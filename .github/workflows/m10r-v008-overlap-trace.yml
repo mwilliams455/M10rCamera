@@ -1,11 +1,9 @@
-name: M10-R v0.08 overlap trace
+name: M10-R static trace
 
 on:
   push:
-    branches:
-      - m10r-metering-latch-trace
-    paths:
-      - '.m10r-v008-trigger'
+    branches: [m10r-metering-latch-trace]
+    paths: ['.m10r-v008-trigger']
 
 permissions:
   contents: read
@@ -16,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 -m pip install --quiet capstone
-      - name: Recover firmware and trace CTRL scheduler overlap
+      - name: Recover firmware and trace traditional meter producer boundary
         shell: bash
         run: |
           set -euo pipefail
@@ -29,53 +27,68 @@ jobs:
           #include <vector>
           using namespace std;
           static uint32_t u32(const vector<uint8_t>& b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);}
-          struct BR{const uint8_t* p; size_t n,bit=0; int get(){if(bit>=n*8) throw runtime_error("eof"); int v=(p[bit>>3]>>(7-(bit&7)))&1; ++bit; return v;}};
-          static int cat(BR& r){int a=r.get(); if(!a)return r.get()?7:6; int b=r.get(); if(!b)return r.get()?5:1; int c=r.get(); if(!c)return r.get()?2:0; int d=r.get(); if(!d)return 4; return r.get()?8:3;}
-          int main(){ifstream f("/tmp/M10-R.FW",ios::binary); vector<uint8_t> fw((istreambuf_iterator<char>(f)),{}); const size_t C=0x38; uint32_t h=u32(fw,C+8), expected=u32(fw,C+0x10); const uint8_t* tr=&fw[C+0x54]; vector<uint8_t> out; out.reserve(expected); size_t st=C+h; for(int i=0;i<8;i++){size_t e=st+i*16; uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12); BR br{&fw[C+ro],ps}; for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0; for(int z=0;z<k;z++)x=(x<<1)|br.get(); if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1); out.push_back(tr[v+128]);}} if(out.size()!=expected)return 3; ofstream o("/tmp/M10R_unpacked.bin",ios::binary); o.write((char*)out.data(),out.size());}
+          struct BR{const uint8_t* p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}};
+          static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;}
+          int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t> fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
           CPP
-          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
-          /tmp/unpack
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
           echo '859c936b6ac8efe0bc4ce7f05623013644fc5d8aee3c6835f09860f452adc2e0  /tmp/M10R_unpacked.bin' | sha256sum -c -
-          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
-          python3 - <<'PY' >/tmp/m10r-v008-report.txt
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/tmp/sections-list.txt
+          python3 - <<'PY' >/tmp/m10r-meter-producer.txt
           from pathlib import Path
-          import struct
-          from capstone import Cs, CS_ARCH_ARM, CS_MODE_THUMB, CS_MODE_LITTLE_ENDIAN
-          from capstone.arm import ARM_OP_IMM, ARM_OP_MEM, ARM_REG_PC
-          b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes(); base=0x08000000; pfx=4
-          md=Cs(CS_ARCH_ARM, CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
-          def off(va): return pfx+va-base
-          def u32va(va): return struct.unpack_from('<I',b,off(va))[0]
-          def dis(label,start,end):
-              print(f'\n=== {label} {start:#010x}..{end:#010x} ===')
-              for i in md.disasm(b[off(start):off(end)],start):
-                  if i.mnemonic!='.byte': print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
-          for args in [('LOCK_RX',0x0800248e,0x080024b2),('UPDATE_HELPER',0x0800dc4a,0x0800dc72),('EVENT_CONSUMER',0x0800dcc6,0x0800dd78),('BUILDER_HEAD',0x0800d91c,0x0800dab0),('BUILDER_CALC_CALL',0x0800db40,0x0800db90),('EVENT_SEND',0x0801cef0,0x0801cf90),('OS_EVENT_A',0x08032d80,0x08032df0),('OS_EVENT_B',0x08032df0,0x08032e70),('TASK_TABLE',0x080396c0,0x080397e0),('EXPOSURE_GLOBALS_CODE',0x0800e53c,0x0800e650)]: dis(*args)
-          targets=[0x0800248e,0x0800dc4a,0x0800dcc6,0x0800d91c,0x080203b4,0x0801cf26,0x08032dc0,0x08032e00]
-          callers={t:[] for t in targets}; literal_refs=[]; desc=0x2001aa78
-          for i in md.disasm(b[pfx:],base):
-              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm in callers: callers[i.operands[0].imm].append(i.address)
-              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
-                  lit=((i.address+4)&~3)+i.operands[1].mem.disp
-                  if base<=lit<=base+len(b)-pfx-4:
-                      try: val=u32va(lit)
-                      except: continue
-                      if val==desc: literal_refs.append((i.address,lit,i.op_str))
-          print('\n=== CALLERS ===')
-          for t in targets: print(hex(t),[hex(x) for x in callers[t]])
-          print('\n=== CODE REFS TO EXPOSURE TASK DESCRIPTOR 0x2001AA78 ===')
-          for r in literal_refs: print(hex(r[0]),'literal',hex(r[1]),r[2])
-          for a,lit,_ in literal_refs: dis('DESC_REF_'+hex(a),max(base,a-48),min(base+len(b)-pfx,a+96))
-          # Direct literal references to lock global in code tell whether the calculator re-reads it.
-          print('\n=== LOCK GLOBAL LITERAL LOCATIONS ===')
-          needle=struct.pack('<I',0x2001ad6e); p=0
-          while True:
-              p=b.find(needle,p)
-              if p<0: break
-              print(hex(base+p-pfx)); p+=1
+          import struct,re,csv
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM
+          ctrl=Path('/tmp/sections/090_CTRL-System.bin').read_bytes(); base=0x08000000;pfx=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(v):return pfx+v-base
+          def dis(label,s,e):
+              print(f'\n=== {label} {s:#010x}..{e:#010x} ===')
+              for i in md.disasm(ctrl[off(s):off(e)],s):
+                  if i.mnemonic!='.byte':print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
+          dis('AE_MEASURE_RESULT_HANDLER',0x0800e1c0,0x0800e280)
+          # Find direct BL callers and Thumb-pointer table refs to handler.
+          target=0x0800e1ec;calls=[]
+          for i in md.disasm(ctrl[pfx:],base):
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm==target:calls.append(i.address)
+          print('\n=== DIRECT CALLERS ===', [hex(x) for x in calls])
+          for a in calls:dis('CALLER_'+hex(a),max(base,a-160),min(base+len(ctrl)-pfx,a+192))
+          for v in (0x0800e1ed,0x0800e1ec):
+              n=struct.pack('<I',v);hits=[];p=0
+              while True:
+                  p=ctrl.find(n,p)
+                  if p<0:break
+                  hits.append(base+p-pfx);p+=1
+              print('POINTER_XREF',hex(v),[hex(x) for x in hits])
+              for h in hits:
+                  q=max(0,pfx+h-base-64);r=min(len(ctrl),pfx+h-base+96)
+                  words=[(base+x-pfx,struct.unpack_from('<I',ctrl,x)[0]) for x in range(q-(q%4),r-3,4)]
+                  print('PTR_CONTEXT',hex(h),[(hex(a),hex(w)) for a,w in words])
+          # Search all extracted sections for diagnostic/source vocabulary.
+          pats=[b'AE measure result',b'Tlog',b'BvExt',b'BvCMOS',b'BV_IR',b'ambient light',b'photodiode',b'light meter',b'metering',b'AE measure']
+          print('\n=== CROSS-SECTION STRING HITS ===')
+          for path in sorted(Path('/tmp/sections').glob('*.bin')):
+              data=path.read_bytes(); found=[]
+              low=data.lower()
+              for pat in pats:
+                  q=low.find(pat.lower())
+                  if q>=0:found.append((pat.decode('ascii'),hex(q)))
+              if found:print(path.name,found)
+          # Broad printable meter/Bv strings in non-CTRL sections, with local offsets.
+          print('\n=== NON-CTRL METER/BV VOCABULARY ===')
+          for path in sorted(Path('/tmp/sections').glob('*.bin')):
+              if path.name.startswith('090_'):continue
+              data=path.read_bytes(); rows=[]
+              for m in re.finditer(rb'[ -~]{5,100}\x00',data):
+                  s=m.group()[:-1].decode('ascii','ignore');lo=s.lower()
+                  if any(k in lo for k in ('tlog','bvext','bv_cmos','bv ir','ambient light','meter','photodiode','ae meas')):
+                      rows.append((hex(m.start()),s))
+              if rows:
+                  print('\nSECTION',path.name)
+                  for row in rows[:120]:print(row[0],repr(row[1]))
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: m10r-v008-report
-          path: /tmp/m10r-v008-report.txt
+          name: m10r-meter-producer
+          path: /tmp/m10r-meter-producer.txt
           if-no-files-found: error
