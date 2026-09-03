@@ -47,16 +47,15 @@ jobs:
           print('\n=== PC LITERAL VALUES ===')
           for lo,hi in [(0x080181d0,0x080182b0),(0x0802d2c0,0x0802d450),(0x0802d678,0x0802d7fa)]:
             for i in md.disasm(b[off(lo):off(hi)],lo):
+              if i.mnemonic=='.byte': continue
               for op in i.operands:
                 if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC:
                   lit=((i.address+4)&~3)+op.mem.disp
                   if base<=lit<=base+len(b)-pfx-4:
                     print(hex(i.address),'lit',hex(lit),'=',hex(struct.unpack_from('<I',b,off(lit))[0]))
-          # all literal xrefs to calibration/state blocks used by constructor
           for target in [0x2001a9d8,0x2001ac74]:
             print('\n=== LITERAL XREFS',hex(target),'===')
-            needle=struct.pack('<I',target);p=0
-            lits=[]
+            needle=struct.pack('<I',target);p=0;lits=[]
             while True:
               p=b.find(needle,p)
               if p<0:break
@@ -65,6 +64,7 @@ jobs:
             for lit in lits:
               refs=[]
               for i in md.disasm(b[pfx:],base):
+                if i.mnemonic=='.byte': continue
                 for op in i.operands:
                   if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC and (((i.address+4)&~3)+op.mem.disp)==lit: refs.append(i.address)
               print('literal',hex(lit),'code_refs',[hex(x) for x in refs[:200]])
