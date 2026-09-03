@@ -37,12 +37,11 @@ jobs:
           /tmp/unpack
           echo '859c936b6ac8efe0bc4ce7f05623013644fc5d8aee3c6835f09860f452adc2e0  /tmp/M10R_unpacked.bin' | sha256sum -c -
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
-          python3 - <<'PY'
+          python3 - <<'PY' >/tmp/m10r-v008-report.txt
           from pathlib import Path
           import struct
           from capstone import Cs, CS_ARCH_ARM, CS_MODE_THUMB, CS_MODE_LITTLE_ENDIAN
           from capstone.arm import ARM_OP_IMM, ARM_OP_MEM, ARM_REG_PC
-
           b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes(); base=0x08000000; pfx=4
           md=Cs(CS_ARCH_ARM, CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
           def off(va): return pfx+va-base
@@ -51,55 +50,32 @@ jobs:
               print(f'\n=== {label} {start:#010x}..{end:#010x} ===')
               for i in md.disasm(b[off(start):off(end)],start):
                   if i.mnemonic!='.byte': print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
-          for args in [
-              ('LOCK_RX',0x0800248e,0x080024b2),
-              ('UPDATE_HELPER',0x0800dc4a,0x0800dc72),
-              ('EVENT_CONSUMER',0x0800dcc6,0x0800dd78),
-              ('BUILDER_HEAD',0x0800d91c,0x0800dab0),
-              ('BUILDER_CALC_CALL',0x0800db40,0x0800db90),
-              ('EVENT_SEND',0x0801cef0,0x0801cf90),
-              ('OS_EVENT_A',0x08032d80,0x08032df0),
-              ('OS_EVENT_B',0x08032df0,0x08032e70),
-              ('TASK_TABLE',0x080396c0,0x080397e0),
-              ('EXPOSURE_GLOBALS_CODE',0x0800e53c,0x0800e650),
-          ]: dis(*args)
-
+          for args in [('LOCK_RX',0x0800248e,0x080024b2),('UPDATE_HELPER',0x0800dc4a,0x0800dc72),('EVENT_CONSUMER',0x0800dcc6,0x0800dd78),('BUILDER_HEAD',0x0800d91c,0x0800dab0),('BUILDER_CALC_CALL',0x0800db40,0x0800db90),('EVENT_SEND',0x0801cef0,0x0801cf90),('OS_EVENT_A',0x08032d80,0x08032df0),('OS_EVENT_B',0x08032df0,0x08032e70),('TASK_TABLE',0x080396c0,0x080397e0),('EXPOSURE_GLOBALS_CODE',0x0800e53c,0x0800e650)]: dis(*args)
           targets=[0x0800248e,0x0800dc4a,0x0800dcc6,0x0800d91c,0x080203b4,0x0801cf26,0x08032dc0,0x08032e00]
-          callers={t:[] for t in targets}
-          literal_refs=[]
-          desc=0x2001aa78
-          code=b[pfx:]
-          for i in md.disasm(code,base):
-              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:
-                  t=i.operands[0].imm
-                  if t in callers: callers[t].append(i.address)
-              if i.mnemonic.startswith('ldr') and len(i.operands)>=2:
-                  op=i.operands[1]
-                  if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC:
-                      lit=((i.address+4)&~3)+op.mem.disp
-                      if base <= lit <= base+len(b)-pfx-4:
-                          try: val=u32va(lit)
-                          except: continue
-                          if val==desc: literal_refs.append((i.address,lit,i.op_str))
+          callers={t:[] for t in targets}; literal_refs=[]; desc=0x2001aa78
+          for i in md.disasm(b[pfx:],base):
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm in callers: callers[i.operands[0].imm].append(i.address)
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                  lit=((i.address+4)&~3)+i.operands[1].mem.disp
+                  if base<=lit<=base+len(b)-pfx-4:
+                      try: val=u32va(lit)
+                      except: continue
+                      if val==desc: literal_refs.append((i.address,lit,i.op_str))
           print('\n=== CALLERS ===')
           for t in targets: print(hex(t),[hex(x) for x in callers[t]])
           print('\n=== CODE REFS TO EXPOSURE TASK DESCRIPTOR 0x2001AA78 ===')
           for r in literal_refs: print(hex(r[0]),'literal',hex(r[1]),r[2])
-
-          # Print neighborhoods around each actual code reference to the descriptor.
-          for a,lit,_ in literal_refs:
-              s=max(base,a-48); e=min(base+len(b)-pfx,a+96)
-              dis('DESC_REF_'+hex(a),s,e)
-
-          # Scan printable strings and pointer references that may name the descriptor/task.
-          print('\n=== STRINGS WITH TASK/EVENT/EXPOSURE ===')
-          import re
-          strs=[]
-          for m in re.finditer(rb'[ -~]{4,80}\x00',b):
-              s=m.group()[:-1].decode('ascii','ignore'); low=s.lower()
-              if any(k in low for k in ('task','event','exposure','meter','ae ')):
-                  va=base+m.start()-pfx
-                  strs.append((va,s))
-          for va,s in strs:
-              if 0x08030000 <= va <= 0x08050000: print(hex(va),repr(s))
+          for a,lit,_ in literal_refs: dis('DESC_REF_'+hex(a),max(base,a-48),min(base+len(b)-pfx,a+96))
+          # Direct literal references to lock global in code tell whether the calculator re-reads it.
+          print('\n=== LOCK GLOBAL LITERAL LOCATIONS ===')
+          needle=struct.pack('<I',0x2001ad6e); p=0
+          while True:
+              p=b.find(needle,p)
+              if p<0: break
+              print(hex(base+p-pfx)); p+=1
           PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m10r-v008-report
+          path: /tmp/m10r-v008-report.txt
+          if-no-files-found: error
