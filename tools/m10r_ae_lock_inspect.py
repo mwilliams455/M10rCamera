@@ -15,6 +15,10 @@ CTRL_PREFIX = 4
 IMG_CODE_BASE = 0x42000000
 IMG_DATA_BASE = 0x40000000
 IMG_PREFIX = 4
+# The BSTM transition initializer block has a flash load address distinct from
+# its runtime RAM address.  Within this block, file_offset = RAM_VA -
+# IMG_DATA_BASE + IMG_BSTM_DATA_FILE_BIAS.
+IMG_BSTM_DATA_FILE_BIAS = 0x91078
 
 
 def u32(data: bytes, offset: int) -> int:
@@ -33,6 +37,11 @@ def img_offset(address: int) -> int:
 def img_data_offset(address: int) -> int:
     """Map an IMG initialized-data VA to its raw image offset."""
     return IMG_PREFIX + address - IMG_DATA_BASE
+
+
+def img_bstm_data_offset(address: int) -> int:
+    """Map a BSTM transition-array RAM VA to its load-image file offset."""
+    return address - IMG_DATA_BASE + IMG_BSTM_DATA_FILE_BIAS
 
 
 def cstring(data: bytes, offset: int) -> str:
@@ -107,6 +116,24 @@ def extract(ctrl_path: Path, img_path: Path) -> dict[str, object]:
     if (lock_callback, unlock_callback) != (0x421BD5D5, 0x421BD5E5):
         raise ValueError("unexpected IMG AE-lock state callback pointers")
 
+    # These two 0x90-byte BSTM states belong to AE_LOCK_CONTROL.  Their
+    # transition arrays live in RAM but are initialized from a later load-image
+    # block, so img_data_offset() is intentionally not used here.
+    state_enabled_runtime_va = 0x40992E3C
+    state_disabled_runtime_va = 0x40992ECC
+    enabled_transition_ram_va = 0x408D988C
+    disabled_transition_ram_va = 0x408D989C
+    enabled_transition = struct.unpack_from(
+        "<H2xIII", img, img_bstm_data_offset(enabled_transition_ram_va)
+    )
+    disabled_transition = struct.unpack_from(
+        "<H2xIII", img, img_bstm_data_offset(disabled_transition_ram_va)
+    )
+    if enabled_transition != (0xD5, 0, 0, state_disabled_runtime_va):
+        raise ValueError("unexpected ae_lock_enabled transition")
+    if disabled_transition != (0xD6, 0, 0, state_enabled_runtime_va):
+        raise ValueError("unexpected ae_lock_disabled transition")
+
     signatures = {
         "ctrl_receiver": require_prefix(
             ctrl,
@@ -155,6 +182,27 @@ def extract(ctrl_path: Path, img_path: Path) -> dict[str, object]:
             img_offset(0x42135388),
             "2900ae2004f004f940e72900af2004f0fff83be7",
             "IMG enum mapper AE cases",
+        ),
+        "img_ae_state_constructors": require_prefix(
+            img,
+            img_offset(0x421CA6D0),
+            (
+                "f748f84988600120c860f7484860f7488861622020390862f5a1f2482c30"
+                "84f671fcf748ef49903188600120c860ee484860f44888616321ea4860300163"
+                "f2a15c3084f65ffc"
+            ),
+            "IMG AE-lock state constructors",
+        ),
+        "img_bstm_transition_dispatch": require_prefix(
+            img,
+            img_offset(0x420A27A6),
+            (
+                "2901a068405a3188884240d12901a06840184068002806d02a01a16889184868"
+                "8047012833d12901a06840188068002807d02901a06840183100826820009047"
+                "01902901a0684018c068002817d02901a0684018c068806a002807d02a01a168"
+                "8918c968886a8047012808d12a01a1688918c868310000f0acf801200090"
+            ),
+            "IMG BSTM transition dispatcher",
         ),
     }
 
@@ -222,6 +270,31 @@ def extract(ctrl_path: Path, img_path: Path) -> dict[str, object]:
             },
             "img_state_machine": strings["img_control"],
             "img_states": [strings["img_state_enabled"], strings["img_state_disabled"]],
+            "physical_state_edges": {
+                "enabled_state": {
+                    "runtime_va": f"0x{state_enabled_runtime_va:08x}",
+                    "transition_ram_va": f"0x{enabled_transition_ram_va:08x}",
+                    "on_event": {"id": "0xd5", "name": "K_Release_0"},
+                    "target_runtime_va": f"0x{enabled_transition[3]:08x}",
+                    "target_state": strings["img_state_disabled"],
+                    "guard": None,
+                    "action": None,
+                },
+                "disabled_state": {
+                    "runtime_va": f"0x{state_disabled_runtime_va:08x}",
+                    "transition_ram_va": f"0x{disabled_transition_ram_va:08x}",
+                    "on_event": {"id": "0xd6", "name": "K_Release_1"},
+                    "target_runtime_va": f"0x{disabled_transition[3]:08x}",
+                    "target_state": strings["img_state_enabled"],
+                    "guard": None,
+                    "action": None,
+                },
+                "entry_effect": (
+                    "K_Release_1 enters ae_lock_enabled and its entry callback "
+                    "sends CTRL command 0x12 payload 1; K_Release_0 enters "
+                    "ae_lock_disabled and its entry callback sends payload 0"
+                ),
+            },
             "img_callbacks": {
                 "lock_thumb": f"0x{lock_callback:08x}",
                 "unlock_thumb": f"0x{unlock_callback:08x}",

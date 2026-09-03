@@ -6,7 +6,12 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from m10r_ae_lock_inspect import extract, img_data_offset, img_offset  # noqa: E402
+from m10r_ae_lock_inspect import (  # noqa: E402
+    extract,
+    img_bstm_data_offset,
+    img_data_offset,
+    img_offset,
+)
 
 
 CTRL = ROOT / "firmware" / "sections" / "090_CTRL-System.bin"
@@ -22,6 +27,10 @@ class AddressMappingTest(unittest.TestCase):
     def test_img_initialized_data_mapping(self) -> None:
         self.assertEqual(img_data_offset(0x40000000), 4)
         self.assertEqual(img_data_offset(0x4096945C), 0x969460)
+
+    def test_img_bstm_load_image_mapping(self) -> None:
+        self.assertEqual(img_bstm_data_offset(0x408D988C), 0x96A904)
+        self.assertEqual(img_bstm_data_offset(0x408D989C), 0x96A914)
 
 
 class LockContractTest(unittest.TestCase):
@@ -67,3 +76,22 @@ class LockContractTest(unittest.TestCase):
             lock["external_actions"]["classification"],
         )
         self.assertIn("do not post events", lock["negative_result"]["classification"])
+
+    def test_physical_release_edges_toggle_ae_lock_states(self) -> None:
+        edges = extract(CTRL, IMG)["ae_lock"]["physical_state_edges"]
+
+        self.assertEqual(edges["enabled_state"]["on_event"]["id"], "0xd5")
+        self.assertEqual(
+            edges["enabled_state"]["target_state"], "ae_lock_disabled"
+        )
+        self.assertIsNone(edges["enabled_state"]["guard"])
+        self.assertIsNone(edges["enabled_state"]["action"])
+
+        self.assertEqual(edges["disabled_state"]["on_event"]["id"], "0xd6")
+        self.assertEqual(
+            edges["disabled_state"]["target_state"], "ae_lock_enabled"
+        )
+        self.assertIsNone(edges["disabled_state"]["guard"])
+        self.assertIsNone(edges["disabled_state"]["action"])
+        self.assertIn("payload 1", edges["entry_effect"])
+        self.assertIn("payload 0", edges["entry_effect"])
