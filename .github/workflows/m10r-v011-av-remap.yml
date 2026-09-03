@@ -10,8 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: python3 -m pip install --quiet capstone
-      - name: Recover and trace remap table
+      - name: Recover and inspect remap data
         shell: bash
         run: |
           set -euo pipefail
@@ -26,25 +25,27 @@ jobs:
           CPP
           g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
-          python3 - <<'PY' >/tmp/m10r-av-remap.txt
+          python3 - <<'PY' >/tmp/m10r-av-remap-data.txt
           from pathlib import Path
           import struct
-          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
           b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes();base=0x08000000;pfx=4
-          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.skipdata=True
           def off(v):return pfx+v-base
-          def dis(label,s,e):
-            print(f'\n=== {label} ===')
-            for i in md.disasm(b[off(s):off(e)],s):
-              if i.mnemonic!='.byte':print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
-          dis('TABLE_INIT',0x0800e130,0x0800e210)
-          dis('TABLE_CONSUMER',0x0800f9f0,0x0800fa50)
-          # literal pool points already established in prior trace
-          for a in [0x0800e19c,0x0800e1ca,0x0800fa16]:
-            dis('KNOWN_XREF_'+hex(a),a-0x50,a+0xa0)
+          def u32(v):return struct.unpack_from('<I',b,off(v))[0]
+          print('literal 0x0800ED14 =',hex(u32(0x0800ed14)))
+          print('literal 0x0800ED18 =',hex(u32(0x0800ed18)))
+          print('literal 0x0800FAD8 =',hex(u32(0x0800fad8)))
+          src=u32(0x0800ed18)
+          print('default source ptr',hex(src))
+          if base <= src < base+len(b)-pfx:
+            raw=b[off(src):off(src)+64]
+            print('default raw64',raw.hex())
+            print('default halfwords', [struct.unpack_from('<h',raw,2*i)[0] for i in range(32)])
+          # inspect nearby static data and literal pool to identify tail defaults/sentinels
+          for v in [0x0800ed10,0x0800ed14,0x0800ed18,0x0800ed1c,0x0800fad0,0x0800fad4,0x0800fad8,0x0800fadc]:
+            print(hex(v),hex(u32(v)))
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: m10r-av-remap
-          path: /tmp/m10r-av-remap.txt
+          name: m10r-av-remap-data
+          path: /tmp/m10r-av-remap-data.txt
           if-no-files-found: error
