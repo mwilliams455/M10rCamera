@@ -13,8 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Run research tests
+        run: python -m unittest discover -s tests -v
       - run: python3 -m pip install --quiet capstone
-      - name: Trace BvExt and BV_IR producers
+      - name: Trace external ambient sensor receiver
         shell: bash
         run: |
           set -euo pipefail
@@ -29,7 +31,7 @@ jobs:
           CPP
           g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
-          python3 - <<'PY' >/tmp/m10r-bvext-ir.txt
+          python3 - <<'PY' >/tmp/m10r-external-ambient.txt
           from pathlib import Path
           import struct,re
           from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
@@ -38,39 +40,41 @@ jobs:
           md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
           def off(v):return pfx+v-base
           def dis(label,s,e):
-            print(f'\n=== {label} ===')
+            print(f'\n=== {label} {s:#010x}..{e:#010x} ===')
             for i in md.disasm(b[off(s):off(e)],s):
               if i.mnemonic!='.byte': print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
-          dis('BVEXT_IR_STATE_USERS',0x080162e0,0x08016480)
-          # functions containing each ref to base 0x2001AC74
-          target=0x2001ac74; n=struct.pack('<I',target);p=0;lits=[]
-          while True:
-            p=b.find(n,p)
-            if p<0:break
-            lits.append(base+p-pfx);p+=1
-          print('\nLITERALS',[hex(x) for x in lits])
-          for lit in lits:
-            refs=[]
-            for i in md.disasm(b[pfx:],base):
-              if i.mnemonic=='.byte': continue
-              for op in i.operands:
-                if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC and (((i.address+4)&~3)+op.mem.disp)==lit: refs.append(i.address)
-            print('REFS',hex(lit),[hex(x) for x in refs])
-            for a in refs: dis('REF_'+hex(a),max(base,a-96),min(base+len(b)-pfx,a+128))
-          # direct callers of candidate state-user routines 0x8016360..0x8016450
-          print('\n=== CALLS INTO REGION ===')
+          dis('EXTERNAL_AMBIENT_RX_CLUSTER',0x080291c0,0x08029560)
+          dis('BVEXT_IR_UPDATER',0x08016380,0x08016470)
+          # Direct callers of the entry points around 0x80292xx/0x80294xx.
+          targets=[0x080292c0,0x080292e0,0x08029300,0x08029320,0x08029340,0x08029360,0x08029380,0x08029400,0x08029440,0x08029480]
+          callers={t:[] for t in targets}
           for i in md.disasm(b[pfx:],base):
-            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:
-              t=i.operands[0].imm
-              if 0x080162e0<=t<0x08016480: print(hex(i.address),'->',hex(t))
-          print('\n=== RELEVANT STRINGS ===')
-          for m in re.finditer(rb'[ -~]{5,100}\x00',b):
-            s=m.group()[:-1].decode('ascii','ignore');lo=s.lower()
-            if any(k in lo for k in ('bvext','bv_ir','infrared','ir ','external ambient','ambient light sensor','ae measure')):
-              print(hex(base+m.start()-pfx),repr(s))
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm in callers:
+              callers[i.operands[0].imm].append(i.address)
+          print('\n=== DIRECT CALLERS ===')
+          for t,cs in callers.items():
+            if cs: print(hex(t),[hex(x) for x in cs])
+          # Decode PC-relative literal values and nearby strings in the cluster.
+          strings={}
+          for m in re.finditer(rb'[ -~]{4,140}\x00',b): strings[base+m.start()-pfx]=m.group()[:-1].decode('ascii','ignore')
+          print('\n=== CLUSTER LITERALS / STRINGS ===')
+          for i in md.disasm(b[off(0x080291c0):off(0x08029560)],0x080291c0):
+            if i.mnemonic=='.byte': continue
+            for op in i.operands:
+              if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC:
+                lit=((i.address+4)&~3)+op.mem.disp
+                if base<=lit<=base+len(b)-pfx-4:
+                  v=struct.unpack_from('<I',b,off(lit))[0]
+                  text=(' '+repr(strings[v])) if v in strings else ''
+                  print(hex(i.address),'lit',hex(lit),'=',hex(v)+text)
+          print('\n=== EXTERNAL / AMBIENT / IR STRINGS ===')
+          for va,s in sorted(strings.items()):
+            lo=s.lower()
+            if any(k in lo for k in ('external ambient','ambient light','infrared','bvext','bv_ir','light sensor','als','ir sensor')):
+              print(hex(va),repr(s))
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: m10r-bvext-ir
-          path: /tmp/m10r-bvext-ir.txt
+          name: m10r-external-ambient
+          path: /tmp/m10r-external-ambient.txt
           if-no-files-found: error
