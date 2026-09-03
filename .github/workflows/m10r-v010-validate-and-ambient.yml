@@ -32,11 +32,11 @@ jobs:
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin firmware/sections >/dev/null
       - name: Run full research tests
         run: python -m unittest discover -s tests -v
-      - name: Trace external Bv correction state and limits
+      - name: Trace AV0 calibration and aperture conversion
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY' >/tmp/m10r-bvext-correction.txt
+          python3 - <<'PY' >/tmp/m10r-aperture-estimator.txt
           from pathlib import Path
           import struct,re
           from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
@@ -48,42 +48,49 @@ jobs:
             print(f'\n=== {label} {s:#010x}..{e:#010x} ===')
             for i in md.disasm(b[off(s):off(e)],s):
               if i.mnemonic!='.byte': print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
-          dis('CORRECTION_CONVERTER_801CBFC',0x0801cb80,0x0801cc90)
-          dis('CORRECTION_LIMIT_HELPERS',0x08010e80,0x08010f50)
-          dis('BVEXT_BLEND',0x0800f98c,0x0800fa72)
-          targets={0x08011ccc:'CORR_SET',0x08011ce2:'CORR_GET',0x08011cea:'CORR_XFORM_GET',0x08011cbe:'STATE8_GET',0x08011cc6:'STATE2C_GET'}
-          callers={t:[] for t in targets}
-          for i in md.disasm(b[pfx:],base):
-            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm in callers:
-              callers[i.operands[0].imm].append(i.address)
-          print('\n=== CORRECTION ACCESSOR CALLERS ===')
-          for t,n in targets.items(): print(n,hex(t),[hex(x) for x in callers[t]])
-          seen=set()
-          for t,n in targets.items():
-            for a in callers[t]:
-              if a in seen: continue
-              seen.add(a); dis(n+'_CALL_'+hex(a),max(base,a-100),min(base+len(b)-pfx,a+150))
+          dis('APERTURE_CONVERTER',0x0801cbfc,0x0801cda0)
+          dis('APERTURE_ESTIMATOR',0x0800f98c,0x0800fa72)
           strings={}
-          for m in re.finditer(rb'[ -~]{4,160}\x00',b): strings[base+m.start()-pfx]=m.group()[:-1].decode('ascii','ignore')
-          print('\n=== RELATED STRINGS ===')
+          for m in re.finditer(rb'[ -~]{4,180}\x00',b): strings[base+m.start()-pfx]=m.group()[:-1].decode('ascii','ignore')
+          print('\n=== CONVERTER LITERALS ===')
+          for i in md.disasm(b[off(0x0801cbfc):off(0x0801cda0)],0x0801cbfc):
+            if i.mnemonic=='.byte': continue
+            for op in i.operands:
+              if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC:
+                lit=((i.address+4)&~3)+op.mem.disp
+                if base<=lit<=base+len(b)-pfx-8:
+                  lo=struct.unpack_from('<I',b,off(lit))[0]
+                  hi=struct.unpack_from('<I',b,off(lit)+4)[0]
+                  d=struct.unpack_from('<d',b,off(lit))[0]
+                  print(hex(i.address),'lit',hex(lit),'u32',hex(lo),hex(hi),'double',repr(d),'str',repr(strings.get(lo)))
+          needle=b'Adjust AV0 done.\x00'
+          pos=b.find(needle)
+          print('\n=== ADJUST AV0 STRING ===')
+          if pos>=0:
+            sva=base+pos-pfx;print('string_va',hex(sva))
+            ptr=struct.pack('<I',sva);q=0;lits=[]
+            while True:
+              q=b.find(ptr,q)
+              if q<0:break
+              lits.append(base+q-pfx);q+=1
+            print('literal_locations',[hex(x) for x in lits])
+            refs=[]
+            for i in md.disasm(b[pfx:],base):
+              if i.mnemonic=='.byte':continue
+              for op in i.operands:
+                if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC:
+                  lit=((i.address+4)&~3)+op.mem.disp
+                  if lit in lits:refs.append(i.address)
+            print('code_refs',[hex(x) for x in refs])
+            for a in refs:dis('ADJUST_AV0_REF_'+hex(a),max(base,a-300),min(base+len(b)-pfx,a+350))
+          print('\n=== CALIBRATION/AV STRINGS ===')
           for va,s in sorted(strings.items()):
             lo=s.lower()
-            if any(k in lo for k in ('bv ext','bvext','ambient','correction bv','bv correction','ir bv','bv_ir','bv value','aperture estimation','estimated aperture')):
+            if any(k in lo for k in ('av0','adjust av','aperture','ambient light','bv adjust','clear bv')):
               print(hex(va),repr(s))
-          print('\n=== TABLE 0x20000040 INITIALIZER POINTER XREFS ===')
-          target=0x20000040;needle=struct.pack('<I',target);p=0
-          while True:
-            p=b.find(needle,p)
-            if p<0: break
-            lit=base+p-pfx;refs=[]
-            for i in md.disasm(b[pfx:],base):
-              if i.mnemonic=='.byte': continue
-              for op in i.operands:
-                if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC and (((i.address+4)&~3)+op.mem.disp)==lit: refs.append(i.address)
-            print(hex(lit),[hex(x) for x in refs]);p+=1
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: m10r-bvext-correction
-          path: /tmp/m10r-bvext-correction.txt
+          name: m10r-aperture-estimator
+          path: /tmp/m10r-aperture-estimator.txt
           if-no-files-found: error
