@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 -m pip install --quiet capstone
-      - name: Trace traditional meter calibration loader
+      - name: Trace meter calibration caller semantics
         shell: bash
         run: |
           set -euo pipefail
@@ -29,42 +29,26 @@ jobs:
           CPP
           g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
-          python3 - <<'PY' >/tmp/m10r-meter-cal-loader.txt
+          python3 - <<'PY' >/tmp/m10r-meter-cal-caller.txt
           from pathlib import Path
           import struct,re
           from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
-          from capstone.arm import ARM_OP_IMM
           b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes();base=0x08000000;pfx=4
           md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
           def off(v):return pfx+v-base
-          def dis(label,s,e):
-            print(f'\n=== {label} ===')
-            for i in md.disasm(b[off(s):off(e)],s):
-              if i.mnemonic!='.byte':print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
-          target=0x0801838c
-          print('DIRECT CALLERS')
-          for i in md.disasm(b[pfx:],base):
-            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm==target: print(hex(i.address))
-          for val in [0x0801838c,0x0801838d]:
-            n=struct.pack('<I',val);p=0
-            while True:
-              p=b.find(n,p)
-              if p<0:break
-              va=base+p-pfx
-              print('POINTER',hex(val),'at',hex(va))
-              dis('PTR_CONTEXT_'+hex(va),max(base,va-96),min(base+len(b)-pfx,va+128))
-              p+=1
-          # dump nearby service/registration code and strings around the pointer tables
-          dis('SERVICE_ZONE_A',0x08015500,0x08015920)
-          dis('SERVICE_ZONE_B',0x08018e80,0x08019220)
-          print('\n=== STRINGS ABOUT AE/AMBIENT/TEMP/ADJUST/BV ===')
-          for m in re.finditer(rb'[ -~]{5,120}\x00',b):
-            s=m.group()[:-1].decode('ascii','ignore');lo=s.lower()
-            if any(k in lo for k in ('ambient','adjust bv','bv adjust','temperature','ae meas','light sensor','light-meter','light meter','tlog')):
-              print(hex(base+m.start()-pfx),repr(s))
+          for i in md.disasm(b[off(0x08018640):off(0x08018880)],0x08018640):
+            if i.mnemonic!='.byte': print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
+          print('\n=== LITERALS/PRINTABLES 0x8018640..0x8018880 ===')
+          strings={}
+          for m in re.finditer(rb'[ -~]{4,120}\x00',b):strings[base+m.start()-pfx]=m.group()[:-1].decode('ascii','ignore')
+          # raw 32-bit words around literal pool after region
+          for va in range(0x08018880,0x08019220,4):
+            if off(va)+4<=len(b):
+              v=struct.unpack_from('<I',b,off(va))[0]
+              if v in strings: print(hex(va),'->',hex(v),repr(strings[v]))
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: m10r-meter-cal-loader
-          path: /tmp/m10r-meter-cal-loader.txt
+          name: m10r-meter-cal-caller
+          path: /tmp/m10r-meter-cal-caller.txt
           if-no-files-found: error
