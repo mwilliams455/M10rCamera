@@ -32,11 +32,11 @@ jobs:
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin firmware/sections >/dev/null
       - name: Run full research tests
         run: python -m unittest discover -s tests -v
-      - name: Trace BvExt and BV_IR consumers
+      - name: Trace BvExt numerical blend helper
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY' >/tmp/m10r-bvext-ir-consumers.txt
+          python3 - <<'PY' >/tmp/m10r-bvext-blend.txt
           from pathlib import Path
           import struct,re
           from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
@@ -48,40 +48,36 @@ jobs:
             print(f'\n=== {label} {s:#010x}..{e:#010x} ===')
             for i in md.disasm(b[off(s):off(e)],s):
               if i.mnemonic!='.byte': print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
-          targets={
-            0x08011d18:'BVEXT_SET',0x08011d2e:'BVEXT_GET',
-            0x08011d36:'BVIR_SET',0x08011d4c:'BVIR_GET',
-            0x08011d54:'TRAD_BV_SET',0x08011d7a:'TRAD_BV_GET',
-            0x08011d82:'CMOS_BV_SET',0x08011da8:'CMOS_BV_GET'
-          }
-          callers={t:[] for t in targets}
+          dis('BVEXT_BLEND_HELPER',0x0800f900,0x0800fb80)
+          dis('FINAL_BV_CALLSITE',0x0800d780,0x0800d920)
+          dis('BVIR_CHANGE_CLUSTER',0x080058f0,0x08005a20)
+          dis('AE_ACCESSORS',0x08011ca0,0x08011dc0)
+          print('\n=== CALLERS OF 0x0800F98C ===')
           for i in md.disasm(b[pfx:],base):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm==0x0800f98c:
+              print(hex(i.address))
+          strings={}
+          for m in re.finditer(rb'[ -~]{4,160}\x00',b): strings[base+m.start()-pfx]=m.group()[:-1].decode('ascii','ignore')
+          print('\n=== BLEND LITERALS / STRINGS ===')
+          for i in md.disasm(b[off(0x0800f900):off(0x0800fb80)],0x0800f900):
+            if i.mnemonic=='.byte': continue
+            for op in i.operands:
+              if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC:
+                lit=((i.address+4)&~3)+op.mem.disp
+                if base<=lit<=base+len(b)-pfx-4:
+                  v=struct.unpack_from('<I',b,off(lit))[0]
+                  text=(' '+repr(strings[v])) if v in strings else ''
+                  print(hex(i.address),'lit',hex(lit),'=',hex(v)+text)
+          print('\n=== DIRECT CALLEES INSIDE BLEND ===')
+          seen=[]
+          for i in md.disasm(b[off(0x0800f98c):off(0x0800fb80)],0x0800f98c):
             if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:
               t=i.operands[0].imm
-              if t in callers: callers[t].append(i.address)
-          print('=== CALLER SUMMARY ===')
-          for t,name in targets.items(): print(name,hex(t),[hex(x) for x in callers[t]])
-          seen=set()
-          for t,name in targets.items():
-            for a in callers[t]:
-              if a in seen: continue
-              seen.add(a); dis(name+'_CALL_'+hex(a),max(base,a-120),min(base+len(b)-pfx,a+180))
-          # Literal/direct references to the AE state base to catch bypasses of accessors.
-          print('\n=== AE STATE BASE DIRECT XREFS ===')
-          state=0x2001a918;needle=struct.pack('<I',state);p=0
-          while True:
-            p=b.find(needle,p)
-            if p<0:break
-            lit=base+p-pfx;refs=[]
-            for i in md.disasm(b[pfx:],base):
-              if i.mnemonic=='.byte':continue
-              for op in i.operands:
-                if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC and (((i.address+4)&~3)+op.mem.disp)==lit: refs.append(i.address)
-            print('literal',hex(lit),'refs',[hex(x) for x in refs])
-            p+=1
+              if t not in seen: seen.append(t)
+          print([hex(x) for x in seen])
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: m10r-bvext-ir-consumers
-          path: /tmp/m10r-bvext-ir-consumers.txt
+          name: m10r-bvext-blend
+          path: /tmp/m10r-bvext-blend.txt
           if-no-files-found: error
