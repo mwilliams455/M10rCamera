@@ -32,61 +32,56 @@ jobs:
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin firmware/sections >/dev/null
       - name: Run full research tests
         run: python -m unittest discover -s tests -v
-      - name: Trace external ambient protocol ownership
+      - name: Trace BvExt and BV_IR consumers
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY' >/tmp/m10r-external-ambient-protocol.txt
+          python3 - <<'PY' >/tmp/m10r-bvext-ir-consumers.txt
           from pathlib import Path
           import struct,re
           from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
           from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_REG_PC
           b=Path('firmware/sections/090_CTRL-System.bin').read_bytes();base=0x08000000;pfx=4
           md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
-          def off(v): return pfx+v-base
+          def off(v):return pfx+v-base
           def dis(label,s,e):
             print(f'\n=== {label} {s:#010x}..{e:#010x} ===')
             for i in md.disasm(b[off(s):off(e)],s):
               if i.mnemonic!='.byte': print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
-          dis('RX_OWNER_WIDE',0x08028f00,0x08029362)
-          dis('TX_PROTOCOL',0x080293a8,0x08029680)
-          # Find direct callers of likely function starts by locating PUSH prologues in the region.
-          print('\n=== PROLOGUES AND DIRECT CALLERS ===')
-          pro=[]
-          for i in md.disasm(b[off(0x08028e00):off(0x08029700)],0x08028e00):
-            if i.mnemonic.startswith('push'): pro.append(i.address)
-          for t in pro:
-            cs=[]
+          targets={
+            0x08011d18:'BVEXT_SET',0x08011d2e:'BVEXT_GET',
+            0x08011d36:'BVIR_SET',0x08011d4c:'BVIR_GET',
+            0x08011d54:'TRAD_BV_SET',0x08011d7a:'TRAD_BV_GET',
+            0x08011d82:'CMOS_BV_SET',0x08011da8:'CMOS_BV_GET'
+          }
+          callers={t:[] for t in targets}
+          for i in md.disasm(b[pfx:],base):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:
+              t=i.operands[0].imm
+              if t in callers: callers[t].append(i.address)
+          print('=== CALLER SUMMARY ===')
+          for t,name in targets.items(): print(name,hex(t),[hex(x) for x in callers[t]])
+          seen=set()
+          for t,name in targets.items():
+            for a in callers[t]:
+              if a in seen: continue
+              seen.add(a); dis(name+'_CALL_'+hex(a),max(base,a-120),min(base+len(b)-pfx,a+180))
+          # Literal/direct references to the AE state base to catch bypasses of accessors.
+          print('\n=== AE STATE BASE DIRECT XREFS ===')
+          state=0x2001a918;needle=struct.pack('<I',state);p=0
+          while True:
+            p=b.find(needle,p)
+            if p<0:break
+            lit=base+p-pfx;refs=[]
             for i in md.disasm(b[pfx:],base):
-              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm==t: cs.append(i.address)
-            print(hex(t),'callers',[hex(x) for x in cs])
-          # String table and exact xrefs to the External ambient light sensor string.
-          strings={}
-          for m in re.finditer(rb'[ -~]{4,180}\x00',b): strings[base+m.start()-pfx]=m.group()[:-1].decode('ascii','ignore')
-          print('\n=== STRINGS 0x8046500..0x8046800 ===')
-          for va,s in sorted(strings.items()):
-            if 0x08046500<=va<0x08046800: print(hex(va),repr(s))
-          for target in [0x08046615]:
-            print('\n=== XREFS STRING',hex(target),'===')
-            needle=struct.pack('<I',target);p=0
-            while True:
-              p=b.find(needle,p)
-              if p<0:break
-              lit=base+p-pfx; refs=[]
-              for i in md.disasm(b[pfx:],base):
-                if i.mnemonic=='.byte':continue
-                for op in i.operands:
-                  if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC and (((i.address+4)&~3)+op.mem.disp)==lit: refs.append(i.address)
-              print('literal',hex(lit),'refs',[hex(x) for x in refs])
-              for a in refs: dis('STRING_REF_'+hex(a),max(base,a-160),min(base+len(b)-pfx,a+220))
-              p+=1
-          # Resolve the diagnostic strings used in the RX parser literal pool.
-          print('\n=== RX DIAGNOSTIC STRING TARGETS ===')
-          for ptr in [0x080466dc,0x08046704,0x08045434,0x08045460,0x0804423c]:
-            print(hex(ptr),repr(strings.get(ptr,'<not printable start>')))
+              if i.mnemonic=='.byte':continue
+              for op in i.operands:
+                if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC and (((i.address+4)&~3)+op.mem.disp)==lit: refs.append(i.address)
+            print('literal',hex(lit),'refs',[hex(x) for x in refs])
+            p+=1
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: m10r-external-ambient-protocol
-          path: /tmp/m10r-external-ambient-protocol.txt
+          name: m10r-bvext-ir-consumers
+          path: /tmp/m10r-bvext-ir-consumers.txt
           if-no-files-found: error
