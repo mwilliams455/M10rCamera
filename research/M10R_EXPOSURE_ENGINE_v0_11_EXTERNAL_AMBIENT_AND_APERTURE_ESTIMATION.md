@@ -139,22 +139,7 @@ The estimator is nonnegative at this point, so this floors the retained value to
 
 When the estimator's remap-mode flag is enabled, the half-stop-quantized value is compared with a threshold array rooted at RAM `0x20000040`.
 
-The consumer starts at index zero and advances while:
-
-```text
-threshold[index] < value
-and index < 21
-```
-
-It then returns:
-
-```text
-remapped_Av = index * 0x80
-```
-
-Thus the output remains on a half-stop Av grid, but the boundary positions are independently calibratable.
-
-The populated default calibration block contains 20 signed Q8.8 thresholds and is 40 bytes long. The default thresholds are:
+Indexes `0..19` are the actual 20 runtime-configurable signed Q8.8 thresholds. The populated compiled default calibration block is 40 bytes and contains:
 
 | Index | Q8.8 | EV |
 |---:|---:|---:|
@@ -181,7 +166,30 @@ The populated default calibration block contains 20 signed Q8.8 thresholds and i
 
 The source block resides at `0x08045714`. Initializer `0x0800E198` copies exactly `0x28` bytes into RAM `0x20000040`. If the incoming control object begins with bytes `1,0`, it instead copies 40 bytes supplied at object `+2`; otherwise it uses the compiled default source.
 
-Indexes 20 and 21 live beyond that 40-byte replaceable block. Index 20 (`0x20000068`) is separately addressable global state; index 21 is the terminal/overflow case in the consumer. Their precise initialization identity is being traced separately and should not be invented in an oracle.
+The consumer loop is slightly unusual. It reads sequential halfwords and returns:
+
+```text
+first index whose read_value >= candidate:
+    remapped_Av = index * 0x80
+
+or when index reaches 21:
+    remapped_Av = 21 * 0x80
+```
+
+Index 20 is **not part of the configurable threshold table**. Address `0x20000068` is an adjacent 32-bit state used by another control path. Its recovered producer writes either integer `15` or `29` according to a separate mode bit.
+
+Because a candidate reaches index 20 only after exceeding threshold 19 (`2483`, approximately 9.699 EV), the low halfword `15` or `29` at index 20 can never satisfy the comparison in the recovered production/default state. The loop therefore advances to index 21, where the explicit `index >= 21` test forces exit regardless of the halfword read there.
+
+The effective production/default remap is therefore:
+
+```text
+20 configurable thresholds -> half-stop outputs 0.0 .. 9.5 EV
+value above threshold[19]   -> terminal 10.5 EV output
+```
+
+A 10.0-EV remap output is skipped in the recovered normal state. It could occur only if the unrelated adjacent index-20 state were artificially large enough to satisfy the comparison, which its observed `15/29` values are not.
+
+This tail behavior is now explicitly modeled in the executable oracle rather than represented as two fictitious threshold entries.
 
 ### Output bounds
 
@@ -216,7 +224,7 @@ This is direct instruction-level evidence that BvExt drives a distinct aperture 
 
 ## 6. `AV0` is a factory calibration reference
 
-The calibration record returned by `0x0801124C` contains a byte/field at offset `+0x13` used by both the aperture-estimation path and the exposure-input builder.
+The calibration record returned by `0x0801124C` contains a field at offset `+0x13` used by both the aperture-estimation path and the exposure-input builder.
 
 The service routine associated with the firmware diagnostic:
 
@@ -363,7 +371,7 @@ The corresponding raw Q8.8 table is:
 0x2000, 0x2600, 0x2D00, 0x3600, 0x4000
 ```
 
-For non-half-stop Av, the power result is converted to Q8.8. The transformed path subsequently scales the human f-number representation and rounds it to the familiar hundredth/thousand-style integer values such as:
+For non-half-stop Av, the power result is converted to Q8.8. The transformed path subsequently scales the human f-number representation and rounds it to familiar integer values such as:
 
 ```text
 1400, 2800, 5600, 11000, 16000, ...
@@ -386,22 +394,21 @@ tools/m10r_aperture_estimator.py
 tests/test_m10r_aperture_estimator.py
 ```
 
-The oracle currently models:
+The oracle models:
 
 - `BvExt - TTL_Bv + AV0` arithmetic;
 - nonnegative clamp;
 - forced Av=4 override;
 - exact +/-65-count persistent raw deadband;
 - 0.5-EV floor;
-- optional threshold-remap algorithm with caller-supplied runtime thresholds;
+- the 20 recovered configurable remap thresholds;
+- the adjacent index-20 read and index-21 terminal behavior;
 - 0..12 EV default bounds;
 - canonical half-stop f-number lookup;
 - `2^(Av/2)` intermediate conversion;
 - human/metadata f-number rounding.
 
-The threshold table remains injectable until the separately-addressed tail state beyond the 40-byte configurable block is completely identified.
-
-The new estimator tests pass as part of the full repository research suite.
+The estimator tests pass as part of the full repository research suite.
 
 ## 12. Implication for the phone implementation
 
