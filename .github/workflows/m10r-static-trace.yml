@@ -1,9 +1,10 @@
 name: M10-R static trace
 
 on:
-  pull_request:
+  push:
+    branches:
+      - m10r-metering-latch-trace
     paths:
-      - '.github/workflows/m10r-static-trace.yml'
       - '.m10r-trace-trigger'
 
 permissions:
@@ -60,14 +61,12 @@ jobs:
                       continue
                   print(f'{insn.address:08x}: {insn.mnemonic:8s} {insn.op_str}')
 
-          # CTRL: lock receiver, exposure-input builder/update helpers, calculator gate.
           disasm('CTRL_LOCK_RECEIVER', ctrl, 0x08000000, 0x0800248e, 0x080024b2)
           disasm('CTRL_UPDATE_HELPER_DC40', ctrl, 0x08000000, 0x0800dc40, 0x0800dc78)
           disasm('CTRL_LOCK_SETTERS', ctrl, 0x08000000, 0x0800dde0, 0x0800de58)
           disasm('CTRL_EXPOSURE_INPUT_LOCK_INJECT', ctrl, 0x08000000, 0x0800da40, 0x0800da80)
           disasm('CTRL_CALCULATOR_LOCK_GATE', ctrl, 0x08000000, 0x08020480, 0x080204e8)
 
-          # IMG: physical translator, BSTM dispatch, lock entry, external start/action path.
           disasm('IMG_BSTM_DISPATCH', img, 0x42000000, 0x420a274c, 0x420a2840)
           disasm('IMG_RELEASE_TRANSLATOR', img, 0x42000000, 0x42186734, 0x421868e8)
           disasm('IMG_AE_ENTRY_CALLBACKS', img, 0x42000000, 0x421bd5cc, 0x421bd5f8)
@@ -104,8 +103,6 @@ jobs:
               return v == 0 or 0x40800000 <= v <= 0x40afffff
 
           print('\n=== IMG BSTM-LIKE TRANSITIONS FOR K_RELEASE EVENTS ===')
-          # The known AE transition initializers live near file 0x96a900. Scan the
-          # surrounding initialized BSTM load block for 16-byte transition records.
           for p in range(0x958000, min(len(img)-16, 0x978000), 4):
               event, guard, action, target = struct.unpack_from('<H2xIII', img, p)
               if event not in (0xd5,0xd6,0xd7,0xd8):
@@ -115,7 +112,6 @@ jobs:
               runtime = 0x40000000 + p - 0x91078
               print(f'file={p:#08x} runtime={runtime:#010x} event={event:#06x} guard={guard:#010x} action={action:#010x} target={target:#010x}')
 
-          # Show literal 32-bit xrefs to key state and globals as a second independent check.
           def xrefs32(label, data, base, value, prefix=4):
               needle=struct.pack('<I', value); p=0; hits=[]
               while True:
