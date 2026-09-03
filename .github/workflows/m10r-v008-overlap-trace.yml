@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 -m pip install --quiet capstone
-      - name: Trace traditional Bv math and ADC sampler
+      - name: Trace meter ADC channels and calibration state
         shell: bash
         run: |
           set -euo pipefail
@@ -29,48 +29,51 @@ jobs:
           CPP
           g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
-          python3 - <<'PY' >/tmp/m10r-bv-math.txt
+          python3 - <<'PY' >/tmp/m10r-meter-adc-cal.txt
           from pathlib import Path
-          import struct
+          import struct,re
           from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
-          from capstone.arm import ARM_OP_MEM,ARM_REG_PC
+          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_REG_PC
           b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes();base=0x08000000;pfx=4
           md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
           def off(v):return pfx+v-base
           def dis(label,s,e):
-            print(f'\n=== {label} ===')
+            print(f'\n=== {label} {s:#x}..{e:#x} ===')
             for i in md.disasm(b[off(s):off(e)],s):
               if i.mnemonic!='.byte':print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
-          dis('ADC_GETTER_0x8018260',0x080181d0,0x080182b0)
-          dis('METER_MATH_0x802d320',0x0802d2c0,0x0802d450)
-          dis('TLOG_AND_BV_0x802d678',0x0802d678,0x0802d7fa)
-          print('\n=== PC LITERAL VALUES ===')
-          for lo,hi in [(0x080181d0,0x080182b0),(0x0802d2c0,0x0802d450),(0x0802d678,0x0802d7fa)]:
-            for i in md.disasm(b[off(lo):off(hi)],lo):
-              if i.mnemonic=='.byte': continue
-              for op in i.operands:
-                if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC:
-                  lit=((i.address+4)&~3)+op.mem.disp
-                  if base<=lit<=base+len(b)-pfx-4:
-                    print(hex(i.address),'lit',hex(lit),'=',hex(struct.unpack_from('<I',b,off(lit))[0]))
-          for target in [0x2001a9d8,0x2001ac74]:
-            print('\n=== LITERAL XREFS',hex(target),'===')
-            needle=struct.pack('<I',target);p=0;lits=[]
+          dis('ADC_GETTER_FULL',0x08018260,0x08018390)
+          dis('CAL_STATE_REGION',0x08018370,0x080184d8)
+          dis('FP_HELPERS_A',0x0801ef60,0x0801f020)
+          dis('FP_HELPERS_B',0x0801f7e0,0x0801f940)
+          # direct callers of ADC getter and calibration mapping
+          for target in [0x08018260,0x0802d320,0x0802d3d0,0x0802d678,0x0802d6dc]:
+            cs=[]
+            for i in md.disasm(b[pfx:],base):
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm==target: cs.append(i.address)
+            print('\nCALLERS',hex(target),[hex(x) for x in cs])
+          # xrefs to state/calibration base literals
+          for target in [0x2001a9d8,0x2001add0,0x2001addd,0x2001adfa]:
+            print('\nSTATE',hex(target))
+            needle=struct.pack('<I',target);p=0
             while True:
               p=b.find(needle,p)
               if p<0:break
-              lits.append(base+p-pfx);p+=1
-            print('literal_locations',[hex(x) for x in lits])
-            for lit in lits:
-              refs=[]
+              lit=base+p-pfx; refs=[]
               for i in md.disasm(b[pfx:],base):
-                if i.mnemonic=='.byte': continue
+                if i.mnemonic=='.byte':continue
                 for op in i.operands:
                   if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC and (((i.address+4)&~3)+op.mem.disp)==lit: refs.append(i.address)
-              print('literal',hex(lit),'code_refs',[hex(x) for x in refs[:200]])
+              print('literal',hex(lit),'refs',[hex(x) for x in refs])
+              p+=1
+          # all strings with temp/adc/meter/calibration near CTRL
+          print('\n=== RELEVANT STRINGS ===')
+          for m in re.finditer(rb'[ -~]{5,100}\x00',b):
+            s=m.group()[:-1].decode('ascii','ignore');lo=s.lower()
+            if any(k in lo for k in ('temp','adc','meter','calib','tlog','light')):
+              print(hex(base+m.start()-pfx),repr(s))
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: m10r-bv-math
-          path: /tmp/m10r-bv-math.txt
+          name: m10r-meter-adc-cal
+          path: /tmp/m10r-meter-adc-cal.txt
           if-no-files-found: error
