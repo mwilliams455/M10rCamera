@@ -25,7 +25,36 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 tools/m10r_unpack.py /tmp/M10-R.FW /tmp/M10R_unpacked.bin
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <iostream>
+          #include <stdexcept>
+          #include <string>
+          #include <vector>
+          using namespace std;
+          static uint32_t u32(const vector<uint8_t>& b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);}
+          struct BR{const uint8_t* p; size_t n,bit=0; int get(){if(bit>=n*8) throw runtime_error("eof"); int v=(p[bit>>3]>>(7-(bit&7)))&1; ++bit; return v;}};
+          static int cat(BR& r){int a=r.get(); if(!a)return r.get()?7:6; int b=r.get(); if(!b)return r.get()?5:1; int c=r.get(); if(!c)return r.get()?2:0; int d=r.get(); if(!d)return 4; return r.get()?8:3;}
+          int main(){
+            ifstream f("/tmp/M10-R.FW",ios::binary); vector<uint8_t> fw((istreambuf_iterator<char>(f)),{});
+            const size_t C=0x38; if(fw.size()<C+0x160||string((char*)&fw[C],4)!="COMP") return 2;
+            uint32_t h=u32(fw,C+8), expected=u32(fw,C+0x10); const uint8_t* tr=&fw[C+0x54];
+            vector<uint8_t> out; out.reserve(expected); size_t st=C+h;
+            for(int i=0;i<8;i++){
+              size_t e=st+i*16; uint32_t ro=u32(fw,e+4), ps=u32(fw,e+8), us=u32(fw,e+12); BR br{&fw[C+ro],ps};
+              for(uint32_t j=0;j<us;j++){
+                int k=cat(br), x=0, v=0; for(int z=0;z<k;z++) x=(x<<1)|br.get();
+                if(k) v=(x >= (1<<(k-1))) ? x : x-((1<<k)-1);
+                out.push_back(tr[v+128]);
+              }
+              cerr<<"chunk "<<i<<" done\n";
+            }
+            if(out.size()!=expected) return 3; ofstream o("/tmp/M10R_unpacked.bin",ios::binary); o.write((char*)out.data(),out.size());
+          }
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          /tmp/unpack
           echo '859c936b6ac8efe0bc4ce7f05623013644fc5d8aee3c6835f09860f452adc2e0  /tmp/M10R_unpacked.bin' | sha256sum -c -
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/m10r_sections >/tmp/sections.txt
           grep -E '^(90|92)\t' /tmp/sections.txt || true
@@ -35,50 +64,30 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import struct, hashlib
-
           ctrl = Path('/tmp/m10r_sections/090_CTRL-System.bin').read_bytes()
           img = Path('/tmp/m10r_sections/092_IMG-System.bin').read_bytes()
           print('CTRL sha256', hashlib.sha256(ctrl).hexdigest(), 'size', len(ctrl))
           print('IMG sha256', hashlib.sha256(img).hexdigest(), 'size', len(img))
-
           def dump(label, data, base, start, end, prefix=4):
-              a = prefix + start - base
-              b = prefix + end - base
-              chunk = data[a:b]
+              a = prefix + start - base; b = prefix + end - base; chunk = data[a:b]
               print(f'RANGE {label} {start:#010x}..{end:#010x} bytes={len(chunk)}')
-              for off in range(0, len(chunk), 32):
-                  print(f'{start+off:08x}: {chunk[off:off+32].hex()}')
-
+              for off in range(0, len(chunk), 32): print(f'{start+off:08x}: {chunk[off:off+32].hex()}')
           dump('CTRL_RECEIVER', ctrl, 0x08000000, 0x08002450, 0x08002510)
           dump('CTRL_DISPATCH', ctrl, 0x08000000, 0x080096e0, 0x08009860)
           dump('CTRL_BUILD_SET_POST', ctrl, 0x08000000, 0x0800d900, 0x0800df80)
           dump('CTRL_CALCULATOR_GATE', ctrl, 0x08000000, 0x08020380, 0x08020580)
-
           dump('IMG_BSTM', img, 0x42000000, 0x420a2700, 0x420a2a80)
           dump('IMG_RELEASE', img, 0x42000000, 0x421866e0, 0x42186940)
           dump('IMG_AE_ENTRY_CALLBACKS', img, 0x42000000, 0x421bd560, 0x421bd680)
           dump('IMG_EXTERNAL_ACTIONS', img, 0x42000000, 0x421be200, 0x421be740)
           dump('IMG_AE_CONTROL_INIT', img, 0x42000000, 0x421c71e0, 0x421c7440)
-
           def xrefs(label, data, base, value, prefix=4):
-              needle = struct.pack('<I', value)
-              hits=[]; pos=0
+              needle=struct.pack('<I',value); hits=[]; pos=0
               while True:
                   pos=data.find(needle,pos)
                   if pos<0: break
-                  hits.append(base + pos - prefix)
-                  pos += 1
-              print('XREF32', label, f'{value:#010x}', ','.join(f'{h:#010x}' for h in hits[:100]), 'count', len(hits))
-
-          for label, value in [
-              ('CTRL_CALC_THUMB',0x080203b5), ('CTRL_LOCK_RX_THUMB',0x0800248f),
-              ('CTRL_LOCK_GLOBAL',0x2001ad6e), ('CTRL_CACHED_BV',0x2000012a),
-          ]:
-              xrefs(label, ctrl, 0x08000000, value)
-          for label, value in [
-              ('IMG_EVENT_PRODUCER_THUMB',0x421bc9e9), ('IMG_EXT_START_THUMB',0x421be2c1),
-              ('IMG_AE_LOCK_ENTRY_THUMB',0x421bd5d5), ('IMG_BSTM_DISPATCH_THUMB',0x420a274d),
-              ('IMG_AE_ENABLED_STATE',0x40992e3c), ('IMG_AE_DISABLED_STATE',0x40992ecc),
-          ]:
-              xrefs(label, img, 0x42000000, value)
+                  hits.append(base+pos-prefix); pos+=1
+              print('XREF32',label,f'{value:#010x}',','.join(f'{h:#010x}' for h in hits[:100]),'count',len(hits))
+          for label,value in [('CTRL_CALC_THUMB',0x080203b5),('CTRL_LOCK_RX_THUMB',0x0800248f),('CTRL_LOCK_GLOBAL',0x2001ad6e),('CTRL_CACHED_BV',0x2000012a)]: xrefs(label,ctrl,0x08000000,value)
+          for label,value in [('IMG_EVENT_PRODUCER_THUMB',0x421bc9e9),('IMG_EXT_START_THUMB',0x421be2c1),('IMG_AE_LOCK_ENTRY_THUMB',0x421bd5d5),('IMG_BSTM_DISPATCH_THUMB',0x420a274d),('IMG_AE_ENABLED_STATE',0x40992e3c),('IMG_AE_DISABLED_STATE',0x40992ecc)]: xrefs(label,img,0x42000000,value)
           PY
