@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 -m pip install --quiet capstone
-      - name: Recover firmware and decode AE-measure dispatch identity
+      - name: Recover firmware and trace selector-5 receive channels
         shell: bash
         run: |
           set -euo pipefail
@@ -29,7 +29,7 @@ jobs:
           CPP
           g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
-          python3 - <<'PY' >/tmp/m10r-meter-dispatch.txt
+          python3 - <<'PY' >/tmp/m10r-selector5-receive.txt
           from pathlib import Path
           import struct,re
           from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
@@ -37,41 +37,50 @@ jobs:
           b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes();base=0x08000000;pfx=4
           md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
           def off(v):return pfx+v-base
-          def dis(s,e):
+          def dis(label,s,e):
+            print(f'\n=== {label} {s:#010x}..{e:#010x} ===')
             for i in md.disasm(b[off(s):off(e)],s):
               if i.mnemonic!='.byte':print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
-          print('=== DISPATCH WIDE ===');dis(0x0801d500,0x0801d8a0)
-          # Find likely function prologue before caller and all calls into containing region.
-          print('\n=== DIRECT CALLS INTO 0x0801d5xx-0x0801d8xx ===')
+          print('SELECTOR5: dispatcher 0x0801D6DA case r0==5 -> 0x0801D886 -> 0x0800E1EC')
+          callers=[0x08015634,0x0801569c,0x08018538,0x0801859c,0x08018616,0x0801862a]
+          for a in callers: dis('DISPATCH_CALL_'+hex(a),a-160,a+96)
+          # direct callers of these enclosing receive helpers, to identify transport registration
+          print('\n=== CALLS INTO CALLER NEIGHBORHOODS ===')
+          ranges=[(0x08015580,0x08015720),(0x08018460,0x08018680)]
           for i in md.disasm(b[pfx:],base):
-            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and 0x0801d500<=i.operands[0].imm<0x0801d8a0:
-              print(hex(i.address),'->',hex(i.operands[0].imm))
-          # Decode PC-relative literal loads in dispatch region.
-          print('\n=== LITERALS USED BY DISPATCH ===')
-          seen=set()
-          for i in md.disasm(b[off(0x0801d500):off(0x0801d8a0)],0x0801d500):
-            for op in i.operands:
-              if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC:
-                lit=((i.address+4)&~3)+op.mem.disp
-                if lit in seen or not(base<=lit<=base+len(b)-pfx-4):continue
-                seen.add(lit);val=struct.unpack_from('<I',b,off(lit))[0]
-                print(hex(i.address),'literal',hex(lit),'=',hex(val))
-          # Strings referenced by literals/data near this dispatcher.
-          print('\n=== NEARBY STRINGS ===')
-          for m in re.finditer(rb'[ -~]{5,100}\x00',b):
-            va=base+m.start()-pfx
-            if 0x0804a000<=va<=0x0804c548:
-              s=m.group()[:-1].decode('ascii','ignore')
-              n=struct.pack('<I',va);p=0;hits=[]
-              while True:
-                p=b.find(n,p)
-                if p<0:break
-                h=base+p-pfx
-                if 0x0801d000<=h<=0x0801e000:hits.append(h)
-                p+=1
-              if hits:print(hex(va),repr(s),[hex(x) for x in hits])
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:
+              t=i.operands[0].imm
+              if any(lo<=t<hi for lo,hi in ranges): print(hex(i.address),'->',hex(t))
+          # print strings referenced from the receive regions
+          print('\n=== STRINGS REFERENCED FROM RECEIVE REGIONS ===')
+          strings={}
+          for m in re.finditer(rb'[ -~]{4,120}\x00',b): strings[base+m.start()-pfx]=m.group()[:-1].decode('ascii','ignore')
+          for i in md.disasm(b[off(0x08015560):off(0x08018680)],0x08015560):
+            if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+              lit=((i.address+4)&~3)+i.operands[1].mem.disp
+              if base<=lit<=base+len(b)-pfx-4:
+                v=struct.unpack_from('<I',b,off(lit))[0]
+                if v in strings: print(hex(i.address),'->',hex(v),repr(strings[v]))
+          # selector-5 immediate nearby call candidates in ALL Thumb-like sections; keep only sites with a BL within next 4 insns.
+          print('\n=== NON-CTRL MOV R0,#5 + NEAR BL CANDIDATES ===')
+          for path in sorted(Path('/tmp/sections').glob('*.bin')):
+            if path.name.startswith('090_'): continue
+            data=path.read_bytes()
+            # sections with ARM/Thumb images are scanned heuristically from offset 4 at VA 0; report offsets only.
+            md2=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md2.detail=True;md2.skipdata=True
+            ins=list(md2.disasm(data[4:],0))
+            hits=[]
+            for idx,i in enumerate(ins):
+              if i.mnemonic in ('movs','mov.w','mov') and i.op_str.replace(' ','') in ('r0,#5','r0,#0x5'):
+                nxt=ins[idx+1:idx+5]
+                bs=[x for x in nxt if x.mnemonic in ('bl','blx')]
+                if bs: hits.append((i.address,[(x.address,x.op_str) for x in bs]))
+            if hits:
+              print('\nSECTION',path.name,'COUNT',len(hits))
+              for h in hits[:120]: print(hex(h[0]),[(hex(a),s) for a,s in h[1]])
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: m10r-meter-dispatch
-          path: /tmp/m10r-meter-dispatch.txt
+          name: m10r-selector5-receive
+          path: /tmp/m10r-selector5-receive.txt
+          if-no-files-found: error
