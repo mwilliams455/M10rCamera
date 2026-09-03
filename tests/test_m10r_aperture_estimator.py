@@ -2,6 +2,7 @@ import unittest
 
 from tools.m10r_aperture_estimator import (
     CANONICAL_FNUMBER_Q8,
+    DEFAULT_REMAP_THRESHOLDS_Q8,
     apply_raw_deadband,
     av_q8_to_fnumber_q8,
     estimate_aperture,
@@ -74,9 +75,39 @@ class ApertureEstimatorTests(unittest.TestCase):
         )
 
     def test_threshold_remap_returns_half_stop_index(self):
-        thresholds = [i * 0x80 for i in range(22)]
+        thresholds = [i * 0x80 for i in range(20)]
         self.assertEqual(threshold_remap_q8(0x0300, thresholds), 0x0300)
         self.assertEqual(threshold_remap_q8(0x0320, thresholds), 0x0380)
+
+    def test_default_remap_block_matches_recovered_40_bytes(self):
+        self.assertEqual(
+            DEFAULT_REMAP_THRESHOLDS_Q8,
+            (
+                192, 320, 448, 524, 627,
+                729, 844, 960, 1100, 1203,
+                1331, 1459, 1587, 1740, 1843,
+                1958, 2073, 2227, 2355, 2483,
+            ),
+        )
+
+    def test_default_remap_overflow_is_av105_and_skips_av10(self):
+        # Once threshold[19]=2483 is exceeded, adjacent index-20 state is only
+        # 15 or 29 in the recovered path, so it cannot match. Index 21 is the
+        # forced terminal bucket -> 21*0x80 = Av10.5.
+        self.assertEqual(threshold_remap_q8(0x0A00), 0x0A80)
+        self.assertEqual(
+            threshold_remap_q8(0x0A00, adjacent_index20_q8=29),
+            0x0A80,
+        )
+
+    def test_literal_index20_can_be_modeled_for_unusual_state(self):
+        thresholds = [i * 0x80 for i in range(20)]
+        # value exceeds threshold[19]=0x980; artificial adjacent state can make
+        # firmware index 20 match and return Av10.0.
+        self.assertEqual(
+            threshold_remap_q8(0x0A00, thresholds, adjacent_index20_q8=0x0A00),
+            0x0A00,
+        )
 
     def test_end_to_end_no_remap(self):
         # BvExt 8 - TTL Bv 8 + AV0 5 -> Av5 -> f/5.6.
