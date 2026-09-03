@@ -26,57 +26,67 @@ jobs:
           #include <vector>
           using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
           CPP
-          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
-          /tmp/unpack
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
           echo '859c936b6ac8efe0bc4ce7f05623013644fc5d8aee3c6835f09860f452adc2e0  /tmp/M10R_unpacked.bin' | sha256sum -c -
           mkdir -p firmware/sections
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin firmware/sections >/dev/null
       - name: Run full research tests
         run: python -m unittest discover -s tests -v
-      - name: Trace external ambient sensor receiver
+      - name: Trace external ambient protocol ownership
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY' >/tmp/m10r-external-ambient.txt
+          python3 - <<'PY' >/tmp/m10r-external-ambient-protocol.txt
           from pathlib import Path
           import struct,re
           from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
           from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_REG_PC
           b=Path('firmware/sections/090_CTRL-System.bin').read_bytes();base=0x08000000;pfx=4
           md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
-          def off(v):return pfx+v-base
+          def off(v): return pfx+v-base
           def dis(label,s,e):
             print(f'\n=== {label} {s:#010x}..{e:#010x} ===')
             for i in md.disasm(b[off(s):off(e)],s):
               if i.mnemonic!='.byte': print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
-          dis('EXTERNAL_AMBIENT_RX_CLUSTER',0x080291c0,0x08029560)
-          dis('BVEXT_IR_UPDATER',0x08016380,0x08016470)
-          print('\n=== CALLERS OF CLUSTER FUNCTIONS ===')
-          for target in [0x080292c0,0x080292e0,0x08029300,0x08029320,0x08029340,0x08029360,0x08029380,0x08029400,0x08029440,0x08029480]:
+          dis('RX_OWNER_WIDE',0x08028f00,0x08029362)
+          dis('TX_PROTOCOL',0x080293a8,0x08029680)
+          # Find direct callers of likely function starts by locating PUSH prologues in the region.
+          print('\n=== PROLOGUES AND DIRECT CALLERS ===')
+          pro=[]
+          for i in md.disasm(b[off(0x08028e00):off(0x08029700)],0x08028e00):
+            if i.mnemonic.startswith('push'): pro.append(i.address)
+          for t in pro:
             cs=[]
             for i in md.disasm(b[pfx:],base):
-              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm==target: cs.append(i.address)
-            if cs: print(hex(target),[hex(x) for x in cs])
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm==t: cs.append(i.address)
+            print(hex(t),'callers',[hex(x) for x in cs])
+          # String table and exact xrefs to the External ambient light sensor string.
           strings={}
-          for m in re.finditer(rb'[ -~]{4,140}\x00',b): strings[base+m.start()-pfx]=m.group()[:-1].decode('ascii','ignore')
-          print('\n=== CLUSTER LITERALS / STRINGS ===')
-          for i in md.disasm(b[off(0x080291c0):off(0x08029560)],0x080291c0):
-            if i.mnemonic=='.byte': continue
-            for op in i.operands:
-              if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC:
-                lit=((i.address+4)&~3)+op.mem.disp
-                if base<=lit<=base+len(b)-pfx-4:
-                  v=struct.unpack_from('<I',b,off(lit))[0]
-                  text=(' '+repr(strings[v])) if v in strings else ''
-                  print(hex(i.address),'lit',hex(lit),'=',hex(v)+text)
-          print('\n=== EXTERNAL / AMBIENT / IR STRINGS ===')
+          for m in re.finditer(rb'[ -~]{4,180}\x00',b): strings[base+m.start()-pfx]=m.group()[:-1].decode('ascii','ignore')
+          print('\n=== STRINGS 0x8046500..0x8046800 ===')
           for va,s in sorted(strings.items()):
-            lo=s.lower()
-            if any(k in lo for k in ('external ambient','ambient light','infrared','bvext','bv_ir','light sensor','als','ir sensor')):
-              print(hex(va),repr(s))
+            if 0x08046500<=va<0x08046800: print(hex(va),repr(s))
+          for target in [0x08046615]:
+            print('\n=== XREFS STRING',hex(target),'===')
+            needle=struct.pack('<I',target);p=0
+            while True:
+              p=b.find(needle,p)
+              if p<0:break
+              lit=base+p-pfx; refs=[]
+              for i in md.disasm(b[pfx:],base):
+                if i.mnemonic=='.byte':continue
+                for op in i.operands:
+                  if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC and (((i.address+4)&~3)+op.mem.disp)==lit: refs.append(i.address)
+              print('literal',hex(lit),'refs',[hex(x) for x in refs])
+              for a in refs: dis('STRING_REF_'+hex(a),max(base,a-160),min(base+len(b)-pfx,a+220))
+              p+=1
+          # Resolve the diagnostic strings used in the RX parser literal pool.
+          print('\n=== RX DIAGNOSTIC STRING TARGETS ===')
+          for ptr in [0x080466dc,0x08046704,0x08045434,0x08045460,0x0804423c]:
+            print(hex(ptr),repr(strings.get(ptr,'<not printable start>')))
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: m10r-external-ambient
-          path: /tmp/m10r-external-ambient.txt
+          name: m10r-external-ambient-protocol
+          path: /tmp/m10r-external-ambient-protocol.txt
           if-no-files-found: error
