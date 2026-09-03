@@ -28,40 +28,20 @@ jobs:
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
           python3 - <<'PY' >/tmp/m10r-av-remap.txt
           from pathlib import Path
-          import struct,re
+          import struct
           from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
-          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_REG_PC
           b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes();base=0x08000000;pfx=4
-          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.skipdata=True
           def off(v):return pfx+v-base
           def dis(label,s,e):
-            print(f'\n=== {label} {s:#010x}..{e:#010x} ===')
+            print(f'\n=== {label} ===')
             for i in md.disasm(b[off(s):off(e)],s):
               if i.mnemonic!='.byte':print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
-          dis('TABLE_INIT_CLUSTER',0x0800e100,0x0800e230)
+          dis('TABLE_INIT',0x0800e130,0x0800e210)
           dis('TABLE_CONSUMER',0x0800f9f0,0x0800fa50)
-          # pointer literal refs
-          target=0x20000040;needle=struct.pack('<I',target);q=0;lits=[]
-          while True:
-            q=b.find(needle,q)
-            if q<0:break
-            lits.append(base+q-pfx);q+=1
-          print('\nPTR_LITERALS',[hex(x) for x in lits])
-          for lit in lits:
-            refs=[]
-            for i in md.disasm(b[pfx:],base):
-              if i.mnemonic=='.byte':continue
-              for op in i.operands:
-                if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC and (((i.address+4)&~3)+op.mem.disp)==lit:refs.append(i.address)
-            print('literal',hex(lit),'refs',[hex(x) for x in refs])
-            for a in refs:dis('PTR_REF_'+hex(a),max(base,a-180),min(base+len(b)-pfx,a+300))
-          # calls to init cluster function candidates
-          print('\nCALLERS NEAR INIT CLUSTER')
-          for t in range(0x0800e100,0x0800e220,2):
-            cs=[]
-            for i in md.disasm(b[pfx:],base):
-              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm==t:cs.append(i.address)
-            if cs:print(hex(t),[hex(x) for x in cs])
+          # literal pool points already established in prior trace
+          for a in [0x0800e19c,0x0800e1ca,0x0800fa16]:
+            dis('KNOWN_XREF_'+hex(a),a-0x50,a+0xa0)
           PY
       - uses: actions/upload-artifact@v4
         with:
