@@ -1,0 +1,83 @@
+name: M10-R task priority trace
+
+on:
+  pull_request:
+    paths:
+      - '.m10r-task-priority-trigger'
+
+permissions:
+  contents: read
+
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover verified firmware and inspect CTRL task descriptors
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std;
+          static uint32_t u32(const vector<uint8_t>& b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);}
+          struct BR{const uint8_t* p; size_t n,bit=0; int get(){if(bit>=n*8) throw runtime_error("eof"); int v=(p[bit>>3]>>(7-(bit&7)))&1; ++bit; return v;}};
+          static int cat(BR& r){int a=r.get(); if(!a)return r.get()?7:6; int b=r.get(); if(!b)return r.get()?5:1; int c=r.get(); if(!c)return r.get()?2:0; int d=r.get(); if(!d)return 4; return r.get()?8:3;}
+          int main(){ifstream f("/tmp/M10-R.FW",ios::binary); vector<uint8_t> fw((istreambuf_iterator<char>(f)),{}); const size_t C=0x38; uint32_t h=u32(fw,C+8), expected=u32(fw,C+0x10); const uint8_t* tr=&fw[C+0x54]; vector<uint8_t> out; out.reserve(expected); size_t st=C+h; for(int i=0;i<8;i++){size_t e=st+i*16; uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12); BR br{&fw[C+ro],ps}; for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0; for(int z=0;z<k;z++)x=(x<<1)|br.get(); if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1); out.push_back(tr[v+128]);}} if(out.size()!=expected)return 3; ofstream o("/tmp/M10R_unpacked.bin",ios::binary); o.write((char*)out.data(),out.size());}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          /tmp/unpack
+          echo '859c936b6ac8efe0bc4ce7f05623013644fc5d8aee3c6835f09860f452adc2e0  /tmp/M10R_unpacked.bin' | sha256sum -c -
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct, re
+          b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes(); base=0x08000000; pfx=4
+          def off(va): return pfx+va-base
+          def u16(o): return struct.unpack_from('<H',b,o)[0]
+          def u32(o): return struct.unpack_from('<I',b,o)[0]
+          def bl_target(a,h1,h2):
+              S=(h1>>10)&1; i10=h1&0x3ff; J1=(h2>>13)&1; J2=(h2>>11)&1; i11=h2&0x7ff
+              I1=(~(J1^S))&1; I2=(~(J2^S))&1; imm=(S<<24)|(I1<<23)|(I2<<22)|(i10<<12)|(i11<<1)
+              if S: imm-=1<<25
+              return (a+4+imm)&0xffffffff
+          def callers(target):
+              out=[]
+              for o in range(pfx,len(b)-3,2):
+                  h1=u16(o); h2=u16(o+2)
+                  if (h1&0xf800)==0xf000 and (h2&0xd000)==0xd000:
+                      a=base+o-pfx
+                      if bl_target(a,h1,h2)==target: out.append(a)
+              return out
+          def x32(v):
+              q=struct.pack('<I',v); out=[]; i=0
+              while True:
+                  i=b.find(q,i)
+                  if i<0: break
+                  out.append(base+i-pfx); i+=1
+              return out
+          def dump(va,n=96):
+              o=off(va); q=b[o:o+n]; print('DUMP',hex(va),n)
+              for k in range(0,len(q),32): print(f'{va+k:08x}:',q[k:k+32].hex())
+          print('WORDS_E4E0_E540')
+          for va in range(0x0800e4e0,0x0800e544,4): print(hex(va),hex(u32(off(va))))
+          desc=u32(off(0x0800e510)); print('EVENT_TASK_DESCRIPTOR_LITERAL',hex(desc))
+          for v in [desc,0x0800dcc7,0x0800dcc6,0x0800248f,0x0800d91d,0x0800d91c]: print('XREF32',hex(v),[hex(x) for x in x32(v)])
+          for t in [0x0800dcc6,0x0800d91c,0x0800248e,0x0801cf26,0x08032dc0,0x08032e00]: print('CALLERS',hex(t),[hex(x) for x in callers(t)])
+          for va in [0x0800dc80,0x0800dcc0,0x0800e4e0]: dump(va,192)
+          for x in x32(desc)[:20]: dump(max(base,x-32),96)
+          # Print nearby printable strings likely to identify task/event objects.
+          print('TASKISH_STRINGS')
+          for m in re.finditer(rb'[ -~]{5,80}\x00',b):
+              s=m.group()[:-1].decode('ascii','ignore')
+              low=s.lower()
+              if any(k in low for k in ('task','event','expos','ae ','meter','ctrl','calc')):
+                  va=base+m.start()-pfx
+                  if 0x08030000 <= va <= 0x08060000:
+                      print(hex(va),repr(s))
+          PY
