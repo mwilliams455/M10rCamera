@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 -m pip install --quiet capstone
-      - name: Recover firmware and trace selector-5 receive call sites
+      - name: Trace local selector-5 packet constructor
         shell: bash
         run: |
           set -euo pipefail
@@ -29,7 +29,7 @@ jobs:
           CPP
           g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
-          python3 - <<'PY' >/tmp/m10r-selector5-callsites.txt
+          python3 - <<'PY' >/tmp/m10r-local-meter-constructor.txt
           from pathlib import Path
           import struct,re
           from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
@@ -41,16 +41,25 @@ jobs:
             print(f'\n=== {label} ===')
             for i in md.disasm(b[off(s):off(e)],s):
               if i.mnemonic!='.byte':print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
-          print('CONFIRMED: 0x0801D6DA r0 selector case 5 -> 0x0801D886 -> AE result handler 0x0800E1EC')
-          for a in [0x08015634,0x0801569c,0x08018538,0x0801859c,0x08018616,0x0801862a]: dis('CALL_'+hex(a),a-192,a+128)
-          # show likely enclosing prologues/registration zones
-          dis('RX_CLUSTER_A',0x080154c0,0x08015720)
-          dis('RX_CLUSTER_B',0x080183d0,0x08018680)
-          # collect printable strings pointed to by literals in only these two clusters
+          dis('CONSTRUCTOR',0x080184d8,0x08018650)
+          print('\n=== CONSTRUCTOR LITERAL VALUES ===')
+          for i in md.disasm(b[off(0x080185c0):off(0x0801861a)],0x080185c0):
+            if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+              lit=((i.address+4)&~3)+i.operands[1].mem.disp
+              if base<=lit<=base+len(b)-pfx-4: print(hex(i.address),'lit',hex(lit),'=',hex(struct.unpack_from('<I',b,off(lit))[0]))
+          targets=[0x080184d8,0x0802d678,0x0802d6dc,0x0802d7f4]
+          print('\n=== DIRECT CALLERS ===')
+          callers={t:[] for t in targets}
+          for i in md.disasm(b[pfx:],base):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm in callers: callers[i.operands[0].imm].append(i.address)
+          for t,cs in callers.items(): print(hex(t),[hex(x) for x in cs])
+          for a in callers[0x080184d8]: dis('CONSTRUCTOR_CALL_'+hex(a),a-128,a+96)
+          dis('HELPERS',0x0802d620,0x0802d840)
+          # strings referenced from helper and constructor-call zones
           strings={}
           for m in re.finditer(rb'[ -~]{4,120}\x00',b): strings[base+m.start()-pfx]=m.group()[:-1].decode('ascii','ignore')
-          print('\n=== CLUSTER STRING REFS ===')
-          for lo,hi in [(0x080154c0,0x08015720),(0x080183d0,0x08018680)]:
+          print('\n=== STRING REFS ===')
+          for lo,hi in [(0x080184d8,0x08018650),(0x0802d620,0x0802d840)]:
             for i in md.disasm(b[off(lo):off(hi)],lo):
               if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
                 lit=((i.address+4)&~3)+i.operands[1].mem.disp
@@ -60,6 +69,6 @@ jobs:
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: m10r-selector5-callsites
-          path: /tmp/m10r-selector5-callsites.txt
+          name: m10r-local-meter-constructor
+          path: /tmp/m10r-local-meter-constructor.txt
           if-no-files-found: error
