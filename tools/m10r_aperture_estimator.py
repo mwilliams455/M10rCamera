@@ -3,18 +3,13 @@
 
 The M10-R estimates working aperture by comparing the front external ambient
 brightness coordinate (BvExt) with the through-lens brightness coordinate and
-adding the calibrated AV0 reference.  All exposure coordinates are signed
+adding the calibrated AV0 reference. All exposure coordinates are signed
 Q8.8 APEX values.
-
-The optional remap table is runtime-configurable firmware state, so callers may
-supply the recovered threshold array.  Omitting it models the estimator before
-that optional remap stage.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-import math
 from typing import Sequence
 
 Q8 = 256
@@ -23,7 +18,20 @@ RAW_DEADBAND_Q8 = 0x41  # update only outside +/-65 counts
 DEFAULT_AV_MIN_Q8 = 0x0000
 DEFAULT_AV_MAX_Q8 = 0x0C00
 
-# Firmware half-stop table at 0x0803D310.  Values are Q8.8 f-numbers and use
+# 40-byte compiled default block copied from 0x08045714 to RAM 0x20000040.
+# These are the only 20 replaceable remap thresholds. The firmware consumer
+# then reads index 20 from adjacent state 0x20000068 and uses index 21 as a
+# terminal bucket. In the recovered runtime path the adjacent state is 15 or
+# 29, so any value that has already exceeded threshold[19] also exceeds that
+# unrelated tail value and therefore terminates at Av=10.5 (0x0A80).
+DEFAULT_REMAP_THRESHOLDS_Q8 = (
+    192, 320, 448, 524, 627,
+    729, 844, 960, 1100, 1203,
+    1331, 1459, 1587, 1740, 1843,
+    1958, 2073, 2227, 2355, 2483,
+)
+
+# Firmware half-stop table at 0x0803D310. Values are Q8.8 f-numbers and use
 # Leica/camera canonical labels rather than the exact mathematical sqrt(2)
 # sequence.
 CANONICAL_FNUMBER_Q8 = (
@@ -109,34 +117,50 @@ def quantize_half_stop_down(av_q8: int) -> int:
     return int(av_q8) & ~0x7F
 
 
-def threshold_remap_q8(av_q8: int, thresholds_q8: Sequence[int]) -> int:
-    """Map a quantized Av through the optional firmware threshold table.
+def threshold_remap_q8(
+    av_q8: int,
+    thresholds_q8: Sequence[int] = DEFAULT_REMAP_THRESHOLDS_Q8,
+    *,
+    adjacent_index20_q8: int | None = None,
+) -> int:
+    """Map a quantized Av through the firmware's optional threshold remap.
 
-    The consumer tests threshold indices 0..21 and returns index*0x80 for the
-    first threshold >= input.  A supplied table must therefore contain at
-    least 22 entries when this stage is enabled.
+    Firmware layout/loop:
+      * indexes 0..19 are the 20-byte-pair runtime-configurable thresholds;
+      * index 20 reads the low halfword of adjacent global 0x20000068;
+      * index 21 is terminal because the loop exits when index >= 21.
+
+    The recovered adjacent global is written as integer 15 or 29. With the
+    default monotonic thresholds, any value that reaches index 20 is already
+    >2483, so 15/29 can never match and the effective overflow result is always
+    21*0x80 = 0x0A80 (Av 10.5).  `adjacent_index20_q8` is exposed only to model
+    the literal firmware read for unusual/custom states.
     """
-    if len(thresholds_q8) < 22:
-        raise ValueError("firmware aperture remap requires at least 22 thresholds")
+    if len(thresholds_q8) < 20:
+        raise ValueError("firmware aperture remap requires 20 configurable thresholds")
+
     value = s16(av_q8)
-    index = 0
-    while True:
-        threshold = s16(int(thresholds_q8[index]))
-        if threshold >= value or index >= 0x15:
+    for index in range(20):
+        if s16(int(thresholds_q8[index])) >= value:
             return index * HALF_STOP_Q8
-        index += 1
+
+    # Literal firmware index 20 read. Under recovered production/default state
+    # this cannot match once threshold[19] has already been exceeded.
+    if adjacent_index20_q8 is not None and s16(adjacent_index20_q8) >= value:
+        return 20 * HALF_STOP_Q8
+
+    # Index 21 always exits regardless of the halfword read there.
+    return 21 * HALF_STOP_Q8
 
 
 def av_q8_to_fnumber_q8(av_q8: int) -> int:
     """Model the core Av->f-number conversion at 0x0801CBFC.
 
-    Exact half-stop Av values use the canonical firmware lookup table.  Other
+    Exact half-stop Av values use the canonical firmware lookup table. Other
     values use f=2^(Av/2) and are represented as Q8.8 before final display/
     metadata rounding.
     """
-    av = int(av_q8)
-    if av < 0:
-        av = 0
+    av = max(0, int(av_q8))
 
     if av % HALF_STOP_Q8 == 0:
         idx = av // HALF_STOP_Q8
@@ -144,8 +168,7 @@ def av_q8_to_fnumber_q8(av_q8: int) -> int:
             return CANONICAL_FNUMBER_Q8[idx]
 
     f = 2.0 ** ((av / Q8) / 2.0)
-    # Firmware converts the floating result back to a fixed-point integer.
-    # Positive conversion is truncating at this stage.
+    # Positive floating-to-integer conversion is truncating at this stage.
     return max(0, min(0xFFFF, int(f * Q8)))
 
 
@@ -168,7 +191,8 @@ def estimate_aperture(
     prior_raw_q8: int,
     force_reference: bool = False,
     remap_enabled: bool = False,
-    remap_thresholds_q8: Sequence[int] | None = None,
+    remap_thresholds_q8: Sequence[int] = DEFAULT_REMAP_THRESHOLDS_Q8,
+    remap_adjacent_index20_q8: int | None = None,
     av_min_q8: int = DEFAULT_AV_MIN_Q8,
     av_max_q8: int = DEFAULT_AV_MAX_Q8,
 ) -> ApertureEstimate:
@@ -182,9 +206,11 @@ def estimate_aperture(
     quantized = quantize_half_stop_down(filtered)
 
     if remap_enabled:
-        if remap_thresholds_q8 is None:
-            raise ValueError("remap thresholds are required when remap is enabled")
-        remapped = threshold_remap_q8(quantized, remap_thresholds_q8)
+        remapped = threshold_remap_q8(
+            quantized,
+            remap_thresholds_q8,
+            adjacent_index20_q8=remap_adjacent_index20_q8,
+        )
     else:
         remapped = quantized
 
