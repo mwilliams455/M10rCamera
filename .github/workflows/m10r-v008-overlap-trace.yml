@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 -m pip install --quiet capstone
-      - name: Trace local selector-5 packet constructor
+      - name: Trace traditional Bv math and ADC sampler
         shell: bash
         run: |
           set -euo pipefail
@@ -29,11 +29,11 @@ jobs:
           CPP
           g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
-          python3 - <<'PY' >/tmp/m10r-local-meter-constructor.txt
+          python3 - <<'PY' >/tmp/m10r-bv-math.txt
           from pathlib import Path
-          import struct,re
+          import struct
           from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
-          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_REG_PC
+          from capstone.arm import ARM_OP_MEM,ARM_REG_PC
           b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes();base=0x08000000;pfx=4
           md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
           def off(v):return pfx+v-base
@@ -41,34 +41,36 @@ jobs:
             print(f'\n=== {label} ===')
             for i in md.disasm(b[off(s):off(e)],s):
               if i.mnemonic!='.byte':print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
-          dis('CONSTRUCTOR',0x080184d8,0x08018650)
-          print('\n=== CONSTRUCTOR LITERAL VALUES ===')
-          for i in md.disasm(b[off(0x080185c0):off(0x0801861a)],0x080185c0):
-            if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
-              lit=((i.address+4)&~3)+i.operands[1].mem.disp
-              if base<=lit<=base+len(b)-pfx-4: print(hex(i.address),'lit',hex(lit),'=',hex(struct.unpack_from('<I',b,off(lit))[0]))
-          targets=[0x080184d8,0x0802d678,0x0802d6dc,0x0802d7f4]
-          print('\n=== DIRECT CALLERS ===')
-          callers={t:[] for t in targets}
-          for i in md.disasm(b[pfx:],base):
-            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm in callers: callers[i.operands[0].imm].append(i.address)
-          for t,cs in callers.items(): print(hex(t),[hex(x) for x in cs])
-          for a in callers[0x080184d8]: dis('CONSTRUCTOR_CALL_'+hex(a),a-128,a+96)
-          dis('HELPERS',0x0802d620,0x0802d840)
-          # strings referenced from helper and constructor-call zones
-          strings={}
-          for m in re.finditer(rb'[ -~]{4,120}\x00',b): strings[base+m.start()-pfx]=m.group()[:-1].decode('ascii','ignore')
-          print('\n=== STRING REFS ===')
-          for lo,hi in [(0x080184d8,0x08018650),(0x0802d620,0x0802d840)]:
+          dis('ADC_GETTER_0x8018260',0x080181d0,0x080182b0)
+          dis('METER_MATH_0x802d320',0x0802d2c0,0x0802d450)
+          dis('TLOG_AND_BV_0x802d678',0x0802d678,0x0802d7fa)
+          print('\n=== PC LITERAL VALUES ===')
+          for lo,hi in [(0x080181d0,0x080182b0),(0x0802d2c0,0x0802d450),(0x0802d678,0x0802d7fa)]:
             for i in md.disasm(b[off(lo):off(hi)],lo):
-              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
-                lit=((i.address+4)&~3)+i.operands[1].mem.disp
-                if base<=lit<=base+len(b)-pfx-4:
-                  v=struct.unpack_from('<I',b,off(lit))[0]
-                  if v in strings: print(hex(i.address),repr(strings[v]))
+              for op in i.operands:
+                if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC:
+                  lit=((i.address+4)&~3)+op.mem.disp
+                  if base<=lit<=base+len(b)-pfx-4:
+                    print(hex(i.address),'lit',hex(lit),'=',hex(struct.unpack_from('<I',b,off(lit))[0]))
+          # all literal xrefs to calibration/state blocks used by constructor
+          for target in [0x2001a9d8,0x2001ac74]:
+            print('\n=== LITERAL XREFS',hex(target),'===')
+            needle=struct.pack('<I',target);p=0
+            lits=[]
+            while True:
+              p=b.find(needle,p)
+              if p<0:break
+              lits.append(base+p-pfx);p+=1
+            print('literal_locations',[hex(x) for x in lits])
+            for lit in lits:
+              refs=[]
+              for i in md.disasm(b[pfx:],base):
+                for op in i.operands:
+                  if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC and (((i.address+4)&~3)+op.mem.disp)==lit: refs.append(i.address)
+              print('literal',hex(lit),'code_refs',[hex(x) for x in refs[:200]])
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: m10r-local-meter-constructor
-          path: /tmp/m10r-local-meter-constructor.txt
+          name: m10r-bv-math
+          path: /tmp/m10r-bv-math.txt
           if-no-files-found: error
