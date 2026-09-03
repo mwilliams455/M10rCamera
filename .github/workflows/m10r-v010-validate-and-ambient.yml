@@ -32,65 +32,69 @@ jobs:
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin firmware/sections >/dev/null
       - name: Run full research tests
         run: python -m unittest discover -s tests -v
-      - name: Trace AV0 calibration and aperture conversion
+      - name: Trace aperture estimate ownership and AV0 calibration
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY' >/tmp/m10r-aperture-estimator.txt
+          python3 - <<'PY' >/tmp/m10r-aperture-ownership.txt
           from pathlib import Path
-          import struct,re
+          import re,struct
           from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
-          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_REG_PC
-          b=Path('firmware/sections/090_CTRL-System.bin').read_bytes();base=0x08000000;pfx=4
+          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM
+          sec=Path('firmware/sections')
+          print('=== CROSS-SECTION AV/APERTURE STRING SEARCH ===')
+          pats=(b'av0',b'aperture',b'ambient light',b'bv adjust',b'clear bv')
+          for p in sorted(sec.glob('*.bin')):
+            d=p.read_bytes(); low=d.lower()
+            hits=[]
+            for pat in pats:
+              q=0
+              while True:
+                q=low.find(pat,q)
+                if q<0:break
+                a=max(0,d.rfind(b'\x00',0,q)+1);z=d.find(b'\x00',q);z=len(d) if z<0 else z
+                hits.append((q,d[a:z].decode('ascii','ignore')));q+=1
+            if hits:
+              print('\nSECTION',p.name)
+              for h,s in hits:print(hex(h),repr(s))
+
+          b=(sec/'090_CTRL-System.bin').read_bytes();base=0x08000000;pfx=4
           md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
           def off(v):return pfx+v-base
           def dis(label,s,e):
             print(f'\n=== {label} {s:#010x}..{e:#010x} ===')
             for i in md.disasm(b[off(s):off(e)],s):
-              if i.mnemonic!='.byte': print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
-          dis('APERTURE_CONVERTER',0x0801cbfc,0x0801cda0)
-          dis('APERTURE_ESTIMATOR',0x0800f98c,0x0800fa72)
-          strings={}
-          for m in re.finditer(rb'[ -~]{4,180}\x00',b): strings[base+m.start()-pfx]=m.group()[:-1].decode('ascii','ignore')
-          print('\n=== CONVERTER LITERALS ===')
-          for i in md.disasm(b[off(0x0801cbfc):off(0x0801cda0)],0x0801cbfc):
-            if i.mnemonic=='.byte': continue
-            for op in i.operands:
-              if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC:
-                lit=((i.address+4)&~3)+op.mem.disp
-                if base<=lit<=base+len(b)-pfx-8:
-                  lo=struct.unpack_from('<I',b,off(lit))[0]
-                  hi=struct.unpack_from('<I',b,off(lit)+4)[0]
-                  d=struct.unpack_from('<d',b,off(lit))[0]
-                  print(hex(i.address),'lit',hex(lit),'u32',hex(lo),hex(hi),'double',repr(d),'str',repr(strings.get(lo)))
-          needle=b'Adjust AV0 done.\x00'
-          pos=b.find(needle)
-          print('\n=== ADJUST AV0 STRING ===')
-          if pos>=0:
-            sva=base+pos-pfx;print('string_va',hex(sva))
-            ptr=struct.pack('<I',sva);q=0;lits=[]
-            while True:
-              q=b.find(ptr,q)
-              if q<0:break
-              lits.append(base+q-pfx);q+=1
-            print('literal_locations',[hex(x) for x in lits])
-            refs=[]
+              if i.mnemonic!='.byte':print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
+          dis('AE_INPUT_BUILD_AND_CALCULATOR_CALL',0x0800d940,0x0800dbc0)
+          dis('CENTRAL_CALCULATOR_ENTRY',0x080203b4,0x08020580)
+          print('\n=== ALL CALLS TO APERTURE RAW/TRANSFORM GETTERS ===')
+          for target,name in [(0x08011ce2,'AV_RAW_GET'),(0x08011cea,'FNUMBER_GET')]:
+            cs=[]
             for i in md.disasm(b[pfx:],base):
-              if i.mnemonic=='.byte':continue
-              for op in i.operands:
-                if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC:
-                  lit=((i.address+4)&~3)+op.mem.disp
-                  if lit in lits:refs.append(i.address)
-            print('code_refs',[hex(x) for x in refs])
-            for a in refs:dis('ADJUST_AV0_REF_'+hex(a),max(base,a-300),min(base+len(b)-pfx,a+350))
-          print('\n=== CALIBRATION/AV STRINGS ===')
-          for va,s in sorted(strings.items()):
-            lo=s.lower()
-            if any(k in lo for k in ('av0','adjust av','aperture','ambient light','bv adjust','clear bv')):
-              print(hex(va),repr(s))
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm==target:cs.append(i.address)
+            print(name,[hex(x) for x in cs])
+          print('\n=== CALIBRATION RECORD GETTER CALLS WITH +0x13 ACCESS NEARBY ===')
+          calls=[]
+          for i in md.disasm(b[pfx:],base):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm==0x0801124c:calls.append(i.address)
+          for a in calls:
+            ins=list(md.disasm(b[off(a):off(min(a+420,base+len(b)-pfx))],a))
+            matches=[]
+            for j in ins:
+              if j.mnemonic=='.byte':continue
+              if any(op.type==ARM_OP_MEM and op.mem.disp==0x13 for op in j.operands):matches.append(j.address)
+            if matches:
+              print('getter',hex(a),'offset13_access',[hex(x) for x in matches])
+              dis('CAL13_CONTEXT_'+hex(a),max(base,a-80),min(base+len(b)-pfx,a+440))
+          print('\n=== DIRECT 0x2001A78F REFERENCES ===')
+          target=0x2001a78f;needle=struct.pack('<I',target);q=0
+          while True:
+            q=b.find(needle,q)
+            if q<0:break
+            print(hex(base+q-pfx));q+=1
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: m10r-aperture-estimator
-          path: /tmp/m10r-aperture-estimator.txt
+          name: m10r-aperture-ownership
+          path: /tmp/m10r-aperture-ownership.txt
           if-no-files-found: error
