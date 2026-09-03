@@ -1,0 +1,92 @@
+name: M10-R v0.08 priority proof
+
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.m10r-v008-priority-trigger']
+
+permissions:
+  contents: read
+
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Recover firmware and extract task identity evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std;
+          static uint32_t u32(const vector<uint8_t>& b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);}
+          struct BR{const uint8_t* p; size_t n,bit=0; int get(){if(bit>=n*8) throw runtime_error("eof"); int v=(p[bit>>3]>>(7-(bit&7)))&1; ++bit; return v;}};
+          static int cat(BR& r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;}
+          int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t> fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t* tr=&fw[C+0x54];vector<uint8_t> out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' >/tmp/m10r-v008-priority.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM
+          b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes();base=0x08000000;pfx=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(v):return pfx+v-base
+          def dis(label,s,e):
+              print(f'\n=== {label} {s:#x}..{e:#x} ===')
+              for i in md.disasm(b[off(s):off(e)],s):
+                  if i.mnemonic!='.byte':print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
+          # Packet dispatcher containing lock command and exposure task/event runtime.
+          dis('COMMAND_DISPATCH_CONTEXT',0x08009680,0x08009880)
+          dis('EVENT_RUNTIME_REGISTRATION',0x0801cdc0,0x0801cf30)
+          dis('RTOS_OBJECT_INIT_AND_WAKE',0x08032780,0x08032dc0)
+          dis('EXPOSURE_EVENT_CONSUMER_NEIGHBORHOOD',0x0800dc70,0x0800de10)
+          # Raw references to candidate exposure event entry points and receiver/dispatch code.
+          vals=[0x0800dcc7,0x0800dc73,0x0800248f,0x08009681,0x08009701,0x080097c1,0x0801cf27]
+          print('\n=== RAW THUMB POINTER XREFS ===')
+          for v in vals:
+              n=struct.pack('<I',v);hits=[];p=0
+              while True:
+                  p=b.find(n,p)
+                  if p<0:break
+                  hits.append(base+p-pfx);p+=1
+              print(hex(v),[hex(x) for x in hits])
+              for h in hits[:12]:
+                  q=off(h);lo=max(0,q-48);hi=min(len(b),q+96)
+                  words=[]
+                  for x in range(lo-(lo%4),hi,4):
+                      if x+4<=len(b): words.append((base+x-pfx,struct.unpack_from('<I',b,x)[0]))
+                  print(' context',hex(h),[(hex(a),hex(w)) for a,w in words])
+          # Function callers around likely command dispatcher targets.
+          targets={0x0800248e,0x0800dcc6,0x0801cf26,0x08032dc0,0x08032a7a,0x08032af4,0x080327ae,0x080327e8,0x080327dc}
+          callers={t:[] for t in targets}
+          for i in md.disasm(b[pfx:],base):
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm in callers:
+                  callers[i.operands[0].imm].append(i.address)
+          print('\n=== CALLERS ===')
+          for t in sorted(targets):print(hex(t),[hex(x) for x in callers[t]])
+          # Print strings containing task names and all 32-bit code xrefs to each string.
+          print('\n=== TASK/CTRL/EXPOSURE STRINGS AND XREFS ===')
+          for m in re.finditer(rb'[ -~]{5,80}\x00',b):
+              s=m.group()[:-1].decode('ascii','ignore');low=s.lower()
+              if not any(k in low for k in ('task','ctrl','exposure','camera control','event')):continue
+              sva=base+m.start()-pfx;n=struct.pack('<I',sva);hits=[];p=0
+              while True:
+                  p=b.find(n,p)
+                  if p<0:break
+                  hits.append(base+p-pfx);p+=1
+              if hits:print(hex(sva),repr(s),[hex(x) for x in hits])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m10r-v008-priority
+          path: /tmp/m10r-v008-priority.txt
