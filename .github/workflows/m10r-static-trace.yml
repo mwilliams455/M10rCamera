@@ -3,6 +3,7 @@ name: M10-R static trace
 on:
   pull_request:
     paths:
+      - '.github/workflows/m10r-static-trace.yml'
       - '.m10r-trace-trigger'
 
 permissions:
@@ -13,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install trace dependencies
+        run: python3 -m pip install --quiet capstone
       - name: Fetch and verify archived firmware
         shell: bash
         run: |
@@ -28,57 +31,107 @@ jobs:
           python3 tools/m10r_unpack.py /tmp/M10-R.FW /tmp/M10R_unpacked.bin
           echo '859c936b6ac8efe0bc4ce7f05623013644fc5d8aee3c6835f09860f452adc2e0  /tmp/M10R_unpacked.bin' | sha256sum -c -
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/m10r_sections >/tmp/sections.txt
-          grep -E '^(90|92)\t' /tmp/sections.txt || true
-      - name: Emit selected static ranges and xrefs
+      - name: Disassemble metering-lock paths
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          import struct, hashlib
+          import hashlib, struct
+          from capstone import Cs, CS_ARCH_ARM, CS_MODE_THUMB, CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM
 
           ctrl = Path('/tmp/m10r_sections/090_CTRL-System.bin').read_bytes()
           img = Path('/tmp/m10r_sections/092_IMG-System.bin').read_bytes()
           print('CTRL sha256', hashlib.sha256(ctrl).hexdigest(), 'size', len(ctrl))
           print('IMG sha256', hashlib.sha256(img).hexdigest(), 'size', len(img))
 
-          def dump(label, data, base, start, end, prefix=4):
-              a = prefix + start - base
-              b = prefix + end - base
-              chunk = data[a:b]
-              print(f'RANGE {label} {start:#010x}..{end:#010x} bytes={len(chunk)}')
-              for off in range(0, len(chunk), 32):
-                  print(f'{start+off:08x}: {chunk[off:off+32].hex()}')
+          md = Cs(CS_ARCH_ARM, CS_MODE_THUMB | CS_MODE_LITTLE_ENDIAN)
+          md.detail = True
+          md.skipdata = True
 
-          dump('CTRL_RECEIVER', ctrl, 0x08000000, 0x08002450, 0x08002510)
-          dump('CTRL_DISPATCH', ctrl, 0x08000000, 0x080096e0, 0x08009860)
-          dump('CTRL_BUILD_SET_POST', ctrl, 0x08000000, 0x0800d900, 0x0800df80)
-          dump('CTRL_CALCULATOR_GATE', ctrl, 0x08000000, 0x08020380, 0x08020580)
+          def off(base, va, prefix=4):
+              return prefix + va - base
 
-          dump('IMG_BSTM', img, 0x42000000, 0x420a2700, 0x420a2a80)
-          dump('IMG_RELEASE', img, 0x42000000, 0x421866e0, 0x42186940)
-          dump('IMG_AE_ENTRY_CALLBACKS', img, 0x42000000, 0x421bd560, 0x421bd680)
-          dump('IMG_EXTERNAL_ACTIONS', img, 0x42000000, 0x421be200, 0x421be740)
-          dump('IMG_AE_CONTROL_INIT', img, 0x42000000, 0x421c71e0, 0x421c7440)
+          def disasm(label, data, base, start, end, prefix=4):
+              blob = data[off(base,start,prefix):off(base,end,prefix)]
+              print(f'\n=== {label} {start:#010x}..{end:#010x} ===')
+              for insn in md.disasm(blob, start):
+                  if insn.mnemonic == '.byte':
+                      continue
+                  print(f'{insn.address:08x}: {insn.mnemonic:8s} {insn.op_str}')
 
-          def xrefs(label, data, base, value, prefix=4):
-              needle = struct.pack('<I', value)
-              hits=[]; pos=0
+          # CTRL: lock receiver, exposure-input builder/update helpers, calculator gate.
+          disasm('CTRL_LOCK_RECEIVER', ctrl, 0x08000000, 0x0800248e, 0x080024b2)
+          disasm('CTRL_UPDATE_HELPER_DC40', ctrl, 0x08000000, 0x0800dc40, 0x0800dc78)
+          disasm('CTRL_LOCK_SETTERS', ctrl, 0x08000000, 0x0800dde0, 0x0800de58)
+          disasm('CTRL_EXPOSURE_INPUT_LOCK_INJECT', ctrl, 0x08000000, 0x0800da40, 0x0800da80)
+          disasm('CTRL_CALCULATOR_LOCK_GATE', ctrl, 0x08000000, 0x08020480, 0x080204e8)
+
+          # IMG: physical translator, BSTM dispatch, lock entry, external start/action path.
+          disasm('IMG_BSTM_DISPATCH', img, 0x42000000, 0x420a274c, 0x420a2840)
+          disasm('IMG_RELEASE_TRANSLATOR', img, 0x42000000, 0x42186734, 0x421868e8)
+          disasm('IMG_AE_ENTRY_CALLBACKS', img, 0x42000000, 0x421bd5cc, 0x421bd5f8)
+          disasm('IMG_EXTERNAL_START', img, 0x42000000, 0x421be2c0, 0x421be318)
+          disasm('IMG_EXTERNAL_RELEASE_ACTIONS', img, 0x42000000, 0x421be6d8, 0x421be724)
+          disasm('IMG_AE_STATE_CONSTRUCTORS', img, 0x42000000, 0x421ca6c0, 0x421ca730)
+          disasm('IMG_AE_CONTROL_INIT', img, 0x42000000, 0x421c7250, 0x421c72a8)
+
+          def scan_callers(label, data, base, targets, prefix=4):
+              wanted = set(targets)
+              hits = {t: [] for t in wanted}
+              for insn in md.disasm(data[prefix:], base):
+                  if insn.mnemonic not in ('bl','blx') or not insn.operands:
+                      continue
+                  op = insn.operands[0]
+                  if op.type == ARM_OP_IMM and op.imm in wanted:
+                      hits[op.imm].append(insn.address)
+              print(f'\n=== {label} CALLERS ===')
+              for t in targets:
+                  print(f'{t:#010x}:', ', '.join(f'{x:#010x}' for x in hits[t]) or 'none')
+
+          scan_callers('CTRL', ctrl, 0x08000000, [
+              0x0800248e, 0x0800dc40, 0x0800dc4a, 0x0800de18,
+              0x0800da62, 0x080203b4, 0x080203b8,
+          ])
+          scan_callers('IMG', img, 0x42000000, [
+              0x420a274c, 0x42186734, 0x421bc9e8, 0x421bd5d4,
+              0x421be2c0, 0x420ab2f8,
+          ])
+
+          def plausible_code(v):
+              return v == 0 or 0x42000001 <= v <= 0x42ffffff
+          def plausible_state(v):
+              return v == 0 or 0x40800000 <= v <= 0x40afffff
+
+          print('\n=== IMG BSTM-LIKE TRANSITIONS FOR K_RELEASE EVENTS ===')
+          # The known AE transition initializers live near file 0x96a900. Scan the
+          # surrounding initialized BSTM load block for 16-byte transition records.
+          for p in range(0x958000, min(len(img)-16, 0x978000), 4):
+              event, guard, action, target = struct.unpack_from('<H2xIII', img, p)
+              if event not in (0xd5,0xd6,0xd7,0xd8):
+                  continue
+              if not plausible_code(guard) or not plausible_code(action) or not plausible_state(target):
+                  continue
+              runtime = 0x40000000 + p - 0x91078
+              print(f'file={p:#08x} runtime={runtime:#010x} event={event:#06x} guard={guard:#010x} action={action:#010x} target={target:#010x}')
+
+          # Show literal 32-bit xrefs to key state and globals as a second independent check.
+          def xrefs32(label, data, base, value, prefix=4):
+              needle=struct.pack('<I', value); p=0; hits=[]
               while True:
-                  pos=data.find(needle,pos)
-                  if pos<0: break
-                  hits.append(base + pos - prefix)
-                  pos += 1
-              print('XREF32', label, f'{value:#010x}', ','.join(f'{h:#010x}' for h in hits[:100]), 'count', len(hits))
+                  p=data.find(needle,p)
+                  if p<0: break
+                  hits.append(base+p-prefix); p += 1
+              print(label, f'{value:#010x}:', ', '.join(f'{x:#010x}' for x in hits))
 
+          print('\n=== LITERAL XREFS ===')
           for label, value in [
-              ('CTRL_CALC_THUMB',0x080203b5), ('CTRL_LOCK_RX_THUMB',0x0800248f),
-              ('CTRL_LOCK_GLOBAL',0x2001ad6e), ('CTRL_CACHED_BV',0x2000012a),
+              ('CTRL_LOCK_GLOBAL',0x2001ad6e), ('CTRL_CACHED_BV',0x2000012a)
           ]:
-              xrefs(label, ctrl, 0x08000000, value)
+              xrefs32(label, ctrl, 0x08000000, value)
           for label, value in [
-              ('IMG_EVENT_PRODUCER_THUMB',0x421bc9e9), ('IMG_EXT_START_THUMB',0x421be2c1),
-              ('IMG_AE_LOCK_ENTRY_THUMB',0x421bd5d5), ('IMG_BSTM_DISPATCH_THUMB',0x420a274d),
               ('IMG_AE_ENABLED_STATE',0x40992e3c), ('IMG_AE_DISABLED_STATE',0x40992ecc),
+              ('IMG_EVENT_PRODUCER',0x421bc9e9), ('IMG_LOCK_ENTRY',0x421bd5d5)
           ]:
-              xrefs(label, img, 0x42000000, value)
+              xrefs32(label, img, 0x42000000, value)
           PY
