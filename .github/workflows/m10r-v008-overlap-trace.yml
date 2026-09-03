@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 -m pip install --quiet capstone
-      - name: Trace meter ADC channels and calibration state
+      - name: Trace traditional meter calibration loader
         shell: bash
         run: |
           set -euo pipefail
@@ -29,51 +29,42 @@ jobs:
           CPP
           g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
-          python3 - <<'PY' >/tmp/m10r-meter-adc-cal.txt
+          python3 - <<'PY' >/tmp/m10r-meter-cal-loader.txt
           from pathlib import Path
           import struct,re
           from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
-          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_REG_PC
+          from capstone.arm import ARM_OP_IMM
           b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes();base=0x08000000;pfx=4
           md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
           def off(v):return pfx+v-base
           def dis(label,s,e):
-            print(f'\n=== {label} {s:#x}..{e:#x} ===')
+            print(f'\n=== {label} ===')
             for i in md.disasm(b[off(s):off(e)],s):
               if i.mnemonic!='.byte':print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
-          dis('ADC_GETTER_FULL',0x08018260,0x08018390)
-          dis('CAL_STATE_REGION',0x08018370,0x080184d8)
-          dis('FP_HELPERS_A',0x0801ef60,0x0801f020)
-          dis('FP_HELPERS_B',0x0801f7e0,0x0801f940)
-          # direct callers of ADC getter and calibration mapping
-          for target in [0x08018260,0x0802d320,0x0802d3d0,0x0802d678,0x0802d6dc]:
-            cs=[]
-            for i in md.disasm(b[pfx:],base):
-              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm==target: cs.append(i.address)
-            print('\nCALLERS',hex(target),[hex(x) for x in cs])
-          # xrefs to state/calibration base literals
-          for target in [0x2001a9d8,0x2001add0,0x2001addd,0x2001adfa]:
-            print('\nSTATE',hex(target))
-            needle=struct.pack('<I',target);p=0
+          target=0x0801838c
+          print('DIRECT CALLERS')
+          for i in md.disasm(b[pfx:],base):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm==target: print(hex(i.address))
+          for val in [0x0801838c,0x0801838d]:
+            n=struct.pack('<I',val);p=0
             while True:
-              p=b.find(needle,p)
+              p=b.find(n,p)
               if p<0:break
-              lit=base+p-pfx; refs=[]
-              for i in md.disasm(b[pfx:],base):
-                if i.mnemonic=='.byte':continue
-                for op in i.operands:
-                  if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC and (((i.address+4)&~3)+op.mem.disp)==lit: refs.append(i.address)
-              print('literal',hex(lit),'refs',[hex(x) for x in refs])
+              va=base+p-pfx
+              print('POINTER',hex(val),'at',hex(va))
+              dis('PTR_CONTEXT_'+hex(va),max(base,va-96),min(base+len(b)-pfx,va+128))
               p+=1
-          # all strings with temp/adc/meter/calibration near CTRL
-          print('\n=== RELEVANT STRINGS ===')
-          for m in re.finditer(rb'[ -~]{5,100}\x00',b):
+          # dump nearby service/registration code and strings around the pointer tables
+          dis('SERVICE_ZONE_A',0x08015500,0x08015920)
+          dis('SERVICE_ZONE_B',0x08018e80,0x08019220)
+          print('\n=== STRINGS ABOUT AE/AMBIENT/TEMP/ADJUST/BV ===')
+          for m in re.finditer(rb'[ -~]{5,120}\x00',b):
             s=m.group()[:-1].decode('ascii','ignore');lo=s.lower()
-            if any(k in lo for k in ('temp','adc','meter','calib','tlog','light')):
+            if any(k in lo for k in ('ambient','adjust bv','bv adjust','temperature','ae meas','light sensor','light-meter','light meter','tlog')):
               print(hex(base+m.start()-pfx),repr(s))
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: m10r-meter-adc-cal
-          path: /tmp/m10r-meter-adc-cal.txt
+          name: m10r-meter-cal-loader
+          path: /tmp/m10r-meter-cal-loader.txt
           if-no-files-found: error
