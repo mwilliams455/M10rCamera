@@ -1,0 +1,68 @@
+name: M10-R v0.58c summarize IMG flags
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v058c-summarize-img-flags.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  summarize:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m10r-metering-latch-trace
+          fetch-depth: 0
+      - name: Reduce v0.58b trace
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > research/M10R_v058c_img_flag_provenance_summary.txt
+          from pathlib import Path
+          p=Path('research/M10R_v058b_img_flag_literal_slice.txt')
+          lines=p.read_text(errors='replace').splitlines()
+          print('M10-R v0.58c IMG FLAG PROVENANCE SUMMARY')
+          print('source:',p)
+          # Always retain global anchors.
+          for line in lines:
+              if line.startswith('POOL_HITS') or line.startswith('CODE_REFS'):
+                  print(line)
+          # Retain small windows around every exact reference section.
+          heads=[i for i,l in enumerate(lines) if l.startswith('=== REF target=')]
+          print('\nREFERENCE_WINDOWS',len(heads))
+          for i in heads:
+              print('\n'+lines[i])
+              for l in lines[i+1:min(len(lines),i+90)]:
+                  if l.startswith('=== '): break
+                  print(l)
+          # Relevant semantic strings only, capped/deduped.
+          print('\nRELEVANT_STRINGS')
+          seen=set();n=0
+          for l in lines:
+              lo=l.lower()
+              if any(k in lo for k in ('lvvideo','live view','liveview','live finder','livefinder','finder','video')):
+                  if l not in seen:
+                      print(l);seen.add(l);n+=1
+                      if n>=180: break
+          # Exact lines that mention the shared addresses anywhere.
+          print('\nSHARED_ADDRESS_LINES')
+          seen=set();n=0
+          for l in lines:
+              lo=l.lower()
+              if any(k in lo for k in ('408f0ec0','408f0ec9','408f0ecd')):
+                  if l not in seen:
+                      print(l);seen.add(l);n+=1
+                      if n>=240: break
+          PY
+      - name: Commit summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v058c_img_flag_provenance_summary.txt
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: summarize v0.58 IMG flag provenance'
+          git pull --rebase origin m10r-metering-latch-trace
+          git push origin HEAD:m10r-metering-latch-trace
