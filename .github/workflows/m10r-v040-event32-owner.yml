@@ -1,0 +1,109 @@
+name: M10-R v0.40 event 78000032 owner
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v040-event32-owner.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m10r-metering-latch-trace
+          fetch-depth: 0
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace unique 0x78000032 literal owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          mkdir -p research
+          python3 - <<'PY' > research/M10R_v040_event32_owner.txt
+          from pathlib import Path
+          import struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_ARM,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();base=0x42000000;pfx=4;code=b[pfx:]
+          th=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);th.detail=True;th.skipdata=True
+          arm=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);arm.detail=True;arm.skipdata=True
+          def off(a):return pfx+a-base
+          def va(q):return base+q-pfx
+          def u32(a):
+            o=off(a);return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+          def astr(a,n=220):
+            o=off(a)
+            if not 0<=o<len(b):return None
+            out=[]
+            for c in b[o:o+n]:
+              if c==0:break
+              if c in (9,10,13) or 32<=c<127:out.append(chr(c))
+              else:return None
+            s=''.join(out);return s if len(s)>=4 else None
+          def fmt(i,mode='T'):
+            ex=''
+            if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+              pc=((i.address+4)&~3) if mode=='T' else i.address+8;la=pc+i.operands[1].mem.disp;v=u32(la)
+              if v is not None:
+                s=astr(v);ex=f' ; LIT {la:#x}->{v:#x}'+(f' STRING={s!r}' if s else '')
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:ex+=f' ; CALL {i.operands[0].imm:#x}'
+            return f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}{ex}'
+          def dump(a,z,title,mode='T'):
+            md=th if mode=='T' else arm
+            print(f'\n=== {title} {a:#x}..{z:#x} {mode} ===')
+            for i in md.disasm(b[off(a):off(z)],a):
+              if i.mnemonic!='.byte':print(fmt(i,mode))
+          pat=struct.pack('<I',0x78000032);hits=[];q=0
+          while True:
+            q=b.find(pat,q)
+            if q<0:break
+            hits.append(va(q));q+=1
+          print('EVENT_LITERAL_ADDRS',[hex(x) for x in hits])
+          for lit in hits:
+            refs=[]
+            # raw Thumb LDR literal patterns
+            for p in range(0,len(code)-4,2):
+              a=base+p;h1=struct.unpack_from('<H',code,p)[0];la=None
+              if (h1&0xf800)==0x4800:la=((a+4)&~3)+((h1&0xff)<<2)
+              elif h1 in (0xf8df,0xf85f):
+                h2=struct.unpack_from('<H',code,p+2)[0];imm=h2&0xfff;la=((a+4)&~3)+(imm if h1==0xf8df else -imm)
+              if la==lit:refs.append(a)
+            print('THUMB_LITERAL_REFS',hex(lit),[hex(x) for x in refs])
+            for a in refs:dump(max(base,a-0x120),a+0x240,'EVENT32 THUMB OWNER '+hex(a),'T')
+          # Broad nearby Thumb region: event literal is near the pack consumers.
+          if hits:
+            a=hits[0]
+            dump(max(base,a-0x500),a+0x180,'EVENT32 NEARBY REGION','T')
+          # list printable strings within 0x420ab000..0x420abc00
+          print('\nNEARBY_ASCII')
+          lo=max(0,off(0x420ab000));hi=min(len(b),off(0x420abc00));q=lo
+          while q<hi:
+            if 32<=b[q]<127:
+              s=q
+              while q<hi and (b[q] in (9,10,13) or 32<=b[q]<127):q+=1
+              if q-s>=6:print(hex(va(s)),repr(b[s:q].decode('latin1','replace')))
+            q+=1
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v040_event32_owner.txt
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: record v0.40 event32 owner'
+          git pull --rebase origin m10r-metering-latch-trace
+          git push origin HEAD:m10r-metering-latch-trace
