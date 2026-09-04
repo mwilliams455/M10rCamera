@@ -1,0 +1,136 @@
+name: M10-R v0.86 AEAWB to CA9 pointer identity
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v086-aeawb-to-ca9-pointer-identity.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace AFAEAWB producer to IMG workflow plus480 and CA9 pointer
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v086_aeawb_to_ca9_pointer_identity.txt
+          from pathlib import Path
+          import struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_REG_PC,ARM_OP_IMM
+
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); base=0x42000000; pfx=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+          def off(a): return pfx+a-base
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp; lo=off(la)
+                if 0<=lo<=len(b)-4:return la,struct.unpack_from('<I',b,lo)[0]
+            except Exception: pass
+            return None
+          def target(i):
+            try:
+              if i.mnemonic.startswith('bl') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm&~1
+            except Exception: pass
+            return None
+          def fmt(i):
+            x=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            q=lit(i)
+            if q:x+=f' ; LIT {hex(q[0])}->{hex(q[1])}'
+            t=target(i)
+            if t is not None:x+=f' ; CALL {hex(t)}'
+            return x
+
+          # One full-image Thumb pass only; all xref queries reuse this index.
+          ins=list(md.disasm(b[pfx:],base))
+          byaddr={i.address:n for n,i in enumerate(ins) if i.id!=0}
+          def context_idx(n,before=16,after=18):
+            for j in range(max(0,n-before),min(len(ins),n+after+1)):
+              if ins[j].id!=0: print(fmt(ins[j]))
+          def contexts_for_indices(title,idxs,before=16,after=18,limit=80):
+            print('\n===',title,'count',len(idxs),'===')
+            for k,n in enumerate(idxs[:limit]):
+              print(f'\n--- hit {k+1}/{len(idxs)} at {hex(ins[n].address)} ---')
+              context_idx(n,before,after)
+            if len(idxs)>limit:print('TRUNCATED',len(idxs)-limit,'hits')
+
+          print('M10-R v0.86 AFAEAWB -> CA9 POINTER IDENTITY')
+          print('IMG section bytes',len(b),'instructions indexed',len(ins))
+
+          # Known consumer: workflow +0x480 -> 0x43705A60 +0x00.
+          n=byaddr.get(0x420a3104)
+          if n is not None:
+            print('\n=== KNOWN CA9 PARAMETER BUILDER 0x420A3104 ===')
+            context_idx(n,4,100)
+
+          # Direct call xrefs are the fastest route to the helper which returns global base+0x14080.
+          wanted=[0x420dadb6,0x420a3104,0x420dca28,0x420dc974,0x420e0850,0x420de0f0,0x420e05b4]
+          for w in wanted:
+            hits=[n for n,i in enumerate(ins) if target(i)==w]
+            contexts_for_indices(f'DIRECT CALLERS OF {hex(w)}',hits,20,24)
+
+          # All references to the AFAEAWB owner global, sub-buffer offset, and CA9 parameter block.
+          vals={0x408efe10:'AFAEAWB global root',0x14080:'AFAEAWB +0x14080 offset',0x43705a60:'CA9 parameter block'}
+          for v,name in vals.items():
+            hits=[n for n,i in enumerate(ins) if lit(i) and lit(i)[1]==v]
+            contexts_for_indices(f'LITERAL REFERENCES {name} {hex(v)}',hits,14,18)
+
+          # base+0x80 is usually encoded as an immediate rather than a literal. Find exact immediate tokens,
+          # plus the 0x85<<3 construction used to address workflow+0x480 (0x428 + 0x58).
+          imm80=[]; imm85=[]; disp58=[]
+          for n,i in enumerate(ins):
+            if i.id==0: continue
+            try:
+              if any(op.type==ARM_OP_IMM and op.imm==0x80 for op in i.operands): imm80.append(n)
+              if any(op.type==ARM_OP_IMM and op.imm==0x85 for op in i.operands): imm85.append(n)
+              for op in i.operands:
+                if op.type==ARM_OP_MEM and op.mem.disp==0x58: disp58.append(n); break
+            except Exception: pass
+          contexts_for_indices('IMMEDIATE 0x80 USES (candidate base+0x80)',imm80,10,12,120)
+          contexts_for_indices('IMMEDIATE 0x85 USES (candidate 0x428 component of +0x480)',imm85,10,14,120)
+
+          # Reduce +0x58 noise: keep only memory accesses whose nearby window also contains #0x85 or #0x428-ish construction.
+          near=[]
+          for n in disp58:
+            s=' | '.join((ins[j].mnemonic+' '+ins[j].op_str).lower() for j in range(max(0,n-10),min(len(ins),n+5)))
+            if '#0x85' in s or '#0x428' in s: near.append(n)
+          contexts_for_indices('MEMORY +0x58 WITH NEARBY +0x480 CONSTRUCTION',near,14,16,120)
+
+          # Raw aligned occurrences are useful for identifying tables/literal pools not reached as decoded PC literals.
+          print('\n=== RAW ALIGNED 32-BIT OCCURRENCES ===')
+          for v,name in vals.items():
+            pat=struct.pack('<I',v); p=0; out=[]
+            while True:
+              p=b.find(pat,p)
+              if p<0:break
+              out.append(base+p-pfx); p+=1
+            print(name,hex(v),'count',len(out),*[hex(x) for x in out[:100]])
+
+          print('\n=== INTERPRETATION RULE ===')
+          print('Freeze pointer identity only if a caller/dataflow explicitly carries AFAEAWB base, base+0x80, or base+0x14080 into the workflow object field subsequently read as +0x480 by 0x420A3104.')
+          print('Absence of such a chain is a negative result, not permission to equate the pointers by proximity.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v086_aeawb_to_ca9_pointer_identity.txt
+          git commit -m 'research: record v0.86 AEAWB to CA9 pointer identity' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
