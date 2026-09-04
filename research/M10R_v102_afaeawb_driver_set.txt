@@ -1,0 +1,671 @@
+M10-R v1.02 AFAEAWB DRIVER SET TRACE
+STRING 0x420dc920 'Prepro (driver): set aeawb!'
+STRING 0x420dc9fc 'Prepro (driver): set aeawb-window!'
+STRING 0x420e6a7c 'PrePro: set AEAWB'
+STRING 0x420f5f9c 'prepro set afaeawb field position'
+STRING 0x421e9a1d 'drv_prepro_afaeawb_SetPreproGlobalSettings'
+STRING 0x421e9a48 'drv_prepro_afaeawb_if_Config'
+
+=== STRING XREF FUNCTIONS ===
+
+--- 'drv_prepro_afaeawb_SetPreproGlobalSettings' xref=0x420da54a function=0x420da53c ---
+420da53c: push       {r4, r5, r6, lr}
+420da53e: movs       r4, r0
+420da540: movs       r5, #0
+420da542: cmp        r4, #0
+420da544: beq        #0x420da54a
+420da546: cmp        r4, #0x64
+420da548: bne        #0x420da558
+420da54a: ldr        r2, [pc, #0x3c4] ; LIT 0x420da910->0x421e9a1d STRING='drv_prepro_afaeawb_SetPreproGlobalSettings'
+420da54c: adr        r1, #0x3c4 ; ADRSTR [(1108191508, 'Prepro: %s  - no afaeawb-prepro settings for IDLE/POWERDOWN')]
+420da54e: movs       r0, #3
+420da550: bl         #0x42140150
+420da554: movs       r0, #0
+420da556: pop        {r4, r5, r6, pc}
+420da558: movs       r0, #1
+420da55a: ldr        r1, [pc, #0x3f4] ; LIT 0x420da950->0x408f0310
+420da55c: str        r0, [r1, #4]
+420da55e: movs       r0, r4
+420da560: bl         #0x420d926c
+420da564: ldr        r1, [pc, #0x3e8] ; LIT 0x420da950->0x408f0310
+420da566: strh       r0, [r1]
+420da568: movs       r0, r1
+420da56a: ldrh       r0, [r0]
+420da56c: movs       r1, #0xf0
+420da56e: ands       r0, r1
+420da570: cmp        r0, #0
+420da572: bne        #0x420da670
+420da574: ldr        r0, [pc, #0x3d8] ; LIT 0x420da950->0x408f0310
+420da576: ldrh       r0, [r0]
+420da578: movs       r3, r0
+420da57a: blx        #0x4209f988
+420da57e: cdp2       p6, #0, c4, c6, c4, #0
+420da582: bge        #0x420da4a8
+420da584: cdp2       p1, #0xf, c2, c13, c5, #0
+420da588: lsls       r1, r1, #0xe
+420da58a: ldr        r0, [pc, #0x3c8] ; LIT 0x420da954->0x408f0410
+420da58c: str        r1, [r0]
+420da58e: movs       r1, #0xff
+420da590: adds       r1, #0xb7
+420da592: subs       r0, #0x20
+420da594: strh       r1, [r0, #2]
+420da596: movs       r1, #0x78
+420da598: subs       r0, #0x20
+420da59a: strh       r1, [r0, #0x20]
+420da59c: movs       r1, #0x7c
+420da59e: adds       r0, #0x20
+420da5a0: strh       r1, [r0, #6]
+420da5a2: movs       r1, #0x50
+420da5a4: strh       r1, [r0, #4]
+420da5a6: movs       r1, #0x40
+420da5a8: strh       r1, [r0, #0xa]
+420da5aa: strh       r1, [r0, #8]
+420da5ac: movs       r1, #0x20
+420da5ae: strh       r1, [r0, #0xc]
+420da5b0: strh       r1, [r0, #0xe]
+420da5b2: strh       r1, [r0, #0x10]
+420da5b4: strh       r1, [r0, #0x12]
+420da5b6: ldr        r1, [pc, #0x3a0] ; LIT 0x420da958->0x22e
+420da5b8: subs       r0, #0xe0
+420da5ba: str        r1, [r0, #0x18]
+420da5bc: movs       r1, #0xf0
+420da5be: str        r1, [r0, #0x10]
+420da5c0: ldr        r1, [pc, #0x398] ; LIT 0x420da95c->0x1e10
+420da5c2: str        r1, [r0, #0x1c]
+420da5c4: ldr        r1, [pc, #0x398] ; LIT 0x420da960->0x1310
+420da5c6: str        r1, [r0, #0x14]
+420da5c8: movs       r1, #0xe1
+420da5ca: lsls       r1, r1, #4
+420da5cc: strh       r1, [r0, #0x20]
+420da5ce: ldr        r1, [pc, #0x394] ; LIT 0x420da964->0x8e8
+420da5d0: strh       r1, [r0, #0x24]
+420da5d2: movs       r1, #0xff
+420da5d4: adds       r1, #0xf1
+420da5d6: strh       r1, [r0, #0x22]
+420da5d8: movs       r1, #0xff
+420da5da: adds       r1, #0x41
+420da5dc: strh       r1, [r0, #0x26]
+420da5de: movs       r1, #0xff
+
+--- 'drv_prepro_afaeawb_SetPreproGlobalSettings' xref=0x420da85c function=None ---
+420da820: movs       r1, #0x7d
+420da822: lsls       r1, r1, #3
+420da824: strh       r1, [r0, #0x22]
+420da826: movs       r1, #0x51
+420da828: lsls       r1, r1, #3
+420da82a: strh       r1, [r0, #0x26]
+420da82c: movs       r1, #0xff
+420da82e: adds       r1, #0x21
+420da830: ldr        r0, [pc, #0x120] ; LIT 0x420da954->0x408f0410
+420da832: str        r1, [r0, #4]
+420da834: movs       r1, #4
+420da836: adds       r0, r0, #4
+420da838: str        r1, [r0, #4]
+420da83a: movs       r1, #0x7d
+420da83c: lsls       r1, r1, #3
+420da83e: str        r1, [r0, #0x10]
+420da840: movs       r1, #0x51
+420da842: lsls       r1, r1, #3
+420da844: str        r1, [r0, #0x14]
+420da846: movs       r1, #0xff
+420da848: adds       r1, #0x9b
+420da84a: str        r1, [r0, #0x18]
+420da84c: movs       r1, #0x90
+420da84e: str        r1, [r0, #0x1c]
+420da850: ldr        r1, [pc, #0x120] ; LIT 0x420da974->0x148c
+420da852: str        r1, [r0, #0x20]
+420da854: movs       r1, #0x93
+420da856: lsls       r1, r1, #4
+420da858: str        r1, [r0, #0x24]
+420da85a: b          #0x420da86c
+420da85c: ldr        r2, [pc, #0xb0] ; LIT 0x420da910->0x421e9a1d STRING='drv_prepro_afaeawb_SetPreproGlobalSettings'
+420da85e: adr        r1, #0x118 ; ADRSTR [(1108191608, 'Prepro: %s  -unknown AFAEAWB-Mode'), (1108191610, 'epro: %s  -unknown AFAEAWB-Mode')]
+420da860: movs       r0, #4
+420da862: bl         #0x42140150
+420da866: movs       r5, #0xb
+420da868: mvns       r5, r5
+420da86a: mov        r8, r8
+420da86c: b          #0x420daac2
+420da86e: ldr        r0, [pc, #0xe0] ; LIT 0x420da950->0x408f0310
+420da870: ldrh       r0, [r0]
+420da872: cmp        r0, #0x11
+420da874: beq        #0x420da880
+420da876: cmp        r0, #0x12
+420da878: beq        #0x420da90a
+420da87a: cmp        r0, #0x13
+420da87c: bne        #0x420da90c
+420da87e: b          #0x420daa28
+420da880: movs       r1, #0x37
+420da882: lsls       r1, r1, #7
+420da884: ldr        r0, [pc, #0xcc] ; LIT 0x420da954->0x408f0410
+420da886: str        r1, [r0]
+420da888: ldr        r1, [pc, #0x110] ; LIT 0x420da99c->0xfc8
+420da88a: subs       r0, #0x20
+420da88c: strh       r1, [r0, #2]
+420da88e: ldr        r1, [pc, #0xd8] ; LIT 0x420da968->0x3ae
+420da890: adds       r1, #0x9b
+420da892: subs       r0, #0x20
+420da894: strh       r1, [r0, #0x20]
+420da896: movs       r1, #0x1c
+420da898: adds       r0, #0x20
+420da89a: strh       r1, [r0, #6]
+420da89c: movs       r1, #0x1a
+420da89e: strh       r1, [r0, #4]
+420da8a0: movs       r1, #0x16
+420da8a2: strh       r1, [r0, #0xa]
+420da8a4: movs       r1, #0x10
+420da8a6: strh       r1, [r0, #8]
+420da8a8: movs       r1, #0x1c
+420da8aa: strh       r1, [r0, #0xc]
+420da8ac: movs       r1, #0x1a
+420da8ae: strh       r1, [r0, #0xe]
+420da8b0: movs       r1, #0x10
+420da8b2: strh       r1, [r0, #0x10]
+420da8b4: strh       r1, [r0, #0x12]
+420da8b6: ldr        r1, [pc, #0xe4] ; LIT 0x420da99c->0xfc8
+420da8b8: adds       r1, #0xfc
+420da8ba: subs       r0, #0xe0
+420da8bc: str        r1, [r0, #0x18]
+420da8be: ldr        r1, [pc, #0xb0] ; LIT 0x420da970->0x5ca
+420da8c0: subs       r1, #0xe5
+420da8c2: str        r1, [r0, #0x10]
+420da8c4: movs       r1, #0x70
+420da8c6: str        r1, [r0, #0x1c]
+420da8c8: movs       r1, #0x68
+420da8ca: str        r1, [r0, #0x14]
+420da8cc: movs       r1, #0
+420da8ce: strh       r1, [r0, #0x20]
+420da8d0: strh       r1, [r0, #0x24]
+420da8d2: movs       r1, #0x70
+420da8d4: strh       r1, [r0, #0x22]
+420da8d6: movs       r1, #0x68
+420da8d8: strh       r1, [r0, #0x26]
+420da8da: movs       r1, #0xff
+420da8dc: adds       r1, #0x91
+420da8de: ldr        r0, [pc, #0x74] ; LIT 0x420da954->0x408f0410
+420da8e0: str        r1, [r0, #4]
+420da8e2: movs       r1, #4
+420da8e4: adds       r0, r0, #4
+420da8e6: str        r1, [r0, #4]
+420da8e8: movs       r1, #0x7b
+
+--- 'drv_prepro_afaeawb_SetPreproGlobalSettings' xref=0x420daab0 function=None ---
+420daa74: strh       r1, [r0, #0x20]
+420daa76: strh       r1, [r0, #0x24]
+420daa78: movs       r1, #0x70
+420daa7a: strh       r1, [r0, #0x22]
+420daa7c: movs       r1, #0x68
+420daa7e: strh       r1, [r0, #0x26]
+420daa80: movs       r1, #0xff
+420daa82: adds       r1, #0x91
+420daa84: ldr        r0, [pc, #0x40] ; LIT 0x420daac8->0x408f0410
+420daa86: str        r1, [r0, #4]
+420daa88: movs       r1, #4
+420daa8a: adds       r0, r0, #4
+420daa8c: str        r1, [r0, #4]
+420daa8e: movs       r1, #0x7b
+420daa90: lsls       r1, r1, #6
+420daa92: str        r1, [r0, #8]
+420daa94: movs       r1, #0x51
+420daa96: lsls       r1, r1, #5
+420daa98: str        r1, [r0, #0xc]
+420daa9a: movs       r1, #0xfc
+420daa9c: str        r1, [r0, #0x28]
+420daa9e: movs       r1, #0x9c
+420daaa0: str        r1, [r0, #0x2c]
+420daaa2: movs       r1, #0x4d
+420daaa4: lsls       r1, r1, #3
+420daaa6: str        r1, [r0, #0x30]
+420daaa8: movs       r1, #0xff
+420daaaa: adds       r1, #0xa1
+420daaac: str        r1, [r0, #0x34]
+420daaae: b          #0x420daac0
+420daab0: ldr        r2, [pc, #0x20] ; LIT 0x420daad4->0x421e9a1d STRING='drv_prepro_afaeawb_SetPreproGlobalSettings'
+420daab2: ldr        r1, [pc, #0x24] ; LIT 0x420daad8->0x420da978 STRING='Prepro: %s  -unknown AFAEAWB-Mode'
+420daab4: movs       r0, #4
+420daab6: bl         #0x42140150
+420daaba: movs       r5, #0xb
+420daabc: mvns       r5, r5
+420daabe: mov        r8, r8
+420daac0: mov        r8, r8
+420daac2: movs       r0, r5
+420daac4: b          #0x420da556
+420daac6: movs       r0, r0
+420daac8: lsls       r0, r2, #0x10
+420daaca: lsls       r7, r1
+420daacc: lsrs       r0, r1, #0x1f
+420daace: movs       r0, r0
+420daad0: lsls       r1, r1, #0x11
+420daad2: movs       r0, r0
+420daad4: ldr        r2, [sp, #0x74]
+420daad6: tst        r6, r3
+420daad8: add        r1, sp, #0x1e0
+420daada: tst        r5, r1
+420daadc: push       {r4, lr}
+420daade: ldr        r0, [pc, #0x18] ; LIT 0x420daaf8->0x408f0410
+420daae0: ldr        r0, [r0, #0x3c]
+420daae2: cmp        r0, #0
+420daae4: beq        #0x420daaf4
+420daae6: ldr        r2, [pc, #0x14] ; LIT 0x420daafc->0x408efe10
+420daae8: ldr        r2, [r2, #0x7c]
+420daaea: movs       r0, r2
+420daaec: adds       r0, #0x80
+420daaee: ldr        r2, [pc, #8] ; LIT 0x420daaf8->0x408f0410
+420daaf0: ldr        r1, [r2, #0x3c]
+420daaf2: blx        r1
+420daaf4: pop        {r4, pc}
+420daaf6: movs       r0, r0
+420daaf8: lsls       r0, r2, #0x10
+420daafa: lsls       r7, r1
+420daafc: cdp2       p0, #1, c4, c0, c14, #4
+420dab00: push       {r4, r5, r6, lr}
+420dab02: movs       r4, r0
+420dab04: movs       r5, #0
+420dab06: ldr        r0, [pc, #0xf4] ; LIT 0x420dabfc->0x408f0390
+420dab08: ldr        r0, [r0, #0x7c]
+420dab0a: cmp        r0, #0
+420dab0c: beq        #0x420dab64
+420dab0e: ldr        r0, [pc, #0xec] ; LIT 0x420dabfc->0x408f0390
+420dab10: subs       r0, #0x80
+420dab12: ldrh       r1, [r0]
+420dab14: adds       r0, #0x80
+420dab16: ldr        r0, [r0, #0x7c]
+420dab18: strh       r1, [r0]
+420dab1a: movs       r1, #1
+420dab1c: ldr        r0, [pc, #0xdc] ; LIT 0x420dabfc->0x408f0390
+420dab1e: ldr        r0, [r0, #0x7c]
+420dab20: adds       r0, #0xff
+420dab22: adds       r0, #0x9d
+420dab24: strb       r1, [r0]
+420dab26: ldr        r1, [pc, #0xd4] ; LIT 0x420dabfc->0x408f0390
+420dab28: ldr        r1, [r1, #0x7c]
+420dab2a: movs       r0, r1
+420dab2c: adds       r0, #0x1c
+420dab2e: bl         #0x420d8fc8
+420dab32: ldr        r0, [pc, #0xc8] ; LIT 0x420dabfc->0x408f0390
+420dab34: ldr        r1, [r4, #0xc]
+420dab36: ldr        r0, [r0, #0x7c]
+420dab38: str        r1, [r0, #4]
+420dab3a: ldr        r0, [pc, #0xc0] ; LIT 0x420dabfc->0x408f0390
+420dab3c: ldr        r1, [r4, #0x10]
+420dab3e: ldr        r0, [r0, #0x7c]
+420dab40: str        r1, [r0, #8]
+
+--- 'drv_prepro_afaeawb_if_Config' xref=0x420dac3a function=0x420dac08 ---
+420dac08: push       {r4, r5, r6, r7, lr}
+420dac0a: sub        sp, #0x2c
+420dac0c: movs       r4, r0
+420dac0e: movs       r7, #0
+420dac10: bl         #0x420e4e40
+420dac14: movs       r5, r0
+420dac16: movs       r6, #0
+420dac18: ldrb       r0, [r4]
+420dac1a: cmp        r0, r5
+420dac1c: beq        #0x420dac32
+420dac1e: ldrb       r2, [r4]
+420dac20: movs       r3, r5
+420dac22: ldr        r1, [pc, #0x138] ; LIT 0x420dad5c->0x42836a30 STRING='Prepro: not possible to change AFAWB-mode-data of PreproMode=%d while current PreproMode=%d'
+420dac24: movs       r0, #4
+420dac26: bl         #0x42140150
+420dac2a: movs       r0, #0xb
+420dac2c: mvns       r0, r0
+420dac2e: add        sp, #0x2c
+420dac30: pop        {r4, r5, r6, r7, pc}
+420dac32: cmp        r5, #0
+420dac34: beq        #0x420dac3a
+420dac36: cmp        r5, #0x64
+420dac38: bne        #0x420dac48
+420dac3a: ldr        r2, [pc, #0x124] ; LIT 0x420dad60->0x421e9a48 STRING='drv_prepro_afaeawb_if_Config'
+420dac3c: ldr        r1, [pc, #0x124] ; LIT 0x420dad64->0x428369e0 STRING='Prepro: %s no afaeawb-config while E_DRV_PREPRO_IF_PREPROMODE_IDLE/POWERDOWN'
+420dac3e: movs       r0, #3
+420dac40: bl         #0x42140150
+420dac44: movs       r0, #0
+420dac46: b          #0x420dac2e
+420dac48: ldr        r0, [r4, #4]
+420dac4a: cmp        r0, #0
+420dac4c: bne        #0x420dac7a
+420dac4e: ldr        r1, [pc, #0x118] ; LIT 0x420dad68->0x42836938 STRING='Prepro: NULL-Pointer for AFAEAWB address - using global memory (only for testing allowed)'
+420dac50: movs       r0, #3
+420dac52: bl         #0x42140150
+420dac56: ldr        r0, [pc, #0x114] ; LIT 0x420dad6c->0x408efe10
+420dac58: ldr        r0, [r0, #0x7c]
+420dac5a: cmp        r0, #0
+420dac5c: bne        #0x420dac74
+420dac5e: adr        r1, #0x110 ; ADRSTR [(1108192624, 'Prepro: allocate global memory for aeawb-data'), (1108192626, 'epro: allocate global memory for aeawb-data')]
+420dac60: movs       r0, #3
+420dac62: bl         #0x42140150
+420dac66: ldr        r1, [pc, #0x138] ; LIT 0x420dada0->0x142b0
+420dac68: movs       r0, #1
+420dac6a: lsls       r0, r0, #0x14
+420dac6c: bl         #0x42143134
+420dac70: ldr        r1, [pc, #0xf8] ; LIT 0x420dad6c->0x408efe10
+420dac72: str        r0, [r1, #0x7c]
+420dac74: ldr        r0, [pc, #0xf4] ; LIT 0x420dad6c->0x408efe10
+420dac76: ldr        r0, [r0, #0x7c]
+420dac78: str        r0, [r4, #4]
+420dac7a: ldr        r0, [pc, #0x128] ; LIT 0x420dada4->0x408f044c
+420dac7c: ldr        r1, [r4, #0x14]
+420dac7e: str        r1, [r0, #4]
+420dac80: subs       r0, #0x3c
+420dac82: ldr        r1, [r4, #0x18]
+420dac84: str        r1, [r0, #0x3c]
+420dac86: ldr        r1, [pc, #0x120] ; LIT 0x420dada8->0x14080
+420dac88: ldr        r0, [r4, #4]
+420dac8a: adds       r1, r0, r1
+420dac8c: ldr        r0, [pc, #0x114] ; LIT 0x420dada4->0x408f044c
+420dac8e: subs       r0, #0xbc
+420dac90: str        r1, [r0, #0x7c]
+420dac92: ldr        r0, [r4, #4]
+420dac94: adds       r0, #0x80
+420dac96: ldr        r1, [pc, #0x10c] ; LIT 0x420dada4->0x408f044c
+420dac98: subs       r1, #0xbc
+420dac9a: str        r0, [r1, #0x78]
+420dac9c: movs       r0, r1
+420dac9e: subs       r0, #0x80
+420daca0: ldrh       r0, [r0]
+420daca2: ldr        r1, [r4, #4]
+420daca4: strh       r0, [r1]
+420daca6: movs       r0, r4
+420daca8: bl         #0x420da1a8
+420dacac: ldr        r0, [pc, #0xfc] ; LIT 0x420dadac->0x408ef710
+420dacae: ldr        r0, [r0, #8]
+420dacb0: cmp        r0, #0
+420dacb2: bne        #0x420dacba
+420dacb4: ldrb       r0, [r4]
+420dacb6: bl         #0x420d93c8
+420dacba: ldr        r0, [pc, #0xf4] ; LIT 0x420dadb0->0x408f0314
+420dacbc: bl         #0x420dca28
+420dacc0: ldr        r0, [pc, #0xe0] ; LIT 0x420dada4->0x408f044c
+420dacc2: subs       r0, #0x5c
+420dacc4: bl         #0x420dc974
+420dacc8: ldr        r0, [r4, #4]
+420dacca: movs       r1, r0
+420daccc: adds       r1, #0x80
+420dacce: movs       r0, #6
+420dacd0: bl         #0x420e0850
+420dacd4: movs       r0, #8
+420dacd6: str        r0, [sp, #0x24]
+
+--- 'Prepro (driver): set aeawb-window!' xref=0x420dc980 function=0x420dc974 ---
+420dc974: push       {r4, lr}
+420dc976: movs       r4, r0
+420dc978: ldr        r0, [pc, #0x7c] ; LIT 0x420dc9f8->0x409aa1c4
+420dc97a: ldr        r0, [r0]
+420dc97c: cmp        r0, #0
+420dc97e: bne        #0x420dc988
+420dc980: adr        r1, #0x78 ; ADRSTR [(1108199932, 'Prepro (driver): set aeawb-window!')]
+420dc982: movs       r0, #2
+420dc984: bl         #0x42140150
+420dc988: ldrh       r0, [r4]
+420dc98a: ldr        r1, [pc, #0x94] ; LIT 0x420dca20->0x20004000
+420dc98c: str        r0, [r1, #8]
+420dc98e: ldrh       r0, [r4, #2]
+420dc990: str        r0, [r1, #0xc]
+420dc992: ldrh       r0, [r4, #4]
+420dc994: str        r0, [r1, #0x10]
+420dc996: ldrh       r0, [r4, #6]
+420dc998: str        r0, [r1, #0x14]
+420dc99a: ldrh       r0, [r4, #0xa]
+420dc99c: str        r0, [r1, #0x1c]
+420dc99e: ldrh       r0, [r4, #8]
+420dc9a0: str        r0, [r1, #0x18]
+420dc9a2: movs       r0, r1
+420dc9a4: ldr        r0, [r0, #0x20]
+420dc9a6: lsrs       r0, r0, #9
+420dc9a8: lsls       r0, r0, #9
+420dc9aa: ldrh       r1, [r4, #0xe]
+420dc9ac: lsls       r1, r1, #0x17
+420dc9ae: lsrs       r1, r1, #0x17
+420dc9b0: orrs       r0, r1
+420dc9b2: ldr        r1, [pc, #0x6c] ; LIT 0x420dca20->0x20004000
+420dc9b4: str        r0, [r1, #0x20]
+420dc9b6: movs       r0, r1
+420dc9b8: ldr        r0, [r0, #0x20]
+420dc9ba: ldr        r1, [pc, #0x68] ; LIT 0x420dca24->0xfc00ffff
+420dc9bc: ands       r0, r1
+420dc9be: ldrh       r1, [r4, #0xc]
+420dc9c0: lsls       r1, r1, #0x10
+420dc9c2: ldr        r2, [pc, #0x60] ; LIT 0x420dca24->0xfc00ffff
+420dc9c4: mvns       r2, r2
+420dc9c6: ands       r1, r2
+420dc9c8: orrs       r0, r1
+420dc9ca: ldr        r1, [pc, #0x54] ; LIT 0x420dca20->0x20004000
+420dc9cc: str        r0, [r1, #0x20]
+420dc9ce: movs       r0, r1
+420dc9d0: ldr        r0, [r0, #0x24]
+420dc9d2: lsrs       r0, r0, #9
+420dc9d4: lsls       r0, r0, #9
+420dc9d6: ldrh       r1, [r4, #0x12]
+420dc9d8: lsls       r1, r1, #0x17
+420dc9da: lsrs       r1, r1, #0x17
+420dc9dc: orrs       r0, r1
+420dc9de: ldr        r1, [pc, #0x40] ; LIT 0x420dca20->0x20004000
+420dc9e0: str        r0, [r1, #0x24]
+420dc9e2: movs       r0, r1
+420dc9e4: ldr        r0, [r0, #0x24]
+420dc9e6: mvns       r1, r2
+420dc9e8: ands       r0, r1
+420dc9ea: ldrh       r1, [r4, #0x10]
+420dc9ec: lsls       r1, r1, #0x10
+420dc9ee: ands       r1, r2
+420dc9f0: orrs       r0, r1
+420dc9f2: ldr        r1, [pc, #0x2c] ; LIT 0x420dca20->0x20004000
+420dc9f4: str        r0, [r1, #0x24]
+420dc9f6: pop        {r4, pc}
+420dc9f8: adr        r1, #0x310
+420dc9fa: lsls       r2, r3
+420dc9fc: strb       r0, [r2, #9]
+420dc9fe: strb       r5, [r4, #1]
+420dca00: ldr        r2, [r6, #0x74]
+420dca02: cmp        r0, #0x20
+420dca04: strb       r4, [r4, #9]
+420dca06: strb       r1, [r5, #0x19]
+420dca08: strb       r5, [r4, #9]
+420dca0a: subs       r2, #0x29
+420dca0c: strb       r0, [r4, #0xc]
+
+--- 'PrePro: set AEAWB' xref=0x420e668a function=None ---
+420e6648: ldrb       r1, [r0, #9]
+420e664a: str        r1, [sp, #0x220]
+420e664c: movs       r1, #5
+420e664e: add        r0, sp, #0x200
+420e6650: strh       r1, [r0, #0x1c]
+420e6652: movs       r1, #0
+420e6654: str        r1, [sp, #0x224]
+420e6656: add        r0, sp, #0x21c
+420e6658: bl         #0x420ddf08
+420e665c: mov        r8, r8
+420e665e: movs       r0, #0xff
+420e6660: adds       r0, #0xe5
+420e6662: ldr        r0, [r0, r4]
+420e6664: cmp        r0, #1
+420e6666: bne        #0x420e6682
+420e6668: ldr        r0, [pc, #0x3f8] ; LIT 0x420e6a64->0x408ef710
+420e666a: ldr        r0, [r0, #8]
+420e666c: cmp        r0, #2
+420e666e: bhi        #0x420e6678
+420e6670: adr        r1, #0x3f4 ; ADRSTR [(1108241000, 'PrePro: set HIST')]
+420e6672: movs       r0, #2
+420e6674: bl         #0x42140150
+420e6678: movs       r0, r4
+420e667a: adds       r0, #0xff
+420e667c: adds       r0, #0xd5
+420e667e: bl         #0x420dd630
+420e6682: ldr        r0, [pc, #0x3e0] ; LIT 0x420e6a64->0x408ef710
+420e6684: ldr        r0, [r0, #8]
+420e6686: cmp        r0, #2
+420e6688: bhi        #0x420e6692
+420e668a: adr        r1, #0x3f0 ; ADRSTR [(1108241020, 'PrePro: set AEAWB'), (1108241022, 'ePro: set AEAWB')]
+420e668c: movs       r0, #2
+420e668e: bl         #0x42140150
+420e6692: movs       r1, #2
+420e6694: add        r0, sp, #0x80
+420e6696: strb       r1, [r0, #0x14]
+420e6698: movs       r1, #0
+420e669a: strb       r1, [r0, #0x15]
+420e669c: add        r0, sp, #0x94
+420e669e: strh       r1, [r0, #0x10]
+420e66a0: subs       r1, r1, #1
+420e66a2: strh       r1, [r0, #0xe]
+420e66a4: movs       r1, #0
+420e66a6: strh       r1, [r0, #0x18]
+420e66a8: subs       r1, r1, #1
+420e66aa: strh       r1, [r0, #0x16]
+420e66ac: movs       r1, #0
+420e66ae: strh       r1, [r0, #0x14]
+420e66b0: subs       r1, r1, #1
+420e66b2: strh       r1, [r0, #0x12]
+420e66b4: movs       r1, #0
+420e66b6: strh       r1, [r0, #0xc]
+420e66b8: subs       r1, r1, #1
+420e66ba: add        r0, sp, #0x80
+420e66bc: strh       r1, [r0, #0x1e]
+420e66be: movs       r1, #0
+420e66c0: add        r0, sp, #0x94
+420e66c2: strh       r1, [r0, #0x1c]
+420e66c4: subs       r1, r1, #1
+420e66c6: add        r0, sp, #0x80
+420e66c8: strh       r1, [r0, #0x2e]
+420e66ca: movs       r1, #0
+420e66cc: add        r0, sp, #0x94
+420e66ce: strh       r1, [r0, #0x20]
+420e66d0: subs       r1, r1, #1
+420e66d2: strh       r1, [r0, #0x1e]
+420e66d4: movs       r1, #0
+420e66d6: strh       r1, [r0, #0x24]
+420e66d8: subs       r1, r1, #1
+420e66da: strh       r1, [r0, #0x22]
+420e66dc: movs       r1, #0x53
+420e66de: add        r0, sp, #0x80
+420e66e0: strh       r1, [r0, #0x16]
+420e66e2: movs       r1, #0x2d
+420e66e4: add        r0, sp, #0x94
+420e66e6: strh       r1, [r0, #6]
+420e66e8: strh       r1, [r0, #8]
+420e66ea: movs       r1, #0x53
+420e66ec: strh       r1, [r0, #4]
+420e66ee: blx        #0x420dc584
+420e66f2: movs       r0, #0xe3
+420e66f4: lsls       r0, r0, #2
+420e66f6: adds       r0, r4, r0
+420e66f8: ldrb       r1, [r0, #0x1a]
+420e66fa: str        r1, [sp, #0x1c4]
+420e66fc: ldr        r0, [pc, #0x390] ; LIT 0x420e6a90->0x408f0410
+420e66fe: ldr        r1, [r0]
+420e6700: str        r1, [sp, #0x1bc]
+420e6702: movs       r1, #6
+420e6704: add        r0, sp, #0x180
+420e6706: strh       r1, [r0, #0x34]
+420e6708: movs       r1, #0
+420e670a: str        r1, [sp, #0x1b8]
+420e670c: add        r0, sp, #0x1b4
+420e670e: bl         #0x420e05b4
+420e6712: movs       r1, #8
+420e6714: str        r1, [sp, #0x1d4]
+420e6716: movs       r1, #0
+420e6718: str        r1, [sp, #0x1cc]
+420e671a: movs       r1, #4
+
+--- 'prepro set afaeawb field position' xref=0x420f5f70 function=0x420f5f6c ---
+420f5f6c: push       {r4, lr}
+420f5f6e: ldr        r1, [pc, #0x28] ; LIT 0x420f5f98->0x420f392d
+420f5f70: adr        r0, #0x28 ; ADRSTR [(1108303772, 'prepro set afaeawb field position')]
+420f5f72: bl         #0x4213fda4
+420f5f76: ldr        r1, [pc, #0x48] ; LIT 0x420f5fc0->0x420f3c1d
+420f5f78: adr        r0, #0x48 ; ADRSTR [(1108303812, 'prepro set debug level')]
+420f5f7a: bl         #0x4213fda4
+420f5f7e: ldr        r1, [pc, #0x5c] ; LIT 0x420f5fdc->0x420f3bf1
+420f5f80: adr        r0, #0x5c ; ADRSTR [(1108303840, 'prepro help')]
+420f5f82: bl         #0x4213fda4
+420f5f86: ldr        r1, [pc, #0x64] ; LIT 0x420f5fec->0x420eb7a5
+420f5f88: adr        r0, #0x64 ; ADRSTR [(1108303856, 'prepro fshd info')]
+420f5f8a: bl         #0x4213fda4
+420f5f8e: ldr        r1, [pc, #0x74] ; LIT 0x420f6004->0x420f6279
+420f5f90: adr        r0, #0x74 ; ADRSTR [(1108303880, 'prepro check sdc')]
+420f5f92: bl         #0x4213fda4
+420f5f96: pop        {r4, pc}
+420f5f98: subs       r1, #0x2d
+420f5f9a: tst        r7, r1
+420f5f9c: strb       r0, [r6, #9]
+420f5f9e: strb       r5, [r4, #1]
+420f5fa0: ldr        r2, [r6, #0x74]
+420f5fa2: strb       r0, [r4, #0xc]
+420f5fa4: strb       r5, [r4, #0x11]
+420f5fa6: str        r0, [r4, #0x10]
+420f5fa8: str        r6, [r4, #0x14]
+420f5faa: str        r5, [r4, #0x14]
+420f5fac: str        r7, [r6, #0x24]
+420f5fae: str        r0, [r4, #0x60]
+420f5fb0: str        r1, [r5, #0x54]
+420f5fb2: str        r4, [r5, #0x44]
+420f5fb4: strb       r0, [r4]
+420f5fb6: strb       r7, [r5, #0xd]
+420f5fb8: strb       r1, [r5, #0x11]
+420f5fba: ldr        r1, [r5, #0x74]
+420f5fbc: lsls       r6, r5, #1
+420f5fbe: movs       r0, r0
+420f5fc0: subs       r4, #0x1d
+420f5fc2: tst        r7, r1
+420f5fc4: strb       r0, [r6, #9]
+420f5fc6: strb       r5, [r4, #1]
+420f5fc8: ldr        r2, [r6, #0x74]
+420f5fca: strb       r0, [r4, #0xc]
+420f5fcc: strb       r5, [r4, #0x11]
+420f5fce: str        r0, [r4, #0x40]
+420f5fd0: str        r5, [r4, #0x24]
+420f5fd2: str        r5, [r6, #0x74]
+420f5fd4: ldr        r0, [r4, #0x40]
+420f5fd6: strb       r5, [r4, #0x19]
+420f5fd8: ldr        r5, [r4, #0x44]
+420f5fda: movs       r0, r0
+420f5fdc: subs       r3, #0xf1
+420f5fde: tst        r7, r1
+420f5fe0: strb       r0, [r6, #9]
+420f5fe2: strb       r5, [r4, #1]
+420f5fe4: ldr        r2, [r6, #0x74]
+420f5fe6: ldr        r0, [r4]
+420f5fe8: ldr        r5, [r4, #0x44]
+420f5fea: lsls       r0, r6, #1
+420f5fee: tst        r6, r1
+420f5ff0: strb       r0, [r6, #9]
+420f5ff2: strb       r5, [r4, #1]
+420f5ff4: ldr        r2, [r6, #0x74]
+420f5ff6: str        r0, [r4, #0x60]
+420f5ff8: ldr        r3, [r6, #4]
+420f5ffa: movs       r0, #0x64
+420f5ffc: ldr        r1, [r5, #0x64]
+420f5ffe: ldr        r6, [r4, #0x74]
+420f6000: movs       r0, r0
+420f6002: movs       r0, r0
+420f6004: str        r1, [r7, #0x24]
+420f6006: tst        r7, r1
+
+FUNCTION_STARTS 0x420da53c 0x420dac08 0x420dc974 0x420f5f6c
+
+=== DIRECT CALLERS OF NAMED SET FUNCTIONS ===
+0x420da53c callers 0x420e461a 0x420f36a4
+0x420dac08 callers 0x420f36aa 0x420f5244
+0x420dc974 callers 0x420dacc4
+0x420f5f6c callers 0x420f6742
+
+=== PREPRO GLOBALS TOUCHED IN NAMED FUNCTIONS ===
+drv_prepro_afaeawb_SetPreproGlobalSettings 420da55a: ldr        r1, [pc, #0x3f4] ; LIT 0x420da950->0x408f0310
+drv_prepro_afaeawb_SetPreproGlobalSettings 420da564: ldr        r1, [pc, #0x3e8] ; LIT 0x420da950->0x408f0310
+drv_prepro_afaeawb_SetPreproGlobalSettings 420da574: ldr        r0, [pc, #0x3d8] ; LIT 0x420da950->0x408f0310
+drv_prepro_afaeawb_SetPreproGlobalSettings 420da58a: ldr        r0, [pc, #0x3c8] ; LIT 0x420da954->0x408f0410
+drv_prepro_afaeawb_SetPreproGlobalSettings 420da5e2: ldr        r0, [pc, #0x370] ; LIT 0x420da954->0x408f0410
+drv_prepro_afaeawb_if_Config 420dac56: ldr        r0, [pc, #0x114] ; LIT 0x420dad6c->0x408efe10
+drv_prepro_afaeawb_if_Config 420dac70: ldr        r1, [pc, #0xf8] ; LIT 0x420dad6c->0x408efe10
+drv_prepro_afaeawb_if_Config 420dac74: ldr        r0, [pc, #0xf4] ; LIT 0x420dad6c->0x408efe10
+drv_prepro_afaeawb_if_Config 420dac7a: ldr        r0, [pc, #0x128] ; LIT 0x420dada4->0x408f044c
+drv_prepro_afaeawb_if_Config 420dac8c: ldr        r0, [pc, #0x114] ; LIT 0x420dada4->0x408f044c
+drv_prepro_afaeawb_if_Config 420dac96: ldr        r1, [pc, #0x10c] ; LIT 0x420dada4->0x408f044c
+drv_prepro_afaeawb_if_Config 420dacac: ldr        r0, [pc, #0xfc] ; LIT 0x420dadac->0x408ef710
+drv_prepro_afaeawb_if_Config 420dacba: ldr        r0, [pc, #0xf4] ; LIT 0x420dadb0->0x408f0314
+drv_prepro_afaeawb_if_Config 420dacc0: ldr        r0, [pc, #0xe0] ; LIT 0x420dada4->0x408f044c
+drv_prepro_afaeawb_if_Config 420dacd8: ldr        r0, [pc, #0xc8] ; LIT 0x420dada4->0x408f044c
+drv_prepro_afaeawb_if_Config 420dace4: ldr        r1, [pc, #0xbc] ; LIT 0x420dada4->0x408f044c
+prepro set afaeawb field position 420f6028: ldr        r3, [pc, #0x10c] ; LIT 0x420f6138->0x408f4000
+
+=== DECISION ===
+Prioritize the named set-aeawb / set-aeawb-window function that consumes mode/window counts and touches the statistic-buffer owner globals. Trace its output/register writes next.
