@@ -1,0 +1,155 @@
+name: M10-R v0.22 pack block to LVVideoSync and selector
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v022-packblock-lvsync-selector.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m10r-metering-latch-trace
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace IMG pack block to event 0x78000032 and CTRL selector
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std;
+          static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);}
+          struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}};
+          static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;}
+          int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          mkdir -p research
+          python3 - <<'PY' > research/M10R_v022_packblock_lvsync_selector.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_OP_REG,ARM_REG_PC
+
+          def trace_section(path,base,pfx,targets,label,extra_functions=()):
+              b=Path(path).read_bytes()
+              md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+              def off(a): return pfx+a-base
+              def r32(a):
+                  o=off(a)
+                  return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+              def astr(a,n=180):
+                  o=off(a)
+                  if not 0<=o<len(b): return None
+                  out=[]
+                  for c in b[o:o+n]:
+                      if c==0: break
+                      if c in (9,10,13) or 32<=c<127: out.append(chr(c))
+                      else: return None
+                  s=''.join(out)
+                  return s if len(s)>=4 else None
+              def annotate(i):
+                  ex=''
+                  if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                      la=((i.address+4)&~3)+i.operands[1].mem.disp; v=r32(la)
+                      if v is not None:
+                          s=astr(v); ex=f' ; LIT {la:#x}->{v:#x}'+(f' STRING={s!r}' if s else '')
+                  if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:
+                      ex += f' ; CALL->{i.operands[0].imm:#x}'
+                  return ex
+              def dump(title,a,z):
+                  a=max(base,a&~1); z=min(base+len(b)-pfx,z)
+                  print(f'\n=== {label} {title} {a:#x}..{z:#x} ===')
+                  for i in md.disasm(b[off(a):off(z)],a):
+                      if i.mnemonic!='.byte': print(f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}{annotate(i)}')
+              ins=list(md.disasm(b[pfx:],base))
+              byaddr={i.address:i for i in ins if i.mnemonic!='.byte'}
+              calls={}
+              for i in ins:
+                  if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:
+                      calls.setdefault(i.operands[0].imm,[]).append(i.address)
+              print(f'\n################ {label} ################')
+              print('SECTION',path,'BASE',hex(base),'SIZE',hex(len(b)-pfx),'INS',len(ins))
+              target_refs={}
+              for t,name in targets:
+                  pat=struct.pack('<I',t); q=0; lits=[]
+                  while True:
+                      q=b.find(pat,q)
+                      if q<0: break
+                      lits.append(base+q-pfx); q+=1
+                  refs=[]
+                  for i in ins:
+                      if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                          la=((i.address+4)&~3)+i.operands[1].mem.disp
+                          if la in lits: refs.append(i.address)
+                  target_refs[t]=(lits,refs)
+                  print('\nTARGET',name,hex(t))
+                  print('RAW_LITERALS',[hex(x) for x in lits])
+                  print('PC_LDR_REFS',[hex(x) for x in refs])
+                  for a in refs:
+                      dump('TARGET_REF_'+name,a-0x100,a+0x180)
+                      i=byaddr.get(a)
+                      if i and i.operands and i.operands[0].type==ARM_OP_REG:
+                          reg=i.operands[0].reg
+                          print('POST_LOAD_MEM_USES',hex(a),'REG',i.reg_name(reg))
+                          started=False;count=0
+                          for j in ins:
+                              if j.address<a: continue
+                              if j.address==a: started=True; continue
+                              if not started or j.address>a+0x180: break
+                              for op in j.operands:
+                                  if op.type==ARM_OP_MEM and op.mem.base==reg:
+                                      print(f'  {j.address:08x}: {j.mnemonic:10s} {j.op_str}')
+                              count+=1
+              for f in extra_functions:
+                  print('\nDIRECT_CALLERS',hex(f),[hex(x) for x in calls.get(f,[])])
+                  dump('FUNCTION_'+hex(f),f,f+0x180)
+                  for a in calls.get(f,[]): dump('CALLER_OF_'+hex(f),a-0xc0,a+0x120)
+              # Search direct branch/call destinations shared by neighborhoods of target refs.
+              print('\nNEARBY_CALL_TARGETS')
+              for t,name in targets:
+                  _,refs=target_refs[t]
+                  for a in refs:
+                      c=[]
+                      for i in ins:
+                          if a-0x100<=i.address<=a+0x180 and i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:
+                              c.append((i.address,i.operands[0].imm))
+                      print(name,hex(a),[(hex(x),hex(y)) for x,y in c])
+              return target_refs
+
+          img_targets=[
+              (0x408f0ec0,'PACK_BLOCK'),
+              (0x408ced00,'AE_RESULT_CTX'),
+              (0x78000032,'EVENT_78000032'),
+          ]
+          trace_section('/tmp/sections/092_IMG-System.bin',0x42000000,4,img_targets,'IMG',extra_functions=(0x42161fa0,0x42162120,0x420a2fb4))
+
+          ctrl_targets=[
+              (0x20000132,'BVCMOS_SELECTOR'),
+              (0x200190ac,'AE_RING_BASE'),
+              (0x2001a918,'AE_STATE_BASE'),
+          ]
+          trace_section('/tmp/sections/090_CTRL-System.bin',0x08000000,4,ctrl_targets,'CTRL',extra_functions=(0x0800f1c0,0x0800f228,0x0800306c,0x08011d82,0x08011da8))
+          PY
+      - name: Commit trace result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v022_packblock_lvsync_selector.txt
+          if git diff --cached --quiet; then
+            echo 'No trace changes to commit'
+          else
+            git commit -m 'research: record v0.22 pack block/LVVideoSync selector trace'
+            git push origin HEAD:m10r-metering-latch-trace
+          fi
