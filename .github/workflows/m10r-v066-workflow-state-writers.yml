@@ -61,14 +61,11 @@ jobs:
           ins=list(md.disasm(b[off(start):off(end)],start)); idx={i.address:n for n,i in enumerate(ins)}
           print('M10-R v0.66 WORKFLOW OBJECT +0x20C WRITER TRACE')
           print('Owner read sequence: object pointer -> +8 +0xFF +0xFF +2 = +0x208 -> [reg,#4] = object +0x20C.')
-          # Detect exact +0x208 construction sequence, then inspect following accesses.
           hits=[]
           for n in range(len(ins)-5):
               seq=ins[n:n+5]
-              # same dest register across adds #8,#ff,#ff,#2
               try:
-                  regs=[];imms=[]
-                  ok=True
+                  regs=[];imms=[];ok=True
                   for j in range(4):
                       x=seq[j]
                       if not x.mnemonic.startswith('add') or len(x.operands)<2 or x.operands[0].type!=ARM_OP_REG:
@@ -85,30 +82,25 @@ jobs:
           for n,reg in hits:
               print(f'\n=== +0x208 SEQUENCE at {ins[n].address:#x} reg={reg} ===')
               for x in ins[max(0,n-35):min(len(ins),n+35)]: print(fmt(x))
-              # classify [reg,#4] accesses next few instructions
               for x in ins[n+4:min(len(ins),n+18)]:
                   try:
                       for op in x.operands:
                           if op.type==ARM_OP_MEM and x.reg_name(op.mem.base)==reg and op.mem.disp==4:
                               print('FIELD20C_ACCESS',fmt(x))
                   except:pass
-          # Also locate direct wide +/-0x20c address arithmetic or memory operands.
           print('\nDIRECT_20C_OPERAND_HITS')
           for n,x in enumerate(ins):
               if '0x20c' in x.op_str.lower():
                   for y in ins[max(0,n-20):min(len(ins),n+24)]:print(fmt(y))
                   print('--')
-          # Find stores to [reg,#4] near any table root literal refs, in case construction differs.
           print('\nTABLE-ROOT-LOCAL STORES')
           for n,x in enumerate(ins):
               line=fmt(x).lower()
               if '->0x408cecf0' not in line: continue
               for y in ins[n:min(len(ins),n+65)]:
-                  if y.mnemonic.startswith('str') and '[',']': pass
                   ly=fmt(y)
                   if y.mnemonic.startswith('str') and '#4]' in ly:
                       print('ROOTREF',fmt(x));print('STORE',ly)
-          # Relevant literal strings in this code range.
           print('\nNEARBY SEMANTIC STRINGS')
           seen=set()
           for x in ins:
