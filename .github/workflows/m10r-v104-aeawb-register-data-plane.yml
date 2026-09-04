@@ -1,0 +1,130 @@
+name: M10-R v1.04 AEAWB register and data plane
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v104-aeawb-register-data-plane.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace AEAWB register labels and post-config data plane
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int bb=r.get();if(!bb)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v104_aeawb_register_data_plane.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(a): return PFX+a-BASE
+          def u32a(a):
+            o=off(a);return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+          def cstr(a):
+            o=off(a)
+            if not 0<=o<len(b): return None
+            x=b[o:min(len(b),o+240)].split(b'\0',1)[0]
+            try:s=x.decode('ascii')
+            except:return None
+            return s if len(s)>=4 and all((32<=ord(c)<127) or c in '\r\n\t' for c in s) else None
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                a=((i.address+4)&~3)+i.operands[1].mem.disp;return a,u32a(a)
+            except: pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            q=lit(i)
+            if q and q[1] is not None:
+              s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'
+              st=cstr(q[1]);
+              if st:s+=f' STRING={st!r}'
+            return s
+          def dump(lo,hi,title):
+            print(f'\n=== {title} {lo:#x}..{hi:#x} ===')
+            for i in md.disasm(b[off(lo):off(hi)],lo):
+              if i.id: print(fmt(i))
+          print('M10-R v1.04 AEAWB REGISTER / DATA-PLANE TRACE')
+          print('Frozen geometry: 22 horizontal x 16 vertical. Live compact window 0x408F03F0 has +0xA=22,+0x8=16 for the relevant branch; set-aeawb-window maps +0x8->MMIO+0x18 and +0xA->MMIO+0x1C.')
+          dump(0x420dc900,0x420dcae0,'AEAWB DRIVER SET/GET CLUSTER')
+          dump(0x420daca0,0x420dad60,'AFAEAWB CONFIG POST-WINDOW CONTINUATION')
+          dump(0x420e0800,0x420e09d0,'0x420E0850 TARGET / REGISTRATION HELPER')
+          # bounded xrefs/callers
+          print('\n=== DIRECT CALLERS OF 0x420DCA28 / 0x420E0850 ===')
+          for target in (0x420dca28,0x420e0850):
+            callers=[]
+            for lo,hi in ((0x420c0000,0x420f8000),):
+              for i in md.disasm(b[off(lo):off(hi)],lo):
+                if not i.id or i.mnemonic not in ('bl','blx'): continue
+                try:d=int(i.op_str.strip().lstrip('#'),0)
+                except:continue
+                if d==target:callers.append(i.address)
+            print(hex(target),'callers',*[hex(x) for x in callers])
+          # Find literal pool xrefs to MMIO base 0x20004000 and nearby addresses in Prepro range.
+          print('\n=== MMIO 0x20004000 LITERAL POOLS / USERS ===')
+          pools=[]
+          for p in range(PFX,len(b)-3,4):
+            v=struct.unpack_from('<I',b,p)[0]
+            if 0x20004000<=v<0x20004100:pools.append((BASE+p-PFX,v))
+          print('POOLS',*(f'{p:#x}->{v:#x}' for p,v in pools))
+          # disassemble windows around PC-relative LDR references to each pool, bounded near driver code
+          for pa,v in pools:
+            lo=max(BASE,pa-0x300);hi=min(BASE+len(b)-PFX,pa+0x80)
+            for i in md.disasm(b[off(lo):off(hi)],lo):
+              q=lit(i)
+              if q and q[0]==pa:
+                print(f'\nMMIO XREF {v:#x} via pool {pa:#x} @{i.address:#x}')
+                wlo=max(lo,i.address-0x50);whi=min(hi,i.address+0x90)
+                for x in md.disasm(b[off(wlo):off(whi)],wlo):
+                  if x.id:print(fmt(x))
+          # Relevant strings around data-transfer helpers.
+          print('\n=== BUFFER/DMA/AEAWB STRINGS 0x420D..0x420F ===')
+          p=off(0x420d0000);end=off(0x42100000)
+          while p<end:
+            if 32<=b[p]<127:
+              q=p
+              while q<end and 32<=b[q]<127:q+=1
+              if q-p>=5 and q<end and b[q]==0:
+                try:s=b[p:q].decode('ascii')
+                except:s=''
+                sl=s.lower()
+                if ('aeawb' in sl or 'afaeawb' in sl) and any(k in sl for k in ('data','buffer','address','dma','macro','start','set','get','interrupt','field')):
+                  print(hex(BASE+p-PFX),repr(s))
+                p=q+1;continue
+            p+=1
+          # Search literal references to 0x408EFE10, 0x14080, and 0x408F0390 in continuation neighborhoods.
+          print('\n=== OWNER/BUFFER ROOT REFERENCES NEAR POST-CONFIG ===')
+          for lo,hi in ((0x420da000,0x420dae00),(0x420e0000,0x420e2000)):
+            for i in md.disasm(b[off(lo):off(hi)],lo):
+              if not i.id:continue
+              q=lit(i)
+              if q and q[1] in (0x408efe10,0x14080,0x408f0390,0x408f0410,0x408f03f0): print(fmt(i))
+          print('\n=== DECISION RULE ===')
+          print('1) Freeze MMIO horizontal/vertical mapping only if a getter/debug consumer labels +0x18/+0x1C. 2) For data-plane closure, prioritize post-config calls that receive base+0x80/base+0x14080 and identify whether they configure DMA/statistics output ownership or callback routing.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v104_aeawb_register_data_plane.txt
+          git commit -m 'research: record v1.04 AEAWB register data plane' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
