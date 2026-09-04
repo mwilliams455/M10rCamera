@@ -1,0 +1,77 @@
+name: M10-R v0.81 CA9 MFM feature generator tail
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v081-ca9-mfm-feature-generator-tail.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Fast recover and trace remaining MFM features
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v081_ca9_mfm_feature_generator_tail.txt
+          from pathlib import Path
+          import struct, math
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_ARM,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_REG_PC
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes();base=0x40000000;pfx=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);md.detail=True
+          def off(a):return pfx+a-base
+          def one(a):
+            o=off(a);ds=list(md.disasm(b[o:o+4],a,1)) if 0<=o<=len(b)-4 else [];return ds[0] if ds else None
+          def lit(i):
+            if not (i.mnemonic.startswith('ldr') or i.mnemonic.startswith('vldr')) or len(i.operands)<2 or i.operands[-1].type!=ARM_OP_MEM or i.operands[-1].mem.base!=ARM_REG_PC:return ''
+            la=i.address+8+i.operands[-1].mem.disp;lo=off(la)
+            if not 0<=lo<=len(b)-4:return ''
+            u=struct.unpack_from('<I',b,lo)[0];s=f' ; LIT {hex(la)} u32={hex(u)}'
+            if 0<=lo<=len(b)-8:
+              d=struct.unpack_from('<d',b,lo)[0]
+              if math.isfinite(d):s+=f' d64={d:.12g}'
+            return s
+          print('M10-R v0.81 CA9 MFM FEATURE GENERATOR TAIL')
+          print('\n=== CONTINUATION 0x40001F50..0x4000301C ===')
+          for a in range(0x40001f50,0x4000301c,4):
+            i=one(a)
+            if i:print(f'{i.address:08x}: {i.mnemonic:9s} {i.op_str}{lit(i)}')
+          print('\n=== FEATURE HALFWORD STORES r7+0x152..0x16A via r6+0x52..0x6A ===')
+          for a in range(0x40001f50,0x4000301c,4):
+            i=one(a)
+            if not i or not i.mnemonic.startswith('strh'):continue
+            t=i.op_str.lower()
+            if any(f'#0x{x:x}' in t for x in range(0x52,0x6b,2)) or any(f'#0x{x:x}' in t for x in range(0x152,0x16b,2)):
+              print(f'{i.address:08x}: {i.mnemonic:9s} {i.op_str}')
+          print('\n=== DYNAMIC WEIGHT STORES +0x180..+0x18C ===')
+          for a in range(0x40001f50,0x4000301c,4):
+            i=one(a)
+            if not i or not i.mnemonic.startswith('strb'):continue
+            t=i.op_str.lower()
+            if any(f'#0x{x:x}' in t for x in range(0x180,0x18d)):
+              print(f'{i.address:08x}: {i.mnemonic:9s} {i.op_str}')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v081_ca9_mfm_feature_generator_tail.txt
+          git commit -m 'research: record v0.81 CA9 MFM feature generator tail' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
