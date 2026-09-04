@@ -1,0 +1,809 @@
+M10-R v1.38 WB MODE / PRESET SEMANTIC MAP
+
+=== TOP-LEVEL WB MODE JUMP TABLE @0x4000B178 (14 words) ===
+mode  0 -> 0x4000b58c
+mode  1 -> 0x4000b1b0
+mode  2 -> 0x4000b1c8
+mode  3 -> 0x4000b208
+mode  4 -> 0x4000b350
+mode  5 -> 0x4000b58c
+mode  6 -> 0x4000b37c
+mode  7 -> 0x4000b3a0
+mode  8 -> 0x4000b3f4
+mode  9 -> 0x4000b4cc
+mode 10 -> 0x4000b4f4
+mode 11 -> 0x4000b568
+mode 12 -> 0x4000b4cc
+mode 13 -> 0x4000b340
+
+=== UNIQUE MODE TARGET BLOCKS ===
+
+-- target 0x4000b1b0; modes [1] --
+4000b1b0: mov        r3, r6
+4000b1b4: mov        r2, r7
+4000b1b8: mov        r1, r5
+4000b1bc: mov        r0, r4
+4000b1c0: bl         #0x4000a688 ; CALL 0x4000a688
+4000b1c4: b          #0x4000b310
+4000b1c8: mov        r3, r6
+4000b1cc: mov        r2, r7
+4000b1d0: mov        r1, r5
+4000b1d4: mov        r0, r4
+4000b1d8: bl         #0x4000a688 ; CALL 0x4000a688
+4000b1dc: mov        r3, r6
+4000b1e0: mov        r2, r7
+4000b1e4: mov        r1, r5
+4000b1e8: mov        r0, r4
+4000b1ec: bl         #0x40007b08 ; CALL 0x40007b08
+4000b1f0: add        sp, sp, #0x20
+4000b1f4: mov        r2, r7
+4000b1f8: mov        r1, r8
+4000b1fc: mov        r0, r5
+4000b200: pop        {r4, r5, r6, r7, r8, lr}
+4000b204: b          #0x4000aea4
+4000b208: ldr        r0, [r4, #0x18]
+4000b20c: cmp        r0, #0xa
+4000b210: ldrlo      pc, [pc, r0, lsl #2] ; LIT 0x4000b218->0x4000b32c
+4000b214: b          #0x4000b32c
+4000b218: andmi      fp, r0, ip, lsr #6
+4000b21c: andmi      fp, r0, r0, asr #4
+4000b220: andmi      fp, r0, r4, asr r2
+4000b224: andmi      fp, r0, r8, ror #4
+4000b228: andmi      fp, r0, ip, ror r2
+4000b22c: mulmi      r0, r0, r2
+4000b230: andmi      fp, r0, r4, lsr #5
+4000b234: strhmi     fp, [r0], -r8
+4000b238: andmi      fp, r0, ip, asr #5
+4000b23c: andmi      fp, r0, r0, ror #5
+4000b240: add        r0, r7, #0x100
+4000b244: ldrh       r1, [r0, #0xc8]
+4000b248: strh       r1, [r6]
+4000b24c: ldrh       r0, [r0, #0xd8]
+
+-- target 0x4000b1c8; modes [2] --
+4000b1c8: mov        r3, r6
+4000b1cc: mov        r2, r7
+4000b1d0: mov        r1, r5
+4000b1d4: mov        r0, r4
+4000b1d8: bl         #0x4000a688 ; CALL 0x4000a688
+4000b1dc: mov        r3, r6
+4000b1e0: mov        r2, r7
+4000b1e4: mov        r1, r5
+4000b1e8: mov        r0, r4
+4000b1ec: bl         #0x40007b08 ; CALL 0x40007b08
+4000b1f0: add        sp, sp, #0x20
+4000b1f4: mov        r2, r7
+4000b1f8: mov        r1, r8
+4000b1fc: mov        r0, r5
+4000b200: pop        {r4, r5, r6, r7, r8, lr}
+4000b204: b          #0x4000aea4
+4000b208: ldr        r0, [r4, #0x18]
+4000b20c: cmp        r0, #0xa
+4000b210: ldrlo      pc, [pc, r0, lsl #2] ; LIT 0x4000b218->0x4000b32c
+4000b214: b          #0x4000b32c
+4000b218: andmi      fp, r0, ip, lsr #6
+4000b21c: andmi      fp, r0, r0, asr #4
+4000b220: andmi      fp, r0, r4, asr r2
+4000b224: andmi      fp, r0, r8, ror #4
+4000b228: andmi      fp, r0, ip, ror r2
+4000b22c: mulmi      r0, r0, r2
+4000b230: andmi      fp, r0, r4, lsr #5
+4000b234: strhmi     fp, [r0], -r8
+4000b238: andmi      fp, r0, ip, asr #5
+4000b23c: andmi      fp, r0, r0, ror #5
+4000b240: add        r0, r7, #0x100
+4000b244: ldrh       r1, [r0, #0xc8]
+4000b248: strh       r1, [r6]
+4000b24c: ldrh       r0, [r0, #0xd8]
+4000b250: b          #0x4000b30c
+4000b254: add        r0, r7, #0x100
+4000b258: ldrh       r1, [r0, #0xce]
+4000b25c: strh       r1, [r6]
+4000b260: ldrh       r0, [r0, #0xde]
+4000b264: b          #0x4000b30c
+
+-- target 0x4000b208; modes [3] --
+4000b208: ldr        r0, [r4, #0x18]
+4000b20c: cmp        r0, #0xa
+4000b210: ldrlo      pc, [pc, r0, lsl #2] ; LIT 0x4000b218->0x4000b32c
+4000b214: b          #0x4000b32c
+4000b218: andmi      fp, r0, ip, lsr #6
+4000b21c: andmi      fp, r0, r0, asr #4
+4000b220: andmi      fp, r0, r4, asr r2
+4000b224: andmi      fp, r0, r8, ror #4
+4000b228: andmi      fp, r0, ip, ror r2
+4000b22c: mulmi      r0, r0, r2
+4000b230: andmi      fp, r0, r4, lsr #5
+4000b234: strhmi     fp, [r0], -r8
+4000b238: andmi      fp, r0, ip, asr #5
+4000b23c: andmi      fp, r0, r0, ror #5
+4000b240: add        r0, r7, #0x100
+4000b244: ldrh       r1, [r0, #0xc8]
+4000b248: strh       r1, [r6]
+4000b24c: ldrh       r0, [r0, #0xd8]
+4000b250: b          #0x4000b30c
+4000b254: add        r0, r7, #0x100
+4000b258: ldrh       r1, [r0, #0xce]
+4000b25c: strh       r1, [r6]
+4000b260: ldrh       r0, [r0, #0xde]
+4000b264: b          #0x4000b30c
+4000b268: add        r0, r7, #0x100
+4000b26c: ldrh       r1, [r0, #0xcc]
+4000b270: strh       r1, [r6]
+4000b274: ldrh       r0, [r0, #0xdc]
+4000b278: b          #0x4000b30c
+4000b27c: add        r0, r7, #0x100
+4000b280: ldrh       r1, [r0, #0xc2]
+4000b284: strh       r1, [r6]
+4000b288: ldrh       r0, [r0, #0xd2]
+4000b28c: b          #0x4000b30c
+4000b290: add        r0, r7, #0x100
+4000b294: ldrh       r1, [r0, #0xc4]
+4000b298: strh       r1, [r6]
+4000b29c: ldrh       r0, [r0, #0xd4]
+4000b2a0: b          #0x4000b30c
+4000b2a4: add        r0, r7, #0x100
+
+-- target 0x4000b340; modes [13] --
+4000b340: mov        r0, #0x100
+4000b344: str        r0, [r5, #0x274]
+4000b348: str        r0, [r5, #0x278]
+4000b34c: b          #0x4000b370
+4000b350: ldr        r0, [r4, #0x10]
+4000b354: ldr        r0, [r0]
+4000b358: str        r0, [r5, #0x274]
+4000b35c: ldr        r0, [r4, #0x10]
+4000b360: ldr        r0, [r0, #4]
+4000b364: str        r0, [r5, #0x278]
+4000b368: ldr        r0, [r4, #0x10]
+4000b36c: ldr        r0, [r0, #8]
+4000b370: str        r0, [r5, #0x27c]
+4000b374: add        sp, sp, #0x20
+4000b378: pop        {r4, r5, r6, r7, r8, pc}
+4000b37c: ldr        r0, [r4, #0x10]
+4000b380: ldr        r0, [r0, #0x18]
+4000b384: str        r0, [r5, #0x274]
+4000b388: ldr        r0, [r4, #0x10]
+4000b38c: ldr        r0, [r0, #0x1c]
+4000b390: str        r0, [r5, #0x278]
+4000b394: ldr        r0, [r4, #0x10]
+4000b398: ldr        r0, [r0, #0x20]
+4000b39c: b          #0x4000b370
+4000b3a0: mov        r3, r6
+4000b3a4: mov        r2, r7
+4000b3a8: mov        r1, r5
+4000b3ac: mov        r0, r4
+4000b3b0: bl         #0x4000a688 ; CALL 0x4000a688
+4000b3b4: mov        r3, r6
+4000b3b8: mov        r2, r7
+4000b3bc: mov        r1, r5
+4000b3c0: mov        r0, r4
+4000b3c4: bl         #0x40007b08 ; CALL 0x40007b08
+4000b3c8: ldr        r1, [r4, #0x10]
+4000b3cc: ldr        r0, [r5, #0x274]
+4000b3d0: str        r0, [r1, #0xc]
+4000b3d4: ldr        r1, [r4, #0x10]
+4000b3d8: ldr        r0, [r5, #0x278]
+4000b3dc: str        r0, [r1, #0x10]
+
+-- target 0x4000b350; modes [4] --
+4000b350: ldr        r0, [r4, #0x10]
+4000b354: ldr        r0, [r0]
+4000b358: str        r0, [r5, #0x274]
+4000b35c: ldr        r0, [r4, #0x10]
+4000b360: ldr        r0, [r0, #4]
+4000b364: str        r0, [r5, #0x278]
+4000b368: ldr        r0, [r4, #0x10]
+4000b36c: ldr        r0, [r0, #8]
+4000b370: str        r0, [r5, #0x27c]
+4000b374: add        sp, sp, #0x20
+4000b378: pop        {r4, r5, r6, r7, r8, pc}
+4000b37c: ldr        r0, [r4, #0x10]
+4000b380: ldr        r0, [r0, #0x18]
+4000b384: str        r0, [r5, #0x274]
+4000b388: ldr        r0, [r4, #0x10]
+4000b38c: ldr        r0, [r0, #0x1c]
+4000b390: str        r0, [r5, #0x278]
+4000b394: ldr        r0, [r4, #0x10]
+4000b398: ldr        r0, [r0, #0x20]
+4000b39c: b          #0x4000b370
+4000b3a0: mov        r3, r6
+4000b3a4: mov        r2, r7
+4000b3a8: mov        r1, r5
+4000b3ac: mov        r0, r4
+4000b3b0: bl         #0x4000a688 ; CALL 0x4000a688
+4000b3b4: mov        r3, r6
+4000b3b8: mov        r2, r7
+4000b3bc: mov        r1, r5
+4000b3c0: mov        r0, r4
+4000b3c4: bl         #0x40007b08 ; CALL 0x40007b08
+4000b3c8: ldr        r1, [r4, #0x10]
+4000b3cc: ldr        r0, [r5, #0x274]
+4000b3d0: str        r0, [r1, #0xc]
+4000b3d4: ldr        r1, [r4, #0x10]
+4000b3d8: ldr        r0, [r5, #0x278]
+4000b3dc: str        r0, [r1, #0x10]
+4000b3e0: ldr        r1, [r4, #0x10]
+4000b3e4: ldr        r0, [r5, #0x27c]
+4000b3e8: str        r0, [r1, #0x14]
+4000b3ec: add        sp, sp, #0x20
+
+-- target 0x4000b37c; modes [6] --
+4000b37c: ldr        r0, [r4, #0x10]
+4000b380: ldr        r0, [r0, #0x18]
+4000b384: str        r0, [r5, #0x274]
+4000b388: ldr        r0, [r4, #0x10]
+4000b38c: ldr        r0, [r0, #0x1c]
+4000b390: str        r0, [r5, #0x278]
+4000b394: ldr        r0, [r4, #0x10]
+4000b398: ldr        r0, [r0, #0x20]
+4000b39c: b          #0x4000b370
+4000b3a0: mov        r3, r6
+4000b3a4: mov        r2, r7
+4000b3a8: mov        r1, r5
+4000b3ac: mov        r0, r4
+4000b3b0: bl         #0x4000a688 ; CALL 0x4000a688
+4000b3b4: mov        r3, r6
+4000b3b8: mov        r2, r7
+4000b3bc: mov        r1, r5
+4000b3c0: mov        r0, r4
+4000b3c4: bl         #0x40007b08 ; CALL 0x40007b08
+4000b3c8: ldr        r1, [r4, #0x10]
+4000b3cc: ldr        r0, [r5, #0x274]
+4000b3d0: str        r0, [r1, #0xc]
+4000b3d4: ldr        r1, [r4, #0x10]
+4000b3d8: ldr        r0, [r5, #0x278]
+4000b3dc: str        r0, [r1, #0x10]
+4000b3e0: ldr        r1, [r4, #0x10]
+4000b3e4: ldr        r0, [r5, #0x27c]
+4000b3e8: str        r0, [r1, #0x14]
+4000b3ec: add        sp, sp, #0x20
+4000b3f0: pop        {r4, r5, r6, r7, r8, pc}
+4000b3f4: mov        r2, sp
+4000b3f8: mov        r1, r7
+4000b3fc: mov        r0, r4
+4000b400: bl         #0x400081e4 ; CALL 0x400081e4
+4000b404: ldr        r0, [sp, #0x18]
+4000b408: cmp        r0, #0x14
+4000b40c: bne        #0x4000b474
+4000b410: mov        r0, #0
+4000b414: strb       r0, [r5, #0x280]
+4000b418: ldr        r0, [r4, #0x10]
+
+-- target 0x4000b3a0; modes [7] --
+4000b3a0: mov        r3, r6
+4000b3a4: mov        r2, r7
+4000b3a8: mov        r1, r5
+4000b3ac: mov        r0, r4
+4000b3b0: bl         #0x4000a688 ; CALL 0x4000a688
+4000b3b4: mov        r3, r6
+4000b3b8: mov        r2, r7
+4000b3bc: mov        r1, r5
+4000b3c0: mov        r0, r4
+4000b3c4: bl         #0x40007b08 ; CALL 0x40007b08
+4000b3c8: ldr        r1, [r4, #0x10]
+4000b3cc: ldr        r0, [r5, #0x274]
+4000b3d0: str        r0, [r1, #0xc]
+4000b3d4: ldr        r1, [r4, #0x10]
+4000b3d8: ldr        r0, [r5, #0x278]
+4000b3dc: str        r0, [r1, #0x10]
+4000b3e0: ldr        r1, [r4, #0x10]
+4000b3e4: ldr        r0, [r5, #0x27c]
+4000b3e8: str        r0, [r1, #0x14]
+4000b3ec: add        sp, sp, #0x20
+4000b3f0: pop        {r4, r5, r6, r7, r8, pc}
+4000b3f4: mov        r2, sp
+4000b3f8: mov        r1, r7
+4000b3fc: mov        r0, r4
+4000b400: bl         #0x400081e4 ; CALL 0x400081e4
+4000b404: ldr        r0, [sp, #0x18]
+4000b408: cmp        r0, #0x14
+4000b40c: bne        #0x4000b474
+4000b410: mov        r0, #0
+4000b414: strb       r0, [r5, #0x280]
+4000b418: ldr        r0, [r4, #0x10]
+4000b41c: ldr        r0, [r0, #0xc]
+4000b420: str        r0, [r5, #0x274]
+4000b424: ldr        r0, [r4, #0x10]
+4000b428: ldr        r0, [r0, #0x10]
+4000b42c: str        r0, [r5, #0x278]
+4000b430: ldr        r0, [r4, #0x10]
+4000b434: ldr        r0, [r0, #0x14]
+4000b438: str        r0, [r5, #0x27c]
+4000b43c: add        sp, sp, #0x20
+
+-- target 0x4000b3f4; modes [8] --
+4000b3f4: mov        r2, sp
+4000b3f8: mov        r1, r7
+4000b3fc: mov        r0, r4
+4000b400: bl         #0x400081e4 ; CALL 0x400081e4
+4000b404: ldr        r0, [sp, #0x18]
+4000b408: cmp        r0, #0x14
+4000b40c: bne        #0x4000b474
+4000b410: mov        r0, #0
+4000b414: strb       r0, [r5, #0x280]
+4000b418: ldr        r0, [r4, #0x10]
+4000b41c: ldr        r0, [r0, #0xc]
+4000b420: str        r0, [r5, #0x274]
+4000b424: ldr        r0, [r4, #0x10]
+4000b428: ldr        r0, [r0, #0x10]
+4000b42c: str        r0, [r5, #0x278]
+4000b430: ldr        r0, [r4, #0x10]
+4000b434: ldr        r0, [r0, #0x14]
+4000b438: str        r0, [r5, #0x27c]
+4000b43c: add        sp, sp, #0x20
+4000b440: pop        {r4, r5, r6, r7, r8, pc}
+4000b444: andmi      ip, r1, r0
+4000b448: blo        #0x40e5b95c
+4000b44c: ldmdahs    r3!, {r5, r8, sl, sp} ^
+4000b450: eorhs      r2, sp, sb, lsr #32
+4000b454: strbtvc    r6, [sb], #-0x857
+4000b458: .byte      0x65, 0x20, 0x42, 0x61
+4000b45c: .byte      0x6c, 0x61, 0x6e, 0x63
+4000b460: ldrbtvc    r2, [r3], #-0x65
+4000b464: ldrbvs     r7, [r4, #-0x261]!
+4000b468: andeq      r0, r0, r4, rrx
+4000b46c: andmi      r3, r4, ip, asr #4
+4000b470: andmi      ip, r1, r0, asr r5
+4000b474: mov        r0, #1
+4000b478: mov        r3, r6
+4000b47c: strb       r0, [r5, #0x280]
+4000b480: mov        r2, r7
+4000b484: ldr        r0, [sp, #0x10]
+4000b488: mov        r1, r5
+4000b48c: strh       r0, [r6]
+4000b490: ldr        r0, [sp, #0x14]
+
+-- target 0x4000b4cc; modes [9, 12] --
+4000b4cc: ldr        r0, [r4, #0x10]
+4000b4d0: ldr        r1, [r0, #0xc]
+4000b4d4: str        r1, [r0]
+4000b4d8: ldr        r0, [r4, #0x10]
+4000b4dc: ldr        r1, [r0, #0x10]
+4000b4e0: str        r1, [r0, #4]
+4000b4e4: ldr        r0, [r4, #0x10]
+4000b4e8: ldr        r1, [r0, #0x14]
+4000b4ec: str        r1, [r0, #8]
+4000b4f0: b          #0x4000b350
+4000b4f4: mov        r2, sp
+4000b4f8: mov        r1, r7
+4000b4fc: mov        r0, r4
+4000b500: bl         #0x40007e68 ; CALL 0x40007e68
+4000b504: ldr        r0, [sp, #0x18]
+4000b508: cmp        r0, #0x14
+4000b50c: bne        #0x4000b474
+4000b510: mov        r0, #0
+4000b514: strb       r0, [r5, #0x280]
+4000b518: ldr        r0, [r4, #0x10]
+4000b51c: ldr        r0, [r0, #0x18]
+4000b520: str        r0, [r5, #0x274]
+4000b524: ldr        r0, [r4, #0x10]
+4000b528: ldr        r0, [r0, #0x1c]
+4000b52c: str        r0, [r5, #0x278]
+4000b530: ldr        r0, [r4, #0x10]
+4000b534: ldr        r0, [r0, #0x20]
+4000b538: str        r0, [r5, #0x27c]
+4000b53c: ldr        r1, [r4, #0x10]
+4000b540: ldr        r0, [r5, #0x274]
+4000b544: str        r0, [r1, #0xc]
+4000b548: ldr        r1, [r4, #0x10]
+4000b54c: ldr        r0, [r5, #0x278]
+4000b550: str        r0, [r1, #0x10]
+4000b554: ldr        r1, [r4, #0x10]
+4000b558: ldr        r0, [r5, #0x27c]
+4000b55c: str        r0, [r1, #0x14]
+4000b560: add        sp, sp, #0x20
+4000b564: pop        {r4, r5, r6, r7, r8, pc}
+4000b568: ldr        r0, [r4, #0x10]
+
+-- target 0x4000b4f4; modes [10] --
+4000b4f4: mov        r2, sp
+4000b4f8: mov        r1, r7
+4000b4fc: mov        r0, r4
+4000b500: bl         #0x40007e68 ; CALL 0x40007e68
+4000b504: ldr        r0, [sp, #0x18]
+4000b508: cmp        r0, #0x14
+4000b50c: bne        #0x4000b474
+4000b510: mov        r0, #0
+4000b514: strb       r0, [r5, #0x280]
+4000b518: ldr        r0, [r4, #0x10]
+4000b51c: ldr        r0, [r0, #0x18]
+4000b520: str        r0, [r5, #0x274]
+4000b524: ldr        r0, [r4, #0x10]
+4000b528: ldr        r0, [r0, #0x1c]
+4000b52c: str        r0, [r5, #0x278]
+4000b530: ldr        r0, [r4, #0x10]
+4000b534: ldr        r0, [r0, #0x20]
+4000b538: str        r0, [r5, #0x27c]
+4000b53c: ldr        r1, [r4, #0x10]
+4000b540: ldr        r0, [r5, #0x274]
+4000b544: str        r0, [r1, #0xc]
+4000b548: ldr        r1, [r4, #0x10]
+4000b54c: ldr        r0, [r5, #0x278]
+4000b550: str        r0, [r1, #0x10]
+4000b554: ldr        r1, [r4, #0x10]
+4000b558: ldr        r0, [r5, #0x27c]
+4000b55c: str        r0, [r1, #0x14]
+4000b560: add        sp, sp, #0x20
+4000b564: pop        {r4, r5, r6, r7, r8, pc}
+4000b568: ldr        r0, [r4, #0x10]
+4000b56c: ldr        r0, [r0, #0xc]
+4000b570: str        r0, [r5, #0x274]
+4000b574: ldr        r0, [r4, #0x10]
+4000b578: ldr        r0, [r0, #0x10]
+4000b57c: str        r0, [r5, #0x278]
+4000b580: ldr        r0, [r4, #0x10]
+4000b584: ldr        r0, [r0, #0x14]
+4000b588: b          #0x4000b370
+4000b58c: ldr        r1, [pc, #0xfc] ; LIT 0x4000b690->0x4001c4fc STRING='CA9: wb_startWhiteBalance() - WB Mode not implemented! WB set to Preset DAYLIGHT'
+4000b590: mov        r0, #4
+
+-- target 0x4000b568; modes [11] --
+4000b568: ldr        r0, [r4, #0x10]
+4000b56c: ldr        r0, [r0, #0xc]
+4000b570: str        r0, [r5, #0x274]
+4000b574: ldr        r0, [r4, #0x10]
+4000b578: ldr        r0, [r0, #0x10]
+4000b57c: str        r0, [r5, #0x278]
+4000b580: ldr        r0, [r4, #0x10]
+4000b584: ldr        r0, [r0, #0x14]
+4000b588: b          #0x4000b370
+4000b58c: ldr        r1, [pc, #0xfc] ; LIT 0x4000b690->0x4001c4fc STRING='CA9: wb_startWhiteBalance() - WB Mode not implemented! WB set to Preset DAYLIGHT'
+4000b590: mov        r0, #4
+4000b594: bl         #0x4000ded4 ; CALL 0x4000ded4
+4000b598: b          #0x4000b240
+
+-- target 0x4000b58c; modes [0, 5] --
+4000b58c: ldr        r1, [pc, #0xfc] ; LIT 0x4000b690->0x4001c4fc STRING='CA9: wb_startWhiteBalance() - WB Mode not implemented! WB set to Preset DAYLIGHT'
+4000b590: mov        r0, #4
+4000b594: bl         #0x4000ded4 ; CALL 0x4000ded4
+4000b598: b          #0x4000b240
+
+=== PRESET JUMP TABLE @0x4000B218 ===
+preset 0 -> 0x4000b32c
+preset 1 -> 0x4000b240
+preset 2 -> 0x4000b254
+preset 3 -> 0x4000b268
+preset 4 -> 0x4000b27c
+preset 5 -> 0x4000b290
+preset 6 -> 0x4000b2a4
+preset 7 -> 0x4000b2b8
+preset 8 -> 0x4000b2cc
+preset 9 -> 0x4000b2e0
+
+=== PRESET RUNTIME TABLE ACCESSES ===
+r7 loads runtime base 0x4004324c; it is outside static section 099 and values are not firmware-image-readable here
+preset 1: halfwords at runtime_base+0x1c8 and +0x1d8
+preset 2: halfwords at runtime_base+0x1ce and +0x1de
+preset 3: halfwords at runtime_base+0x1cc and +0x1dc
+preset 4: halfwords at runtime_base+0x1c2 and +0x1d2
+preset 5: halfwords at runtime_base+0x1c4 and +0x1d4
+preset 6: halfwords at runtime_base+0x1c6 and +0x1d6
+preset 7: halfwords at runtime_base+0x1ca and +0x1da
+preset 8: halfwords at runtime_base+0x1d0 and +0x1e0
+preset 9 uses input+0x1c -> helper 0x4000aa34 -> indexed halfwords at runtime_base+0x1e2 and +0x262 families
+
+=== STRING-BACKED WB START REFERENCES ===
+4000b144: ldr        r2, [pc, #0x2f8] ; LIT 0x4000b444->0x4001c000 STRING='ca9_wb_start'
+4000b32c: ldr        r2, [pc, #0x110] ; LIT 0x4000b444->0x4001c000 STRING='ca9_wb_start'
+4000b334: ldr        r1, [pc, #0x134] ; LIT 0x4000b470->0x4001c550 STRING='CA9: %s() - WB Preset not implemented! WB set to Preset DAYLIGHT'
+4000b58c: ldr        r1, [pc, #0xfc] ; LIT 0x4000b690->0x4001c4fc STRING='CA9: wb_startWhiteBalance() - WB Mode not implemented! WB set to Preset DAYLIGHT'
+
+=== SEMANTIC WB STRINGS ACROSS EXTRACTED SECTIONS ===
+sec=88 name='GEO-SHP file' va=0x1038b4 term='awb' ctx='\x98ù\x0e\x9e,@\x8fÇ\x0cTÆSB@K\x93RÐí\x9d,@)®*û®TB@Ú\x90\x7ff\x10\x9f,@©\x87ht\x07UB@)>>!;\x9f,@,\x9ez¤ÁUB@J\x0b\x97UØ\x9c,@ÎªÏÕVVB@®óo\x97ý\x9a,@9\x98M\x80aWB@î±ô¡\x0b\x9a,@Ûúé?kXB@R\x9b8¹ß\x99,@ò\'*\x1bÖXB@W@¡\x9e>\x9a,@éñ{\x9bþXB@¦\nF%u\x9a,@\x15\x1c^\x10\x91ZB@\x06\x9fæäE\x9e,@¡ò¯å\x95[B@{Ý"0Ö\x9f,@Ñéy7\x16\\B@¥\x12\x9eÐë\x9f,@vÿX\x88\x0e]B@¥\x12\x9eÐë\x9f,@¤«tw\x9d]B@h\x93Ã\'\x9d\xa0,@¨9y\x91\t^B@\'\x88º\x0f@¢,@\x96\x07é)r^B@þ\x9c\x82ül¤,@ß¤iP4_B@zqâ'
+sec=88 name='GEO-SHP file' va=0x147f38 term='awb' ctx='\x9eÐë\x9f,@¡ò¯å\x95[B@{Ý"0Ö\x9f,@\x15\x1c^\x10\x91ZB@\x06\x9fæäE\x9e,@éñ{\x9bþXB@¦\nF%u\x9a,@ò\'*\x1bÖXB@W@¡\x9e>\x9a,@Ûúé?kXB@R\x9b8¹ß\x99,@9\x98M\x80aWB@î±ô¡\x0b\x9a,@ÎªÏÕVVB@®óo\x97ý\x9a,@,\x9ez¤ÁUB@J\x0b\x97UØ\x9c,@©\x87ht\x07UB@)>>!;\x9f,@)®*û®TB@Ú\x90\x7ff\x10\x9f,@\x8fÇ\x0cTÆSB@K\x93RÐí\x9d,@áFÊ\x16ISB@ò\x06\x98ù\x0e\x9e,@_F±ÜÒRB@\x11ªÔì\x81\x9e,@°©ó¨øQB@Eh\x04\x1b×\x9f,@\x07y=\x98\x14QB@Re\x18w\x83\xa0,@¸XQ\x83iPB@K %vm\x9f,@ùÚ3K\x02PB@0\x82Æ'
+sec=88 name='GEO-SHP file' va=0x10a5eb4 term='awb' ctx="céCÇQÀ_\x95\x0b\x95\x7fWBÀÀZµkBÇQÀÎ\x1b'\x85yWBÀ»\x9d}åAÇQÀ|pìÙsWBÀµàE_AÇQÀÂP\x87\x15nWBÀµàE_AÇQÀqÆ0'hWBÀµÆ\xa0\x13BÇQÀ\x9e]¾õaWBÀ¹O\x8e\x02DÇQÀø\x8bÙ\x92UWBÀ¿\x0cÆ\x88DÇQÀT§\x03YOWBÀ¾Ø{ñEÇQÀWw,¶IWBÀÔdÆÛJÇQÀ\x0bñH¼<WBÀè¼Æ.QÇQÀ\x10\x91\x9av1WBÀâ±\x9fÅRÇQÀ;\x8cI\x7f/WBÀó\x02ì£SÇQÀ\x90N]ù,WBÀá\x97úySÇQÀìi\x87¿&WBÀî_YiRÇQÀl[\x94Ù WBÀè¼Æ.QÇQÀ\x86\x1f\x9cO\x1dWBÀZd;ßOÇQÀ\x87\x870~\x1aWBÀØ¹i"
+sec=88 name='GEO-SHP file' va=0x12c0d93 term='hmi' ctx='\x18$}Zõ4@=\'½o|iZÀÈ\x06ÒÅ¦õ4@Z»íBsiZÀ\x01\x17dËòõ4@5`\x90ôiiZÀW@¡\x9e>ö4@Ï\x15¥\x84`iZÀË\x82\x89?\x8aö4@\x0f\x9a]÷ViZÀ¼æU\x9dÕö4@\x0e/\x88HMiZÀ+l\x06¸ ÷4@ÌÔ$xCiZÀ·\nb\xa0k÷4@H\x8b3\x869iZÀaÂhV¶÷4@k\x10æv/iZÀ\x89\x9bSÉ|ø4@L¦\nF%iZÀ-\x96"ùJø4@ìL¡ó\x1aiZÀO²Õå\x94ø4@3ÂÛ\x83\x10iZÀ\x8eç3\xa0Þø4@8H\x88ò\x05iZÀªF¯\x06(ù4@å\x9cØCûhZÀä¾Õ:qù4@O\x02\x9bsðhZÀ\x9bXà+ºù4@yxÏ\x81åhZÀÏ\x13ÏÙ\x02ú4@I½§rÚhZÀ\x80ð'
+sec=88 name='GEO-SHP file' va=0x12d8d74 term='hmi' ctx='¾\x9cÙ^\x11@\x96?ß\x16,}IÀÕÎ0µ¥\x0e\x11@\x80»ì×\x9dxIÀ¢Ò\x88\x99}Î\x10@ÆÃ{\x0e,uIÀ-\x93áx>\x83\x10@ýöuà\x9cqIÀczÂ\x12\x0fH\x10@ñ\x0f[z4oIÀ¢~\x17¶f\x0b\x10@\x831"QhmIÀPþî\x1d5f\x0f@·\r£ xlIÀm\x90IFÎâ\x0e@Vb\x9e\x95´lIÀrm¨\x18çO\x0e@\xa0pvk\x99lIÀãý¸ýò©\r@6\x052;\x8blIÀ-\x99cyWý\x0c@ïuR_\x96lIÀ£#¹ü\x87T\x0c@\x06\x85A\x99FmIÀä\x87J#fö\x0b@×ÜÑÿrmIÀÃ~O¬S¥\x0b@jûWV\x9alIÀ\x84ÕXÂÚx\x0b@á%8õ\x81lIÀ¾L\x14!u;\x0b@Ê\x15Þå"lIÀ\x0e-²\x9dï\x07\x0b@à/fKVkIÀ,\x81\x94'
+sec=88 name='GEO-SHP file' va=0x177f098 term='hmi' ctx='\x80Ðz(]ÀjÜ\x9bß0MI@½þ$>w(]À»\x9a<e5MI@G\x1c²\x81t(]Àôüi£:MI@\x01\x8a\x91%s(]ÀË\x865\x95EMI@¼°5[y(]ÀV}®¶bMI@\t4ØÔy(]ÀÅ °rhMI@\'g(îx(]Àài2ãmMI@À´¨Or(]À\roÖà}MI@@ÀZµk(]ÀÒÇ|@\xa0MI@PoFÍW(]Àé\x80$ìÛMI@ç\x1d§èH(]Àg\x9b\x1bÓ\x13NI@úð,AF(]Àá\t½þ$NI@"Pý\x83H(]ÀOÊ¤\x866NI@\x01\x13¸u7(]Àà,%ËINI@¨Äu\x8c+(]Àó\x1c\x91ïRNI@ù\x14|ã\x19(]À$&¨á[NI@\x08\x93âã\x13(]ÀÙA%®cNI@-ëþ'
+sec=88 name='GEO-SHP file' va=0x21e3700 term='awb' ctx="Æ.QÇQÀ\x10\x91\x9av1WBÀÔdÆÛJÇQÀ\x0bñH¼<WBÀ¾Ø{ñEÇQÀWw,¶IWBÀ¿\x0cÆ\x88DÇQÀT§\x03YOWBÀ¹O\x8e\x02DÇQÀø\x8bÙ\x92UWBÀµÆ\xa0\x13BÇQÀ\x9e]¾õaWBÀµàE_AÇQÀqÆ0'hWBÀµàE_AÇQÀÂP\x87\x15nWBÀ»\x9d}åAÇQÀ|pìÙsWBÀÀZµkBÇQÀÎ\x1b'\x85yWBÀHÜcéCÇQÀ_\x95\x0b\x95\x7fWBÀË\xa0ÚàDÇQÀßo´ã\x86WBÀBÑ<\x80EÇQÀpµN\\\x8eWBÀÐ)ÈÏFÇQÀ\x7fP\x17)\x94WBÀÉ\x04ü\x1aIÇQÀþ*Àw\x9bWBÀÍY\x9frLÇQÀ\x8e<\x10Y¤WBÀäM~\x8bNÇQÀ\x9e\x0b#½¨WBÀéÖk"
+sec=88 name='GEO-SHP file' va=0x2543c04 term='hmi' ctx='§èH(]Àg\x9b\x1bÓ\x13NI@PoFÍW(]Àé\x80$ìÛMI@@ÀZµk(]ÀÒÇ|@\xa0MI@À´¨Or(]À\roÖà}MI@\'g(îx(]Àài2ãmMI@\t4ØÔy(]ÀÅ °rhMI@¼°5[y(]ÀV}®¶bMI@\x01\x8a\x91%s(]ÀË\x865\x95EMI@G\x1c²\x81t(]Àôüi£:MI@½þ$>w(]À»\x9a<e5MI@t¶\x80Ðz(]ÀjÜ\x9bß0MI@"û Ë\x82(]ÀÀ\x06D\x88+MI@Ëö!o¹(]Àý\x83H\x86\x1cMI@\x07\x97\x8e9Ï(]À\x9d*ß3\x12MI@x\rúÒÛ(]ÀûyS\x91\nMI@û"¡-ç(]ÀAÕèÕ|MI@HÃ)só(]ÀýÛe¿îLI@»\t¾'
+sec=88 name='GEO-SHP file' va=0x2696833 term='hmi' ctx='c${\x84ÿS@¶¢ÍqniF@C\x04\x1cB\x95ÿS@©£ãjdiF@\x84*5{\xa0ÿS@¢~\x17¶fiF@çSÇ*¥ÿS@±\x19à\x82liF@çp\xadö°ÿS@v\x1bÔ~kiF@Ýa\x13\x99¹ÿS@\x0e/\x88HMiF@Û\x13$¶»ÿS@\x9e\x06\x0c\x92>iF@ú`\x19\x1bºÿS@ö{b\x9d*iF@\xa0ûrf»ÿS@Êû8\x9a#iF@P\x8e\x02DÁÿS@^ô\x15¤\x19iF@\x87nö\x07ÊÿS@\x82Äv÷|iF@I×L¾ÙÿS@/M\x11àôhF@ÓÝu6äÿS@&R\x9aÍãhF@AgÒ¦êÿS@ã©G\x1aÜhF@3k) íÿS@Õv\x13|ÓhF@\nõô\x11øÿS@T;ÃÔ\x96hF@åÐ"ÛùÿS@×Â,´shF@°\x8c'
+sec=88 name='GEO-SHP file' va=0x296d620 term='hmi' ctx='%Ésà]@Þ\x05J\n,nI@\x80\r\x88\x10Wà]@ä¼ÿ\x8f\x13nI@s\xa0\x87Ú6à]@e\x8b¤ÝèmI@$\x98jf-à]@ªDÙ[ÊmI@Ì\x9aXà+à]@ÆüÜÐ\x94mI@\x82Uõò;à]@\x12¾÷7hmI@>\x04U£Wà]@XÈ\\\x19TmI@\x10%Zòxà]@=bôÜBmI@\x9b\x01.È\x96à]@"ü\x8b\xa01mI@´è\x9d\n¸à]@ëª@-\x06mI@À!T©Ùà]@XU/¿ÓlI@Ê6p\x07êà]@]\x87jJ²lI@8ÀÌwðà]@Èa0\x7f\x85lI@\x82<»|ëà]@\x0b³ÐÎilI@\x93S;ÃÔà]@\x07|~\x18!lI@©öéxÌà]@¢BusñkI@µ\x87½PÀà]@ïTÀ=ÏkI@fÝ?'
+sec=88 name='GEO-SHP file' va=0x2a4734c term='awb' ctx="ô¢vöQ@\x9b\x92¬ÃÑWB@þ¶'HlöQ@¿\x7fóâÄWB@ïp;4,öQ@Ñêä\x0cÅWB@\x9dGÅÿ\x1döQ@+MJA·WB@¿\x98-Y\x15öQ@\x0f(\x9br\x85WB@ÁÉ6p\x07öQ@W±øMaWB@lê<*þõQ@\x02\r6u\x1eWB@\x96wÕ\x03æõQ@\x876|\x1b\x10WB@\x0c:!tÐõQ@ëÇ&ù\x11WB@\x16ø\x8an½õQ@¯²¶)\x1eWB@B!\x02\x0e¡õQ@þ\x0eE\x81>WB@ÂÞÄ\x90\x9cõQ@X\x8e\x90\x81<WB@w\x9d\rùgõQ@\rpA¶,WB@KæXÞUõQ@÷Ì\x92|5WB@\x10Z\x0f_&õQ@\x19\x1eûY,WB@\x10æv/÷ôQ@DßÝÊ\x12WB@à¢\x93¥ÖôQ@³$@M-WB@\x0e\x85Ï"
+sec=88 name='GEO-SHP file' va=0x2a4742c term='awb' ctx='\x0f_&õQ@\x19\x1eûY,WB@\x10æv/÷ôQ@DßÝÊ\x12WB@à¢\x93¥ÖôQ@³$@M-WB@\x0e\x85ÏÖÁôQ@\x1ds\x9e±/WB@w1Ít¯ôQ@Ûl¬Ä<WB@$·&Ý\x96ôQ@\n\x14±\x88aWB@B\\9{gôQ@\x88º\x0f@jWB@@\x87ùò\x02ôQ@~Q\x82þBWB@\x7f\x87¢@\x9fóQ@ñJ\x92çúVB@Ø-\x02c}óQ@y\x95µMñVB@PoFÍWóQ@pÎ\x88ÒÞVB@W²c#\x10óQ@Tã¥\x9bÄVB@îZB>èòQ@5\x0b´;¤VB@fk}\x91ÐòQ@Y§Ê÷\x8cVB@=\x81°S¬òQ@ÅÅQ¹\x89VB@{2ÿè\x9bòQ@Õ\x94d\x1d\x8eVB@Ï\x86ü3\x83òQ@v\x8c+.\x8eVB@\x15¨Å'
+sec=88 name='GEO-SHP file' va=0x2b3e28c term='hmi' ctx='ÁoCaW@\x12\x84+\xa0PMI@r£ÈZCaW@2\x05k\x9cMMI@Z-°ÇDaW@-°ÇDJMI@j0\rÃGaW@cñ\x9bÂJMI@Ã-\x1fIIaW@ìÀ9#JMI@iÈx\x94JaW@\x8dìJËHMI@\x02g)YNaW@\x97\xadõEBMI@[éµÙXaW@µÆ\xa0\x13BMI@lì\x12Õ[aW@=bôÜBMI@²Jé\x99^aW@ï\x90b\x80DMI@?o*RaaW@«\x05ö\x98HMI@\x1a1³ÏcaW@?\x1b¹nJMI@\neáëkaW@©i\x17ÓLMI@\x9d,µÞoaW@f\x12õ\x82OMI@\n\x82Ç·waW@ÁâpæWMI@gî!á{aW@û¬2SZMI@ÔC4º\x83aW@uÊ£\x1baMI@,\rü'
+sec=88 name='GEO-SHP file' va=0x2b3e2dc term='hmi' ctx='x\x94JaW@\x8dìJËHMI@\x02g)YNaW@\x97\xadõEBMI@[éµÙXaW@µÆ\xa0\x13BMI@lì\x12Õ[aW@=bôÜBMI@²Jé\x99^aW@ï\x90b\x80DMI@?o*RaaW@«\x05ö\x98HMI@\x1a1³ÏcaW@?\x1b¹nJMI@\neáëkaW@©i\x17ÓLMI@\x9d,µÞoaW@f\x12õ\x82OMI@\n\x82Ç·waW@ÁâpæWMI@gî!á{aW@û¬2SZMI@ÔC4º\x83aW@uÊ£\x1baMI@,\rü¨\x86aW@ÀË\x0c\x1beMI@\x11Çº¸\x8daW@\x8fßÛôgMI@9\x0cæ¯\x90aW@§\x07\x05¥hMI@´\x91ë¦\x94aW@d°âTkMI@ÿx¯Z\x99aW@¼\x93O\x8fmMI@¦d9'
+sec=88 name='GEO-SHP file' va=0x2b3e36c term='hmi' ctx='Ç·waW@ÁâpæWMI@gî!á{aW@û¬2SZMI@ÔC4º\x83aW@uÊ£\x1baMI@,\rü¨\x86aW@ÀË\x0c\x1beMI@\x11Çº¸\x8daW@\x8fßÛôgMI@9\x0cæ¯\x90aW@§\x07\x05¥hMI@´\x91ë¦\x94aW@d°âTkMI@ÿx¯Z\x99aW@¼\x93O\x8fmMI@¦d9\t¥aW@¶Ö\x17\tmMI@\x0c\x95\x7f-¯aW@½ûã½jMI@\x1f¹5é¶aW@A\x0eJ\x98iMI@Õ"¢\x98¼aW@d°âTkMI@ýM(DÀaW@\'\x16ø\x8anMI@ÊùbïÅaW@yY\x13\x0b|MI@|\x0e,GÈaW@8»µL\x86MI@\x88¼åêÇaW@°p\x92æ\x8fMI@é,³\x08ÅaW@£w*à\x9eMI@\x8bÀX'
+sec=88 name='GEO-SHP file' va=0x2b3ec2c term='hmi' ctx='}\x93¦bW@Ä[çß.MI@\x0f\x99ò!¨bW@ü\x89Ê\x865MI@bóqm¨bW@rR\x98÷8MI@-ÌB;§bW@m\x1aÛkAMI@FB[Î¥bW@w,¶IEMI@·Ï*3¥bW@|\x81Y¡HMI@e©õ~£bW@Ù!þaKMI@©h¬ý\x9dbW@\x83÷U¹PMI@»íBs\x9dbW@#»Ò2RMI@ÍX4\x9d\x9dbW@\n÷Ê¼UMI@ÙìHõ\x9dbW@-\x99cyWMI@\x89³"j¢bW@ã\x1cut\\MI@¬;\x16Û¤bW@\x93ãNé`MI@ÚW\x1e¤§bW@µn\x83ÚoMI@iäó\x8a§bW@±6ÆNxMI@ÈÒ\x87.¨bW@ÂmmáyMI@®ôÚl¬bW@\x07~TÃ~MI@\x1e4»'
+sec=88 name='GEO-SHP file' va=0x2b3ee7c term='hmi' ctx="\x08ÆÁbW@\x7f¿\x98-YMI@ $\x0b\x98ÀbW@\x03Òþ\x07XMI@K\x1fº\xa0¾bW@¾Á\x17&SMI@\x1cµÂô½bW@¼\x08S\x94KMI@F|'f½bW@ÈêVÏIMI@Ûù~j¼bW@:\x92Ë\x7fHMI@)\x97Æ/¼bW@¡ó\x1a»DMI@à\x82lY¾bW@¬\x1cZd;MI@µ\x87½PÀbW@¯ì\x82Á5MI@Ò8ÔïÂbW@òC¥\x113MI@\x01£Ë\x9bÃbW@p\x99Óe1MI@\x01£Ë\x9bÃbW@Ü\x83\x10\x90/MI@C¬þ\x08ÃbW@ZÙ>ä-MI@%\x93S;ÃbW@ÆÃ{\x0e,MI@\x9a[!¬ÆbW@ý\xa0.R(MI@G8-xÑbW@\x1fò\x96«\x1fMI@J\x0b\x97UØbW@è÷ý\x9b\x17MI@\x0cW\x07"
+sec=88 name='GEO-SHP file' va=0x2b3fabc term='hmi' ctx='|ú}dW@\x13Õ[\x03[MI@´\x8eª&\x88dW@Hâåé\\MI@\x89E\x0c;\x8cdW@íb\x9aé^MI@í¼\x8dÍ\x8edW@"p$Ð`MI@W?6É\x8fdW@°È¯\x1fbMI@VñFæ\x91dW@GÿËµhMI@O²Õå\x94dW@\x0fîÎÚmMI@Êk%t\x97dW@2\x90g\x97oMI@Ûn\x82o\x9adW@ØDf.pMI@ÈÏF®\x9bdW@sK«!qMI@i\xadhs\x9cdW@ã\x8a\x8b£rMI@üÂ+I\x9edW@\x99\x0e\x9d\x9ewMI@lèf\x7f\xa0dW@?à\x81\x01\x84MI@á\x96\x8f¤¤dW@\x17\x9e\x97\x8a\x8dMI@ÃI\x9a?¦dW@\x98\x14\x1f\x9f\x90MI@ìöYe¦dW@\x1a¿ðJ\x92MI@çSÇ*¥dW@*\x8e\x03¯\x96MI@0\x82Æ'
+sec=88 name='GEO-SHP file' va=0x2c6b434 term='awb' ctx='FÍWóQ@pÎ\x88ÒÞVB@Ø-\x02c}óQ@y\x95µMñVB@\x7f\x87¢@\x9fóQ@ñJ\x92çúVB@@\x87ùò\x02ôQ@~Q\x82þBWB@B\\9{gôQ@\x88º\x0f@jWB@$·&Ý\x96ôQ@\n\x14±\x88aWB@w1Ít¯ôQ@Ûl¬Ä<WB@\x0e\x85ÏÖÁôQ@\x1ds\x9e±/WB@à¢\x93¥ÖôQ@³$@M-WB@\x10æv/÷ôQ@DßÝÊ\x12WB@\x10Z\x0f_&õQ@\x19\x1eûY,WB@KæXÞUõQ@÷Ì\x92|5WB@w\x9d\rùgõQ@\rpA¶,WB@ÂÞÄ\x90\x9cõQ@X\x8e\x90\x81<WB@B!\x02\x0e¡õQ@þ\x0eE\x81>WB@\x16ø\x8an½õQ@¯²¶)\x1eWB@\x0c:!tÐõQ@ëÇ&ù\x11WB@\x96wÕ'
+sec=88 name='GEO-SHP file' va=0x2c6b514 term='awb' ctx="\x02\x0e¡õQ@þ\x0eE\x81>WB@\x16ø\x8an½õQ@¯²¶)\x1eWB@\x0c:!tÐõQ@ëÇ&ù\x11WB@\x96wÕ\x03æõQ@\x876|\x1b\x10WB@lê<*þõQ@\x02\r6u\x1eWB@ÁÉ6p\x07öQ@W±øMaWB@¿\x98-Y\x15öQ@\x0f(\x9br\x85WB@\x9dGÅÿ\x1döQ@+MJA·WB@ïp;4,öQ@Ñêä\x0cÅWB@þ¶'HlöQ@¿\x7fóâÄWB@.\x8cô¢vöQ@\x9b\x92¬ÃÑWB@%±¤Ü}öQ@:\\«=ìWB@EÔD\x9f\x8föQ@uÈÍp\x03XB@È\x06ÒÅ¦öQ@@Þ«V&XB@\x13ñÖù·öQ@\x10\x02ò%TXB@dÌ]KÈöQ@\x9cøjGqXB@\x121%\x92èöQ@\x8eË¸©\x81XB@|ó\x1b"
+sec=88 name='GEO-SHP file' va=0x317d480 term='hmi' ctx='hs\x9cdW@ã\x8a\x8b£rMI@ÈÏF®\x9bdW@sK«!qMI@Ûn\x82o\x9adW@ØDf.pMI@Êk%t\x97dW@2\x90g\x97oMI@O²Õå\x94dW@\x0fîÎÚmMI@VñFæ\x91dW@GÿËµhMI@W?6É\x8fdW@°È¯\x1fbMI@í¼\x8dÍ\x8edW@"p$Ð`MI@\x89E\x0c;\x8cdW@íb\x9aé^MI@´\x8eª&\x88dW@Hâåé\\MI@~â|ú}dW@\x13Õ[\x03[MI@{ÛL\x85xdW@Þ\x93\x87\x85ZMI@ài2ãmdW@AñcÌ]MI@È\n~\x1bbdW@\x8c¾\x824cMI@\x8fÂõ(\\dW@ß\x18\x02\x80cMI@»\x0b\x94\x14XdW@(-\\VaMI@·¶ð¼TdW@î\x96ä\x80]MI@\x0b__'
+sec=88 name='GEO-SHP file' va=0x317e0c0 term='hmi' ctx="Ë\x9bÃbW@p\x99Óe1MI@Ò8ÔïÂbW@òC¥\x113MI@µ\x87½PÀbW@¯ì\x82Á5MI@à\x82lY¾bW@¬\x1cZd;MI@)\x97Æ/¼bW@¡ó\x1a»DMI@Ûù~j¼bW@:\x92Ë\x7fHMI@F|'f½bW@ÈêVÏIMI@\x1cµÂô½bW@¼\x08S\x94KMI@K\x1fº\xa0¾bW@¾Á\x17&SMI@ $\x0b\x98ÀbW@\x03Òþ\x07XMI@m\x8d\x08ÆÁbW@\x7f¿\x98-YMI@\x9cÝZ&ÃbW@%t\x97ÄYMI@Gçü\x14ÇbW@a¦í_YMI@KVE¸ÉbW@rÝ\x94òZMI@D\x17Ô·ÌbW@\x8eZaú^MI@¾h\x8f\x17ÒbW@ïç\x14ägMI@X;\x8asÔbW@)²ÖPjMI@\x7fLk"
+sec=88 name='GEO-SHP file' va=0x317e310 term='hmi' ctx='Hõ\x9dbW@-\x99cyWMI@ÍX4\x9d\x9dbW@\n÷Ê¼UMI@»íBs\x9dbW@#»Ò2RMI@©h¬ý\x9dbW@\x83÷U¹PMI@e©õ~£bW@Ù!þaKMI@·Ï*3¥bW@|\x81Y¡HMI@FB[Î¥bW@w,¶IEMI@-ÌB;§bW@m\x1aÛkAMI@bóqm¨bW@rR\x98÷8MI@\x0f\x99ò!¨bW@ü\x89Ê\x865MI@æ\x1f}\x93¦bW@Ä[çß.MI@\x06¡¼\x8f£bW@\x9fÌ?ú&MI@Gªïü¢bW@)\x04r\x89#MI@\x9cl\x03w\xa0bW@bI¹û\x1cMI@£\x91Ï+\x9ebW@:êè¸\x1aMI@3l\x94õ\x9bbW@Ã¹\x86\x19\x1aMI@¬\x1e0\x0f\x99bW@v\x1c?T\x1aMI@ô\x18å'
+sec=88 name='GEO-SHP file' va=0x317ebd0 term='hmi' ctx='5é¶aW@A\x0eJ\x98iMI@\x0c\x95\x7f-¯aW@½ûã½jMI@¦d9\t¥aW@¶Ö\x17\tmMI@ÿx¯Z\x99aW@¼\x93O\x8fmMI@´\x91ë¦\x94aW@d°âTkMI@9\x0cæ¯\x90aW@§\x07\x05¥hMI@\x11Çº¸\x8daW@\x8fßÛôgMI@,\rü¨\x86aW@ÀË\x0c\x1beMI@ÔC4º\x83aW@uÊ£\x1baMI@gî!á{aW@û¬2SZMI@\n\x82Ç·waW@ÁâpæWMI@\x9d,µÞoaW@f\x12õ\x82OMI@\neáëkaW@©i\x17ÓLMI@\x1a1³ÏcaW@?\x1b¹nJMI@?o*RaaW@«\x05ö\x98HMI@²Jé\x99^aW@ï\x90b\x80DMI@lì\x12Õ[aW@=bôÜBMI@[éµ'
+sec=88 name='GEO-SHP file' va=0x317ec60 term='hmi' ctx='!á{aW@û¬2SZMI@\n\x82Ç·waW@ÁâpæWMI@\x9d,µÞoaW@f\x12õ\x82OMI@\neáëkaW@©i\x17ÓLMI@\x1a1³ÏcaW@?\x1b¹nJMI@?o*RaaW@«\x05ö\x98HMI@²Jé\x99^aW@ï\x90b\x80DMI@lì\x12Õ[aW@=bôÜBMI@[éµÙXaW@µÆ\xa0\x13BMI@\x02g)YNaW@\x97\xadõEBMI@iÈx\x94JaW@\x8dìJËHMI@Ã-\x1fIIaW@ìÀ9#JMI@j0\rÃGaW@cñ\x9bÂJMI@Z-°ÇDaW@-°ÇDJMI@r£ÈZCaW@2\x05k\x9cMMI@ûXÁoCaW@\x12\x84+\xa0PMI@Ø\x9c\x83gBaW@\x12Pá\x08RMI@°WX'
+sec=88 name='GEO-SHP file' va=0x317ecb0 term='hmi' ctx='*RaaW@«\x05ö\x98HMI@²Jé\x99^aW@ï\x90b\x80DMI@lì\x12Õ[aW@=bôÜBMI@[éµÙXaW@µÆ\xa0\x13BMI@\x02g)YNaW@\x97\xadõEBMI@iÈx\x94JaW@\x8dìJËHMI@Ã-\x1fIIaW@ìÀ9#JMI@j0\rÃGaW@cñ\x9bÂJMI@Z-°ÇDaW@-°ÇDJMI@r£ÈZCaW@2\x05k\x9cMMI@ûXÁoCaW@\x12\x84+\xa0PMI@Ø\x9c\x83gBaW@\x12Pá\x08RMI@°WXp?aW@}\x06Ô\x9bQMI@SëýF;aW@Ë×eøOMI@+¦ÒO8aW@¡\x10\x01\x87PMI@:$µP2aW@@\xa03iSMI@ú\x9c»]/aW@ ë©ÕWMI@VÒ\x8a'
+sec=88 name='GEO-SHP file' va=0x32156a4 term='awb' ctx='\x12\x9f;\x81N@Q¾\xa0\x85\x84Wb@î\x96ä\x80]\x81N@4\x83øÀ\x8eWb@p\x98h\x90\x82\x81N@*Ê¥ñ\x8bWb@ìÜ´\x19§\x81N@\x1då`6\x81Wb@\x80\x0f^»´\x81N@\x9b\x03\x04stWb@<3Áp®\x81N@\x81ë\x8a\x19aWb@&VF#\x9f\x81N@Õ\\n0TWb@ÿÌ >°\x81N@,Õ\x05¼LWb@\x8a!9\x99¸\x81N@]p\x06\x7f?Wb@/n£\x01¼\x81N@\x83\x86þ\t.Wb@Aðøö®\x81N@\x80H¿}\x1dWb@\x0b^ô\x15¤\x81N@Åâ7\x85\x15Wb@\x9b\x1e\x14\x94¢\x81N@\x89ÒÞà\x0bWb@<3Áp®\x81N@W\x08«±\x04Wb@´s\x9a\x05Ú\x81N@\x84\x9f8\x80þVb@n£\x01¼\x05\x82N@F\x977\x87ëVb@á}U.T\x82N@BÌ%UÛVb@óV]'
+sec=88 name='GEO-SHP file' va=0x3216914 term='awb' ctx='ë\x18W¢N@¤úÎ/JWb@N\nó\x1eg¢N@B¯?\x89OWb@\x1d;¨Äu¢N@C<\x12/OWb@\x15\x1c^\x10\x91¢N@\tÿ"hLWb@x\x96 #\xa0¢N@Iö\x085CWb@\x14?ÆÜµ¢N@\x14\\¬¨AWb@4K\x02ÔÔ¢N@}?5^:Wb@ÈÎÛØì¢N@âç¿\x07/Wb@\x91ñ(\x95ð¢N@{Ü·Z\'Wb@\t\x15\x1c^\x10£N@þd\x8c\x0f3Wb@\x89]ÛÛ-£N@XW\x05j1Wb@Þv¡¹N£N@M\x11àô.Wb@\x16\x13\x9b\x8fk£N@\x0e¤\x8bM+Wb@wÚ\x1a\x11\x8c£N@åÔÎ05Wb@ù¾¸T¥£N@\x8cd\x8fP3Wb@\x14%!\x91¶£N@\x82çÞÃ%Wb@ò\x07\x03Ï½£N@7ã4D\x15Wb@âç¿'
+sec=88 name='GEO-SHP file' va=0x32280d4 term='awb' ctx='¹\x88ï|P@®»yªÃvb@Í\x06\x99dä|P@.\x1eÞsàvb@[B>èÙ|P@\x91BYøúvb@ADjÚÅ|P@ñ+Öp\x11wb@DÝ\x07 µ|P@\x0fòz0)wb@\x12l\\ÿ®|P@9\x98M\x80awb@Í¬¥\x80´|P@\x08\x90¡c\x87wb@©¼\x1dá´|P@6\x06\x9d\x10ºwb@Wy\x02a§|P@\x02\x81Î¤Íwb@Ö\x1c \x98£|P@8gDiïwb@\\å\t\x84\x9d|P@rø¤\x13\txb@b¢A\n\x9e|P@`é|x\x16xb@iäó\x8a§|P@\x90\x82§\x90+xb@\xa0ÄçN°|P@\xa0\x88E\x0c;xb@Z\x9d\x9c¡¸|P@ð\x15ÝzMxb@R\x10<¾½|P@\x07xÒÂexb@³Ñ9?Å|P@½\x8e8d\x83xb@\x94mà'
+sec=88 name='GEO-SHP file' va=0x32dfae4 term='hmi' ctx='\x12öíRH@\x1fII\x0fCMI@\x902â\x02ÐRH@=\x7fÚ¨NMI@0ö^|ÑRH@õõ|ÍrMI@3\x8c»A´RH@Û\x88\'»\x99MI@\x10v\x8aU\x83RH@u\x8fl®\x9aMI@w\x12\x11þERH@qÆ0\'hMI@VG\x8et\x06RH@ÀzÜ·ZMI@Ëgy\x1eÜQH@\x82¬§V_MI@MØ~2ÆQH@Ý¶ïQ\x7fMI@\x11\x1b,\x9c¤QH@OÌz1\x94MI@y\x02a§XQH@0h!\x01£MI@à\x9eçO\x1bQH@\x1d \x98£ÇMI@\x9a\t\x86s\rQH@JB"mãMI@¼[Y¢³PH@\x08°È¯\x1fNI@Xs\x80`\x8ePH@\x08°È¯\x1fNI@£\x1d7ünPH@T6¬©,NI@ßøÚ3KPH@Ujö@+NI@¶\xa0÷'
+sec=88 name='GEO-SHP file' va=0x32e0594 term='hmi' ctx='\x07ìj\\H@HPü\x18sMI@ø\x19\x17\x0e\x84\\H@Ê5\x052;MI@\x1f.9î\x94\\H@¦\x0eòz0MI@ûsÑ\x90ñ\\H@\x89)\x91D/MI@\x99\x84\x0by\x04]H@üU\x80ï6MI@\x7fhæÉ5]H@â9[@hMI@Yü¦°R]H@±M*\x1akMI@¢\x9bý\x81r]H@\x9bp¯Ì[MI@.ã¦\x06\x9a]H@ð2ÃFYMI@¢|A\x0b\t^H@\x1b¹nJyMI@ë\x1b\x98Ü(^H@©KÆ1\x92MI@Üôg?R^H@;¨Äu\x8cMI@n¿|²b^H@\x08 µ\x89\x93MI@w\x9d\rùg^H@\x14\x08;ÅªMI@%\x94¾\x10r^H@üü÷àµMI@0\x0e.\x1ds^H@Ù\x94+¼ËMI@\x8bp\x93Qe^H@å|±÷âMI@ôø½'
+sec=88 name='GEO-SHP file' va=0x34f308f term='hmi' ctx='nö\x07ÊÿS@\x82Äv÷|iF@P\x8e\x02DÁÿS@^ô\x15¤\x19iF@\xa0ûrf»ÿS@Êû8\x9a#iF@ú`\x19\x1bºÿS@ö{b\x9d*iF@Û\x13$¶»ÿS@\x9e\x06\x0c\x92>iF@Ýa\x13\x99¹ÿS@\x0e/\x88HMiF@çp\xadö°ÿS@v\x1bÔ~kiF@çSÇ*¥ÿS@±\x19à\x82liF@\x84*5{\xa0ÿS@¢~\x17¶fiF@C\x04\x1cB\x95ÿS@©£ãjdiF@\x8dc${\x84ÿS@¶¢ÍqniF@(µ\x17ÑvÿS@À´¨OriF@÷w¶GoÿS@ÎOq\x1cxiF@V,~SXÿS@\x8bÄ\x045|iF@\x81$ìÛIÿS@Ä&2s\x81iF@»\x9d}åAÿS@zªCn\x86iF@û\x07\x91\x0c9ÿS@Í!©\x85\x92iF@AI'
+sec=88 name='GEO-SHP file' va=0x3558090 term='hmi' ctx='T©Ùà]@XU/¿ÓlI@´è\x9d\n¸à]@ëª@-\x06mI@\x9b\x01.È\x96à]@"ü\x8b\xa01mI@\x10%Zòxà]@=bôÜBmI@>\x04U£Wà]@XÈ\\\x19TmI@\x82Uõò;à]@\x12¾÷7hmI@Ì\x9aXà+à]@ÆüÜÐ\x94mI@$\x98jf-à]@ªDÙ[ÊmI@s\xa0\x87Ú6à]@e\x8b¤ÝèmI@\x80\r\x88\x10Wà]@ä¼ÿ\x8f\x13nI@`x%Ésà]@Þ\x05J\n,nI@\x049(a¦à]@î%\x8dÑ:nI@AòÎ¡\x0cá]@N\x7fö#EnI@gF?\x1aNá]@<NÑ\x91\\nI@ÇÖ3\x84cá]@Úã\x85txnI@öCl°pá]@ÈÏF®\x9bnI@\x03@\x157ná]@ÐÐ?ÁÅnI@\x0e\x15ã'
+sec=88 name='GEO-SHP file' va=0x35a7e70 term='awb' ctx='ó\x8a§|P@rø¤\x13\txb@b¢A\n\x9e|P@8gDiïwb@\\å\t\x84\x9d|P@\x02\x81Î¤Íwb@Ö\x1c \x98£|P@6\x06\x9d\x10ºwb@Wy\x02a§|P@\x08\x90¡c\x87wb@©¼\x1dá´|P@9\x98M\x80awb@Í¬¥\x80´|P@\x0fòz0)wb@\x12l\\ÿ®|P@ñ+Öp\x11wb@DÝ\x07 µ|P@\x91BYøúvb@ADjÚÅ|P@.\x1eÞsàvb@[B>èÙ|P@®»yªÃvb@Í\x06\x99dä|P@éÒ¿$\x95vb@\x85w¹\x88ï|P@`¬o`rvb@\x0b)?©ö|P@\x03\x06I\x9fVvb@\x81Y¡H÷|P@í\x9bû«Gvb@Ê6p\x07ê|P@ $\x0b\x98@vb@¥ØÑ8Ô|P@s\x13µ47vb@à\x9c\x11'
+sec=88 name='GEO-SHP file' va=0x3820f6f term='hmi' ctx='nö\x07ÊÿS@\x82Äv÷|iF@P\x8e\x02DÁÿS@^ô\x15¤\x19iF@\xa0ûrf»ÿS@Êû8\x9a#iF@ú`\x19\x1bºÿS@ö{b\x9d*iF@Û\x13$¶»ÿS@\x9e\x06\x0c\x92>iF@Ýa\x13\x99¹ÿS@\x0e/\x88HMiF@çp\xadö°ÿS@v\x1bÔ~kiF@çSÇ*¥ÿS@±\x19à\x82liF@\x84*5{\xa0ÿS@¢~\x17¶fiF@C\x04\x1cB\x95ÿS@©£ãjdiF@\x8dc${\x84ÿS@¶¢ÍqniF@(µ\x17ÑvÿS@À´¨OriF@÷w¶GoÿS@ÎOq\x1cxiF@V,~SXÿS@\x8bÄ\x045|iF@\x81$ìÛIÿS@Ä&2s\x81iF@»\x9d}åAÿS@zªCn\x86iF@û\x07\x91\x0c9ÿS@Í!©\x85\x92iF@AI'
+sec=88 name='GEO-SHP file' va=0x39efa78 term='awb' ctx='\x9b\x8fk£N@XW\x05j1Wb@Þv¡¹N£N@þd\x8c\x0f3Wb@\x89]ÛÛ-£N@{Ü·Z\'Wb@\t\x15\x1c^\x10£N@âç¿\x07/Wb@\x91ñ(\x95ð¢N@}?5^:Wb@ÈÎÛØì¢N@\x14\\¬¨AWb@4K\x02ÔÔ¢N@Iö\x085CWb@\x14?ÆÜµ¢N@\tÿ"hLWb@x\x96 #\xa0¢N@C<\x12/OWb@\x15\x1c^\x10\x91¢N@B¯?\x89OWb@\x1d;¨Äu¢N@¤úÎ/JWb@N\nó\x1eg¢N@X8IóGWb@P\x89ë\x18W¢N@\x1fL\x8a\x8fOWb@Á«åÎL¢N@&R\x9aÍcWb@\x9bÿW\x1d9¢N@&UÛMpWb@Çô\x84%\x1e¢N@\x160\x81[wWb@)Bêvö¡N@\x1b¹nJyWb@Å\x8d['
+sec=88 name='GEO-SHP file' va=0x39f0ce8 term='awb' ctx='\x14\x94¢\x81N@\x80H¿}\x1dWb@\x0b^ô\x15¤\x81N@\x83\x86þ\t.Wb@Aðøö®\x81N@]p\x06\x7f?Wb@/n£\x01¼\x81N@,Õ\x05¼LWb@\x8a!9\x99¸\x81N@Õ\\n0TWb@ÿÌ >°\x81N@\x81ë\x8a\x19aWb@&VF#\x9f\x81N@\x9b\x03\x04stWb@<3Áp®\x81N@\x1då`6\x81Wb@\x80\x0f^»´\x81N@*Ê¥ñ\x8bWb@ìÜ´\x19§\x81N@4\x83øÀ\x8eWb@p\x98h\x90\x82\x81N@Q¾\xa0\x85\x84Wb@î\x96ä\x80]\x81N@B&\x199\x8bWb@_\x7f\x12\x9f;\x81N@nú³\x1f©Wb@\x8e¬ü2\x18\x81N@"3\x17¸¼Wb@\x82\xad\x12,\x0e\x81N@&\x1b\x0f¶ØWb@å\nïr\x11\x81N@Ö¨\x87hôWb@\x87\x870~\x1a\x81N@\x88Ú6\x8c\x02Xb@Éª\x08'
+sec=88 name='GEO-SHP file' va=0x3d6e9d8 term='awb' ctx="<º\x11.2Àl\x94õ\x9b\tXb@\x9cß0Ñ -2ÀH\x89]ÛÛWb@X\x1bc'¼,2ÀG ^×¯Wb@XW\x05j1,2À$cµù\x7fWb@\x1e6\x91\x99\x0b,2ÀæWs\x80`Wb@×\x153ÂÛ+2À\x7f\x85Ì\x95AWb@pÒ4(\x9a+2Àä\x15\x88\x9e\x14Wb@\x832\x8d&\x17+2Àc³#Õ÷Vb@,J\tÁª*2Àx\x80'-ÜVb@\x06e\x1aM.*2À\t8\x84*µVb@\x86ädâV)2À?æ\x03\x02\x9dVb@¯yUgµ(2À\x1a¢\n\x7f\x86Vb@&Ãñ|\x06(2Àê{\rÁqVb@9*7QK'2À\x05¥hå^Vb@°9\x07Ï\x84&2ÀÞ\x90F\x05NVb@9c\x98\x13´%2ÀÚ\x91ê;?Vb@\x1f\x10èLÚ$2À¹û\x1c\x1f-Vb@n0Ô"
+sec=88 name='GEO-SHP file' va=0x3d6ebf8 term='awb' ctx='B;§\x112À\x1f\x84\x80|\tWb@\x87kµ\x87½\x102Àó\x04ÂN1Wb@¡ÚàDô\x0f2À\x97ä\x80]MWb@Ä&2s\x81\x0f2À^\x80}tjWb@ö^|Ñ\x1e\x0f2À\x8dCý.lWb@rÞÿÇ\t\x0f2Àìú\x05»aWb@\x9aé^\'õ\r2À\x08\x02dèXWb@Ó\x15l#\x9e\x0c2Ààc°âTWb@ÒßKáA\x0b2À"9\x99¸UWb@äHg`ä\t2ÀãÃìe[Wb@\x13c\x99~\x89\x082À&R\x9aÍcWb@\x94ú²´S\x072À\x16\x13\x9b\x8fkWb@`|áC\x89\x062À{K9_lWb@6Y£\x1e¢\x052ÀÇó\x19PoWb@v4\x0eõ»\x042À4¼Y\x83wWb@Ä²\x99CR\x032À\tkcì\x84Wb@\x96\x94»Ïñ\x012Àæ>9\n\x90Wb@Ê\x8d"'
+sec=88 name='GEO-SHP file' va=0x3df8b3c term='awb' ctx='[Y¢½CÀô\x15¤\x19\x8bWb@ñ\x9e\x03Ë\x11¾CÀ\x1fôlV}Wb@\x9cá\x06|~¾CÀK\xad÷\x1bmWb@\x12KÊÝç¾CÀ\x01÷<\x7fZWb@\x7f¢²aM¿CÀ³Dg\x99EWb@\xad¦ë\x89®¿CÀ2uWvAWb@>\x07\x96#dÀCÀYÂÚ\x18;Wb@Ñ>VðÛÀCÀ´Ë·>,Wb@GV~\x19\x8cÁCÀ£w*à\x1eWb@<f\xa02þÁCÀß\x8c\x9a¯\x12Wb@º×I}YÂCÀøÿqÂ\x04Wb@þ~1[²ÂCÀ\n\x85\x088\x04Wb@´vÛ\x85æÂCÀXãl:\x02Wb@\xad\x8ap\x93QÃCÀrÁ\x19üýVb@^ò?ù»ÃCÀlZ)\x04òVb@á·!ÆkÄCÀ=,Ô\x9aæVb@\x9a\x95íCÞÄCÀÁÈË\x9aØVb@ïá\x92'
+sec=88 name='GEO-SHP file' va=0x3e5f0ac term='awb' ctx="'f½\x04BÀ¦',ñ\x80Wb@)èö\x92Æ\x04BÀJÒ5\x93oWb@\x9bÉ7ÛÜ\x04BÀÃ\x9evøkWb@\x14³^\x0cå\x04BÀ\x95\x82n/iWb@\r«x#ó\x04BÀ\x7fö#EdWb@~Æ\x85\x03!\x05BÀ.\x049(aWb@ÓÞà\x0b\x93\x05BÀìú\x05»aWb@R\nº½¤\x05BÀÏIï\x1b_Wb@K\x02ÔÔ²\x05BÀlì\x12Õ[Wb@(,ñ\x80²\x05BÀ\x12¡\x11l\\Wb@=¸;k·\x05BÀÅ\x03Ê¦\\Wb@\x12½\x8cb¹\x05BÀ\x1c\x99Gþ`Wb@DúíëÀ\x05BÀ\x07xÒÂeWb@¡\x83.áÐ\x05BÀA\x0eJ\x98iWb@}\x96çÁÝ\x05BÀÃ¸\x1bDkWb@\n»(zà\x05BÀÈA\t3mWb@ý¤Ú§ã\x05BÀnÜb~nWb@á'\x0e"
+sec=88 name='GEO-SHP file' va=0x3e5f0bc term='awb' ctx="ö\x92Æ\x04BÀJÒ5\x93oWb@\x9bÉ7ÛÜ\x04BÀÃ\x9evøkWb@\x14³^\x0cå\x04BÀ\x95\x82n/iWb@\r«x#ó\x04BÀ\x7fö#EdWb@~Æ\x85\x03!\x05BÀ.\x049(aWb@ÓÞà\x0b\x93\x05BÀìú\x05»aWb@R\nº½¤\x05BÀÏIï\x1b_Wb@K\x02ÔÔ²\x05BÀlì\x12Õ[Wb@(,ñ\x80²\x05BÀ\x12¡\x11l\\Wb@=¸;k·\x05BÀÅ\x03Ê¦\\Wb@\x12½\x8cb¹\x05BÀ\x1c\x99Gþ`Wb@DúíëÀ\x05BÀ\x07xÒÂeWb@¡\x83.áÐ\x05BÀA\x0eJ\x98iWb@}\x96çÁÝ\x05BÀÃ¸\x1bDkWb@\n»(zà\x05BÀÈA\t3mWb@ý¤Ú§ã\x05BÀnÜb~nWb@á'\x0e\xa0ß\x05BÀ\x15\x91a\x15oWb@}\x96ç"
+sec=88 name='GEO-SHP file' va=0x3e6abdc term='awb' ctx='t%\x02ùAÀ²c#\x10/wb@KçÃ³\x04ùAÀ\x9fvøk2wb@[ê ¯\x07ùAÀ\x7fõ¸o5wb@Ð~¤\x88\x0cùAÀ\xad\x84î\x928wb@°É\x1aõ\x10ùAÀRD\x86U<wb@ò\tÙy\x1bùAÀÇK7\x89Awb@ºI\x0c\x02+ùAÀ\x07`\x03"Dwb@5\x9bÇa0ùAÀ$¸\x91²Ewb@ëR#ô3ùAÀ:\x92Ë\x7fHwb@\x0b%\x93S;ùAÀ¢DK\x1eOwb@ò}q©JùAÀ*¬TPQwb@ÅæãÚPùAÀþb¶dUwb@CYøúZùAÀ ë©ÕWwb@·í{Ô_ùAÀÀzÜ·Zwb@ö@+0dùAÀk\x9e#ò]wb@¥\x9fpvkùAÀ\x04Wy\x02awb@¢ÏG\x19qùAÀIô2\x8aewb@\x8cøN'
+sec=88 name='GEO-SHP file' va=0x3e6ac7c term='awb' ctx="q©JùAÀ*¬TPQwb@ÅæãÚPùAÀþb¶dUwb@CYøúZùAÀ ë©ÕWwb@·í{Ô_ùAÀÀzÜ·Zwb@ö@+0dùAÀk\x9e#ò]wb@¥\x9fpvkùAÀ\x04Wy\x02awb@¢ÏG\x19qùAÀIô2\x8aewb@\x8cøNÌzùAÀ0ñGQgwb@\x89(&o\x80ùAÀî&ø¦iwb@×\x16\x9e\x97\x8aùAÀÔÕ\x1d\x8bmwb@>²¹j\x9eùAÀ\x14]\x17~pwb@õºE`¬ùAÀG\x02\r6uwb@\x1d\x03²×»ùAÀáaÚ7wwb@Àç\x87\x11ÂùAÀÓK\x8cezwb@&þ(êÌùAÀ\x0c\x07B²\x80wb@á'\x0e\xa0ßùAÀæ!S>\x84wb@wö\x95\x07éùAÀ+¥gz\x89wb@_·\x08"
+sec=88 name='GEO-SHP file' va=0x3ee71a8 term='awb' ctx='²×»ùAÀ\x14]\x17~pwb@õºE`¬ùAÀÔÕ\x1d\x8bmwb@>²¹j\x9eùAÀî&ø¦iwb@×\x16\x9e\x97\x8aùAÀ0ñGQgwb@\x89(&o\x80ùAÀIô2\x8aewb@\x8cøNÌzùAÀ\x04Wy\x02awb@¢ÏG\x19qùAÀk\x9e#ò]wb@¥\x9fpvkùAÀÀzÜ·Zwb@ö@+0dùAÀ ë©ÕWwb@·í{Ô_ùAÀþb¶dUwb@CYøúZùAÀ*¬TPQwb@ÅæãÚPùAÀ¢DK\x1eOwb@ò}q©JùAÀ:\x92Ë\x7fHwb@\x0b%\x93S;ùAÀ$¸\x91²Ewb@ëR#ô3ùAÀ\x07`\x03"Dwb@5\x9bÇa0ùAÀÇK7\x89Awb@ºI\x0c\x02+ùAÀRD\x86U<wb@ò\tÙ'
+sec=88 name='GEO-SHP file' va=0x3ee7248 term='awb' ctx='øúZùAÀ*¬TPQwb@ÅæãÚPùAÀ¢DK\x1eOwb@ò}q©JùAÀ:\x92Ë\x7fHwb@\x0b%\x93S;ùAÀ$¸\x91²Ewb@ëR#ô3ùAÀ\x07`\x03"Dwb@5\x9bÇa0ùAÀÇK7\x89Awb@ºI\x0c\x02+ùAÀRD\x86U<wb@ò\tÙy\x1bùAÀ\xad\x84î\x928wb@°É\x1aõ\x10ùAÀ\x7fõ¸o5wb@Ð~¤\x88\x0cùAÀ\x9fvøk2wb@[ê ¯\x07ùAÀ²c#\x10/wb@KçÃ³\x04ùAÀõ-sº,wb@Ï-t%\x02ùAÀ\t¨p\x04)wb@Tt$\x97ÿøAÀòÍ67&wb@\x82\x90,`\x02ùAÀ}\x05iÆ"wb@û\xad\x9d(\tùAÀj\x15ý¡\x19wb@)ç\x8b½\x17ùAÀH4\x81"\x16wb@GÌì'
+sec=88 name='GEO-SHP file' va=0x3ef2d68 term='awb' ctx=".áÐ\x05BÀ\x1c\x99Gþ`Wb@DúíëÀ\x05BÀÅ\x03Ê¦\\Wb@\x12½\x8cb¹\x05BÀ\x12¡\x11l\\Wb@=¸;k·\x05BÀlì\x12Õ[Wb@(,ñ\x80²\x05BÀÏIï\x1b_Wb@K\x02ÔÔ²\x05BÀìú\x05»aWb@R\nº½¤\x05BÀ.\x049(aWb@ÓÞà\x0b\x93\x05BÀ\x7fö#EdWb@~Æ\x85\x03!\x05BÀ\x95\x82n/iWb@\r«x#ó\x04BÀÃ\x9evøkWb@\x14³^\x0cå\x04BÀJÒ5\x93oWb@\x9bÉ7ÛÜ\x04BÀ¦',ñ\x80Wb@)èö\x92Æ\x04BÀ\x1cðùa\x84Wb@F|'f½\x04BÀh?RD\x86Wb@ø\x8d¯=³\x04BÀ!\x93\x8c\x9c\x85Wb@øSã¥\x9b\x04BÀ!\xad1è\x84Wb@\x1d\x92Z(\x99\x04BÀ\x0c\x07B²\x80Wb@\x9bþì"
+sec=88 name='GEO-SHP file' va=0x3ef2d78 term='awb' ctx="íëÀ\x05BÀÅ\x03Ê¦\\Wb@\x12½\x8cb¹\x05BÀ\x12¡\x11l\\Wb@=¸;k·\x05BÀlì\x12Õ[Wb@(,ñ\x80²\x05BÀÏIï\x1b_Wb@K\x02ÔÔ²\x05BÀìú\x05»aWb@R\nº½¤\x05BÀ.\x049(aWb@ÓÞà\x0b\x93\x05BÀ\x7fö#EdWb@~Æ\x85\x03!\x05BÀ\x95\x82n/iWb@\r«x#ó\x04BÀÃ\x9evøkWb@\x14³^\x0cå\x04BÀJÒ5\x93oWb@\x9bÉ7ÛÜ\x04BÀ¦',ñ\x80Wb@)èö\x92Æ\x04BÀ\x1cðùa\x84Wb@F|'f½\x04BÀh?RD\x86Wb@ø\x8d¯=³\x04BÀ!\x93\x8c\x9c\x85Wb@øSã¥\x9b\x04BÀ!\xad1è\x84Wb@\x1d\x92Z(\x99\x04BÀ\x0c\x07B²\x80Wb@\x9bþìG\x8a\x04BÀPSËÖzWb@$}Z"
+sec=88 name='GEO-SHP file' va=0x3fd0148 term='hmi' ctx='A\x9c\x873\x18@ÔïÂÖlmI@ÁV\t\x16\x873\x18@"\x8d\n\x9clmI@8»µL\x863\x18@\x10"\x19rlmI@\x1c\n\x9f\xad\x833\x18@ìK6\x1elmI@é\r÷\x91[3\x18@\x0cÍu\x1aimI@O;ü5Y3\x18@¹röÎhmI@Ò\x19\x18yY3\x18@6\x94Ú\x8bhmI@`r£ÈZ3\x18@â9[@hmI@\x8eZaú^3\x18@ïç\x14ägmI@»B\x1f,c3\x18@\x9b\x8d\x95\x98gmI@\'JB"m3\x18@\x8a"¤ngmI@Ø\x10\x1c\x97q3\x18@\x8a"¤ngmI@\x05ùÙÈu3\x18@é*Ý]gmI@¤\x88\x0c«x3\x18@x·²DgmI@8\x9eÏ\x80z3\x18@\x07D\x88+gmI@w½4E\x803\x18@`\x8f\x89\x94fmI@\x0bÓ÷\x1a\x823\x18@\x96\x04¨©emI@>xí'
+sec=88 name='GEO-SHP file' va=0x3fd0158 term='hmi' ctx='\t\x16\x873\x18@"\x8d\n\x9clmI@8»µL\x863\x18@\x10"\x19rlmI@\x1c\n\x9f\xad\x833\x18@ìK6\x1elmI@é\r÷\x91[3\x18@\x0cÍu\x1aimI@O;ü5Y3\x18@¹röÎhmI@Ò\x19\x18yY3\x18@6\x94Ú\x8bhmI@`r£ÈZ3\x18@â9[@hmI@\x8eZaú^3\x18@ïç\x14ägmI@»B\x1f,c3\x18@\x9b\x8d\x95\x98gmI@\'JB"m3\x18@\x8a"¤ngmI@Ø\x10\x1c\x97q3\x18@\x8a"¤ngmI@\x05ùÙÈu3\x18@é*Ý]gmI@¤\x88\x0c«x3\x18@x·²DgmI@8\x9eÏ\x80z3\x18@\x07D\x88+gmI@w½4E\x803\x18@`\x8f\x89\x94fmI@\x0bÓ÷\x1a\x823\x18@\x96\x04¨©emI@>xíÒ\x863\x18@Ù\'\x80bdmI@ÌÐx'
+sec=88 name='GEO-SHP file' va=0x3fd0168 term='hmi' ctx='µL\x863\x18@\x10"\x19rlmI@\x1c\n\x9f\xad\x833\x18@ìK6\x1elmI@é\r÷\x91[3\x18@\x0cÍu\x1aimI@O;ü5Y3\x18@¹röÎhmI@Ò\x19\x18yY3\x18@6\x94Ú\x8bhmI@`r£ÈZ3\x18@â9[@hmI@\x8eZaú^3\x18@ïç\x14ägmI@»B\x1f,c3\x18@\x9b\x8d\x95\x98gmI@\'JB"m3\x18@\x8a"¤ngmI@Ø\x10\x1c\x97q3\x18@\x8a"¤ngmI@\x05ùÙÈu3\x18@é*Ý]gmI@¤\x88\x0c«x3\x18@x·²DgmI@8\x9eÏ\x80z3\x18@\x07D\x88+gmI@w½4E\x803\x18@`\x8f\x89\x94fmI@\x0bÓ÷\x1a\x823\x18@\x96\x04¨©emI@>xíÒ\x863\x18@Ù\'\x80bdmI@ÌÐx"\x883\x18@Í\xad\x10VcmI@ÁV\t'
+sec=88 name='GEO-SHP file' va=0x3fd0518 term='hmi' ctx="&5´1\x18@ý÷àµKmI@c^G\x1c²1\x18@\t¦\x9aYKmI@Xä×\x0f±1\x18@ÂùÔ±JmI@Xä×\x0f±1\x18@¼<\x9d+JmI@ÄÎ\x14:¯1\x18@\x16\x88\x9e\x94ImI@\x97æV\x08«1\x18@\x9fW<õHmI@ìÜ´\x19§1\x18@\x1cy ²HmI@\x8bO\x010\x9e1\x18@('ÚUHmI@¢&ú|\x941\x18@¦H¾\x12HmI@¹ýòÉ\x8a1\x18@4Õ\x93ùGmI@\x03]û\x02z1\x18@X«vMHmI@ÊúÍÄt1\x18@X«vMHmI@øÅ¥*m1\x18@vÄ!\x1bHmI@%®c\\q1\x18@â®^EFmI@¨o\x99Óe1\x18@\x8fTßùEmI@çT2|T1\x18@`\x04\x8d\x99DmI@\x03Ì|\x07?1\x18@wøk²FmI@MHk"
+sec=88 name='GEO-SHP file' va=0x3fd0528 term='hmi' ctx="G\x1c²1\x18@\t¦\x9aYKmI@Xä×\x0f±1\x18@ÂùÔ±JmI@Xä×\x0f±1\x18@¼<\x9d+JmI@ÄÎ\x14:¯1\x18@\x16\x88\x9e\x94ImI@\x97æV\x08«1\x18@\x9fW<õHmI@ìÜ´\x19§1\x18@\x1cy ²HmI@\x8bO\x010\x9e1\x18@('ÚUHmI@¢&ú|\x941\x18@¦H¾\x12HmI@¹ýòÉ\x8a1\x18@4Õ\x93ùGmI@\x03]û\x02z1\x18@X«vMHmI@ÊúÍÄt1\x18@X«vMHmI@øÅ¥*m1\x18@vÄ!\x1bHmI@%®c\\q1\x18@â®^EFmI@¨o\x99Óe1\x18@\x8fTßùEmI@çT2|T1\x18@`\x04\x8d\x99DmI@\x03Ì|\x07?1\x18@wøk²FmI@MHk\x0c:1\x18@¦|\x08ªFmI@_b,"
+sec=88 name='GEO-SHP file' va=0x3fd0538 term='hmi' ctx="×\x0f±1\x18@ÂùÔ±JmI@Xä×\x0f±1\x18@¼<\x9d+JmI@ÄÎ\x14:¯1\x18@\x16\x88\x9e\x94ImI@\x97æV\x08«1\x18@\x9fW<õHmI@ìÜ´\x19§1\x18@\x1cy ²HmI@\x8bO\x010\x9e1\x18@('ÚUHmI@¢&ú|\x941\x18@¦H¾\x12HmI@¹ýòÉ\x8a1\x18@4Õ\x93ùGmI@\x03]û\x02z1\x18@X«vMHmI@ÊúÍÄt1\x18@X«vMHmI@øÅ¥*m1\x18@vÄ!\x1bHmI@%®c\\q1\x18@â®^EFmI@¨o\x99Óe1\x18@\x8fTßùEmI@çT2|T1\x18@`\x04\x8d\x99DmI@\x03Ì|\x07?1\x18@wøk²FmI@MHk\x0c:1\x18@¦|\x08ªFmI@_b,Ó/1\x18@¦|\x08ªFmI@\x04\x92°"
+sec=88 name='GEO-SHP file' va=0x3fd0548 term='hmi' ctx="×\x0f±1\x18@¼<\x9d+JmI@ÄÎ\x14:¯1\x18@\x16\x88\x9e\x94ImI@\x97æV\x08«1\x18@\x9fW<õHmI@ìÜ´\x19§1\x18@\x1cy ²HmI@\x8bO\x010\x9e1\x18@('ÚUHmI@¢&ú|\x941\x18@¦H¾\x12HmI@¹ýòÉ\x8a1\x18@4Õ\x93ùGmI@\x03]û\x02z1\x18@X«vMHmI@ÊúÍÄt1\x18@X«vMHmI@øÅ¥*m1\x18@vÄ!\x1bHmI@%®c\\q1\x18@â®^EFmI@¨o\x99Óe1\x18@\x8fTßùEmI@çT2|T1\x18@`\x04\x8d\x99DmI@\x03Ì|\x07?1\x18@wøk²FmI@MHk\x0c:1\x18@¦|\x08ªFmI@_b,Ó/1\x18@¦|\x08ªFmI@\x04\x92°o'1\x18@\x94\x11\x17\x80FmI@ÅrK"
+sec=88 name='GEO-SHP file' va=0x3fd0568 term='hmi' ctx="V\x08«1\x18@\x9fW<õHmI@ìÜ´\x19§1\x18@\x1cy ²HmI@\x8bO\x010\x9e1\x18@('ÚUHmI@¢&ú|\x941\x18@¦H¾\x12HmI@¹ýòÉ\x8a1\x18@4Õ\x93ùGmI@\x03]û\x02z1\x18@X«vMHmI@ÊúÍÄt1\x18@X«vMHmI@øÅ¥*m1\x18@vÄ!\x1bHmI@%®c\\q1\x18@â®^EFmI@¨o\x99Óe1\x18@\x8fTßùEmI@çT2|T1\x18@`\x04\x8d\x99DmI@\x03Ì|\x07?1\x18@wøk²FmI@MHk\x0c:1\x18@¦|\x08ªFmI@_b,Ó/1\x18@¦|\x08ªFmI@\x04\x92°o'1\x18@\x94\x11\x17\x80FmI@ÅrK«!1\x18@â®^EFmI@{ö\\¦&1\x18@6=((EmI@HQg"
+sec=88 name='GEO-SHP file' va=0x3fd0578 term='hmi' ctx="´\x19§1\x18@\x1cy ²HmI@\x8bO\x010\x9e1\x18@('ÚUHmI@¢&ú|\x941\x18@¦H¾\x12HmI@¹ýòÉ\x8a1\x18@4Õ\x93ùGmI@\x03]û\x02z1\x18@X«vMHmI@ÊúÍÄt1\x18@X«vMHmI@øÅ¥*m1\x18@vÄ!\x1bHmI@%®c\\q1\x18@â®^EFmI@¨o\x99Óe1\x18@\x8fTßùEmI@çT2|T1\x18@`\x04\x8d\x99DmI@\x03Ì|\x07?1\x18@wøk²FmI@MHk\x0c:1\x18@¦|\x08ªFmI@_b,Ó/1\x18@¦|\x08ªFmI@\x04\x92°o'1\x18@\x94\x11\x17\x80FmI@ÅrK«!1\x18@â®^EFmI@{ö\\¦&1\x18@6=((EmI@HQgî!1\x18@w,¶IEmI@\x04uÊ"
+sec=88 name='GEO-SHP file' va=0x3fd0588 term='hmi' ctx="\x010\x9e1\x18@('ÚUHmI@¢&ú|\x941\x18@¦H¾\x12HmI@¹ýòÉ\x8a1\x18@4Õ\x93ùGmI@\x03]û\x02z1\x18@X«vMHmI@ÊúÍÄt1\x18@X«vMHmI@øÅ¥*m1\x18@vÄ!\x1bHmI@%®c\\q1\x18@â®^EFmI@¨o\x99Óe1\x18@\x8fTßùEmI@çT2|T1\x18@`\x04\x8d\x99DmI@\x03Ì|\x07?1\x18@wøk²FmI@MHk\x0c:1\x18@¦|\x08ªFmI@_b,Ó/1\x18@¦|\x08ªFmI@\x04\x92°o'1\x18@\x94\x11\x17\x80FmI@ÅrK«!1\x18@â®^EFmI@{ö\\¦&1\x18@6=((EmI@HQgî!1\x18@w,¶IEmI@\x04uÊ£\x1b1\x18@×4ï8EmI@BwI"
+sec=88 name='GEO-SHP file' va=0x405ed1c term='awb' ctx="-ÌB\x0b6@2YÜ\x7fdZB@î\x08§\x05/\n6@¸=Ab»YB@Z\r\x89{,\t6@ÃÖlå%YB@èLÚTÝ\x076@µ¥\x0eòzXB@0\x0e.\x1ds\x066@[\\ã3ÙWB@\x85w¹\x88ï\x046@ü¦°RAWB@µ\x88(&o\x046@~©\x9f7\x15WB@éóQF\\\x046@h\x92XRîVB@f¡\x9dÓ,\x046@í\x82Á5wVB@\xa0áÍ\x1a¼\x036@×Pj/¢UB@åD»\n)\x036@6çà\x99ÐTB@}w+Kt\x026@4Ù?O\x03TB@\x02-]Á6\x026@ú}ÿæÅSB@\x9dõ)Çd\x016@Yý\x11\x86\x01SB@V\x80ï6o|6@!Ë\x82\x89?RB@\x1f\x83\x15§Zÿ5@\x04®+f\x84QB@\x86V'g(þ5@Z½ÃíÐPB@y[é"
+sec=88 name='GEO-SHP file' va=0x413be1c term='hmi' ctx="k\x0c:1\x18@¦|\x08ªFmI@\x03Ì|\x07?1\x18@wøk²FmI@çT2|T1\x18@`\x04\x8d\x99DmI@¨o\x99Óe1\x18@\x8fTßùEmI@%®c\\q1\x18@â®^EFmI@øÅ¥*m1\x18@vÄ!\x1bHmI@ÊúÍÄt1\x18@X«vMHmI@\x03]û\x02z1\x18@X«vMHmI@¹ýòÉ\x8a1\x18@4Õ\x93ùGmI@¢&ú|\x941\x18@¦H¾\x12HmI@\x8bO\x010\x9e1\x18@('ÚUHmI@ìÜ´\x19§1\x18@\x1cy ²HmI@\x97æV\x08«1\x18@\x9fW<õHmI@ÄÎ\x14:¯1\x18@\x16\x88\x9e\x94ImI@Xä×\x0f±1\x18@¼<\x9d+JmI@Xä×\x0f±1\x18@ÂùÔ±JmI@c^G\x1c²1\x18@\t¦\x9aYKmI@zR&"
+sec=88 name='GEO-SHP file' va=0x413be2c term='hmi' ctx="|\x07?1\x18@wøk²FmI@çT2|T1\x18@`\x04\x8d\x99DmI@¨o\x99Óe1\x18@\x8fTßùEmI@%®c\\q1\x18@â®^EFmI@øÅ¥*m1\x18@vÄ!\x1bHmI@ÊúÍÄt1\x18@X«vMHmI@\x03]û\x02z1\x18@X«vMHmI@¹ýòÉ\x8a1\x18@4Õ\x93ùGmI@¢&ú|\x941\x18@¦H¾\x12HmI@\x8bO\x010\x9e1\x18@('ÚUHmI@ìÜ´\x19§1\x18@\x1cy ²HmI@\x97æV\x08«1\x18@\x9fW<õHmI@ÄÎ\x14:¯1\x18@\x16\x88\x9e\x94ImI@Xä×\x0f±1\x18@¼<\x9d+JmI@Xä×\x0f±1\x18@ÂùÔ±JmI@c^G\x1c²1\x18@\t¦\x9aYKmI@zR&5´1\x18@ý÷àµKmI@Ä%Ç"
+sec=88 name='GEO-SHP file' va=0x413be3c term='hmi' ctx="2|T1\x18@`\x04\x8d\x99DmI@¨o\x99Óe1\x18@\x8fTßùEmI@%®c\\q1\x18@â®^EFmI@øÅ¥*m1\x18@vÄ!\x1bHmI@ÊúÍÄt1\x18@X«vMHmI@\x03]û\x02z1\x18@X«vMHmI@¹ýòÉ\x8a1\x18@4Õ\x93ùGmI@¢&ú|\x941\x18@¦H¾\x12HmI@\x8bO\x010\x9e1\x18@('ÚUHmI@ìÜ´\x19§1\x18@\x1cy ²HmI@\x97æV\x08«1\x18@\x9fW<õHmI@ÄÎ\x14:¯1\x18@\x16\x88\x9e\x94ImI@Xä×\x0f±1\x18@¼<\x9d+JmI@Xä×\x0f±1\x18@ÂùÔ±JmI@c^G\x1c²1\x18@\t¦\x9aYKmI@zR&5´1\x18@ý÷àµKmI@Ä%Ç\x9dÒ1\x18@2\x05k\x9cMmI@ý\x87ô"
+sec=88 name='GEO-SHP file' va=0x413be5c term='hmi' ctx="c\\q1\x18@â®^EFmI@øÅ¥*m1\x18@vÄ!\x1bHmI@ÊúÍÄt1\x18@X«vMHmI@\x03]û\x02z1\x18@X«vMHmI@¹ýòÉ\x8a1\x18@4Õ\x93ùGmI@¢&ú|\x941\x18@¦H¾\x12HmI@\x8bO\x010\x9e1\x18@('ÚUHmI@ìÜ´\x19§1\x18@\x1cy ²HmI@\x97æV\x08«1\x18@\x9fW<õHmI@ÄÎ\x14:¯1\x18@\x16\x88\x9e\x94ImI@Xä×\x0f±1\x18@¼<\x9d+JmI@Xä×\x0f±1\x18@ÂùÔ±JmI@c^G\x1c²1\x18@\t¦\x9aYKmI@zR&5´1\x18@ý÷àµKmI@Ä%Ç\x9dÒ1\x18@2\x05k\x9cMmI@ý\x87ôÛ×1\x18@äg#×MmI@üÞ¦?û1\x18@I-\x94LNmI@$~Å"
+sec=88 name='GEO-SHP file' va=0x413be6c term='hmi' ctx="¥*m1\x18@vÄ!\x1bHmI@ÊúÍÄt1\x18@X«vMHmI@\x03]û\x02z1\x18@X«vMHmI@¹ýòÉ\x8a1\x18@4Õ\x93ùGmI@¢&ú|\x941\x18@¦H¾\x12HmI@\x8bO\x010\x9e1\x18@('ÚUHmI@ìÜ´\x19§1\x18@\x1cy ²HmI@\x97æV\x08«1\x18@\x9fW<õHmI@ÄÎ\x14:¯1\x18@\x16\x88\x9e\x94ImI@Xä×\x0f±1\x18@¼<\x9d+JmI@Xä×\x0f±1\x18@ÂùÔ±JmI@c^G\x1c²1\x18@\t¦\x9aYKmI@zR&5´1\x18@ý÷àµKmI@Ä%Ç\x9dÒ1\x18@2\x05k\x9cMmI@ý\x87ôÛ×1\x18@äg#×MmI@üÞ¦?û1\x18@I-\x94LNmI@$~Å\x1a.2\x18@®ò\x04ÂNmI@nQf"
+sec=88 name='GEO-SHP file' va=0x413be7c term='hmi' ctx="ÍÄt1\x18@X«vMHmI@\x03]û\x02z1\x18@X«vMHmI@¹ýòÉ\x8a1\x18@4Õ\x93ùGmI@¢&ú|\x941\x18@¦H¾\x12HmI@\x8bO\x010\x9e1\x18@('ÚUHmI@ìÜ´\x19§1\x18@\x1cy ²HmI@\x97æV\x08«1\x18@\x9fW<õHmI@ÄÎ\x14:¯1\x18@\x16\x88\x9e\x94ImI@Xä×\x0f±1\x18@¼<\x9d+JmI@Xä×\x0f±1\x18@ÂùÔ±JmI@c^G\x1c²1\x18@\t¦\x9aYKmI@zR&5´1\x18@ý÷àµKmI@Ä%Ç\x9dÒ1\x18@2\x05k\x9cMmI@ý\x87ôÛ×1\x18@äg#×MmI@üÞ¦?û1\x18@I-\x94LNmI@$~Å\x1a.2\x18@®ò\x04ÂNmI@nQf\x83L2\x18@ïá\x92ãNmI@K|þ"
+sec=88 name='GEO-SHP file' va=0x413be8c term='hmi' ctx="û\x02z1\x18@X«vMHmI@¹ýòÉ\x8a1\x18@4Õ\x93ùGmI@¢&ú|\x941\x18@¦H¾\x12HmI@\x8bO\x010\x9e1\x18@('ÚUHmI@ìÜ´\x19§1\x18@\x1cy ²HmI@\x97æV\x08«1\x18@\x9fW<õHmI@ÄÎ\x14:¯1\x18@\x16\x88\x9e\x94ImI@Xä×\x0f±1\x18@¼<\x9d+JmI@Xä×\x0f±1\x18@ÂùÔ±JmI@c^G\x1c²1\x18@\t¦\x9aYKmI@zR&5´1\x18@ý÷àµKmI@Ä%Ç\x9dÒ1\x18@2\x05k\x9cMmI@ý\x87ôÛ×1\x18@äg#×MmI@üÞ¦?û1\x18@I-\x94LNmI@$~Å\x1a.2\x18@®ò\x04ÂNmI@nQf\x83L2\x18@ïá\x92ãNmI@K|þ)U2\x18@aU½üNmI@\x8av\x15"
+sec=88 name='GEO-SHP file' va=0x413c23c term='hmi' ctx='ÙÈu3\x18@é*Ý]gmI@Ø\x10\x1c\x97q3\x18@\x8a"¤ngmI@\'JB"m3\x18@\x8a"¤ngmI@»B\x1f,c3\x18@\x9b\x8d\x95\x98gmI@\x8eZaú^3\x18@ïç\x14ägmI@`r£ÈZ3\x18@â9[@hmI@Ò\x19\x18yY3\x18@6\x94Ú\x8bhmI@O;ü5Y3\x18@¹röÎhmI@é\r÷\x91[3\x18@\x0cÍu\x1aimI@\x1c\n\x9f\xad\x833\x18@ìK6\x1elmI@8»µL\x863\x18@\x10"\x19rlmI@ÁV\t\x16\x873\x18@"\x8d\n\x9clmI@Ç\x13A\x9c\x873\x18@ÔïÂÖlmI@ªb*ý\x843\x18@Ú¬ú\\mmI@\x16Mg\'\x833\x18@¼\x93O\x8fmmI@ã§qo~3\x18@ài2ãmmI@\x05ùÙÈu3\x18@»_\x05ønmI@l&ß'
+sec=88 name='GEO-SHP file' va=0x413c24c term='hmi' ctx='\x1c\x97q3\x18@\x8a"¤ngmI@\'JB"m3\x18@\x8a"¤ngmI@»B\x1f,c3\x18@\x9b\x8d\x95\x98gmI@\x8eZaú^3\x18@ïç\x14ägmI@`r£ÈZ3\x18@â9[@hmI@Ò\x19\x18yY3\x18@6\x94Ú\x8bhmI@O;ü5Y3\x18@¹röÎhmI@é\r÷\x91[3\x18@\x0cÍu\x1aimI@\x1c\n\x9f\xad\x833\x18@ìK6\x1elmI@8»µL\x863\x18@\x10"\x19rlmI@ÁV\t\x16\x873\x18@"\x8d\n\x9clmI@Ç\x13A\x9c\x873\x18@ÔïÂÖlmI@ªb*ý\x843\x18@Ú¬ú\\mmI@\x16Mg\'\x833\x18@¼\x93O\x8fmmI@ã§qo~3\x18@ài2ãmmI@\x05ùÙÈu3\x18@»_\x05ønmI@l&ßls3\x18@Á\x1c=~omI@ã\x8a\x8b'
+sec=88 name='GEO-SHP file' va=0x413c25c term='hmi' ctx='B"m3\x18@\x8a"¤ngmI@»B\x1f,c3\x18@\x9b\x8d\x95\x98gmI@\x8eZaú^3\x18@ïç\x14ägmI@`r£ÈZ3\x18@â9[@hmI@Ò\x19\x18yY3\x18@6\x94Ú\x8bhmI@O;ü5Y3\x18@¹röÎhmI@é\r÷\x91[3\x18@\x0cÍu\x1aimI@\x1c\n\x9f\xad\x833\x18@ìK6\x1elmI@8»µL\x863\x18@\x10"\x19rlmI@ÁV\t\x16\x873\x18@"\x8d\n\x9clmI@Ç\x13A\x9c\x873\x18@ÔïÂÖlmI@ªb*ý\x843\x18@Ú¬ú\\mmI@\x16Mg\'\x833\x18@¼\x93O\x8fmmI@ã§qo~3\x18@ài2ãmmI@\x05ùÙÈu3\x18@»_\x05ønmI@l&ßls3\x18@Á\x1c=~omI@ã\x8a\x8b£r3\x18@ü\x1aI\x82pmI@ôÁ2'
+sec=88 name='GEO-SHP file' va=0x41a750c term='hmi' ctx="\x94\x84Dj,@]¿`7lmI@²ó66;j,@p^\x9cøjmI@\x9eÏ\x80z3j,@\x8ewGÆjmI@`°\x1b¶-j,@5`\x90ôimI@\x02\x10wõ*j,@_'õeimI@À\x03\x03\x08\x1fj,@\x18{/¾hmI@I\x9fVÑ\x1fj,@|S\x06\x0ehmI@/ÛN[#j,@\xadø\x86ÂgmI@\x1e¤§È!j,@À\x97Â\x83fmI@yW=`\x1ej,@\x02»\x9a<emI@¯Ì[u\x1dj,@\x85Í|\x17dmI@Ô\nÓ÷\x1aj,@ß\x18\x02\x80cmI@Wéî:\x1bj,@\x9e]¾õamI@¾\x16ôÞ\x18j,@i\x1cêwamI@\xadßLL\x17j,@òë\x87Ø`mI@\x90.6\xad\x14j,@±0DN_mI@Áæ\x1c<\x13j,@AñcÌ]mI@\x7f÷\x8e"
+sec=88 name='GEO-SHP file' va=0x41a751c term='hmi' ctx="66;j,@p^\x9cøjmI@\x9eÏ\x80z3j,@\x8ewGÆjmI@`°\x1b¶-j,@5`\x90ôimI@\x02\x10wõ*j,@_'õeimI@À\x03\x03\x08\x1fj,@\x18{/¾hmI@I\x9fVÑ\x1fj,@|S\x06\x0ehmI@/ÛN[#j,@\xadø\x86ÂgmI@\x1e¤§È!j,@À\x97Â\x83fmI@yW=`\x1ej,@\x02»\x9a<emI@¯Ì[u\x1dj,@\x85Í|\x17dmI@Ô\nÓ÷\x1aj,@ß\x18\x02\x80cmI@Wéî:\x1bj,@\x9e]¾õamI@¾\x16ôÞ\x18j,@i\x1cêwamI@\xadßLL\x17j,@òë\x87Ø`mI@\x90.6\xad\x14j,@±0DN_mI@Áæ\x1c<\x13j,@AñcÌ]mI@\x7f÷\x8e\x1a\x13j,@úD\x9e$]mI@h\x03°"
+sec=88 name='GEO-SHP file' va=0x41a774c term='hmi' ctx='ÿ¬ùi,@ò}q©JmI@ÿ®Ï\x9cõi,@\x0f\x97\x1cwJmI@îw(\nôi,@KÉr\x12JmI@-z§\x02îi,@F\x0c;\x8cImI@ÏÙ\x02Bëi,@\x16\x88\x9e\x94ImI@OË\x0f\\åi,@íô\x83ºHmI@ÉÿäïÞi,@dY0ñGmI@8ºJw×i,@ÿ\x93¿{GmI@\x99*\x18\x95Ôi,@\x88c]ÜFmI@à¹÷pÉi,@\x8fTßùEmI@qâ«\x1dÅi,@\x18$}ZEmI@\x9f\xad\x83\x83½i,@\x01üSªDmI@rÅÅQ¹i,@BëáËDmI@ÁþëÜ´i,@<.ªEDmI@aq8ó«i,@\x96y«®CmI@ý\x13\\¬¨i,@1´:9CmI@|ä\x84\t£i,@[{\x9fªBmI@P\x1d«'
+sec=88 name='GEO-SHP file' va=0x41c16fc term='hmi' ctx='ùÔ±ê*@y\x1fGsdMI@&\x199\x0b{ê*@JÏô\x12cMI@kdWZFê*@-ê\x93ÜaMI@\x9f[èJ\x04ê*@Â3¡IbMI@}\x05iÆ¢é*@+Nµ\x16fMI@VId\x1fdé*@ÑÎi\x16hMI@_EF\x07$é*@Ú¬ú\\mMI@²½\x16ôÞè*@ýN\x93\x19oMI@ñhã\x88µè*@0ô\x88ÑsMI@L¨àð\x82è*@«y\x8eÈwMI@Ï\x81å\x08\x19è*@|\x8dÒ¥\x7fMI@ò$é\x9aÉç*@ñ\x0eð¤\x85MI@£ x|{ç*@S\x048½\x8bMI@¬s\x0cÈ^ç*@â\\Ã\x0c\x8dMI@\x95Ea\x17Eç*@\x17\x9e\x97\x8a\x8dMI@@¾\x84\n\x0eç*@/ú\nÒ\x8cMI@*\x90ÙYôæ*@²Ø&\x15\x8dMI@»~Á'
+sec=88 name='GEO-SHP file' va=0x41c4afc term='hmi' ctx="züÞ¦*@x·²DgMI@²Ôz¿Ñ¦*@÷tuÇbMI@c'¼\x04§¦*@ô\x87f\x9e\\MI@\x80Ó»x?¦*@·Ð\x95\x08TMI@(¶\x82¦%¦*@Zd;ßOMI@Ëø÷\x19\x17¦*@oÓ\x9fýHMI@··[\x92\x03¦*@î\\\x18éEMI@k,am\x8c¥*@¹þ]\x9f9MI@¡¹N#-¥*@D\x19ªb*MI@à\x9eçO\x1b¥*@ÚÊKþ'MI@\x1fó\x01\x81Î¤*@`\xadÚ5!MI@ä/-ê\x93¤*@ª)É:\x1cMI@p³x±0¤*@¤l\x91´\x1bMI@W\x98¾×\x10¤*@8N\nó\x1eMI@º»Î\x86ü£*@Ov3£\x1fMI@keÂ/õ£*@\x90eÁÄ\x1fMI@$\x9c\x16¼è£*@aá$Í\x1fMI@¤SW"
+sec=88 name='GEO-SHP file' va=0x4428ff8 term='hmi' ctx='}s\x7f5\n@+¾¡ðÙLI@I\x12\x84+\xa00\n@È}«uâLI@\x02(F\x96Ì1\n@&4I,)MI@\x1e\x87Áü\x152\n@\xad¡Ô^DMI@²-\x03ÎR2\n@£\x95{\x81YMI@#,*ât2\n@T\xad\x85YhMI@gó8\x0cæ/\n@Ê©\x9dajMI@ðÃAB\x94/\n@§;O<gMI@ô¥·?\x17-\n@6\x94Ú\x8bhMI@\x05Ý^Ò\x18-\n@]¿`7lMI@Ýë¤¾,-\n@+k\x9bâqMI@\x83ÀÊ¡Eö\x18@Á:\x8e\x1f*KI@n1?74õ\x18@QLÞ|3KI@Åt!V\x7fô\x18@\x84½\x89!9KI@SvúA]ô\x18@A\x9a±h:KI@\x03|·yãô\x18@z6«>WKI@ß¨\x15¦ïõ\x18@\x8eÎù)\x8eKI@J\x07ë'
+sec=88 name='GEO-SHP file' va=0x4429028 term='hmi' ctx='Áü\x152\n@\xad¡Ô^DMI@²-\x03ÎR2\n@£\x95{\x81YMI@#,*ât2\n@T\xad\x85YhMI@gó8\x0cæ/\n@Ê©\x9dajMI@ðÃAB\x94/\n@§;O<gMI@ô¥·?\x17-\n@6\x94Ú\x8bhMI@\x05Ý^Ò\x18-\n@]¿`7lMI@Ýë¤¾,-\n@+k\x9bâqMI@\x83ÀÊ¡Eö\x18@Á:\x8e\x1f*KI@n1?74õ\x18@QLÞ|3KI@Åt!V\x7fô\x18@\x84½\x89!9KI@SvúA]ô\x18@A\x9a±h:KI@\x03|·yãô\x18@z6«>WKI@ß¨\x15¦ïõ\x18@\x8eÎù)\x8eKI@J\x07ëÿ\x1cö\x18@8Ø\x9b\x18\x92KI@?\x1eúîVö\x18@7p\x07ê\x94KI@Ì$ê\x05\x9fö\x18@õL/1\x96KI@\x05\x18\x96'
+sec=88 name='GEO-SHP file' va=0x469218c term='hmi' ctx="jÛ0´A@x^*6æmI@~q©J[´A@\x830·{¹mI@\x88Ú6\x8c\x82´A@ÎÃ\tL§mI@c¹¥Õ\x90´A@\x02c}\x03\x93mI@5\x7fLkÓ´A@\x94\x17\x99\x80_mI@\x162W\x06Õ´A@íô\x83ºHmI@í\x0bè\x85;µA@vãÝ\x91±lI@\x1c\x95\x9b¨¥µA@|¹O\x8e\x02lI@¯\x93ú²´µA@\x9fs·ë¥kI@ÄÎ\x14:¯µA@î?2\x1d:kI@èõ'ñ¹µA@\x1bÙ\x95\x96\x91jI@\x0fíc\x05¿µA@\x91\x7ff\x10\x1fjI@> Ð\x99´µA@1~\x1a÷æiI@v¦Ðy\x8dµA@Ýê9é}iI@©ú\x95Î\x87µA@h\x05\x86¬niI@%z\x19ÅrµA@\x14²ó66iI@·\x9cKqUµA@~\x01½pçhI@l³±"
+sec=88 name='GEO-SHP file' va=0x4695f94 term='awb' ctx='\x0eJ\x98\x1dI@»òY\x9e\x07WB@Q\x14è\x13y\x1eI@,Ô\x9aæ\x1dWB@\x91,`\x02·\x1eI@¿Òùð,WB@ÒÃÐêä\x1eI@\x1eÄÎ\x14:WB@\tÄëú\x05\x1fI@Ô\x81¬§VWB@\x16ö´Ã_\x1fI@È$#gaWB@d\x1eù\x83\x81\x1fI@s\x85w¹\x88WB@«ÏÕVì\x1fI@ó\x93j\x9f\x8eWB@Ü×\x81sF I@Ô·Ìé²XB@Ñ\x05õ-s"I@p\x08UjöXB@uÍä\x9bm"I@/Q½5°YB@K<\xa0lÊ!I@Ò:ª\x9a ZB@\x84»³vÛ!I@5\x0c\x1f\x11SZB@uÍä\x9bm"I@\x8f¥\x0f]P[B@\xadnõ\x9cô"I@\x0fÖÿ9Ì[B@%\x06\x81\x95C#I@ÝïP\x14è[B@\x96çÁÝY#I@c\x97¨Þ\x1a\\B@AH\x16'
+sec=88 name='GEO-SHP file' va=0x49e3520 term='awb' ctx='³vÛ!I@/Q½5°YB@K<\xa0lÊ!I@p\x08UjöXB@uÍä\x9bm"I@Ô·Ìé²XB@Ñ\x05õ-s"I@ó\x93j\x9f\x8eWB@Ü×\x81sF I@s\x85w¹\x88WB@«ÏÕVì\x1fI@È$#gaWB@d\x1eù\x83\x81\x1fI@Ô\x81¬§VWB@\x16ö´Ã_\x1fI@\x1eÄÎ\x14:WB@\tÄëú\x05\x1fI@¿Òùð,WB@ÒÃÐêä\x1eI@,Ô\x9aæ\x1dWB@\x91,`\x02·\x1eI@»òY\x9e\x07WB@Q\x14è\x13y\x1eI@\nº½¤1VB@\x0bA\x0eJ\x98\x1dI@/Q½5°UB@0Ø\rÛ\x16\x1dI@Óö¯¬4UB@ø6ýÙ\x8f\x1cI@©\x87ht\x07UB@MÖ¨\x87h\x1cI@»òY\x9e\x07SB@¹ü\x87ôÛ\x1bI@ÙÎ÷SãQB@\x06GÉ'
+sec=88 name='GEO-SHP file' va=0x49e7338 term='hmi' ctx="'ñ¹µA@\x1bÙ\x95\x96\x91jI@ÄÎ\x14:¯µA@î?2\x1d:kI@¯\x93ú²´µA@\x9fs·ë¥kI@\x1c\x95\x9b¨¥µA@|¹O\x8e\x02lI@í\x0bè\x85;µA@vãÝ\x91±lI@\x162W\x06Õ´A@íô\x83ºHmI@5\x7fLkÓ´A@\x94\x17\x99\x80_mI@c¹¥Õ\x90´A@\x02c}\x03\x93mI@\x88Ú6\x8c\x82´A@ÎÃ\tL§mI@~q©J[´A@\x830·{¹mI@\x82\x1ejÛ0´A@x^*6æmI@G\x03x\x0b$´A@\râ\x03;þmI@¾g$B#´A@õÖÀV\tnI@\x1aO\x04q\x1e´A@¨\x8a©ô\x13nI@W\x98¾×\x10´A@{¿Ñ\x8e\x1bnI@\x98M\x80aù³A@\x87l ]lnI@´\x90\x80Ñå³A@\x82|\x19:vnI@Ð\x0e¸"
+sec=88 name='GEO-SHP file' va=0x4b78574 term='hmi' ctx="\x83¤O+\n@ïTÀ=ÏMI@\x0e\x9e\tM\x12+\n@úÕ\x1c \x98MI@\x9dÖmPû-\n@º\x82mÄ\x93MI@Ýë¤¾,-\n@+k\x9bâqMI@\x05Ý^Ò\x18-\n@]¿`7lMI@ô¥·?\x17-\n@6\x94Ú\x8bhMI@ðÃAB\x94/\n@§;O<gMI@gó8\x0cæ/\n@Ê©\x9dajMI@#,*ât2\n@T\xad\x85YhMI@²-\x03ÎR2\n@£\x95{\x81YMI@\x1e\x87Áü\x152\n@\xad¡Ô^DMI@\x02(F\x96Ì1\n@&4I,)MI@I\x12\x84+\xa00\n@È}«uâLI@\x1e¦}s\x7f5\n@+¾¡ðÙLI@\x02G\x02\r65\n@\x99ó\x8c}ÉLI@%A¸\x02\n5\n@ÜJ¯ÍÆLI@ñI'\x12L5\n@\x8bÀXßÀLI@@/Ü"
+sec=88 name='GEO-SHP file' va=0x4b785a4 term='hmi' ctx="¤¾,-\n@+k\x9bâqMI@\x05Ý^Ò\x18-\n@]¿`7lMI@ô¥·?\x17-\n@6\x94Ú\x8bhMI@ðÃAB\x94/\n@§;O<gMI@gó8\x0cæ/\n@Ê©\x9dajMI@#,*ât2\n@T\xad\x85YhMI@²-\x03ÎR2\n@£\x95{\x81YMI@\x1e\x87Áü\x152\n@\xad¡Ô^DMI@\x02(F\x96Ì1\n@&4I,)MI@I\x12\x84+\xa00\n@È}«uâLI@\x1e¦}s\x7f5\n@+¾¡ðÙLI@\x02G\x02\r65\n@\x99ó\x8c}ÉLI@%A¸\x02\n5\n@ÜJ¯ÍÆLI@ñI'\x12L5\n@\x8bÀXßÀLI@@/Ü¹02\n@<\x9f\x01õfLI@«±\x84µ16\n@LQ.\x8d_LI@\x11\x8fÄËÓ9\n@/Oç\x8aRLI@Ä\tL"
+sec=88 name='GEO-SHP file' va=0x4c7b9e4 term='hmi' ctx='ª\x97ß\x050@òí]\x83¾LI@¬pËGR\x060@\x1e\x17Õ"¢LI@\x1eR\x0c\x90h\x060@Ñy\x8d]¢LI@Òþ\x07X«\x060@\x82ÿ\xaddÇLI@\x87Þâá=\x070@\x99\x0f\x08t&MI@8\x9eÏ\x80z\x070@.ä\x11ÜHMI@\x9c¢#¹ü\x070@XSY\x14vMI@ \tûv\x12\t0@\x85@.qäMI@OÍå\x06C\t0@á\x95$ÏõMI@°u©\x11ú\t0@\x7fk\'JBNI@\x03²×»?\n0@KÌ³\x92VNI@\x92Z(\x99\x9c\n0@B\x96\x05\x13\x7fNI@x\n¹RÏ\n0@\x10\x93p!\x8fNI@MIÖáè\n0@ \x7fiQ\x9fNI@\x14x\'\x9f\x1e\x0b0@ç\x1c<\x13\x9aNI@LÂ\x85<\x82\x0b0@Pý\x83H\x86NI@DP5z5\x0c0@pD÷¬kNI@\x86ÉT'
+sec=88 name='GEO-SHP file' va=0x4d9f5d4 term='hmi' ctx="\x01\x81Î¤*@`\xadÚ5!MI@à\x9eçO\x1b¥*@ÚÊKþ'MI@¡¹N#-¥*@D\x19ªb*MI@k,am\x8c¥*@¹þ]\x9f9MI@··[\x92\x03¦*@î\\\x18éEMI@Ëø÷\x19\x17¦*@oÓ\x9fýHMI@(¶\x82¦%¦*@Zd;ßOMI@\x80Ó»x?¦*@·Ð\x95\x08TMI@c'¼\x04§¦*@ô\x87f\x9e\\MI@²Ôz¿Ñ¦*@÷tuÇbMI@\x829züÞ¦*@x·²DgMI@\x02eS®ð¦*@oö\x07ÊmMI@\n\x0f\x9a]÷¦*@\x8asÔÑqMI@\x99J?áì¦*@\x07\x9b:\x8f\x8aMI@OZ¸¬Â¦*@\x01L\x198\xa0MI@éòæp\xad¦*@\x8blçû©MI@Þ>«Ì\x94¦*@qt\x95î®MI@\x0bÐ¶"
+sec=88 name='GEO-SHP file' va=0x4da29d4 term='hmi' ctx='å\x08\x19è*@|\x8dÒ¥\x7fMI@L¨àð\x82è*@«y\x8eÈwMI@ñhã\x88µè*@0ô\x88ÑsMI@²½\x16ôÞè*@ýN\x93\x19oMI@_EF\x07$é*@Ú¬ú\\mMI@VId\x1fdé*@ÑÎi\x16hMI@}\x05iÆ¢é*@+Nµ\x16fMI@\x9f[èJ\x04ê*@Â3¡IbMI@kdWZFê*@-ê\x93ÜaMI@&\x199\x0b{ê*@JÏô\x12cMI@øÁùÔ±ê*@y\x1fGsdMI@1\x98¿Bæê*@oÙ!þaMI@\x17\x9f\x02`<ë*@õ»°5[MI@éGÃ)së*@tE)!XMI@>Ï\x9f6ªë*@¦\x99îuRMI@\x13\x0e½ÅÃë*@äg#×MMI@À>:uåë*@~Q\x82þBMI@¬«\x02'
+sec=88 name='GEO-SHP file' va=0x4dbc984 term='hmi' ctx='«\x1dÅi,@\x18$}ZEmI@à¹÷pÉi,@\x8fTßùEmI@\x99*\x18\x95Ôi,@\x88c]ÜFmI@8ºJw×i,@ÿ\x93¿{GmI@ÉÿäïÞi,@dY0ñGmI@OË\x0f\\åi,@íô\x83ºHmI@ÏÙ\x02Bëi,@\x16\x88\x9e\x94ImI@-z§\x02îi,@F\x0c;\x8cImI@îw(\nôi,@KÉr\x12JmI@ÿ®Ï\x9cõi,@\x0f\x97\x1cwJmI@ë§ÿ¬ùi,@ò}q©JmI@5AÔ}|j,@-|}\xadKmI@\x7fÚ¨N\x07j,@ÞªëPMmI@èô¼\x1b\x0bj,@¨\x01\x83¤OmI@D¨R³\x07j,@\x83÷U¹PmI@\x0bF%u\x02j,@\x8fqÅÅQmI@;þ\x0b\x04\x01j,@Ä²\x99CRmI@Ä\x99_'
+sec=88 name='GEO-SHP file' va=0x4dbcbb4 term='hmi' ctx='Ó÷\x1aj,@ß\x18\x02\x80cmI@¯Ì[u\x1dj,@\x85Í|\x17dmI@yW=`\x1ej,@\x02»\x9a<emI@\x1e¤§È!j,@À\x97Â\x83fmI@/ÛN[#j,@\xadø\x86ÂgmI@I\x9fVÑ\x1fj,@|S\x06\x0ehmI@À\x03\x03\x08\x1fj,@\x18{/¾hmI@\x02\x10wõ*j,@_\'õeimI@`°\x1b¶-j,@5`\x90ôimI@\x9eÏ\x80z3j,@\x8ewGÆjmI@²ó66;j,@p^\x9cøjmI@×N\x94\x84Dj,@]¿`7lmI@]7¥¼Vj,@øÅ¥*mmI@!"5íbj,@E/£XnmI@sePmpj,@nÂ½2omI@KW°\x8dxj,@Á\x1c=~omI@\x1e\x8cØ\'\x80j,@åò\x1fÒomI@\x81é´'
+sec=88 name='GEO-SHP file' va=0x4dbcbc4 term='hmi' ctx='[u\x1dj,@\x85Í|\x17dmI@yW=`\x1ej,@\x02»\x9a<emI@\x1e¤§È!j,@À\x97Â\x83fmI@/ÛN[#j,@\xadø\x86ÂgmI@I\x9fVÑ\x1fj,@|S\x06\x0ehmI@À\x03\x03\x08\x1fj,@\x18{/¾hmI@\x02\x10wõ*j,@_\'õeimI@`°\x1b¶-j,@5`\x90ôimI@\x9eÏ\x80z3j,@\x8ewGÆjmI@²ó66;j,@p^\x9cøjmI@×N\x94\x84Dj,@]¿`7lmI@]7¥¼Vj,@øÅ¥*mmI@!"5íbj,@E/£XnmI@sePmpj,@nÂ½2omI@KW°\x8dxj,@Á\x1c=~omI@\x1e\x8cØ\'\x80j,@åò\x1fÒomI@\x81é´n\x83j,@[#\x82qpmI@Wî\x05'
+sec=88 name='GEO-SHP file' va=0x4fb64e0 term='hmi' ctx='\x98Ü(^H@©KÆ1\x92MI@¢|A\x0b\t^H@\x1b¹nJyMI@.ã¦\x06\x9a]H@ð2ÃFYMI@¢\x9bý\x81r]H@\x9bp¯Ì[MI@Yü¦°R]H@±M*\x1akMI@\x7fhæÉ5]H@â9[@hMI@\x99\x84\x0by\x04]H@üU\x80ï6MI@ûsÑ\x90ñ\\H@\x89)\x91D/MI@\x1f.9î\x94\\H@¦\x0eòz0MI@ø\x19\x17\x0e\x84\\H@Ê5\x052;MI@·$\x07ìj\\H@HPü\x18sMI@/Oç\x8aR\\H@î!á{\x7fMI@\x1aO\x04q\x1e\\H@L¥\x9fpvMI@Ü)\x1d¬ÿ[H@\x13Iô2\x8aMI@º0Ò\x8bÚ[H@\x99Hi6\x8fMI@@Ù\x94+¼[H@Xp?à\x81MI@¸\x03uÊ£[H@¥Ù<\x0e\x83MI@Ú\x1a\x11'
+sec=88 name='GEO-SHP file' va=0x4fb6f90 term='hmi' ctx="a§XQH@0h!\x01£MI@\x11\x1b,\x9c¤QH@OÌz1\x94MI@MØ~2ÆQH@Ý¶ïQ\x7fMI@Ëgy\x1eÜQH@\x82¬§V_MI@VG\x8et\x06RH@ÀzÜ·ZMI@w\x12\x11þERH@qÆ0'hMI@\x10v\x8aU\x83RH@u\x8fl®\x9aMI@3\x8c»A´RH@Û\x88'»\x99MI@0ö^|ÑRH@õõ|ÍrMI@\x902â\x02ÐRH@=\x7fÚ¨NMI@t@\x12öíRH@\x1fII\x0fCMI@\x98¡ñD\x10SH@&n\x15Ä@MI@3P\x19ÿ>SH@O\x93\x19o+MI@ýkyåzSH@÷êã¡ïLI@)x\n¹RSH@³ëÞ\x8aÄLI@À®&OYSH@\x8f\x8aÿ;¢LI@ÂùÔ±JSH@Ç-æç\x86LI@þÔx"
+sec=88 name='GEO-SHP file' va=0x5433bfc term='hmi' ctx='×»?\n0@KÌ³\x92VNI@°u©\x11ú\t0@\x7fk\'JBNI@OÍå\x06C\t0@á\x95$ÏõMI@ \tûv\x12\t0@\x85@.qäMI@\x9c¢#¹ü\x070@XSY\x14vMI@8\x9eÏ\x80z\x070@.ä\x11ÜHMI@\x87Þâá=\x070@\x99\x0f\x08t&MI@Òþ\x07X«\x060@\x82ÿ\xaddÇLI@\x1eR\x0c\x90h\x060@Ñy\x8d]¢LI@¬pËGR\x060@\x1e\x17Õ"¢LI@\x11¬ª\x97ß\x050@òí]\x83¾LI@þ\x98Ö¦±\x050@M¾ÙæÆLI@³ðõµ.\x050@Ò\x89\x04SÍLI@:Í\x02í\x0e\x050@MÛ¿²ÒLI@3Q\x84Ôí\x040@·F\x04ãàLI@\x11ÆOãÞ\x040@¸Ë~ÝéLI@(\x9dH0Õ\x040@\x97âª²ïLI@\tÿ"'
+sec=88 name='GEO-SHP file' va=0x57f30a8 term='awb' ctx='áC\x89\x062À&R\x9aÍcWb@\x94ú²´S\x072ÀãÃìe[Wb@\x13c\x99~\x89\x082À"9\x99¸UWb@äHg`ä\t2Ààc°âTWb@ÒßKáA\x0b2À\x08\x02dèXWb@Ó\x15l#\x9e\x0c2Àìú\x05»aWb@\x9aé^\'õ\r2À\x8dCý.lWb@rÞÿÇ\t\x0f2À^\x80}tjWb@ö^|Ñ\x1e\x0f2À\x97ä\x80]MWb@Ä&2s\x81\x0f2Àó\x04ÂN1Wb@¡ÚàDô\x0f2À\x1f\x84\x80|\tWb@\x87kµ\x87½\x102ÀU/¿ÓäVb@-ÌB;§\x112À\x13\x0e½ÅÃVb@6\\ä\x9e®\x122Àø\x8an½¦Vb@\x9bÆöZÐ\x132À\x05\x19\x01\x15\x8eVb@\x19ÇHö\x08\x152À\x80ñ\x0c\x1azVb@\x04T8\x82T\x162À\x11Vc\tkVb@\x12l\\'
+sec=88 name='GEO-SHP file' va=0x57f32c8 term='awb' ctx="ñ|\x06(2À?æ\x03\x02\x9dVb@¯yUgµ(2À\t8\x84*µVb@\x86ädâV)2Àx\x80'-ÜVb@\x06e\x1aM.*2Àc³#Õ÷Vb@,J\tÁª*2Àä\x15\x88\x9e\x14Wb@\x832\x8d&\x17+2À\x7f\x85Ì\x95AWb@pÒ4(\x9a+2ÀæWs\x80`Wb@×\x153ÂÛ+2À$cµù\x7fWb@\x1e6\x91\x99\x0b,2ÀG ^×¯Wb@XW\x05j1,2ÀH\x89]ÛÛWb@X\x1bc'¼,2Àl\x94õ\x9b\tXb@\x9cß0Ñ -2À}ZE\x7fèWb@P§<º\x11.2ÀÛ¦x\\ÔWb@Ù]\xa0¤À.2À»\x9d}åÁWb@ÓØ^\x0bz/2À\x13×1®¸Wb@v¥e¤Þ/2À\x82qpé\x98Wb@ÑÌ\x93k\n02ÀAô¤LjWb@È'd"
+sec=88 name='GEO-SHP file' va=0x58085e8 term='awb' ctx='Û\x85æÂCÀøÿqÂ\x04Wb@þ~1[²ÂCÀß\x8c\x9a¯\x12Wb@º×I}YÂCÀ£w*à\x1eWb@<f\xa02þÁCÀ´Ë·>,Wb@GV~\x19\x8cÁCÀYÂÚ\x18;Wb@Ñ>VðÛÀCÀ2uWvAWb@>\x07\x96#dÀCÀ³Dg\x99EWb@\xad¦ë\x89®¿CÀ\x01÷<\x7fZWb@\x7f¢²aM¿CÀK\xad÷\x1bmWb@\x12KÊÝç¾CÀ\x1fôlV}Wb@\x9cá\x06|~¾CÀô\x15¤\x19\x8bWb@ñ\x9e\x03Ë\x11¾CÀ\x1eúîV\x96Wb@è»[Y¢½CÀü¨\x86ý\x9eWb@Xqªµ0½CÀÕèÕ|¥Wb@\x16ø\x8an½¼CÀÎ\x1c\x92Z¨Wb@\x99\x80_#I¼CÀÙ#Ô\x0c©Wb@äÚP1Î»CÀ\x94\x86\x1a\x85¤Wb@Ë\x12\x9d'
+sec=88 name='GEO-SHP file' va=0x5971630 term='awb' ctx='»\n)\x036@6çà\x99ÐTB@\xa0áÍ\x1a¼\x036@×Pj/¢UB@f¡\x9dÓ,\x046@í\x82Á5wVB@éóQF\\\x046@h\x92XRîVB@µ\x88(&o\x046@~©\x9f7\x15WB@\x85w¹\x88ï\x046@ü¦°RAWB@0\x0e.\x1ds\x066@[\\ã3ÙWB@èLÚTÝ\x076@µ¥\x0eòzXB@Z\r\x89{,\t6@ÃÖlå%YB@î\x08§\x05/\n6@¸=Ab»YB@\x9cj-ÌB\x0b6@2YÜ\x7fdZB@§X5\x08s\x0b6@Fë¨j\x82ZB@C\x1b\x80\r\x88\x0c6@Ã\x109}=[B@ó\x03Wy\x02\r6@zä\x0f\x06\x9e[B@ß2§Ëb\x0e6@\x18\x96?ß\x16\\B@N\x97ÅÄæ\x0f6@§Ï\x0e¸®\\B@*¬TPQ\x116@0\x9dÖmP]B@`:\xad'
+sec=88 name='GEO-SHP file' va=0x5a33b7c term='hmi' ctx='J#fö\x0b@ïuR_\x96lIÀ£#¹ü\x87T\x0c@6\x052;\x8blIÀ-\x99cyWý\x0c@\xa0pvk\x99lIÀãý¸ýò©\r@Vb\x9e\x95´lIÀrm¨\x18çO\x0e@·\r£ xlIÀm\x90IFÎâ\x0e@\x831"QhmIÀPþî\x1d5f\x0f@ñ\x0f[z4oIÀ¢~\x17¶f\x0b\x10@ýöuà\x9cqIÀczÂ\x12\x0fH\x10@ÆÃ{\x0e,uIÀ-\x93áx>\x83\x10@\x80»ì×\x9dxIÀ¢Ò\x88\x99}Î\x10@\x96?ß\x16,}IÀÕÎ0µ¥\x0e\x11@\x16\x18²ºÕ\x83IÀ\x08è¾\x9cÙ^\x11@f\x14Ë-\xad\x8eIÀíF\x1fó\x01±\x11@|*§=%\x9bIÀæç\x86¦ìô\x11@Æ1\x92=B§IÀ\x15\xadÜ\x0bÌ*\x12@}¯!8.³IÀõ,\x08å}|\x12@û\x91"2¬ºIÀºÛõ'
+sec=88 name='GEO-SHP file' va=0x5bce5a3 term='hmi' ctx='ç3\xa0Þø4@ìL¡ó\x1aiZÀO²Õå\x94ø4@L¦\nF%iZÀ-\x96"ùJø4@k\x10æv/iZÀ\x89\x9bSÉ|ø4@H\x8b3\x869iZÀaÂhV¶÷4@ÌÔ$xCiZÀ·\nb\xa0k÷4@\x0e/\x88HMiZÀ+l\x06¸ ÷4@\x0f\x9a]÷ViZÀ¼æU\x9dÕö4@Ï\x15¥\x84`iZÀË\x82\x89?\x8aö4@5`\x90ôiiZÀW@¡\x9e>ö4@Z»íBsiZÀ\x01\x17dËòõ4@=\'½o|iZÀÈ\x06ÒÅ¦õ4@ß£þz\x85iZÀ\r\x18$}Zõ4@@1²d\x8eiZÀpB!\x02\x0eõ4@G\x8d\t1\x97iZÀð\x85ÉTÁô4@ª\x9cö\x94\x9ciZÀ\tn¤l\x91ô4@B!\x02\x0e¡iZÀªH\x85±\x85ô4@?T\x1a1³iZÀ\x9fZ'
+sec=90 name='CTRL-System' va=0x8034503 term='hmi' ctx='ø}J}Kë÷µùSì\x1a+ë÷ßø{J{Kë÷\xadùSì\x1a+ë÷×øyJyKë÷¥ùSì\x1a+ë÷Ïø\x02F\x0bFQì\x18\x0bî÷\x13þSì\x19+ë÷ÅøAì\x19\x0b ²ê÷DýAì\x1a\x0bÍ¹Sì\x1a+mHmIë÷·øSì\x19+î÷ýýSì\x18+ë÷\x81ù\x04F\rFSì\x1a+Oð@@fIë÷¦ø"F+FYà\x01-Sì\x18+4Û| aIë÷\x9bø\x82F\x8bFSì\x18+_H_Ië÷\x93ø\x06F\x0fFSì\x1a+]H]Ië÷\x8bø\x04F\rFSì\x19+[HUIë÷\x83ø\x02F\x0bF F)Fî÷Çý2F;Fë÷KùRF[Fë÷Gù\x04F\rFSì\x1a+| PIë÷mø"F+F àOðÀ@MIë÷eø\x04F\rFSì\x18+KHKI'
+sec=90 name='CTRL-System' va=0x8035633 term='hmi' ctx='\x1a\\¿\x01!Aq\x90ø(\x101±I\x1e\x80ø(\x10É²\t¹\x01!\x01q\x05H\x04h$±`h\x80G$h|,úÑ\x10½|¿Ä|| \x14\xad\x01 \x80µsH|hPôp|qI\x08`qH|hPð\x01|oI\x08`| nI\x08`lH|hmI\x08@jI\x08`lHmI\x08`hH|h0ô\x80 fI\x08`| iI\x08`|ð\\ø_ð|`gI\x08`\x01½p´| |!\x02"|#\x02$^M-h\x15ð\x0c\x05(|\x05||-\x04Ð\x04-\x06Ð\x08-\x08Ð2à]M^N5`1à]M\\N5`-àVM-hÅó\x80U+|TM-h\x15ð?\x05,||+\tÐUMµûôõON6hÆó\x88\x16uC)|\x08àNMµûôõJN6hÆó\x88\x16uC)|GM-hÅó\x01Em\x1cm|*|±ûòõFN'
+sec=90 name='CTRL-System' va=0x803563d term='hmi' ctx='\x101±I\x1e\x80ø(\x10É²\t¹\x01!\x01q\x05H\x04h$±`h\x80G$h|,úÑ\x10½|¿Ä|| \x14\xad\x01 \x80µsH|hPôp|qI\x08`qH|hPð\x01|oI\x08`| nI\x08`lH|hmI\x08@jI\x08`lHmI\x08`hH|h0ô\x80 fI\x08`| iI\x08`|ð\\ø_ð|`gI\x08`\x01½p´| |!\x02"|#\x02$^M-h\x15ð\x0c\x05(|\x05||-\x04Ð\x04-\x06Ð\x08-\x08Ð2à]M^N5`1à]M\\N5`-àVM-hÅó\x80U+|TM-h\x15ð?\x05,||+\tÐUMµûôõON6hÆó\x88\x16uC)|\x08àNMµûôõJN6hÆó\x88\x16uC)|GM-hÅó\x01Em\x1cm|*|±ûòõFN5`\x02àDMDN5`'
+sec=90 name='CTRL-System' va=0x803a61f term='flash' ctx="\x8d\x04\x08\x19î\x01\x08\x08¼\x04\x08|·\x04\x08\x94·\x04\x08±!\x02\x08\x10¼\x04\x08\xa0·\x04\x08|±\x04\x08\x85\x1c\x02\x08\x18¼\x04\x08|·\x04\x08¬·\x04\x08)#\x02\x08 ¼\x04\x08|·\x04\x08\x10±\x04\x08Û'\x02\x08||||||||||||||||of flash info -> status unchanged, don't transmit! (camera: sync time %i, mount %i, ready %i, compensation 0x%04X (%i) handgrip: mount %i, ready %i, compensation 0x%04X (%i))\r\n||||Set stil"
+sec=90 name='CTRL-System' va=0x803a93b term='flash' ctx=' ID %i, Max ISO %i, Max TV %i, Flags vl %i lf %i rlv %i mag %i vr %i vs %i exps %i)\r\n||of flash info (camera: sync time %i, mount %i, ready %i, compensation 0x%04X (%i) handgrip: mount %i, ready %i, compensation 0x%04X (%i))\r\n|LVVideoSync received (AV %i, SV %i, TV %i, Image'
+sec=90 name='CTRL-System' va=0x803c8ae term='flash' ctx='e (TskDisplays event 0x%08X)!\r\n|RTOS system not initialized yet, events not available (TskFlash event 0x%08X)!\r\n||||RTOS system not initialized yet, events not available (TskImage event 0x%08X)!\r\n||||Set diagnostics info (shutter actions %i, op. counter %i s, camera on count'
+sec=90 name='CTRL-System' va=0x803d197 term='flash' ctx="eter -> already in LV sync available, don't transmit! (%i, on - %i)\r\n||IMG Simulator: \t - Flash (advanced) : mounted %i, ready %i, EV = 0x%02X (%i)\r\n|||ù\x80ù|ú\x80ú|û\x80û|ü\x80ü|ý\x80ý|þ\x80þ|ÿ\x80ÿ||\x80||\x01\x80\x01|\x02\x80\x02|\x03\x80\x03|\x04\x80\x04|\x05\x80\x05|\x06\x80\x06|\x07\x80\x07|\x08\x80\x08|\t\x80\t|\n\x80\n|\x0b\x80\x0b|\x0c||RTOS system not initialized yet, events not "
+sec=90 name='CTRL-System' va=0x803d807 term='flash' ctx=" -> status unchanged, don't transmit! (BV (0x%04X), BV IR  (0x%04X))\r\n|IMG Simulator: \t - Flash (prime) : mounted %i, ready %i, EV = 0x%02X (%i)\r\n|Run shutter motor CCW with PWM (running time %i us, duty cycle %i %%).\r\n||||Guard: IMG_FCT_BLOCKED_OLD_VERY_COLD (Batt. old & ba"
+sec=90 name='CTRL-System' va=0x803e316 term='flash' ctx='re calibration values in EEPROM successful. (save:OK) \r\n||||TC: Write to Update register (Flash area %i, HW ID %i, Version %i.%i)\r\n|No acknowledge from device, abort communication!!! (address 0x%02X)\r\n|||Test - Ltp_RHS (AS5510 (hall sensor), S-5851A (temperature sensor)):\r\n|'
+sec=90 name='CTRL-System' va=0x8040178 term='flash' ctx='ation enter exposure state to lens ready:\t\t\t%i ms\r\n|||\t- Duration enter exposure state to flash ready:\t\t\t0 ms\r\n|||\t- Duration enter exposure state to flash ready:\t\t\t%i ms\r\n||\t- Duration enter exposure state to shutter ready:\t\t%i ms\r\n|SERVICE_MODE: Set flash sync mode %i on s'
+sec=90 name='CTRL-System' va=0x80401b4 term='flash' ctx='ation enter exposure state to flash ready:\t\t\t0 ms\r\n|||\t- Duration enter exposure state to flash ready:\t\t\t%i ms\r\n||\t- Duration enter exposure state to shutter ready:\t\t%i ms\r\n|SERVICE_MODE: Set flash sync mode %i on second curtain\r\n||||Undefined command (Type <service ?> for i'
+sec=90 name='CTRL-System' va=0x804021a term='flash' ctx='\t\t\t%i ms\r\n||\t- Duration enter exposure state to shutter ready:\t\t%i ms\r\n|SERVICE_MODE: Set flash sync mode %i on second curtain\r\n||||Undefined command (Type <service ?> for information)...\r\n|||Application:\tLCC Honey V%i.%i (HW_ID %i, Rev. %s, %s %s)\r\n||#######################'
+sec=90 name='CTRL-System' va=0x8040ac7 term='flash' ctx='el %i!\r\n|||lcc_mcu_SCA_ReceiveData() -> Undefined SCA channel %i!\r\n||||TC: Write to Erase flash area register (Flash area %i)\r\n||||AE library:\tLCC AEAlgorithm V%i.%i (HW_ID %i, Rev. %s)\r\n||||Br. EV; Br. EV; Pshift EV; Pshift EV; Override; Override; ||Bracketing EV value for '
+sec=90 name='CTRL-System' va=0x8040adc term='flash' ctx='A_ReceiveData() -> Undefined SCA channel %i!\r\n||||TC: Write to Erase flash area register (Flash area %i)\r\n||||AE library:\tLCC AEAlgorithm V%i.%i (HW_ID %i, Rev. %s)\r\n||||Br. EV; Br. EV; Pshift EV; Pshift EV; Override; Override; ||Bracketing EV value for calculation (0x%04X |'
+sec=90 name='CTRL-System' va=0x80422dd term='flash' ctx="### System info:\r\n\r\n|################################## System test:\r\n\r\n|Wrong size of preflash measure result (%i != %i)\r\n||IMG Simulator:\t- M lens type code : 0x%02X (%i)\r\n|||Not possible in this system (TOC ID 0x%08X (%i))\r\n||IMG: Connection lost don't start image simulat"
+sec=90 name='CTRL-System' va=0x804328d term='flash' ctx=' 1st stage transmission\r\n||||\t- [%09i ms] Relase 2nd stage transmission\r\n||||\t- [%09i ms] Flash task ready for exposure\r\n||||\t- [%09i ms] Shutter task ready for exposure\r\n||\t- [%09i ms] Received run exposure from image\r\n|\r\n-------------> Run exposure delay : %i ms\r\n|||Time: '
+sec=90 name='CTRL-System' va=0x80436a0 term='flash' ctx='C time (%02i.%02i.%04i %02i:%02i:%02i)\r\n||Drive mode received (%i, frm. %i, delay %i s)\r\n|Flash compensation received (0x%04X, (%i))\r\n||||\t- Move lens small steps (%i) to the right\r\n||||Get lens data received (data %i, pkt nr %i)\r\n|||Nothing to do in this camera mode (mode %'
+sec=90 name='CTRL-System' va=0x8044a7f term='flash' ctx=' ok button (cause %i)\r\n||||IMG Simulator: Prepare for still capture\r\n||IMG Simulator: \t - Flash sync time : %i\r\n|||IMG Simulator: \t - Lens connected : %i\r\n||||IMG Simulator: SV wheel auto ISO selected\r\n|IMG Simulator: Release 1st stage button ||||IMG Simulator: Release 2nd s'
+sec=90 name='CTRL-System' va=0x8044e10 term='flash' ctx='r: Undefined HW trigger point (%i)!\r\n|Central shutter exposure not available!\r\n|||Xmodem: Flash packet %i (address 0x%08X)\r\n||Initialize AE algorithm module (0x%08X).\r\n||\t- SV step value (0x%04X | %i | %f |).\r\n||||\t- AV step value (0x%04X | %i | %f |).\r\n||||Calculate exposur'
+sec=90 name='CTRL-System' va=0x80457b8 term='flash' ctx='cted\r\n||||IMG Simulator: Start image simulation\r\n|IMG Simulator: Stop image simulation\r\n||Flash sync on end exposure received\r\n|||Flash sync on start exposure received\r\n|Exposure metering mode received (%i)\r\n||Picture buffer capacity (%i) received\r\n|Undefined GUI state (%i) '
+sec=90 name='CTRL-System' va=0x80457e0 term='flash' ctx='ulation\r\n|IMG Simulator: Stop image simulation\r\n||Flash sync on end exposure received\r\n|||Flash sync on start exposure received\r\n|Exposure metering mode received (%i)\r\n||Picture buffer capacity (%i) received\r\n|Undefined GUI state (%i) received!\r\n||||Update control received ('
+sec=90 name='CTRL-System' va=0x80462bb term='flash' ctx=' value (0x%04X | %i | %f |).\r\n|\t- AV min value (0x%04X | %i | %f |).\r\n|AISO; AElock; Br.; Flash rdy; Strobo; ||Auto ISO (%i) <- (0 - off, 1 - on).\r\n|||Override value (0x%04X | %i | %f |).\r\n||\t- Bracketing EV value ( %i | %f |).\r\n||0x%08X \t - \t EE_ADDRESS_CFGDATA_END\r\n|||0x%0'
+sec=90 name='CTRL-System' va=0x804795c term='flash' ctx='||Nö\x88QÎò|\x01\x08h@ôp|\x08`¿óO\x8f¿óo\x8fOð|páî\x10\npG||u\x87ÿÿ$\x8c\x01|\x08"| ||||¹¦ÿÿðJ||0\x02||||| ©¦ÿÿøK||\x10|||p\x01| %\x11||Flash niveau is set to %d.\r\n||||Adjust GNC-Flash done. [%i]\r\n|||Adjust Shutter 1000 to %d.\r\n||||Adjust Shutter 2000 to %d.\r\n||||Adjust Shutter 4000 to %d.\r\n||||Clear Shutter adjust done'
+sec=90 name='CTRL-System' va=0x8047987 term='flash' ctx='\x8c\x01|\x08"| ||||¹¦ÿÿðJ||0\x02||||| ©¦ÿÿøK||\x10|||p\x01| %\x11||Flash niveau is set to %d.\r\n||||Adjust GNC-Flash done. [%i]\r\n|||Adjust Shutter 1000 to %d.\r\n||||Adjust Shutter 2000 to %d.\r\n||||Adjust Shutter 4000 to %d.\r\n||||Clear Shutter adjust done.\r\n||||Adjust Shutter X delay to %d.\r\n|Clos'
+sec=90 name='CTRL-System' va=0x8047a84 term='flash' ctx=' X delay to %d.\r\n|Close shutter after service\r\n|||Release by serial interface.\r\n||Disable flash interface...\r\n||||New Manufacturing ID is %s.\r\n|||New SerialNumber is %08Xh.\r\n||||Undefined debug level (%i).\r\n|||Start focus button monitoring\r\n|Stop focus button monitoring\r\n||\t'
+sec=90 name='CTRL-System' va=0x804841f term='flash' ctx='nication error (%i)\r\n||RTC initialization error (%i)\r\n|Temperature sensor error (%i)\r\n|Preflash sensor error (%i)\r\n||||Unknown sensor %i error (%i)\r\n||Button (%i) error (Nr. %i)\r\n||||Switch (%i) error (Nr. %i)\r\n||||Camera battery not inserted\r\n|||Check start up possibility\r\n'
+sec=90 name='CTRL-System' va=0x8048b24 term='flash' ctx='%i]\r\n|Adjust BV0 done. [%i/%i]\r\n||Adjust BV3 done. [%i/%i]\r\n||Adjust BV10 done. [%i/%i]\r\n|Flash niveau is now %d.\r\n|||Adjust Shutter 30 to %d.\r\n||Adjust Shutter 60 to %d.\r\n||Adjust Shutter 125 to %d.\r\n|Adjust Shutter 250 to %d.\r\n|Adjust Shutter 500 to %d.\r\n|Open shutter for '
+sec=90 name='CTRL-System' va=0x8048c27 term='flash' ctx='pen shutter for service\r\n||Focus position in cm: %i\r\n||Start sensor cleaning...\r\n||Enable flash interface...\r\n|New BodyNumber is %08Xh.\r\n||Manufacturing ID is %s.\r\n|||SerialNumber is %08Xh.\r\n||||New hardware ID is %08Xh.\r\n|Stand-by mode disabled.\r\n|||Global camera state -> %'
+sec=90 name='CTRL-System' va=0x8049620 term='flash' ctx=' timer test (%i us)\r\n|Undefined button (%i)!\r\n||||Undefined switch (%i)!\r\n||||Xmodem: Get flash data\r\n||||Initialization parameter:\r\n|\t- AE control type (%i).\r\n||\t- AE debug level (%i).\r\n|||\t- SV table size (%i).\r\n||||\t- AV table size (%i).\r\n||||Initialization parameter;\r\n|;'
+sec=90 name='CTRL-System' va=0x804a964 term='flash' ctx=' %i\r\n|lcc_mcu_reset();\r\n||\t- Switched off\r\n|||XSync1stCurtain\r\n|||XSync2ndCurtain\r\n|||\tPreflash values:\r\n|Flag Skip:%01i\r\n||||HSS duration:%05i\r\n|Set flash [%i].\r\n|||Check flash [%i].\r\n|Transmit status ||||Release request...||\tPacket size : %i\r\n|Wait for reset...\r\n|\t- mirror'
+sec=90 name='CTRL-System' va=0x804a9a0 term='flash' ctx='n\r\n|||XSync2ndCurtain\r\n|||\tPreflash values:\r\n|Flag Skip:%01i\r\n||||HSS duration:%05i\r\n|Set flash [%i].\r\n|||Check flash [%i].\r\n|Transmit status ||||Release request...||\tPacket size : %i\r\n|Wait for reset...\r\n|\t- mirror down\r\n||||\t- Open aperture\r\n||\t- Close aperture\r\n|Set updat'
+sec=90 name='CTRL-System' va=0x804a9b6 term='flash' ctx='\n|||\tPreflash values:\r\n|Flag Skip:%01i\r\n||||HSS duration:%05i\r\n|Set flash [%i].\r\n|||Check flash [%i].\r\n|Transmit status ||||Release request...||\tPacket size : %i\r\n|Wait for reset...\r\n|\t- mirror down\r\n||||\t- Open aperture\r\n||\t- Close aperture\r\n|Set update info\r\n|||Try to adju'
+sec=90 name='CTRL-System' va=0x804b175 term='flash' ctx='amera||||simulateflags|||WriteOffsetTime|\tAdjust - %i\r\n||\tControl - %i\r\n|\tDebug - %i\r\n|||\tFlash - %i\r\n|||\tImage - %i\r\n|||\tLens - %i\r\n||||Task %i ready\r\n|||||||||||||||||Error store:\r\n||Index:%03i\r\n||||LZ Bild:%05i\r\n||LZ mess:%05i\r\n||LZ adj:%05i\r\n|||Preflash 1:\r\n|||Preflash 2'
+sec=90 name='CTRL-System' va=0x804b217 term='flash' ctx='|||||||Error store:\r\n||Index:%03i\r\n||||LZ Bild:%05i\r\n||LZ mess:%05i\r\n||LZ adj:%05i\r\n|||Preflash 1:\r\n|||Preflash 2:\r\n|||GN5_6b_o:%i\r\n|||HSS korr.:%i\r\n||Preflash End.\r\n|Data sent.\r\n||||TabIndex: %i \r\n|unknown!!!\r\n||||\t- mirror up\r\n||Stop exposure\r\n|adjust_acc_test|\t- Xaxis : %'
+sec=90 name='CTRL-System' va=0x804b227 term='flash' ctx='re:\r\n||Index:%03i\r\n||||LZ Bild:%05i\r\n||LZ mess:%05i\r\n||LZ adj:%05i\r\n|||Preflash 1:\r\n|||Preflash 2:\r\n|||GN5_6b_o:%i\r\n|||HSS korr.:%i\r\n||Preflash End.\r\n|Data sent.\r\n||||TabIndex: %i \r\n|unknown!!!\r\n||||\t- mirror up\r\n||Stop exposure\r\n|adjust_acc_test|\t- Xaxis : %i\r\n|\t- Yaxis : %'
+sec=90 name='CTRL-System' va=0x804b257 term='flash' ctx='05i\r\n||LZ adj:%05i\r\n|||Preflash 1:\r\n|||Preflash 2:\r\n|||GN5_6b_o:%i\r\n|||HSS korr.:%i\r\n||Preflash End.\r\n|Data sent.\r\n||||TabIndex: %i \r\n|unknown!!!\r\n||||\t- mirror up\r\n||Stop exposure\r\n|adjust_acc_test|\t- Xaxis : %i\r\n|\t- Yaxis : %i\r\n|\t- Zaxis : %i\r\n|Wait %i ms\r\n||||SetDriveMode'
+sec=90 name='CTRL-System' va=0x804bae3 term='flash' ctx='|||Start OS\r\n||%s %s %s\r\n||not ok!\r\n|||Test end.\r\n|Count: %i\r\n|not ok!\r\n|||\t- TTL:\r\n|||\t- Flash:\r\n|not ok!\r\n|||timeout!\r\n||not ok!\r\n|||not ok!\r\n|||\t--- ok!\r\n||not ok\r\n||||DRV-ACC:||||Landscape|||PicRight||||ÀFÀFû÷Òþý÷¤ÿ||||||||%i\r\n||||||||||||||||||||||||||||||||||||||||||||'
+sec=92 name='IMG-System' va=0x62575 term='hmi' ctx='!É\x04\x08@|(®Ð{H|x\x03!\x08CyI\x02àÏàcà\x07à\x08pS wI\x08p\x03 vI\x08pÂàwH|x\x12(\x03ÐuH|x\x19(4Ñ|,2ÑqH|h|(\x02Ð| iI\x08p\x03ð\x1aù\x06 \x04ð\x0bømH|hmI\x08@|(\x0cÐeH|x\x03!\x08CcI\x08pS bI\x08p\x03 bI\x08p\x99à|ðZÿç!É\x04\x08@|(\x93Ð[H|x\x03!\x08CYI\x08pS XI\x08p\x03 XI\x08p\x85àXH|x\x11(\x03ÐVH|x\x18(}Ñ|,{Ñ|ð<ÿç!É\x04\x08@|(tÐLH|x\x03!\x08CJI\x08pS II\x08p\x03 II\x08pgàIH|x\x12(\x03ÐGH|x\x19(DÑ>H|x|(\x14Ñ=H|x\x02(WÑ\x01ðbÿ|(SÑ;H|x\x03!\x08C'
+sec=92 name='IMG-System' va=0x694e1 term='hmi' ctx='!É\x04\x08@|(®Ð{H|x\x03!\x08CyI\x02àÏàcà\x07à\x08pS wI\x08p\x03 vI\x08pÂàwH|x\x12(\x03ÐuH|x\x19(4Ñ|,2ÑqH|h|(\x02Ð| iI\x08p\x03ðJý\x06 \x04ð\x87ümH|hmI\x08@|(\x0cÐeH|x\x03!\x08CcI\x08pS bI\x08p\x03 bI\x08p\x99à|ð(ÿç!É\x04\x08@|(\x93Ð[H|x\x03!\x08CYI\x08pS XI\x08p\x03 XI\x08p\x85àXH|x\x11(\x03ÐVH|x\x18(}Ñ|,{Ñ|ð\nÿç!É\x04\x08@|(tÐLH|x\x03!\x08CJI\x08pS II\x08p\x03 II\x08pgàIH|x\x12(\x03ÐGH|x\x19(DÑ>H|x|(\x14Ñ=H|x\x02(WÑ\x01ðÜÿ|(SÑ;H|x\x03!\x08C'
+sec=92 name='IMG-System' va=0x80edc term='awb' ctx='oreImage: Error writing pRAW of %s, %x(%d)||||STR_IMG: StorageStoreImage: Error writing pRAWBLK of %s, %x(%d)|STR_IMG: StorageStoreImage: Error writing JPGBT of %s, %x(%d)|||\x8c"\x84B$ñ\x02ü3|\x14ªGI\x04 |\x96¿ð\x07ù0|\nä\x1f¨|\x90\x05 À\x01(\x18\x85!É|@\x18%#\x9b\x03Bk\x1e\x99%\x98;ñ4ø\x06||.\x0cÚ\x1e©%\x98$ñãû3|\x14ª9I\x04 |\x96¿ðèø0|1ä\x0e¨Þ÷uù\x1e©%\x98$'
+sec=92 name='IMG-System' va=0xa1aa1 term='flash' ctx='û\x17à\rJ@¡\x04 \x9eð\x80û| ÀCø½\tJG¡\x04 \x9eðxû| ÀCöç\x05JN¡\x04 \x9eðpû| ÀCîç |ìç||×N\x80B%s()||||%s(): Visoflex 2 SPI-Flash: Erase...||||%s(): Visoflex 2 SPI-Flash: Erase done! --> Program...||%s(): Visoflex 2 SPI-Flash: Program done! --> Verify...|%s(): Visoflex 2 SPI-Flash: Verify done!||||%s(): Viso'
+sec=92 name='IMG-System' va=0xa1ac9 term='flash' ctx=' \x9eðpû| ÀCîç |ìç||×N\x80B%s()||||%s(): Visoflex 2 SPI-Flash: Erase...||||%s(): Visoflex 2 SPI-Flash: Erase done! --> Program...||%s(): Visoflex 2 SPI-Flash: Program done! --> Verify...|%s(): Visoflex 2 SPI-Flash: Verify done!||||%s(): Visoflex 2 SPI-Flash: Verify FAILED!||%s(): '
+sec=92 name='IMG-System' va=0xa1b01 term='flash' ctx=' Erase...||||%s(): Visoflex 2 SPI-Flash: Erase done! --> Program...||%s(): Visoflex 2 SPI-Flash: Program done! --> Verify...|%s(): Visoflex 2 SPI-Flash: Verify done!||||%s(): Visoflex 2 SPI-Flash: Verify FAILED!||%s(): Visoflex 2 SPI-Flash: Program FAILED!|%s(): Visoflex 2 S'
+sec=92 name='IMG-System' va=0xa1b39 term='flash' ctx=' Program...||%s(): Visoflex 2 SPI-Flash: Program done! --> Verify...|%s(): Visoflex 2 SPI-Flash: Verify done!||||%s(): Visoflex 2 SPI-Flash: Verify FAILED!||%s(): Visoflex 2 SPI-Flash: Program FAILED!|%s(): Visoflex 2 SPI-Flash: Erase FAILED!|||\x10µ\x14J\x14¡\x01 \x9eðºú|!\x03 ÿ÷Òü\x04||,\x15Ñ\x01!\x08|'
+sec=92 name='IMG-System' va=0xa1b65 term='flash' ctx='gram done! --> Verify...|%s(): Visoflex 2 SPI-Flash: Verify done!||||%s(): Visoflex 2 SPI-Flash: Verify FAILED!||%s(): Visoflex 2 SPI-Flash: Program FAILED!|%s(): Visoflex 2 SPI-Flash: Erase FAILED!|||\x10µ\x14J\x14¡\x01 \x9eðºú|!\x03 ÿ÷Òü\x04||,\x15Ñ\x01!\x08|ÿ÷Ëü\x04||,\x08Ñ\nJ\r¡\x02 \x9eð§ú\x02 ½÷´ú\nà\x06J\x14¡\x04 \x9eð\x9eú\x04à\x03J\x1f¡'
+sec=92 name='IMG-System' va=0xa1b91 term='flash' ctx='I-Flash: Verify done!||||%s(): Visoflex 2 SPI-Flash: Verify FAILED!||%s(): Visoflex 2 SPI-Flash: Program FAILED!|%s(): Visoflex 2 SPI-Flash: Erase FAILED!|||\x10µ\x14J\x14¡\x01 \x9eðºú|!\x03 ÿ÷Òü\x04||,\x15Ñ\x01!\x08|ÿ÷Ëü\x04||,\x08Ñ\nJ\r¡\x02 \x9eð§ú\x02 ½÷´ú\nà\x06J\x14¡\x04 \x9eð\x9eú\x04à\x03J\x1f¡\x04 \x9eð\x98ú |\x10½«N\x80B%s()||||%s(): Reset OLED relea'
+sec=92 name='IMG-System' va=0xa1bbd term='flash' ctx='I-Flash: Verify FAILED!||%s(): Visoflex 2 SPI-Flash: Program FAILED!|%s(): Visoflex 2 SPI-Flash: Erase FAILED!|||\x10µ\x14J\x14¡\x01 \x9eðºú|!\x03 ÿ÷Òü\x04||,\x15Ñ\x01!\x08|ÿ÷Ëü\x04||,\x08Ñ\nJ\r¡\x02 \x9eð§ú\x02 ½÷´ú\nà\x06J\x14¡\x04 \x9eð\x9eú\x04à\x03J\x1f¡\x04 \x9eð\x98ú |\x10½«N\x80B%s()||||%s(): Reset OLED release of FPGA reset done.||||%s(): Reset OLED d'
+sec=92 name='IMG-System' va=0xa1d29 term='flash' ctx='ð?ý\x06||.\x0bÑ\nJ\rI\x02 \x9eð9ú*|!|8|ÿ÷xþ\x06|\x07à\x04J\x08¡\x04 \x9eð-ú| ÀCø½0|üçYN\x80B%s()||||\xa0â\x84B%s(): Visoflex 2 SPI-Flash: Overwrite Header FAILED!||||þµ\x05||&|$|!hF\x01q\x0c!Aq\x01!\x81q\x01-\x03Ñ\x03 iFÈq\x02à\x01 iFÈqiFÈy\x01!H@iF\x08r\x05à`\x1c\x04\x06$\x0e\x01 ½÷óù\x05 \x01#\x02|\x01©|\x90U ,ð!ý|(\x01Ð\x03,íÛ\x03,\x01Û|&öC0|þ½þµ\x05||&|$|!hF\x01q\x0c!Aq\x01!\x81q\x01-\x03Ñ\x01 iFÈq\x02à| iFÈqiFÈy\x01!H@'
+sec=92 name='IMG-System' va=0xa307f term='white balance' ctx='ð\x9cù  \x05\x90\x1cH\x06\x90\x1cH\x07\x90\x08\x94\t\x95| \n\x90\x0b\x90\x0c\x90\r\x90\x14"\t©hF¬÷Ré\x05¨\x0fÈ|ð\x1cú\x06|0|áç||\x18\x88\x81@CA9: ca9_StartWhiteBalance() - white balance module not active||]\x80\nB¤ZpC\x10µ\x04|\x02¡\x04 \x9dðPø\x10½||ARM9: AE MODULE: AE algorithm finished default call back!!!|\x0f´pµ\x05\x9c\x06\x9d |¨Gp¼\x08¼\x04°\x18Gpµ\x8e°\x04|\r||&$!\x05¨¬÷Té\x85 À| \x18\x80m8I\x08`| \x88\x80\x9c |[\x08\x81\x94 |[H\x81\x9a |[È\x80\xa0 |['
+sec=92 name='IMG-System' va=0xa3c48 term='color temperature' ctx='8.5f % 8.5f % 8.5f||||CA9: %s(), %d - DNG CM2 R2: % 8.5f % 8.5f % 8.5f||||CA9: %s(), %d - Color Temperature CM1: % 8.0f|||CA9: %s(), %d - [in] Gain R: %4i | G: %4i | B: %4i||f\x87\x81@`WpC||p@øHCi\x02i| ÷I\x03\x93\x02\x92Bñ\x8eê\x05\x91\x04\x90üðÄî\t\x91\x08\x90ñIËh\x8ah| ðI\x03\x93\x02\x92Bñ~ê\x05\x91\x04\x90üð´î\x07\x91\x06\x90\x0b\x99\n\x98\x05\x91\x04\x90\t\x99\x08\x98\x03\x91\x02\x90\x07\x99\x06\x98ð#æJ\x01\x91|\x90å¡ôH|h\x9cð%úàI\x88'
+sec=92 name='IMG-System' va=0xa7e08 term='awb' ctx=')I h\x88B\nÐ\x0b\'ÿC h\x0b|\x14J%¡|\x90\x04 \x98ðÅù\x1bà`h\x01(\nÐ\x0b\'ÿC`h\x01#\rJ+¡|\x90\x04 \x98ð·ù\rà\x18"!|0|§÷\x80ê3H|x|(\x04Ð2¡>H|h\x98ð¨ù8|þ½AWB.bin|o\x9f\x1eBCA9: %s() file not found||||CA9: %s() failed!!! Size %i != %ll||BWA CA9: %s() failed!!! MagicNumber 0x%08X != 0x%08X||||CA9: %s() failed!!! VersionNumber 0x08X != 0x08X|||'
+sec=92 name='IMG-System' va=0xa7ff8 term='awb' ctx='! MagicNumber 0x%08X != 0x%08X||||CA9: %s() failed!!! VersionNumber 0x%08X != 0x%08X||`\x0e\x8f@AWB.bin|\x19\x88\x81@CA9: %s() - write successful to %s||\x1c\x88\x81@CA9: %s() - write error %i||pµ\x04||%\x18"\x02I |§÷Lé(|p½`\x0e\x8f@\x0f´pµ\x05\x9c\x06\x9d\x07\x9e |\\0ÿ0ÿ0\x020@o=I\x08` |\\0\x9d!\x89|@\x18@h9IH` |\\0\x9d!\x89|@\x18\x80h5I\x88` |\\0ÿ0ÿ0\x020@o2I\x88a |\\0\x9d'
+sec=92 name='IMG-System' va=0xa8337 term='white balance' ctx='\x89\x1fH\x01S\x1dHD0\x01\x8a\x81 \x80|\x01S\x1aHD0A\x8a\x19H|\x1d\x01S\x17HD0\x81\x8aA À|\x01S\x14HD0Á\x8a\x13H\x080\x01S(|\x89ç||\x18\x88\x81@CA9: wb_fill_parameter() - white balance module not active||¤ZpC\x02\x02||ðµ\x89°\x04||&|%ÆH|x\x01(\x08ÐÅJÅ¡\x04 \x97ðìþ\r ÀC\t°ð½¥h|ðçÿ\x06|\x80 |YÉIHa\x84 |Y\x88a\x88 |YÈa\x08|@i\x01(\x0bÐ\x08|@i\x02(\x07Ð\x08|@i\x07(\x03Ð\x08|@i\n(}Ñ½H@i\x01(\x03Ð»H@i\x07(\x06Ñ\x85 À| \x18@k·IÈ`Eà¶H@i\x02(\x03Ð´H@i\n(=Ñ\x85 À| \x18\x80m°I'
+sec=92 name='IMG-System' va=0xa8698 term='white balance' ctx='\x1eHD0Á\x82 n\x03(\x05Ð n\x04(\x02Ð n\x05(\x02Ñ |ÿ÷Úý)H|x|(\x0bÐ |\x080ÿ0ÿ0\x020co(¡Bh%H|h\x97ðlý|ð¼ù0|}æ\x18\x88\x81@Û\x9f\x1eBCA9: %s() - white balance module not active|¤ZpCCA9: %s(FrameStatus: %i) invalid for AWB -> set WB to Daylight||du\x83BÌ]pC\x19\x88\x81@\x1ct\x83B\x1c\x88\x81@`\x0e\x8f@CA9: pInfo    - Frame Status:%i ImgID:%i||||pµ\x04||%&|\x9c60\x88\x10(.Ñà\x8c\x01(\x14Ñ jÿ'
+sec=92 name='IMG-System' va=0xa86e1 term='awb' ctx='@Û\x9f\x1eBCA9: %s() - white balance module not active|¤ZpCCA9: %s(FrameStatus: %i) invalid for AWB -> set WB to Daylight||du\x83BÌ]pC\x19\x88\x81@\x1ct\x83B\x1c\x88\x81@`\x0e\x8f@CA9: pInfo    - Frame Status:%i ImgID:%i||||pµ\x04||%&|\x9c60\x88\x10(.Ñà\x8c\x01(\x14Ñ jÿ÷Ðû\x05||-\x06Ð\x17Hôð°ý`hôð»ý\x1dà\x13H@\x1eôð¨ý`hôð³ý\x15àà\x8c|(\x12Ñ jÿ÷^ü\x05|\rJ\r¡\x04 #j\x97ð'
+sec=92 name='IMG-System' va=0xa86f2 term='daylight' ctx='white balance module not active|¤ZpCCA9: %s(FrameStatus: %i) invalid for AWB -> set WB to Daylight||du\x83BÌ]pC\x19\x88\x81@\x1ct\x83B\x1c\x88\x81@`\x0e\x8f@CA9: pInfo    - Frame Status:%i ImgID:%i||||pµ\x04||%&|\x9c60\x88\x10(.Ñà\x8c\x01(\x14Ñ jÿ÷Ðû\x05||-\x06Ð\x17Hôð°ý`hôð»ý\x1dà\x13H@\x1eôð¨ý`hôð³ý\x15àà\x8c|(\x12Ñ jÿ÷^ü\x05|\rJ\r¡\x04 #j\x97ðÝü\tH@\x1eôð\x93ý|"\x18!`hõð@ú\x05à'
+sec=92 name='IMG-System' va=0xa8bcb term='flash' ctx='A9: WB Mode  - Mode:%i | Preset:%i | Kelvin:%i|\x18u\x83BCA9: WB Image - ISO:%i | ClampLvl:%i | Flash:%i|CA9: WB WSET  - x:%i | y:%i|CA9: WB Cal h - B:%i | Gb:%i | Gr:%i | R:%i|CA9: WB Cal l - B:%i | Gb:%i | Gr:%i | R:%i|\x10µ\x92°÷H\x11\x90÷H|x|(\x04Ðö¡þH|h\x97ðyúóH|x|(\x0fÐ\x05!É\x01\x11\x98@\x18|x\x10\x90\x06"\x11\x99\x8a^\x0f\x92ö¡ôH\x10\x9b'
+sec=92 name='IMG-System' va=0xa905d term='flash' ctx='k\x11\x98ÿ0Ù0\x80k\x0b\x93\x0c\x92\r\x91\n\x90\x11\x98ÿ0Ù0Ak\x11\x98ÿ0Ù0\x02k\x11\x98ÿ0Ù0;à|[pC\x19\x88\x81@CA9: ***** Output Data *****||||\x1c\x88\x81@CA9: Flash%%: %i  WSET successful: %i|||xt\x83BÌ]pCÀt\x83Bpw\x83B\x18w\x83B¸u\x83B\x10v\x83Bhv\x83BÀv\x83BÃj\x11\x98ÿ0Ù0\x80j\x07\x93\x08\x92\t\x91\x06\x90\x11\x98ÿ0Ù0Bj\x11\x98ÿ0Ù0\x01j\x11\x98ÿ0Ù0Ãi\x11\x98ÿ0Ù0\x80i\x03\x93\x05\x92\x04\x91\x02\x90\x11\x98ÿ0Ù0Ai|à\x15à\x11\x98ÿ0Ù0|i\x01\x91|\x90\x11\x98ÿ0Ù0Àh\x10\x90\x11\x98ÿ0Ù0\x82h\x0f\x92jIjH\x10\x9b|h\x97ð\x1fø'
+sec=92 name='IMG-System' va=0xa93a0 term='white balance' ctx='i | %i | %i | %i||\x10µ|$\x0bH|x\x01(\x07Ð\nJ\x0b¡\x04 \x96ðóþ\r ÀC\x10½\\!\x12H¦÷"è¡!\x89|\x0fH\\0¦÷\x1cè |òç\x18\x88\x81@¨\x9f\x1eBCA9: %s() - white balance module not active|¤ZpC\x10µ|$\x08H|x\x01(\x07Ð\x07J\x08¡\x04 \x96ð½þ\r ÀC\x10½H!\x0fH¥÷ìï |øç\x18\x88\x81@¿\x9f\x1eBCA9: %s() - white balance module not active|\x84]pCñµ\x84°\x01«\x02ª\x03©\x04\x98|÷nî|\x90|\x98|(\x03Ð| ÀC\x05°ð½\x01\x98|(\x01Ñ\x01\x90\x02à\x01\x98@\x1e\x01\x90;¡\x04\x98¦÷\x12è|(\x16ÑÀ'
+sec=92 name='IMG-System' va=0xa9400 term='white balance' ctx='balance module not active|¤ZpC\x10µ|$\x08H|x\x01(\x07Ð\x07J\x08¡\x04 \x96ð½þ\r ÀC\x10½H!\x0fH¥÷ìï |øç\x18\x88\x81@¿\x9f\x1eBCA9: %s() - white balance module not active|\x84]pCñµ\x84°\x01«\x02ª\x03©\x04\x98|÷nî|\x90|\x98|(\x03Ð| ÀC\x05°ð½\x01\x98|(\x01Ñ\x01\x90\x02à\x01\x98@\x1e\x01\x90;¡\x04\x98¦÷\x12è|(\x16ÑÀFµ÷\x83þ\x01\x98=ñðè\x04|\r|\x03\x98=ñìè\x06|"|+|=ñ\x92é1J\x03Âµ÷|þÀF| Øç/¡\x04\x98¥÷öï|(\x16ÑÀFµ÷fþ\x01\x98=ñÔè\x04|\r|\x03\x98=ñÎè\x06|"|+|=ñvé%J\x03Âµ÷_'
+sec=92 name='IMG-System' va=0xa9f71 term='flash' ctx='K)\x99É\x18d1\x06KÉ\x18¥÷æé|"0I`hóð~þÀFÀF+°ð½è\'||LEICA-LENS-FILE-SOF|\x90¨:|8\x96\x83BCtrCPU (lens): load lens flash data error - DATEI-KENNUNG!! -%s|CtrCPU (lens): lens data reading error!!||||ô\x95\x83BCtrCPU (lens): shading file error!!|¬-||x\x0e\x01|pµÀ°\x04|à\x8c\x01(\x14Ñ!j j\x03ð4ý\x05|\x01-\tÑ j¥÷>ø\x06|2|\x01!`hóðBù\x02à`hóð^ù\x15à'
+sec=92 name='IMG-System' va=0xaa53e term='flash' ctx='\x02 \x95ð5þ |C0Ax\x03x\x08\x06|\x14\x18C\x02|Y¡\x02 \x95ð)þ |A0Ay\x03y\x08\x06|\x14\x18C\x02|\\¡\x02 \x95ð\x1dþ|\x98ø½||\x84\x96\x83BCtrlCPU (lens): load lens flash configuration data - READY!|CtrlCPU (lens): LensTypeCode: %d||||CtrlCPU (lens): LensTypeString: %s||CtrlCPU (lens): Correction Data Version: TODO %d||||CtrlCPU (lens): Firmware Ve'
+sec=92 name='IMG-System' va=0xb8079 term='flash' ctx='!||||pµ|$\x0f \x93ð\x11ÿ\x05|(\x02}!É|\x97÷\x08ë\x06|0\x04\x04\x14 |p½pµ\x01$\x14 \x93ð\x01ÿ\x05||-\x03Ð\x01-\x03ÑÀF\x06à|$\x04à\x03¡\x04 \x88ðvøÀFÀF |p½CtrlCPU: FlashSynchOn2Curtain - unknown parameter!||þµ\x04|^ \x93ðÑþ\x05|b \x93ðÍþ\x06|] \x93ðÉþ\x07|A \x97ðÅø\x01\x90% \x97ðÁø|\x90|-\x04Ð\x01-\x05Ð\x02-\tÑ\x05à| àp\nà\x01 àp\x07à\x02 àp\x04à%¡\x04 \x88ð.øÀFÀF|.\x02Ð\x01.\x06Ñ\x02à\x01 \xa0p\x07à| \xa0p\x04à+¡\x04 \x88ð\x1døÀFÀF| `p\x01/\x18Ñ|\x98|(\x08Ð\x01(\tÐ\x02('
+sec=92 name='IMG-System' va=0xb91d0 term='flash' ctx='|\x07Â\x0fõ¡\x02 \x86ðéÿ. |]À\x06Â\x0fù¡\x02 \x86ðáÿ. |]@\x06Â\x0fþ¡\x02 \x86ðÙÿ. |]\x05âCtrlCPU: MR- IMG_CMD_MASTER_END_OF_INIT|Flash Synch. on 2. curtain: %d||auto slow synch. (Flash threshold): %d||auto ISO settings (auto ISO in M): %d|||auto ISO settings (max. exp. time): %d||auto ISO settings (max. still ISO'
+sec=92 name='IMG-System' va=0xb9202 term='flash' ctx='CtrlCPU: MR- IMG_CMD_MASTER_END_OF_INIT|Flash Synch. on 2. curtain: %d||auto slow synch. (Flash threshold): %d||auto ISO settings (auto ISO in M): %d|||auto ISO settings (max. exp. time): %d||auto ISO settings (max. still ISO): %d||auto ISO settings (max. video ISO): %d||sel'
+sec=92 name='IMG-System' va=0xb97d4 term='flash' ctx='low for video): %d||||selected ISO (type): %d|selected ISO (ISO/ASA): %d||key lock: %d||||flash compensation: %d||maximum exposure time: %d|||GUI info (date format): %d||GUI info (GPS status): %d|||GUI info (time format): %d||GUI info (WiFi on): %d||Picture Buffer capacity ('
+sec=92 name='IMG-System' va=0xb9fcb term='flash' ctx='x©x|\x91\x01\x90kx*xí¡\x02 \x86ðèøIç¥\x1cðá||CtrlCPU: MR- IMG_CMD_SET_SLAVE_PARAM||||CtrlCPU: IMG_SPARAM_ID_FLASH_SYNC|||Flash Synch. on 2. curtain: %d||CtrlCPU: IMG_SPARAM_ID_AUTO_SLOW_SYNC|||auto slow synch. (Flash threshold): %d||CtrlCPU: IMG_SPARAM_ID_AUTOISO_SETTINGS|auto ISO settings (a'
+sec=92 name='IMG-System' va=0xb9fd8 term='flash' ctx='\x02 \x86ðèøIç¥\x1cðá||CtrlCPU: MR- IMG_CMD_SET_SLAVE_PARAM||||CtrlCPU: IMG_SPARAM_ID_FLASH_SYNC|||Flash Synch. on 2. curtain: %d||CtrlCPU: IMG_SPARAM_ID_AUTO_SLOW_SYNC|||auto slow synch. (Flash threshold): %d||CtrlCPU: IMG_SPARAM_ID_AUTOISO_SETTINGS|auto ISO settings (auto ISO in M)'
+sec=92 name='IMG-System' va=0xba032 term='flash' ctx='Flash Synch. on 2. curtain: %d||CtrlCPU: IMG_SPARAM_ID_AUTO_SLOW_SYNC|||auto slow synch. (Flash threshold): %d||CtrlCPU: IMG_SPARAM_ID_AUTOISO_SETTINGS|auto ISO settings (auto ISO in M): %d|||auto ISO settings (max. exp. time): %d||auto ISO settings (max. still ISO): %d||aut'
+sec=92 name='IMG-System' va=0xbab3f term='flash' ctx='ted ISO (ISO): %d||CtrlCPU: IMG_SPARAM_ID_KEY_LOCK|key lock: %d||||CtrlCPU: IMG_SPARAM_ID_FLASH_COMPENSATION|||flash compensation: %d||CtrlCPU: IMG_SPARAM_ID_AE_LOCK||lock on: %d|CtrlCPU: IMG_SPARAM_ID_MAX_EXP_TIME|maximum exposure time: %d|||CtrlCPU: IMG_SPARAM_ID_GUI_INFO|'
+sec=92 name='IMG-System' va=0xbab54 term='flash' ctx='rlCPU: IMG_SPARAM_ID_KEY_LOCK|key lock: %d||||CtrlCPU: IMG_SPARAM_ID_FLASH_COMPENSATION|||flash compensation: %d||CtrlCPU: IMG_SPARAM_ID_AE_LOCK||lock on: %d|CtrlCPU: IMG_SPARAM_ID_MAX_EXP_TIME|maximum exposure time: %d|||CtrlCPU: IMG_SPARAM_ID_GUI_INFO|GUI info (date format'
+sec=92 name='IMG-System' va=0xbfd90 term='flash' ctx=' %u us||||Bracketing EV: %d|||Program Shift EV: %d||||Lightmeter: %d||Lightmeter on: %d|||Flash Handgrip Ready: %d||||Flash Handgrip Mounted: %d||Flash Handgrip Compensation: %d|Flash Camera Ready: %d||Flash Camera Mounted: %d||||Flash Camera Compensation: %d|||Batt Camera C'
+sec=92 name='IMG-System' va=0xbfdac term='flash' ctx='||Program Shift EV: %d||||Lightmeter: %d||Lightmeter on: %d|||Flash Handgrip Ready: %d||||Flash Handgrip Mounted: %d||Flash Handgrip Compensation: %d|Flash Camera Ready: %d||Flash Camera Mounted: %d||||Flash Camera Compensation: %d|||Batt Camera Capacity: %d||||Batt Handgrip'
+sec=92 name='IMG-System' va=0xbfdc8 term='flash' ctx='ghtmeter: %d||Lightmeter on: %d|||Flash Handgrip Ready: %d||||Flash Handgrip Mounted: %d||Flash Handgrip Compensation: %d|Flash Camera Ready: %d||Flash Camera Mounted: %d||||Flash Camera Compensation: %d|||Batt Camera Capacity: %d||||Batt Handgrip Capacity: %d||Power Supply:'
+sec=92 name='IMG-System' va=0xbfde8 term='flash' ctx='||Flash Handgrip Ready: %d||||Flash Handgrip Mounted: %d||Flash Handgrip Compensation: %d|Flash Camera Ready: %d||Flash Camera Mounted: %d||||Flash Camera Compensation: %d|||Batt Camera Capacity: %d||||Batt Handgrip Capacity: %d||Power Supply: %d||||Focus Confiramtion -AFRea'
+sec=92 name='IMG-System' va=0xbfe00 term='flash' ctx='%d||||Flash Handgrip Mounted: %d||Flash Handgrip Compensation: %d|Flash Camera Ready: %d||Flash Camera Mounted: %d||||Flash Camera Compensation: %d|||Batt Camera Capacity: %d||||Batt Handgrip Capacity: %d||Power Supply: %d||||Focus Confiramtion -AFReadyForExposure: %d||Focus'
+sec=92 name='IMG-System' va=0xbfe1c term='flash' ctx=': %d||Flash Handgrip Compensation: %d|Flash Camera Ready: %d||Flash Camera Mounted: %d||||Flash Camera Compensation: %d|||Batt Camera Capacity: %d||||Batt Handgrip Capacity: %d||Power Supply: %d||||Focus Confiramtion -AFReadyForExposure: %d||Focus Confiramtion -BadSignal: %d'
+sec=92 name='IMG-System' va=0xc1244 term='flash' ctx='||Aperture (k x 256): %d||SV x 256: %d||||ISO: %d|BV x 256: %d||||IR BV: %d|||Ext BV: %d||flash fired: %d| y\x83B°µ\x88°\x04|\x0f||,\x04Ñ=I\x04 ~ðtÿtà& \x8eðJø\x04\x90ùyºy\x08\x02\x10CiFÈ\x82yyhFAu9y\x01uyz\x01v¹zAvùz\x81v\x06\x99\x05\x98}ð\x1cý\x05|\x04\x98(\x18\x02\x90hF\x02\x99}ðìûx~9~|\x06|\x14\x08C\xa0\x87y\x7f8\x7f\t\x06\t\x14\x01C\x05 À\x01 \x18\x880\x01\x83x{9{|\x06|\x14\x08C \x858|\x120\x8e÷Vé`c& Á]ÿ ½0\x01U8| 0Bx\x01x\x10\x06|\x14\x08'
+sec=92 name='IMG-System' va=0xc1ad0 term='flash' ctx='POS|||current pos: %d|max. pos: %d||||min. pos: %d||||AFOverride: %d||SET - IMG_MPARAM_ID_FLASH_INFO||SET - IMG_MPARAM_ID_BATT_INFO|||SET - IMG_MPARAM_ID_OVERHEATING|SET - IMG_MPARAM_ID_FCT_BLOCKED|SET - IMG_MPARAM_ID_WARNING|SET - IMG_MPARAM_ID_P_SHIFT_EV||SET - IMG_MPARAM_'
+sec=92 name='IMG-System' va=0xc2f98 term='flash' ctx='HC\x05|À\x17|\x0e@\x19\x01\x12\x02 \x8cð\x92úax* \x8cðDúWH@x|(\x03ÑUH@y|(\x11ÐSH\x80x\x01(\x03ÐQH\x80y\x01(\x04Ñ\x02!( \x8cð0ú\x08à\x01!( \x8cð+ú\x03à|!( \x8cð&úp½||Flash Info (camera-compensation x 256): %d||Flash Info (camera-flash mounted): %d|||Flash Info (camera-flash ready): %d|Flash Info (FlashSyncTimeSelected): %d||Flash Info (handgrip-comp'
+sec=92 name='IMG-System' va=0xc2fc4 term='flash' ctx='\x80x\x01(\x03ÐQH\x80y\x01(\x04Ñ\x02!( \x8cð0ú\x08à\x01!( \x8cð+ú\x03à|!( \x8cð&úp½||Flash Info (camera-compensation x 256): %d||Flash Info (camera-flash mounted): %d|||Flash Info (camera-flash ready): %d|Flash Info (FlashSyncTimeSelected): %d||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-'
+sec=92 name='IMG-System' va=0xc2fd7 term='flash' ctx='ð0ú\x08à\x01!( \x8cð+ú\x03à|!( \x8cð&úp½||Flash Info (camera-compensation x 256): %d||Flash Info (camera-flash mounted): %d|||Flash Info (camera-flash ready): %d|Flash Info (FlashSyncTimeSelected): %d||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-flash mounted): %d|'
+sec=92 name='IMG-System' va=0xc2fec term='flash' ctx='&úp½||Flash Info (camera-compensation x 256): %d||Flash Info (camera-flash mounted): %d|||Flash Info (camera-flash ready): %d|Flash Info (FlashSyncTimeSelected): %d||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-flash mounted): %d|Flash Info (handgrip-'
+sec=92 name='IMG-System' va=0xc2fff term='flash' ctx='amera-compensation x 256): %d||Flash Info (camera-flash mounted): %d|||Flash Info (camera-flash ready): %d|Flash Info (FlashSyncTimeSelected): %d||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-flash mounted): %d|Flash Info (handgrip-flash ready): %d|||'
+sec=92 name='IMG-System' va=0xc3010 term='flash' ctx='n x 256): %d||Flash Info (camera-flash mounted): %d|||Flash Info (camera-flash ready): %d|Flash Info (FlashSyncTimeSelected): %d||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-flash mounted): %d|Flash Info (handgrip-flash ready): %d|||¥\x0f\x8f@\x10µ\x04|`x"x|\x02\x10C\x01'
+sec=92 name='IMG-System' va=0xc301c term='flash' ctx='||Flash Info (camera-flash mounted): %d|||Flash Info (camera-flash ready): %d|Flash Info (FlashSyncTimeSelected): %d||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-flash mounted): %d|Flash Info (handgrip-flash ready): %d|||¥\x0f\x8f@\x10µ\x04|`x"x|\x02\x10C\x01|M \x8cðÒù\x10½||\x10'
+sec=92 name='IMG-System' va=0xc3038 term='flash' ctx='ounted): %d|||Flash Info (camera-flash ready): %d|Flash Info (FlashSyncTimeSelected): %d||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-flash mounted): %d|Flash Info (handgrip-flash ready): %d|||¥\x0f\x8f@\x10µ\x04|`x"x|\x02\x10C\x01|M \x8cðÒù\x10½||\x10µ\x04|ó÷>ý\x02(\x14Û¢x\n¡\x02 }ð5øâx\x0b¡\x02 }'
+sec=92 name='IMG-System' va=0xc3068 term='flash' ctx='d|Flash Info (FlashSyncTimeSelected): %d||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-flash mounted): %d|Flash Info (handgrip-flash ready): %d|||¥\x0f\x8f@\x10µ\x04|`x"x|\x02\x10C\x01|M \x8cðÒù\x10½||\x10µ\x04|ó÷>ý\x02(\x14Û¢x\n¡\x02 }ð5øâx\x0b¡\x02 }ð0ø\x01"¢V\x0e¡\x02 }ð*ø"x\x12¡\x02 }ð%ø\x10½bad signal = %d|confi'
+sec=92 name='IMG-System' va=0xc307d term='flash' ctx='ncTimeSelected): %d||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-flash mounted): %d|Flash Info (handgrip-flash ready): %d|||¥\x0f\x8f@\x10µ\x04|`x"x|\x02\x10C\x01|M \x8cðÒù\x10½||\x10µ\x04|ó÷>ý\x02(\x14Û¢x\n¡\x02 }ð5øâx\x0b¡\x02 }ð0ø\x01"¢V\x0e¡\x02 }ð*ø"x\x12¡\x02 }ð%ø\x10½bad signal = %d|confirmation on = %d||||co'
+sec=92 name='IMG-System' va=0xc3090 term='flash' ctx='||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-flash mounted): %d|Flash Info (handgrip-flash ready): %d|||¥\x0f\x8f@\x10µ\x04|`x"x|\x02\x10C\x01|M \x8cðÒù\x10½||\x10µ\x04|ó÷>ý\x02(\x14Û¢x\n¡\x02 }ð5øâx\x0b¡\x02 }ð0ø\x01"¢V\x0e¡\x02 }ð*ø"x\x12¡\x02 }ð%ø\x10½bad signal = %d|confirmation on = %d||||confirmation value = '
+sec=92 name='IMG-System' va=0xc30a5 term='flash' ctx='p-compensation x 256): %d||||Flash Info (handgrip-flash mounted): %d|Flash Info (handgrip-flash ready): %d|||¥\x0f\x8f@\x10µ\x04|`x"x|\x02\x10C\x01|M \x8cðÒù\x10½||\x10µ\x04|ó÷>ý\x02(\x14Û¢x\n¡\x02 }ð5øâx\x0b¡\x02 }ð0ø\x01"¢V\x0e¡\x02 }ð*ø"x\x12¡\x02 }ð%ø\x10½bad signal = %d|confirmation on = %d||||confirmation value = %d|AFReadyForExposure'
+sec=92 name='IMG-System' va=0xc98ba term='flash' ctx='\x01¨A]\x83\x98|\x19@]\x81B\tÐc\x19\rJ\x0e¡\x04 vðmü| ÀC\x81\x90\x05àh\x1c\x05\x04-\x0c|\x98\x85BèÓÀFÿ4ÿ4\x014´BÐÓ\x81\x98\x7f°\x06°ð½||ÿ\x01||ÓP\x80B%s(): Verifiy Flash failed at position %d!||þµ\x04|\x0f|| \x01\x90|%|/\x08Ð} |\x03\x87B\x04Øà\x19\x01!I\x05\x88B\x02Ù\x0b ÀCþ½ÿ |\x04\x04@|&^à0\x04¸BWÒ0\x04|\x19\x01!I\x05\x88BQÒ\x06 ×÷Ëü|%ÀFjF\x01!\x05 ×÷\x90üm\x1chF|x\x02!\x08@|(\x01Ñd-ñÓd-\tÓ+|"J#I\x04 vð\x01ü| ÀC\x01\x908à0\x04\x03\x19\x1dJ\x1e¡\x03 vðöû1\x04\x08\x19×÷ ü|%À'
+sec=92 name='IMG-System' va=0xc9a07 term='flash' ctx="\x90\rà0\x04\x03\x19\x07J&¡\x03 vðËû|à\x04àp\x1c\x06\x066\x0e .\x9eÛÀF\x01\x98\x95ç||wP\x80B\x08æ\x84B%s(): Erase Block at address 0x%06x of SPI flash. START|%s(): Timeout occured while erasing block of SPI flash: %d||%s(): Erase Block at address 0x%06x of SPI flash. FINSHED|||÷µ\x84°\x06|\x15|| \x03\x90|'|$\x05\x98|(\nÐ|-\x08Ð} |\x03\x85B\x04Øp\x19\x01!I\x05\x88B\x03Ù\x0b ÀC\x07°ð½"
+sec=92 name='IMG-System' va=0xc9a45 term='flash' ctx="ck at address 0x%06x of SPI flash. START|%s(): Timeout occured while erasing block of SPI flash: %d||%s(): Erase Block at address 0x%06x of SPI flash. FINSHED|||÷µ\x84°\x06|\x15|| \x03\x90|'|$\x05\x98|(\nÐ|-\x08Ð} |\x03\x85B\x04Øp\x19\x01!I\x05\x88B\x03Ù\x0b ÀC\x07°ð½ÿ |\x04\x06@| \x01\x90Nà\x01\x98|\x02¨BDÒ\x06 ×÷ïû|$ÀF\x02ª\x01!\x05 ×÷´ûd\x1chF|z\x02!\x08@|(\x01Ñd,ñÓd,\tÓ"
+sec=92 name='IMG-System' va=0xc9a7b term='flash' ctx=" occured while erasing block of SPI flash: %d||%s(): Erase Block at address 0x%06x of SPI flash. FINSHED|||÷µ\x84°\x06|\x15|| \x03\x90|'|$\x05\x98|(\nÐ|-\x08Ð} |\x03\x85B\x04Øp\x19\x01!I\x05\x88B\x03Ù\x0b ÀC\x07°ð½ÿ |\x04\x06@| \x01\x90Nà\x01\x98|\x02¨BDÒ\x06 ×÷ïû|$ÀF\x02ª\x01!\x05 ×÷´ûd\x1chF|z\x02!\x08@|(\x01Ñd,ñÓd,\tÓ#|\x1eJ\x1fI\x04 vð%û| ÀC\x03\x900à\x05\x99Ê\x19ð\x19ÿ!\x011×÷eû|$ÀF\x02ª\x01!\x05 ×÷\x91ûd\x1chF|z"
+sec=92 name='IMG-System' va=0xc9bb5 term='flash' ctx='7|à\tà\x01\x98@\x1c|\x04|\x0c\x01\x90\x01!I\x03\x01\x98\x88B«ÛÀF\x03\x98\xa0ç||¤P\x80B\x08æ\x84B%s(): Timeout occured while erasing block of SPI flash: %d||pµ\x04|\x06J\x07¡\x01 vðÃú|%íC!|\x04 ×÷sû\x05|(|p½±M\x80B%s()||||8µ\x1fJ\x1f¡\x01 vð®ú|%|$| \x1eI\x08phF×÷Þû\x04||,&Ñ\x03!A ×÷\x8bþ\x04||,\x08Ð#|\x13J\x16¡\x04 vð\x96ú \x06|\x0e8½\x02!B ×÷{þ\x04||,\x08Ð#|\x0bJ\x0e¡\x04 vð\x86ú \x06|\x0eîç\x07J\x14¡\x02 vð~ú\x01%\x04à\x03J\x18¡\x02 vðwú(|àç||ØM'
+sec=92 name='IMG-System' va=0xca1bc term='flash' ctx='ue from ADC: 0x%02x|||FPGA_W||FPGA_R||%s(): Read Register %d (0x%02X) from FPGA: 0x%02x|||FLASH_DATA_R||||\\â\x84BFLASH_WRITE|xà\x84BFLASH_ERASE_BLOCK|||TEST||||PROX_W||PROX_R||%s(): Proximity sensor raw value: %d||||ORBIT_W|ORBIT_R|%s(): Read Orbit register: (%d ; %d)||||***** EVF'
+sec=92 name='IMG-System' va=0xca1d0 term='flash' ctx='||FPGA_W||FPGA_R||%s(): Read Register %d (0x%02X) from FPGA: 0x%02x|||FLASH_DATA_R||||\\â\x84BFLASH_WRITE|xà\x84BFLASH_ERASE_BLOCK|||TEST||||PROX_W||PROX_R||%s(): Proximity sensor raw value: %d||||ORBIT_W|ORBIT_R|%s(): Read Orbit register: (%d ; %d)||||***** EVF Configuration *****'
+sec=92 name='IMG-System' va=0xca1e0 term='flash' ctx='||%s(): Read Register %d (0x%02X) from FPGA: 0x%02x|||FLASH_DATA_R||||\\â\x84BFLASH_WRITE|xà\x84BFLASH_ERASE_BLOCK|||TEST||||PROX_W||PROX_R||%s(): Proximity sensor raw value: %d||||ORBIT_W|ORBIT_R|%s(): Read Orbit register: (%d ; %d)||||***** EVF Configuration *****|||*************'
+sec=92 name='IMG-System' va=0xca70a term='flash' ctx='oflex_2;ORBIT_W;[X];[Y]|\x14á\x84BÌà\x84B***** ORBIT_R *****|drv_disp_evf_visoflex_2;ORBIT_R|***** FLASH_WRITE *****|drv_disp_evf_visoflex_2;FLASH_WRITE;[ADDRESS];[FILENAME]||||\x0câ\x84B\\á\x84B***** FLASH_ERASE_BLOCK *****|||drv_disp_evf_visoflex_2;FLASH_ERASE_BLOCK;[ADDRESS]|¤á\x84Bpµ\x04|\nJ\x0b¡\x01 u'
+sec=92 name='IMG-System' va=0xca734 term='flash' ctx='T_R *****|drv_disp_evf_visoflex_2;ORBIT_R|***** FLASH_WRITE *****|drv_disp_evf_visoflex_2;FLASH_WRITE;[ADDRESS];[FILENAME]||||\x0câ\x84B\\á\x84B***** FLASH_ERASE_BLOCK *****|||drv_disp_evf_visoflex_2;FLASH_ERASE_BLOCK;[ADDRESS]|¤á\x84Bpµ\x04|\nJ\x0b¡\x01 uðÇü|%íC\x01,\x05Ñ\x17!\x07 Ö÷éÿ\x05|\x04à|!\x07 Ö÷ãÿ\x05|(|p½\x07M\x80B%'
+sec=92 name='IMG-System' va=0xca766 term='flash' ctx='ASH_WRITE *****|drv_disp_evf_visoflex_2;FLASH_WRITE;[ADDRESS];[FILENAME]||||\x0câ\x84B\\á\x84B***** FLASH_ERASE_BLOCK *****|||drv_disp_evf_visoflex_2;FLASH_ERASE_BLOCK;[ADDRESS]|¤á\x84Bpµ\x04|\nJ\x0b¡\x01 uðÇü|%íC\x01,\x05Ñ\x17!\x07 Ö÷éÿ\x05|\x04à|!\x07 Ö÷ãÿ\x05|(|p½\x07M\x80B%s()||||øµ\x06|\r|\x1bJ\x1b¡\x01 uð¨ü×÷æù\x04||,*Ñ(\x0c|\x04\x01!\t\x04G\x18\x01!8|ÿ÷\\'
+sec=92 name='IMG-System' va=0xca798 term='flash' ctx='E;[ADDRESS];[FILENAME]||||\x0câ\x84B\\á\x84B***** FLASH_ERASE_BLOCK *****|||drv_disp_evf_visoflex_2;FLASH_ERASE_BLOCK;[ADDRESS]|¤á\x84Bpµ\x04|\nJ\x0b¡\x01 uðÇü|%íC\x01,\x05Ñ\x17!\x07 Ö÷éÿ\x05|\x04à|!\x07 Ö÷ãÿ\x05|(|p½\x07M\x80B%s()||||øµ\x06|\r|\x1bJ\x1b¡\x01 uð¨ü×÷æù\x04||,*Ñ(\x0c|\x04\x01!\t\x04G\x18\x01!8|ÿ÷\\ø\x04||,\x18Ñ\x10J\x12¡\x02 uð\x92ü*|1|| ×÷?ú\x04||,\x05Ñ\tJ\x13¡\x02 uð\x85ü\x0bà\x06J\x18¡\x04'
+sec=92 name='IMG-System' va=0xd92ff term='awb' ctx='à\x13%\x07à\x05M#|\x05J\x05¡\x04 fðNÿÀFÀF(|p½ÿ\x7f||û\x99\x1eBPrepro: %s - Prepro-mode %d not connected with any AFAEAWBMode||pµ\x05|\x05-\x1aÐ\x08Ü\x01-\rÐ\x02-\rÐ\x03-\x0eÐ\x04-\x1cÑ\x0eà\x11-\x11Ð\x12-\x12Ð\x13-\x15Ñ\x11à\x0fL\x18à\x0eL|4\x15à\x0cLø4\x12à\x0cL\x10à\x0bL|4\rà\tLø4\nà\tL\x08à\x08L|4\x05à|$\x07I\x04 fð÷þÀFÀF |p½||,÷\x8e@\xa0ø\x8e@\x14ú\x8e@\x8cj\x83B\x10µÿ!E1\x0fHv÷\x1aè\x01 \x0eI\x08v|ð\x9fû\x02 |ð\x9cû\x03 |ð\x99û\x04 |ð\x96û\x05 |ð\x93û\x11 |ð\x90û\x12 '
+sec=92 name='IMG-System' va=0xd94fe term='awb' ctx='»¡\x02 \x19\x9afðSþÇ¡\x02 \x1a\x9afðNþÒ¡\x02 \x1b\x9afðIþà¡\x02 \x1c\x9afðDþí¡\x02 \x17\x9afð?þ÷¡\x02 \x18\x9a|àJâfð8þþIýá\x10÷\x8e@\x94i\x83BØg\x83BPrepro: AEAWB Window (h-start-pixel): %d||||Prepro: AEAWB Window (v-start-line): %d|Prepro: AEAWB Window (h-pixel-count): %d||||Prepro: AEAWB Window (v-line-count): %d|Prepro: AEAWB Block Numbe'
+sec=92 name='IMG-System' va=0xd952a term='awb' ctx='\x17\x9afð?þ÷¡\x02 \x18\x9a|àJâfð8þþIýá\x10÷\x8e@\x94i\x83BØg\x83BPrepro: AEAWB Window (h-start-pixel): %d||||Prepro: AEAWB Window (v-start-line): %d|Prepro: AEAWB Window (h-pixel-count): %d||||Prepro: AEAWB Window (v-line-count): %d|Prepro: AEAWB Block Numbers (horizontal): %d||||Prepro: AEAWB Block N'
+sec=92 name='IMG-System' va=0xd9552 term='awb' ctx='ro: AEAWB Window (h-start-pixel): %d||||Prepro: AEAWB Window (v-start-line): %d|Prepro: AEAWB Window (h-pixel-count): %d||||Prepro: AEAWB Window (v-line-count): %d|Prepro: AEAWB Block Numbers (horizontal): %d||||Prepro: AEAWB Block Numbers (vertical): %d||Prepro: AE Field '
+sec=92 name='IMG-System' va=0xd957e term='awb' ctx='ro: AEAWB Window (v-start-line): %d|Prepro: AEAWB Window (h-pixel-count): %d||||Prepro: AEAWB Window (v-line-count): %d|Prepro: AEAWB Block Numbers (horizontal): %d||||Prepro: AEAWB Block Numbers (vertical): %d||Prepro: AE Field (h-pixel-count): %d||||Prepro: AE Field (v-l'
+sec=92 name='IMG-System' va=0xd95a6 term='awb' ctx='ro: AEAWB Window (h-pixel-count): %d||||Prepro: AEAWB Window (v-line-count): %d|Prepro: AEAWB Block Numbers (horizontal): %d||||Prepro: AEAWB Block Numbers (vertical): %d||Prepro: AE Field (h-pixel-count): %d||||Prepro: AE Field (v-line-count): %d|Prepro: AWB Field (h-pixe'
+sec=92 name='IMG-System' va=0xd95d6 term='awb' ctx='AEAWB Window (v-line-count): %d|Prepro: AEAWB Block Numbers (horizontal): %d||||Prepro: AEAWB Block Numbers (vertical): %d||Prepro: AE Field (h-pixel-count): %d||||Prepro: AE Field (v-line-count): %d|Prepro: AWB Field (h-pixel-count): %d|||Prepro: AWB Field (v-line-count):'
+sec=92 name='IMG-System' va=0xd964c term='awb' ctx=': %d||Prepro: AE Field (h-pixel-count): %d||||Prepro: AE Field (v-line-count): %d|Prepro: AWB Field (h-pixel-count): %d|||Prepro: AWB Field (v-line-count): %d||||Prepro: AF Field (h-start-pixel): %d||||Prepro: AF Field (v-start-line): %d|Prepro: AF Field (h-pixel-count): %'
+sec=92 name='IMG-System' va=0xd9674 term='awb' ctx='%d||||Prepro: AE Field (v-line-count): %d|Prepro: AWB Field (h-pixel-count): %d|||Prepro: AWB Field (v-line-count): %d||||Prepro: AF Field (h-start-pixel): %d||||Prepro: AF Field (v-start-line): %d|Prepro: AF Field (h-pixel-count): %d||||Prepro: AF Field (v-line-count): %d'
+sec=92 name='IMG-System' va=0xd973a term='awb' ctx='Prepro: AF Field (h-pixel-count): %d||||Prepro: AF Field (v-line-count): %d|àh\x83BPrepro: AEAWB Window (current h-start-pixel): %d||||Prepro: AEAWB Window (current v-start-line): %d|Prepro: AFAEAWB mode-Window (current h-start-pixel): %d|Prepro: AFAEAWB mode-Window (current '
+sec=92 name='IMG-System' va=0xd976e term='awb' ctx='ield (v-line-count): %d|àh\x83BPrepro: AEAWB Window (current h-start-pixel): %d||||Prepro: AEAWB Window (current v-start-line): %d|Prepro: AFAEAWB mode-Window (current h-start-pixel): %d|Prepro: AFAEAWB mode-Window (current v-start-line): %d||Prepro: AFAEAWB middle-mode-Windo'
+sec=92 name='IMG-System' va=0xd97a0 term='awb' ctx='current h-start-pixel): %d||||Prepro: AEAWB Window (current v-start-line): %d|Prepro: AFAEAWB mode-Window (current h-start-pixel): %d|Prepro: AFAEAWB mode-Window (current v-start-line): %d||Prepro: AFAEAWB middle-mode-Window (current h-start-pixel): %d||Prepro: AFAEAWB mid'
+sec=92 name='IMG-System' va=0xd97d8 term='awb' ctx='ent v-start-line): %d|Prepro: AFAEAWB mode-Window (current h-start-pixel): %d|Prepro: AFAEAWB mode-Window (current v-start-line): %d||Prepro: AFAEAWB middle-mode-Window (current h-start-pixel): %d||Prepro: AFAEAWB middle mode-Window (current v-start-line): %d|||Prepro: AF '
+sec=92 name='IMG-System' va=0xd9810 term='awb' ctx='nt h-start-pixel): %d|Prepro: AFAEAWB mode-Window (current v-start-line): %d||Prepro: AFAEAWB middle-mode-Window (current h-start-pixel): %d||Prepro: AFAEAWB middle mode-Window (current v-start-line): %d|||Prepro: AF Field (current h-start-pixel): %d||||Prepro: AF Field (c'
+sec=92 name='IMG-System' va=0xd9850 term='awb' ctx='rt-line): %d||Prepro: AFAEAWB middle-mode-Window (current h-start-pixel): %d||Prepro: AFAEAWB middle mode-Window (current v-start-line): %d|||Prepro: AF Field (current h-start-pixel): %d||||Prepro: AF Field (current v-start-line): %d|\x88h\x83B\x02 fð5ü$I\x02 \x1d\x9afð0ü"¡\x02 \x1e\x9afð+ü0I\x02 fð\'ü/'
+sec=92 name='IMG-System' va=0xd998c term='awb' ctx='à81¡\x02i\x02 fð\x0bü!Hà89¡Âi\x02 fð\x04ü\x1dHà8A¡Bi\x02 fðýû\x1aHà8\x02\x8cH¡\x02 fðöû\x16Hà8\x82\x8cO¡\x02 fðïû\x1f°0½|||\x98\rBPrepro: AFAEAWB middle-mode-Window (current v-start-line): %d|||0h\x83Bð\x03\x8f@ð\x94\rBPrepro: AF global-Window (h-start-pixel): %d||||Prepro: AF global-Window (v-start-line): %d|Prepro: AF global-Window (h'
+sec=92 name='IMG-System' va=0xd9eea term='awb' ctx='\x81eAlÁe\x81l\x01fAlAf\x81l\x81f\x01|ÈlÁ\x0f\t\x18J\x10\x1aIø1InR\x18\x18Iø1Êf\x08mÁ\x0f\t\x18J\x10\x15Iø1\x89lR\x18\x13Iø1\ng\x08|%à\x10÷\x8e@Prepro: reset AFAEAWB Mode 0x%x|X\x14||\x10\x1e||\x10\x13||®\x0e||¤\t||¾\x06||<\x04||\x8b\x02||$ø\x8e@|\x15||Àn\x01|\x9cHAg|o\x01|\x9aH\x81g+á{!\x89\x01\x98H\x0c0\x01gQ!I\x01p0A`\x95I\x81`\x95IÁ`M!É|\x01aÿ!¡1Aa\x16!\x81a\x10!Áa7!É\x01\x01b\x1c!Ab\x1a!\x81b\x10!Áb\x01c\x89Iü1Ac\x89I\x9c1\x81cp!Ách!\x01d\x84Iü1Ad\x84I\x9c1\x81dp!Ádh!\x01e\x81hAeÁ'
+sec=92 name='IMG-System' va=0xda494 term='awb' ctx='hh|(\x05Ðih\x08\x1d|"!|t÷Rï |Áæð\x03\x8f@ B\x01|\x10÷\x8e@Prepro: middle (ref. used image): x=%d  y=%d||||Prepro: AWB-ext. pos. (ref. LVDS image): x=%d  y=%d|Prepro: AWB-ext. first pixel color: %d||\x80\x02\x8f@Prepro: set AF/AE/AWB-field-position||||Prepro: edge (ref. valid image): x=%d  y=%d|pµ\x04||%|,\x01Ðd'
+sec=92 name='IMG-System' va=0xda4c8 term='awb' ctx='f. used image): x=%d  y=%d||||Prepro: AWB-ext. pos. (ref. LVDS image): x=%d  y=%d|Prepro: AWB-ext. first pixel color: %d||\x80\x02\x8f@Prepro: set AF/AE/AWB-field-position||||Prepro: edge (ref. valid image): x=%d  y=%d|pµ\x04||%|,\x01Ðd,\x06ÑñJñ¡\x03 eðþý| p½\x01 ýIH` |þ÷\x84þúI\x08\x80\x08||\x88ð!\x08@|(}ÑöH|\x88\x03|Å'
+sec=92 name='IMG-System' va=0xda4fe term='awb' ctx='ef. LVDS image): x=%d  y=%d|Prepro: AWB-ext. first pixel color: %d||\x80\x02\x8f@Prepro: set AF/AE/AWB-field-position||||Prepro: edge (ref. valid image): x=%d  y=%d|pµ\x04||%|,\x01Ðd,\x06ÑñJñ¡\x03 eðþý| p½\x01 ýIH` |þ÷\x84þúI\x08\x80\x08||\x88ð!\x08@|(}ÑöH|\x88\x03|Å÷\x06ê\x06þ\x04F\x91Úýþ\x05!\x89\x03òH\x01`ÿ!·1 8A\x80x! 8\x01\x84|! 0Á\x80P!\x81\x80@!A\x81\x01\x81 !\x81\x81Á'
+sec=92 name='IMG-System' va=0xda92d term='awb' ctx='\x84\x81\x84p!A\x84h!Á\x84ÿ!\x911\x1dHA`\x04!|\x1dA`{!\x89\x01\x81`Q!I\x01Á`ü!\x81b\x9c!ÁbM!É|\x01cÿ!¡1AcÚàIàÐà||\x1d\x9a\x1eBPrepro: %s  - no afaeawb-prepro settings for IDLE/POWERDOWN|\x10\x03\x8f@\x10\x04\x8f@.\x02||\x10\x1e||\x10\x13||è\x08||®\x03||\\\x0e||Ê\x05||\x8c\x14||Prepro: %s  -unknown AFAEAWB-Mode|||È\x0f||7!É\x01HH\x01`HI 8A\x80HI 8\x01\x84\x1c! 0Á\x80\x1a!\x81\x80\x16!A\x81\x10!\x01\x81\x1c!\x81\x81\x1a!Á\x81\x10!\x01\x82A\x82=Iü1à8\x81a<I\x9c1'
+sec=92 name='IMG-System' va=0xda995 term='awb' ctx='tings for IDLE/POWERDOWN|\x10\x03\x8f@\x10\x04\x8f@.\x02||\x10\x1e||\x10\x13||è\x08||®\x03||\\\x0e||Ê\x05||\x8c\x14||Prepro: %s  -unknown AFAEAWB-Mode|||È\x0f||7!É\x01HH\x01`HI 8A\x80HI 8\x01\x84\x1c! 0Á\x80\x1a!\x81\x80\x16!A\x81\x10!\x01\x81\x1c!\x81\x81\x1a!Á\x81\x10!\x01\x82A\x82=Iü1à8\x81a<I\x9c1\x01ap!Áah!Aa|!\x01\x84\x81\x84p!A\x84h!Á\x84ÿ!\x9112HA`\x04!|\x1dA`{!\x89\x01\x81`Q!I\x01Á`ü!\x81b\x9c!ÁbM!É|\x01cÿ!¡1AcKà7!É\x01&H\x01`&I 8A\x80&I 8\x01\x84\x1c! 0Á\x80\x1a!\x81\x80\x16!'
+sec=92 name='IMG-System' va=0xdad99 term='awb' ctx="F\x01t| \x05\x90\x04!hF\x81\x800|\x100\x02\x90|!\x01¨\x05ð/ü8|iç||0j\x83BH\x9a\x1eBài\x83B8i\x83B\x10þ\x8e@Prepro: allocate global memory for aeawb-data|||°B\x01|L\x04\x8f@\x80@\x01|\x10÷\x8e@\x14\x03\x8f@\x01|| \x02JÒo\x02KÒ\x18\n`pG\x10þ\x8e@\x80@\x01|ðµ©°\x05|\x0e|\x17|| (\x90(`0`8`!¨+ðCù(\x99@\x18(\x90#\x98\x0cñ~ê\x04|$\x98'\x90&\x99I\x1c!\x98HC8`\nð\x1dø\x06©\x01\x90\tð\x8fý\rHAi\x80\x8c\x08\x1a\x05\x90\nHÁ\x8c\x05\x98@\x1a\x04\x90\x05\x98`C\x03\x90\x04\x98`C\x02\x90'\x99\x03\x98@\x18|\x19(`\x02\x98|\x190`(\x98)°ð½\x10\x03\x8f@øµ\x06|"
+sec=92 name='IMG-System' va=0xdc93b term='awb' ctx='8àá| \xa0á\x01|\xa0á\x02\x10\xa0á\x03 |à¾\x03Ôá|8\xa0á||\xa0ã\x05È\xa0á|||à\x0c0\x03à\x01|\x80á\x03\x10\x82á0 \x9fåð|Âáp\x80½èÄ¡\x9a@Prepro (driver): set aeawb!||@| |\x80ÿÿÿ\x7f||\x80@| \x03H|h\x80\x08\x80|@\x1c\x01I\x08`pG|@| \x03H|h\x80\x08\x80|\x80\x1c\x01I\x08`pG|@| \x10µ\x04|\x1fH|h|(\x03Ñ\x1e¡\x02 cðäû \x88%I\x88``\x88È`\xa0\x88\x08aà\x88Ha`\x89Èa \x89\x88a\x08||j@\n@\x02á\x89É\x05É\r\x08C\x1bI\x08b\x08||j\x1aI\x08@¡\x89\t\x04\x18JÒC\x11@\x08C\x15I\x08b\x08|@j@\n@\x02a\x8aÉ\x05É\r\x08C\x10IHb\x08|@jÑC\x08@!\x8a\t\x04'
+sec=92 name='IMG-System' va=0xdca17 term='awb' ctx='j\x1aI\x08@¡\x89\t\x04\x18JÒC\x11@\x08C\x15I\x08b\x08|@j@\n@\x02a\x8aÉ\x05É\r\x08C\x10IHb\x08|@jÑC\x08@!\x8a\t\x04\x11@\x08C\x0bIHb\x10½Ä¡\x9a@Prepro (driver): set aeawb-window!|||@| ÿÿ|üpµ\x05|AH|h|(\x03Ñ@¡\x02 cð\x8aûIH\x80i\x80\x0b\x80\x03©\x8a\x89\x04\x89\x0c\x08CEI\x88a\x08||j\x80\x0b\x80\x03)\x8b\x89\x04\x89\x0c\x08C@I\x08b\x08|@i\x80\x0b\x80\x03©\x89\x89\x04\x89\x0c\x08C;IHa\x08|Ài\x80\x0b\x80\x03)\x8a\x89\x04\x89\x0c\x08C6IÈa6HihA`©h\x81`|$Gà¡\x013H\x08\x18Àh\x80\x0b\x80\x03â|)|\x1c1Q\x18\x89\x88\x89\x04\x89\x0c\x08C¢\x01,IQ\x18È`¡\x01*H\x08\x18|i\x80\x0b\x80\x03'
+sec=92 name='IMG-System' va=0xe5854 term='awb' ctx='\x08Ñ\x18H\x8c8|o\x01!I\x02\x08C\x15I\x8c9\x08g\x14HÀz\x01(\x08Ñ\x12H\x8c8|o\x01!\x89\x02\x08C\x0fI\x8c9\x08g\x01,\x01Ñø÷\x08þ\x0bI\x8c9\x08oö÷¡þ(|]ä||\x10÷\x8e@PrePro: start AEAWB/PW(6)|||4\x02\x8f@¨ÿ\x8e@PrePro: start HIST||PrePro: start pzsft A1||PrePro: start pzsft A2||PrePro: start LNR/RB/LVDS|||PrePro: start M2P(0)/M2P(1)/PR(0)/PR(1)|pµ\x04|\r||&\x15HÀm|(\nÐ\x14H\x80h\x02(\x03Ø\x13¡\x02'
+sec=92 name='IMG-System' va=0xe6a8e term='awb' ctx='\x18!qCQ\x18\x08sh )|AC |ÿ0é0P0\t\x184 pC\x08\x18|\x8e0!iCIª\x8a\x18\x18!qCQ\x18\x88uv\x1c\x19à\x10÷\x8e@PrePro: set HIST||||PrePro: set AEAWB|||\x10\x04\x8f@\x90\x02\x8f@\x02.|ÚÞæm\x1c\x03-|ÚØæ7¨ö÷bèMHõ÷»ÿ\x07!É\x01b\x18\x08 \x10^ù÷vüq!É|b\x18\x02 \x10^ù÷¯üÿ \x050|Y|(}Ð|\'|!\x1b\x91ÿ \x110\x01Yu\x91ÿ \t0\x01Ys\x91ÿ \x150|YA\x08v\x91ÿ \r0|YA\x08t\x91ÿ )0|]|(\x0cÑ|!\x1b\x91p¨Arÿ \x050\x01Yÿ \x110|Y@|\x0f\x18$à\x01!\x1b\x91\x02!p¨Arÿ \x050\x07Yÿ!\x111\tY\x0c"QC\x08'
+sec=92 name='IMG-System' va=0xf3bd0 term='awb' ctx='                      6:MAGNIFIER2 |||                        7:MAGNIFIER3 |||Prepro: afaeawb field position;%d;%d;%d;%d;%d|||pµ\x05||$\x07\xa0|ð\x10ø\x05\xa0ÿ÷\x95þ\x04\xa0÷÷Îý\x02\xa0\x02ð5û |p½||help||||8µ\x04||%\x01"iF |Jð\x86û\x18¡ |[÷\x82ù|( Ð\x17I\x02 Lð\x88ú\x16¡\x02 Lð\x84ú ¡\x02 Lð\x80ú\'¡\x02 Lð|ú)¡\x02 Lðxú+¡\x02 Lðtú-¡\x02 Lðpú0¡\x02 Lðlú\x07à2¡\x02 |\x9aLðf'
+sec=92 name='IMG-System' va=0xf43c1 term='awb' ctx='R3)- Channel Error|||Prepro (test): Image-Write (PW2/PW5)- Channel Error|Prepro (test): AEAWB-Write (PW6)- Channel Error|Prepro (test): Reentry (M2P0/M2P1/PR0/PR1)- Channel Error|||Prepro (test): undefined Macro Error||||ÿÿ||0µ\x9b°\x05|è\x8c\x01(\x03Ñhh¨ðEÿâá,jò¡\x02 KðwþiF\x01 ð÷aú\x05\x98 \x80hF|\x8b`\x80'
+sec=92 name='IMG-System' va=0xf5faf term='awb' ctx='à1 \x08àB \x06àP \x04àQ \x02àR |àÀFÀF|½\x10µ\nI\n\xa0Ið\x17ÿ\x12I\x12\xa0Ið\x13ÿ\x17I\x17\xa0Ið\x0fÿ\x19I\x19\xa0Ið\x0bÿ\x1dI\x1d\xa0Ið\x07ÿ\x10½-9\x0fBprepro set afaeawb field position|||\x1d<\x0fBprepro set debug level||ñ;\x0fBprepro help|¥·\x0eBprepro fshd info||||yb\x0fBprepro check sdc||||ÿµ\x83°\x17|\r\x9e\x0c\x9d|"CK(|1|ððÐè\x01\x91|\x90ðð¶ê\x04|\x04\x98|(wÑ>¡\x02 Jð\x83ø\x10ðYû\x03\x98ÿ÷eÿ\x01\x90\x12ð\x17ù\x0e\x98\x10ð\x1eü\x03\x98'
+sec=92 name='IMG-System' va=0xf6344 term='awb' ctx='ing currend loaded sdc maps|||\x10µ\x04|\x02¡\x02 Ið ÿ\x10½||Prepro (test): drv_prepro_test_if_CallbackAEAWBReady()||\x10µ\x04|\x02¡\x02 Iðüþ\x10½||Prepro (test): drv_prepro_test_if_CallbackAFReady()|\x10µ\x03¡\x02 IðÛþ|ð\x87ý\x10½Prepro (test): drv_prepro_test_if_CallbackCaptureReady()||||\x10µ|ðQý\x10½pµ\x05|\x0c|(\x1d|(\x06ÑDI\x02 Ið¬'
+sec=92 name='IMG-System' va=0x12d3a8 term='flash' ctx='mes|||Bracketing Aperture|Bracketing Shift||||Exposure Metering|||Exposure Compensation|||Flash Settings||Flash Sync||Auto Slow Sync||Exposure Compensation Flash|ISO Setup|||Sensitivity|Sensitivity Push||||Sensitivity Auto Max||||Sensitivity Auto Time|||White Balance|||White'
+sec=92 name='IMG-System' va=0x12d3b8 term='flash' ctx=' Aperture|Bracketing Shift||||Exposure Metering|||Exposure Compensation|||Flash Settings||Flash Sync||Auto Slow Sync||Exposure Compensation Flash|ISO Setup|||Sensitivity|Sensitivity Push||||Sensitivity Auto Max||||Sensitivity Auto Time|||White Balance|||White Balance Greycar'
+sec=92 name='IMG-System' va=0x12d3ea term='flash' ctx='Exposure Compensation|||Flash Settings||Flash Sync||Auto Slow Sync||Exposure Compensation Flash|ISO Setup|||Sensitivity|Sensitivity Push||||Sensitivity Auto Max||||Sensitivity Auto Time|||White Balance|||White Balance Greycard LiveView|White Balance Greycard Photo||||White B'
+sec=92 name='IMG-System' va=0x12d44c term='white balance' ctx='O Setup|||Sensitivity|Sensitivity Push||||Sensitivity Auto Max||||Sensitivity Auto Time|||White Balance|||White Balance Greycard LiveView|White Balance Greycard Photo||||White Balance Color Temperature|Photo File Format|||Photo JPG Settings||Photo JPG Resolution||||Contrast||||Sharp'
+sec=92 name='IMG-System' va=0x12d45c term='white balance' ctx='ivity|Sensitivity Push||||Sensitivity Auto Max||||Sensitivity Auto Time|||White Balance|||White Balance Greycard LiveView|White Balance Greycard Photo||||White Balance Color Temperature|Photo File Format|||Photo JPG Settings||Photo JPG Resolution||||Contrast||||Sharpness|||Saturatio'
+sec=92 name='IMG-System' va=0x12d46a term='greycard' ctx='ity Push||||Sensitivity Auto Max||||Sensitivity Auto Time|||White Balance|||White Balance Greycard LiveView|White Balance Greycard Photo||||White Balance Color Temperature|Photo File Format|||Photo JPG Settings||Photo JPG Resolution||||Contrast||||Sharpness|||Saturation||Monoch'
+sec=92 name='IMG-System' va=0x12d47c term='white balance' ctx='ivity Auto Max||||Sensitivity Auto Time|||White Balance|||White Balance Greycard LiveView|White Balance Greycard Photo||||White Balance Color Temperature|Photo File Format|||Photo JPG Settings||Photo JPG Resolution||||Contrast||||Sharpness|||Saturation||Monochrome||Toning||Hue|Stren'
+sec=92 name='IMG-System' va=0x12d48a term='greycard' ctx='||||Sensitivity Auto Time|||White Balance|||White Balance Greycard LiveView|White Balance Greycard Photo||||White Balance Color Temperature|Photo File Format|||Photo JPG Settings||Photo JPG Resolution||||Contrast||||Sharpness|||Saturation||Monochrome||Toning||Hue|Strength||||AS'
+sec=92 name='IMG-System' va=0x12d49c term='white balance' ctx='to Time|||White Balance|||White Balance Greycard LiveView|White Balance Greycard Photo||||White Balance Color Temperature|Photo File Format|||Photo JPG Settings||Photo JPG Resolution||||Contrast||||Sharpness|||Saturation||Monochrome||Toning||Hue|Strength||||ASC Cine Classic Look|||A'
+sec=92 name='IMG-System' va=0x12d4aa term='color temperature' ctx='e Balance|||White Balance Greycard LiveView|White Balance Greycard Photo||||White Balance Color Temperature|Photo File Format|||Photo JPG Settings||Photo JPG Resolution||||Contrast||||Sharpness|||Saturation||Monochrome||Toning||Hue|Strength||||ASC Cine Classic Look|||ASC Contemporary Lo'
+sec=92 name='IMG-System' va=0x12e128 term='flash' ctx='_Favorite|Drive Mode_Favorite|Exposure Metering_Favorite||Exposure Compensation_Favorite||Flash Settings_Favorite|ISO Setup_Favorite||Sensitivity Push_Favorite|||White Balance_Favorite||Photo File Format_Favorite||Photo JPG Settings_Favorite|Photo JPG Resolution_Favorite|||A'
+sec=92 name='IMG-System' va=0x12e170 term='white balance' ctx='nsation_Favorite||Flash Settings_Favorite|ISO Setup_Favorite||Sensitivity Push_Favorite|||White Balance_Favorite||Photo File Format_Favorite||Photo JPG Settings_Favorite|Photo JPG Resolution_Favorite|||ASC Cine Classic Look_Favorite||ASC Contemporary Look_Favorite||Auto Review Durat'
+sec=92 name='IMG-System' va=0x12f0b4 term='daylight' ctx='ation TAN|Pairing|Unpairing|||WLAN Version||||GPS|Date Time|||GPS Auto Time|||Time Zone|||Daylight Saving Time||||Date Setting||||Date Format|Date Setting Year|||Date Setting Month||Date Setting Day||||Time Setting||||Time Format|Time Setting Hour|||Time Setting Minute|Time Set'
+sec=92 name='IMG-System' va=0x131433 term='hmi' ctx='`|!\x83HÁr\x83H\x82I 9\x08c\x01 \x08rS!\x7fH\x180\x81\x81À8\x01|Ì1\x88clHp0H`|!yHD0ÁrzHwI$1\x08c\x01 \x08rT 41\x08\x82È\x1fù8\x101\x88cbHp0H`|!oH\x880ÁrqHmIh1\x08c\x01 \x08rU 01\x88\x82`Hd8\x141\x88c\x04 ÈbjH\x08dVH 8H`|!cHÌ0Ár| aI¬1\x08c\x01 \x08rV ,1\x08\x83\x08|,8\x181\x88c`HH`k!`H\x01p|!Ár_H]I 9\x08c\x01 \x08rW!ZH\x080\x81\x83l8\x01|\x881\x88cVHH`l!UHD0\x01p|!ÁrTHRI$1\x08c\x01 \x08rX $1\x08\x84\x08|¬8 1\x88cKHH`m!KH\x880\x01p|!ÁrIHHIh1\x08c\x01 '
+sec=92 name='IMG-System' va=0x13b364 term='flash' ctx='"||#)|0|fð ï\xa0B\x0eÑ"|9|(|\x02ðòû\x01(\x01Ñ|\x90\x10à2|\x0c¡\x04 \x04ð\x0fÿ\nà2|\x19I\x04 \x04ð\tÿ\x04à2|\x17¡\x04 \x04ð\x03ÿ\x04à2|"¡\x04 \x04ðýþ|\x98ø½||hsk_FlashFileFromSDCard: [%s] couldn\'t flash all bytes to NOR!||\x84\xad\x83Bhsk_FlashFileFromSDCard: [%s] could not allocate memory|hsk_FlashFileFromSDCard: [%s] is not exists or size is = 0||\x0f´\x1fµ|'
+sec=92 name='IMG-System' va=0x13b387 term='flash' ctx='|\x0c¡\x04 \x04ð\x0fÿ\nà2|\x19I\x04 \x04ð\tÿ\x04à2|\x17¡\x04 \x04ð\x03ÿ\x04à2|"¡\x04 \x04ðýþ|\x98ø½||hsk_FlashFileFromSDCard: [%s] couldn\'t flash all bytes to NOR!||\x84\xad\x83Bhsk_FlashFileFromSDCard: [%s] could not allocate memory|hsk_FlashFileFromSDCard: [%s] is not exists or size is = 0||\x0f´\x1fµ|$\x1bà\x18 `C\x11I\x08X|(\x14Ñ#|\x10¡\x01 \x06\x9a\x04ð\x8eþ\x08¨\x0fÈ\x03\x93kF'
+sec=92 name='IMG-System' va=0x13b3a8 term='flash' ctx='\x04à2|"¡\x04 \x04ðýþ|\x98ø½||hsk_FlashFileFromSDCard: [%s] couldn\'t flash all bytes to NOR!||\x84\xad\x83Bhsk_FlashFileFromSDCard: [%s] could not allocate memory|hsk_FlashFileFromSDCard: [%s] is not exists or size is = 0||\x0f´\x1fµ|$\x1bà\x18 `C\x11I\x08X|(\x14Ñ#|\x10¡\x01 \x06\x9a\x04ð\x8eþ\x08¨\x0fÈ\x03\x93kF\x07Ã |\x07\x9b\x06\x9a\x02ð\x9aú\x04°\x10¼\x08¼\x04°\x18Gd\x1c\n,áÓ\x13¡\x04 \x04'
+sec=92 name='IMG-System' va=0x13b3e0 term='flash' ctx=' flash all bytes to NOR!||\x84\xad\x83Bhsk_FlashFileFromSDCard: [%s] could not allocate memory|hsk_FlashFileFromSDCard: [%s] is not exists or size is = 0||\x0f´\x1fµ|$\x1bà\x18 `C\x11I\x08X|(\x14Ñ#|\x10¡\x01 \x06\x9a\x04ð\x8eþ\x08¨\x0fÈ\x03\x93kF\x07Ã |\x07\x9b\x06\x9a\x02ð\x9aú\x04°\x10¼\x08¼\x04°\x18Gd\x1c\n,áÓ\x13¡\x04 \x04ðxþ  ÀCðç||\x18\x93\x8f@hsk_AddSoftTimertoArray: Timer(%d) was pu'
+sec=92 name='IMG-System' va=0x13b8fc term='flash' ctx='%s] - VER: 0x%08X|ä°\x83Bøµ\x05||&\r¡(|\x13÷\x07û\x07|\n¡| \x13÷\x02û|"\x11||\x90\x13÷]ø\x04|#|:|\x05¡\x02 \x04ð6ü!|8|ÿ÷üü0|ø½;|||hsk_FlashFileFromSDCard: [%s] ADR=[0x%08X]||\x10µ\x04|!|\x01 #÷Vý\x10½||øµ\x06||\'| 0`"H|h|(&Ñ!\xa0eðÚû\x04||,\x1fÐ |\x06ðúý\x05||-\x13Ð"||#)|\x19\xa0fðöë\xa0B\x08Ð\x17¢\x19¡\x04 \x04ðîû(|\x06ðÁø\x07à\x11H\x05`\x04à"|"I\x04 \x04ðâûÀFÀF\x0cH|h|(\x12Ð\nH|h|h\x1dI\x88B\x05Ñ\x07H|h@h0`\x01\'\x06à\x04'
+sec=92 name='IMG-System' va=0x13cb74 term='flash' ctx="á\x07è³\x83B@º\x83B\x80\x8c\x8c@/settings/episodic/|§½¡\x0c\x08Æ\x13B$¶\x83BÐµ\x83Bhsk_InternalUpdateFirmware: Nothing was flashed, using old TOC||/backup/last.fw|Ô²\x83Bhsk_InternalUpdateFirmware: TOC Header was not found!||||\x8c\x8c@hsk_InternalUpdateFirmware: Hash mismatch|||hsk_InternalUpdateFirmware: couldn't "
+sec=92 name='IMG-System' va=0x13dc7b term='flash' ctx="\x90| \x02\x90\x0cà2\x88i\x08\x1fH|h@ð&ú\x01\x90¶\x1c¤\x1e\xad\x1c\x02\x98@\x1c\x02\x90\x03\x99\x02\x98\x88BîÛ|,\x01Ñ\x01 \x08\x90ÀFÀF|,|Ðrç\x06ðÐú!÷Qü\x08\x98eçhsk_camera_data_if_FlashDataToNOR: 0x%08X 0x%08X 0x%08X ||||Äë\x8e@¬\x1b\x85BÀë\x8e@÷µ\x84°\x06|\x14|| \x03\x90|ðÈø\x05\x99\r\x1a@H|h|(\x02Ñ\x03\x98\x07°ð½!÷Ûú\x06ðuúlà\x01 @\x04\x84B*Ój\x0c9¡\x04 \x02ð3ú|'\x15ài\x083|4H\x02hDH|h@ðýù\x02\x900H|h@|6\x18.H|h@|$\x1a,H|h@|E\x19\x7f\x1c*H|hA|\x01 @\x04\x11÷\x8eì¸BàÜ|,@Ñ"
+sec=92 name='IMG-System' va=0x13dddf term='flash' ctx="BæÛ`\x08\x01\x90|'\nà2\x88i\x08\x1dH|h@ðrù|\x90¶\x1c¤\x1e\xad\x1c\x7f\x1c\x01\x98\x87BñÛ|,\x01Ñ\x01 \x03\x90ÀF|,\x90Ñ\x06ð!ú!÷¢û\x03\x98\x83ç||Äë\x8e@hsk_camera_data_if_FlashDataWithoutErase: Writing Sector %03d|||Àë\x8e@øµ\x05||&t\x1e#'?\x05(|ÿ÷!þ\x04||,\tÛxh\xa0B\x06Ùl `C9|\x081@\x18Fh\x04à*|\x03I\x04 \x02ð\x87ù0|ø½||´\x19\x85B\x10µ\x08H|h|(\tÑ\x01 @\x06\x05I\x08`\x08|\x04¡\x02h\x04 \x02ðsù\x01H|h\x10½Àë\x8e@hsk_camera_data_GetNORAddress: N"
+sec=92 name='IMG-System' va=0x13de9b term='flash' ctx=' \x02ð\x87ù0|ø½||´\x19\x85B\x10µ\x08H|h|(\tÑ\x01 @\x06\x05I\x08`\x08|\x04¡\x02h\x04 \x02ðsù\x01H|h\x10½Àë\x8e@hsk_camera_data_GetNORAddress: NOR Flash found on: 0x%08X|||øµ\x07|\x0c|| ÀC|\x90|&#%-\x05|,=Ð(h\x01((Ñ!H\x87B\x0cÑ `ÿ"C2\x1f¡ |\x080\x10÷¹ù@\x1c``| |\x90\x1eà|&\x12àl pC)|\x081\x08X¸B\nÑl pC\n|\x81\x18l" |\x11÷ðé| |\x90\x03àv\x1chh°BéØ\x05à\x01#\x0eI\x04 *h\x02ð\x13ùhh°B\x0fØ:|\x0b¡\x04 \x02ð\x0bù\x0e ÀC|\x90\x06à\x16¡\x04 \x02ð\x03ù\x0b ÀC|\x90'
+sec=98 name='WLAN EW-Dorin' va=0x2c903a term='hmi' ctx='\x18à\x10V·*\x14Ã\x05^HË\x8e\r|\x92pO"\x16q=¤©\x8fþ>\x9aÿ4\x92\'V\x94gk/Té-\x13PU\x9f¢\x90¯ÿM@gG\x05\x14¬u\x08\x1c9^-¶Ü~¯EâóUµdW?¾\x80D\x86¸Ã\xa0r\x0eï}1V.\x8a\x10;Hmi¥q\x88o+õ\x15á\x8c>á%§\x16V)Î\t°L3\x8e1åh\x7fýy\x80\x80ÞAyèÞJ[AVÓóêBVsv×\x17a\x9byéîÆË|Å\x9f²\x17\x15|ñâO\tnZN\xadÛ>²à|¶äÆc\x86\x19-\'\x1b2\tÿjòòS\x02dÒ\x80\x9d\x16Ø\r¡/u\x96\x93\x99\x95f\x1fzÆoÌ®I\x9dâ\x13ëÓ\x1c>çJ\x9c\\tb\x8c\x91Ò)Ñ\x98Ô/;F)\x94$çÒweR\x1d\x863ê¯×å\x87\x0e%ói\x07Þ\'qí·ð\x11\x1cî7Zm\x87!\x87\x1c #|¾Ò\x9d'
+sec=98 name='WLAN EW-Dorin' va=0x4b1a70 term='awb' ctx='¸nM1\x0b`û±µãä--\x86\x9c\x88i5±÷\x16\x860É\x06ÔG©\x84ßî\x18\x04\x9b \x92úCÅm¨¸Æ}íZÂ ê©\naéÐêà&¼qCT\x02\x06\x92\x94½ü\x141u|$ijj"ÚQ/:ÍÂÖêcB^ºvÒAWBTÈ#\x05\x80\x87\\H\x1e\x9aï·Hÿã \x97TÌòQ\n\x9aQ¨(<\x8ctT\x11¨\x9e\x99½5\x82"£«Å.§H;ævÓ²ò\x0cªþÏÂ\x1d/\x0f\x02\x81*\x93)\x17\x18\x8aN\x05©G/\x1d\x93w\n\r.§#¶¥ó,ÿZ@Þï)lØÏºÎ¢Ò\x1b9qÁ=ô·Ssu\x053\x11b\x87ª\x19\x05¾&Á\x93Û\x01£w\x0f×ù\r¶T\x05\x9d¸P2#\x04©ýIUÉX/\tM1P\x8f]«\x98(À\x87ì8J\x98\x8b\x87Õ±\r\x90¹\x15\x84ÔU¦¬t\x17~;\x7fr¶ÜÚ¦'
+sec=98 name='WLAN EW-Dorin' va=0x54edbf term='awb' ctx="ÞF,0û\x86#ÙdjÜ4\x9dl\x1e\x86\x92XÝaçS·Ú\x06¡O¹Ù³þ¢é+a\r;\x1aÜX_Tö\x8bÚ==\x16\x8a?Hfï$\x19ò\x8b÷\x1fp°\x9ba¸8`ó\x92afïô\x85\x96]Q\x8f«Öâ\x02©ú\x8d\x8b\x83\x0bû\x8auaWB´Å\x94\x9eë,\x8c!£RjÈU<\x91Ä3kG\x0b{ñ\x10?8Ïä\\@\xad\x08ÿ²ª¸\x07l¯Eß?äM?Ô¦¯Ô\x0e³&èÚfC\x87@\x94\xa0\\;ßºKiQæA|»ëÆ[\x1e\x01Óò9\r/Töµ\x86dt\x08\x10oæÂ'²\x1dÔátÎíìRßUu4\x0f¸\x10Æy¶¯\x1dó¥}¿E\x197»%\x15}¡hO¸OkÓR¶°\x15\x8d;]¡6\x1c\x97ûñ\x87ð=\x1b\x8b3$éOG.\x9f½°÷5\x18\x81½W¸c'\x87pÎÀÏÅõ\x03ê\x82\x81l/"
+sec=98 name='WLAN EW-Dorin' va=0x628702 term='hmi' ctx="'Hµöä\x04t¢\x83\x10®Q\x14Öë»¿ù\x99\x97\x08\x97¾Ó\x90Ö\x06Æ\x05¦.6ÒNtÃ×Ä³}\x9d¶qõ\x07 \x9e\x93\x1a\x95§\x14+\x1bµ³ã\x7fÃ\x01,Òé¸Öø¯|ó§\x0cE\x9a^óu&\x93ÞÙSî«àÇ\x0e»\x1aÁïhmI\x81\x8b \tdÏ\x7f=\x95KRcõÃåV¡\x86´oJA\x85ðïl5JÿýÜ\x92\x05£¼çÅ\x14Má\x8dÛ\x96\x1dZ\x9d³\x08@\x0bjkø51´¨-©\x19ÝjâðïV<\x1a\x07à).Í\x8dèÕ½Úè\x8b¡ãÛÛ\x94xC²\x14\x83ÖNB«Â\x8d¬\x1e'QÁð¢±#\x89¹µF¥·\x86\x1c-#Ða\x02ôýù\x8eÛ}>C\x8cÿY°ß\x03\x8a]ü¿µ\x14=wÊ*\x8eýZmÜ'n\x85µpÖ!÷v[\x1c®Ó\x85¦¹\x15n\x109Nàodë÷ç\x9f\x13±\rÇ\x92"
+sec=99 name='IMG-CA9 System' va=0xa4a8 term='awb' ctx='|\x1a\x03 \xa0á\x080\x94åÐ|Äá\x080\x8då\x0b0\xa0á\x0c \x8då\t \xa0áð|ÍáL\x10\x8fâ\x04|\xa0ã\x96\x0e|ë\x14Ð\x8dâð\x8f½èÍË\x01@CA9: ca9_wb_get_cluster() - AFAEAWB mode not implemented %i|CA9: WB(%2i|%2i) R:%4i Gr:%4i Gb:%4i B:%4i||\x0b|Yã\x08|[\x03ßÿÿ\x1a\x03|\xa0á\x02\x10\xa0áÐ Äá\x0c|\x8då\x04|\xa0ã\x08\x10\x8dåX\x10Oâð Íá\x0b0\xa0á\t \xa0ák\x0e|ë\x14Ð\x8dâð\x8f½è\x0b|Yã\x08|[\x03Ïÿÿ\x1a\x03\x10\xa0á\x02|\xa0áÐ Äáø|Íá\x90\x10Oâ\x04|\xa0ãð Íá\x0b0\xa0á\t \xa0'
+sec=99 name='IMG-CA9 System' va=0xb458 term='white balance' ctx='\xa0á\x04|\xa0áwóÿë\x18|\x9då\x14|Pã\x18||\x1a||\xa0ã\x80\x02Åå\x10|\x94å\x0c|\x90åt\x02\x85å\x10|\x94å\x10|\x90åx\x02\x85å\x10|\x94å\x14|\x90å|\x02\x85å Ð\x8dâð\x81½è|À\x01@CA9: %s() - White Balance started|||L2\x04@PÅ\x01@\x01|\xa0ã\x060\xa0á\x80\x02Åå\x07 \xa0á\x10|\x9då\x05\x10\xa0á°|Æá\x14|\x9då²|Æá\x04|\xa0á\x99ñÿë\x10\x10\x94åt\x02\x95å\x0c|\x81å\x10\x10\x94åx\x02\x95å\x10|\x81å\x10\x10\x94å|\x02\x95å\x14|\x81å Ð\x8dâð\x81½è\x10|\x94å\x0c\x10\x90å|\x10\x80å\x10|\x94å\x10\x10\x90å\x04\x10\x80å\x10|\x94å\x14\x10\x90å\x08\x10\x80å\x96ÿÿê\r \xa0á\x07\x10\xa0á\x04|\xa0áXòÿë\x18|\x9då\x14|PãØÿÿ\x1a||\xa0ã\x80'
+sec=99 name='IMG-CA9 System' va=0x1c541 term='preset daylight' ctx='i: Fpos: %i: Tilt: %i:|||CA9: wb_startWhiteBalance() - WB Mode not implemented! WB set to Preset DAYLIGHT||||CA9: %s() - WB Preset not implemented! WB set to Preset DAYLIGHT||||CA9: %s() - StartPixel: %i | B: %4i | Gb: %4i | Gr: %4i | R: %4i |||P2.6||||V3.83UV|CA9: ca9_shared_memory_t'
+sec=99 name='IMG-CA9 System' va=0x1c548 term='daylight' ctx=': %i: Tilt: %i:|||CA9: wb_startWhiteBalance() - WB Mode not implemented! WB set to Preset DAYLIGHT||||CA9: %s() - WB Preset not implemented! WB set to Preset DAYLIGHT||||CA9: %s() - StartPixel: %i | B: %4i | Gb: %4i | Gr: %4i | R: %4i |||P2.6||||V3.83UV|CA9: ca9_shared_memory_t'
+sec=99 name='IMG-CA9 System' va=0x1c560 term='wb preset' ctx='b_startWhiteBalance() - WB Mode not implemented! WB set to Preset DAYLIGHT||||CA9: %s() - WB Preset not implemented! WB set to Preset DAYLIGHT||||CA9: %s() - StartPixel: %i | B: %4i | Gb: %4i | Gr: %4i | R: %4i |||P2.6||||V3.83UV|CA9: ca9_shared_memory_test: set ca9_test_structu'
+sec=99 name='IMG-CA9 System' va=0x1c585 term='preset daylight' ctx='mplemented! WB set to Preset DAYLIGHT||||CA9: %s() - WB Preset not implemented! WB set to Preset DAYLIGHT||||CA9: %s() - StartPixel: %i | B: %4i | Gb: %4i | Gr: %4i | R: %4i |||P2.6||||V3.83UV|CA9: ca9_shared_memory_test: set ca9_test_structure variable_1 to %i||||CA9: ca9_shared_memo'
+sec=99 name='IMG-CA9 System' va=0x1c58c term='daylight' ctx='ted! WB set to Preset DAYLIGHT||||CA9: %s() - WB Preset not implemented! WB set to Preset DAYLIGHT||||CA9: %s() - StartPixel: %i | B: %4i | Gb: %4i | Gr: %4i | R: %4i |||P2.6||||V3.83UV|CA9: ca9_shared_memory_test: set ca9_test_structure variable_1 to %i||||CA9: ca9_shared_memo'
+sec=100 name='IMG-SAM7' va=0xbc93 term='flash' ctx="°\x04|!I\x07H|hÿ÷¥ú|'àiB(\x03Ðàiÿ÷Þÿ\x01'ÿ÷\x86ÿ5àè\x08\x80CS¸|CÿÿÿÏ\x88\x13||°\x11@C||\x10Ï|\x04\x80Âýÿ||\x10'||MWNF : ERROR :Nand Flash Controller IDLE ERROR.\n|||||\x01\x80Â|\x07\x80Â V@C|||Ââ÷ÿÿ\x01 þI\x08` x|\x06\x01!I\x03\x08C¡\x88\t\x04\x08C¡h\t\x02\x08Cáh\x08C\x02\x90\xa0i\x03\x90| \x04\x90|%\x10àôI\t\x7f i\x88@\x01!É\x06\x08Cai\x08CðI\x08`¨|\x02©\x08XîI\x08am\x1c\x03-ìÛìH\x02#ìJ\x01©|\x90ìH|hÿ÷\x14ú\x06||.\x04Ñ\x04!\x01\x98\x08@|(\x1aÑ\x01\x98À\x07À\x0f|(\x02Ð\x06&öC"
+sec=100 name='IMG-SAM7' va=0xca8e term='flash' ctx='nnected is not supported \n||\x9c\x11@C\xa0\x11@C¤\x11@C¨\x11@C||\x80Âÿÿ||Dd_GIC_Ctrl error.E_DD_GIC_INTID_NAND_FLASH_INT\n||||Dd_GIC_Ctrl error.E_DD_GIC_INTID_EXSTRAGE_XDMAC_CH1_INT\n||||ýo||\x02|ÿÿ|\x07\x80Âq¿|C¬\x11@CSÀ|CxV@C\x03\x98@\x19\x03\x90þHÀhhC?\x18üHAj0|£ðfì\x0c||,\nÐ"|9|\x02¨ÿ÷Pù\x05\x90\x05\x98|(\x01Ð\x05\x98Kç| Içðµ\x89°\x07|\x0c|\x01 \x01\x90\x80 \x02\x90| \x03\x90B \x08\x908h@'
+sec=100 name='IMG-SAM7' va=0x2b240 term='flash' ctx='YúÝ÷\x1eúA|\x0c\x19\x01 \x80\x02\x84BÝÛv\x1c\x80.ÆÛ\x7f\x1c\x05/ºÛ\x01$d\x06\x06à h\x05\x90\x05\x98\x84B|Ð\x06\x94$\x1d\x03 |\x06\x84BôÛ\x7f°\x7f°\t°ð½þÿÿ|þÿ\x7f|ÿÿ||ÿÿ\x04|,ê\x0fCtst_flash_StartTest: Test Started|||0x%04X||0x%08X||| |Ð÷µ\x82°\x06|\x14|| \x01\x90\x01.\x0bÐ `3|\x01"\x14I\x04 Õ÷Gÿ\x02 \x01\x90\x01\x98\x05°ð½\x10¡\x02 Õ÷>ÿ\x03\x99|"\x08h\x11|\x82ðhÿ\x07|\x01 @\x06Ý÷uù\x05|½B\x02Ñ| \x01\x90\x01à\x11 \x01\x90\x01  `*|\x0c¡ \x1d\x82ð\xa0ü\x01\x98Ýçtê\x0fCtst_flashID_StartTest: Te'
+sec=100 name='IMG-SAM7' va=0x2b2e4 term='flash' ctx='\x14I\x04 Õ÷Gÿ\x02 \x01\x90\x01\x98\x05°ð½\x10¡\x02 Õ÷>ÿ\x03\x99|"\x08h\x11|\x82ðhÿ\x07|\x01 @\x06Ý÷uù\x05|½B\x02Ñ| \x01\x90\x01à\x11 \x01\x90\x01  `*|\x0c¡ \x1d\x82ð\xa0ü\x01\x98Ýçtê\x0fCtst_flashID_StartTest: Test Started|0x%08X||÷µ\x82°\x06|\x14|| \x01\x90\x01.\x0bÐ `3|\x01"\x14I\x04 Õ÷ûþ\x02 \x01\x90\x01\x98\x05°ð½\x10¡\x02 Õ÷òþ\x03\x99|"\x08h\x11|\x82ð\x1cÿ\x07|\x01 @\x06Ý÷\x12ù\x05|½B\x02Ñ| \x01\x90\x01à\x11 \x01\x90\x01  `*|\r¡ \x1d\x82ðTü\x01\x98ÝçÀê\x0fCtst_flashMID_StartTest: Test Started|'
+sec=100 name='IMG-SAM7' va=0x2b37c term='flash' ctx='\x14I\x04 Õ÷ûþ\x02 \x01\x90\x01\x98\x05°ð½\x10¡\x02 Õ÷òþ\x03\x99|"\x08h\x11|\x82ð\x1cÿ\x07|\x01 @\x06Ý÷\x12ù\x05|½B\x02Ñ| \x01\x90\x01à\x11 \x01\x90\x01  `*|\r¡ \x1d\x82ðTü\x01\x98ÝçÀê\x0fCtst_flashMID_StartTest: Test Started||||0x%08X||þµ\x06|\x0f|\x14||%| \x01\x90|\x90\x01©Ø÷\x14ü\x05||-\x02Ð\x07  p\x01à\x01\x980`\x10!\x04 Ø÷&ü\x05||-\x02Ð\x08  p\x13àiF\x04 Ø÷þû\x05||\x98|\x90|\x98\x10(\x07Ð\x07  pØ¡\x02 |\x9aÕ÷\x8eþ\x01à|\x988`(|þ½\x10µ\x01 Þ÷Xø×¡\x02 Õ÷\x81þ\x02 Þ÷QøÝ¡\x02 Õ÷zþ\x10½\x10µä¡\x02 Õ'
+sec=100 name='IMG-SAM7' va=0x2b380 term='hmi' ctx='Õ÷ûþ\x02 \x01\x90\x01\x98\x05°ð½\x10¡\x02 Õ÷òþ\x03\x99|"\x08h\x11|\x82ð\x1cÿ\x07|\x01 @\x06Ý÷\x12ù\x05|½B\x02Ñ| \x01\x90\x01à\x11 \x01\x90\x01  `*|\r¡ \x1d\x82ðTü\x01\x98ÝçÀê\x0fCtst_flashMID_StartTest: Test Started||||0x%08X||þµ\x06|\x0f|\x14||%| \x01\x90|\x90\x01©Ø÷\x14ü\x05||-\x02Ð\x07  p\x01à\x01\x980`\x10!\x04 Ø÷&ü\x05||-\x02Ð\x08  p\x13àiF\x04 Ø÷þû\x05||\x98|\x90|\x98\x10(\x07Ð\x07  pØ¡\x02 |\x9aÕ÷\x8eþ\x01à|\x988`(|þ½\x10µ\x01 Þ÷Xø×¡\x02 Õ÷\x81þ\x02 Þ÷QøÝ¡\x02 Õ÷zþ\x10½\x10µä¡\x02 Õ÷t'
+sec=100 name='IMG-SAM7' va=0x2f0f9 term='flash' ctx='  cp       memory copy\n\r|[I]  crc32    calculate the CRC32 a data range in memory\n\r||[I]  flash    provide informations on flash memory\n\r||||[I]  fpga     configure FPGA\n\r||[I]  led      switch card led\n\r|[I]  lcd      configure LC Display (AUO)\n\r||1\xa0~ð/ý8\xa0~ð,ý=\xa0~ð)ýC\xa0~ð&ýL\xa0'
+sec=100 name='IMG-SAM7' va=0x2f11a term='flash' ctx='32    calculate the CRC32 a data range in memory\n\r||[I]  flash    provide informations on flash memory\n\r||||[I]  fpga     configure FPGA\n\r||[I]  led      switch card led\n\r|[I]  lcd      configure LC Display (AUO)\n\r||1\xa0~ð/ý8\xa0~ð,ý=\xa0~ð)ýC\xa0~ð&ýL\xa0~ð#ý[\xa0~ð ýa\xa0~ð\x1dýj\xa0~ð\x1aýt\xa0~ð\x17ý\x83H~ð\x14'
+sec=100 name='IMG-SAM7' va=0x2f2d0 term='flash' ctx='isplay\n\r||[I]  mf       memory fill\n\r|[I]  mm       memory mode\n\r|[I]  memtest  SDRAM anf Flash memory test\n\r|[I]  psram    read PSRAM config register and enable page mode\n\r|[I]  pwr      set power mode\n\r||[I]  rand     generate random data\n\r||||[I]  ver      print TSW versi'
+sec=100 name='IMG-SAM7' va=0x2f568 term='flash' ctx='          loop - read all channels until key pressed\n\r||||TSW|[I] TSW:CPU|ADC|DRAM0|DRAM1|FLASH|FPGA|LED|BTN]\n\r|||[I] see TSW documentation\n\r|beep||||[I] beep <freq> <duration> <duty>\n\r|[I]  sound the beeper\n\r|[I]  <freq>    : frequency\n\r||||[I]  <duration>: duration of the '
+sec=100 name='IMG-SAM7' va=0x2f874 term='flash' ctx=']  <div>: 1..8 - new divider for master clock\n\r|||cp||[I] cp <source> <dest> <count> [dma|flash]\n\r||||[I]  copy data in memory\n\r||[I]  <source>: source address\n\r|[I]  <dest>  : destination address\n\r||||[I]  <count> : number of dwords to copy\n\r|||[I]  dma     : used DMA contr'
+sec=100 name='IMG-SAM7' va=0x2fa3c term='flash' ctx='ber of bytes for CRC generation\n\r|[I]  <dest>  : optional location to store CRC32 value\n\r|flash|||[I] flash <cmd>\n\r|||[I]  provide flash memory informations like size or ID\n\r||||[I]  <cmd>: info - read Flash IDs and size\n\r||||[I]         toc  - read firmware table of content'
+sec=100 name='IMG-SAM7' va=0x2fa48 term='flash' ctx=' for CRC generation\n\r|[I]  <dest>  : optional location to store CRC32 value\n\r|flash|||[I] flash <cmd>\n\r|||[I]  provide flash memory informations like size or ID\n\r||||[I]  <cmd>: info - read Flash IDs and size\n\r||||[I]         toc  - read firmware table of contents\n\r||||[I]  '
+sec=100 name='IMG-SAM7' va=0x2fa65 term='flash' ctx='est>  : optional location to store CRC32 value\n\r|flash|||[I] flash <cmd>\n\r|||[I]  provide flash memory informations like size or ID\n\r||||[I]  <cmd>: info - read Flash IDs and size\n\r||||[I]         toc  - read firmware table of contents\n\r||||[I]         test - start erase /wr'
+sec=100 name='IMG-SAM7' va=0x2faac term='flash' ctx='>\n\r|||[I]  provide flash memory informations like size or ID\n\r||||[I]  <cmd>: info - read Flash IDs and size\n\r||||[I]         toc  - read firmware table of contents\n\r||||[I]         test - start erase /write / read test\n\r|>\xa0~ðcøGH~ð`øF\xa0~ð]øMH~ðZøL¡`h~ðPí|(\x05ÑJ\xa0~ðQøN\xa0~ðNøU¡`h~'
+sec=100 name='IMG-SAM7' va=0x2fc30 term='flash' ctx='~ð\x0cí|(\x11Ñ±\xa0~ð\x0cø¹\xa0~ð\tøÀ\xa0~ð\x06øË\xa0~ð\x03øÕ\xa0~ð|øÜ\xa0}ðýÿç¡`h~ðôì|(\x0cÑæ\xa0}ðôÿë\xa0}ðñÿøH}ðîÿ÷\xa0}ðëÿÿá\x01âgâ[I] flash erase <sectoradr> <count>\n\r|||Pñ\x0fC[I] flash recover <sectoradr>\n\r|Ôò\x0fCled|[I] led on|off\n\r||||[I]  sitch card access led on/off\n\r|lcd|[I] lcd conf\n\r||[I]  configure LC Display\n\r|m'
+sec=100 name='IMG-SAM7' va=0x2fc5c term='flash' ctx='ç¡`h~ðôì|(\x0cÑæ\xa0}ðôÿë\xa0}ðñÿøH}ðîÿ÷\xa0}ðëÿÿá\x01âgâ[I] flash erase <sectoradr> <count>\n\r|||Pñ\x0fC[I] flash recover <sectoradr>\n\r|Ôò\x0fCled|[I] led on|off\n\r||||[I]  sitch card access led on/off\n\r|lcd|[I] lcd conf\n\r||[I]  configure LC Display\n\r|md||[I] md [-b|-w|-d] [<addr>]\n\r||||[I]  disp'
+sec=100 name='IMG-SAM7' va=0x30494 term='flash' ctx='rds to generate\n\r|fpga||||[I] fpga conf|susp|off\n\r||||[I]  conf - load configuration from flash\n\r|[I]  susp - set supend mode\n\r|||[I]  off - put in configuration mode\n\r||temp||||[I] temp\n\r||ûH}ð\x7fûûH}ð|ûp½ðµ\x85°\x04|\x0e|\x14"÷¡hF}ð²ï\x07%\x06à\'\x07?\x0fhFÀ]pU$\tm\x1e|-öÚ\x05°ð½\x10µ\x04|ó\xa0}ð`û |}ð]ûö\xa0}ðZû\x10½pµ\x02'
+sec=100 name='IMG-SAM7' va=0x5d433 term='awb' ctx='CAbú÷mù| ø½\x10µ\x04|\x1cÐú÷_ù\x8bI\x88k"x|\n|\x02\x10C\x88cÈk"y|\n|\x02\x10CÈc\x08l"z|\n|\x02\x10C\x08dHl"{|\n|\x02\x10CHd\x8ak%áEá||I:Im_PRO_AEAWB_Stop. PWch macro not stopped error. \n||||\x05||\x02ê\x13||\x082\x10Cô~\x05CI:Im_PRO_AEAWB_Ctrl error. \'aeawb_mode\' value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl error. \'aeawb_ctrl\'is NULL\n|I:Im_PRO_AEAWB'
+sec=100 name='IMG-SAM7' va=0x5d47b term='awb' ctx="k%áEá||I:Im_PRO_AEAWB_Stop. PWch macro not stopped error. \n||||\x05||\x02ê\x13||\x082\x10Cô~\x05CI:Im_PRO_AEAWB_Ctrl error. 'aeawb_mode' value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl error. 'aeawb_ctrl'is NULL\n|I:Im_PRO_AEAWB_Ctrl error. 'awb_mode' value over!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. buffe"
+sec=100 name='IMG-SAM7' va=0x5d48e term='awb' ctx="WB_Stop. PWch macro not stopped error. \n||||\x05||\x02ê\x13||\x082\x10Cô~\x05CI:Im_PRO_AEAWB_Ctrl error. 'aeawb_mode' value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl error. 'aeawb_ctrl'is NULL\n|I:Im_PRO_AEAWB_Ctrl error. 'awb_mode' value over!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. buffer num over (%d)\n||I"
+sec=100 name='IMG-SAM7' va=0x5d4b7 term='awb' ctx="|||\x05||\x02ê\x13||\x082\x10Cô~\x05CI:Im_PRO_AEAWB_Ctrl error. 'aeawb_mode' value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl error. 'aeawb_ctrl'is NULL\n|I:Im_PRO_AEAWB_Ctrl error. 'awb_mode' value over!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. buffer num over (%d)\n||I:Im_PRO_AEAWB_Ctrl. h_bc_num input value "
+sec=100 name='IMG-SAM7' va=0x5d4ca term='awb' ctx="I:Im_PRO_AEAWB_Ctrl error. 'aeawb_mode' value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl error. 'aeawb_ctrl'is NULL\n|I:Im_PRO_AEAWB_Ctrl error. 'awb_mode' value over!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. buffer num over (%d)\n||I:Im_PRO_AEAWB_Ctrl. h_bc_num input value over!! (%d)\n||I:Im_"
+sec=100 name='IMG-SAM7' va=0x5d4e7 term='awb' ctx="eawb_mode' value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl error. 'aeawb_ctrl'is NULL\n|I:Im_PRO_AEAWB_Ctrl error. 'awb_mode' value over!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. buffer num over (%d)\n||I:Im_PRO_AEAWB_Ctrl. h_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. v_bc_num inpu"
+sec=100 name='IMG-SAM7' va=0x5d4f8 term='awb' ctx="over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl error. 'aeawb_ctrl'is NULL\n|I:Im_PRO_AEAWB_Ctrl error. 'awb_mode' value over!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. buffer num over (%d)\n||I:Im_PRO_AEAWB_Ctrl. h_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. v_bc_num input value over!! (%"
+sec=100 name='IMG-SAM7' va=0x5d523 term='awb' ctx="eawb_ctrl'is NULL\n|I:Im_PRO_AEAWB_Ctrl error. 'awb_mode' value over!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. buffer num over (%d)\n||I:Im_PRO_AEAWB_Ctrl. h_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. v_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. detect_size value"
+sec=100 name='IMG-SAM7' va=0x5d54f term='awb' ctx=". 'awb_mode' value over!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. buffer num over (%d)\n||I:Im_PRO_AEAWB_Ctrl. h_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. v_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. detect_size value under!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. detec"
+sec=100 name='IMG-SAM7' va=0x5d587 term='awb' ctx='buffer num over (%d)\n||I:Im_PRO_AEAWB_Ctrl. h_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. v_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. detect_size value under!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. detect_addr=NULL\n||D\x12\x80CÐ½\x85C|@| |S| \x01||\x02þ\x1f||ú/||\x081\x10CI:Im_PRO_A'
+sec=100 name='IMG-SAM7' va=0x5d5bf term='awb' ctx="ut value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. v_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. detect_size value under!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. detect_addr=NULL\n||D\x12\x80CÐ½\x85C|@| |S| \x01||\x02þ\x1f||ú/||\x081\x10CI:Im_PRO_AEAWB_Set_Area error. 'aeawb_area'is NULL\n|\\1\x10Cÿÿ|ü#|ÿ |\x02"
+sec=100 name='IMG-SAM7' va=0x5d5f7 term='awb' ctx="ut value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. detect_size value under!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. detect_addr=NULL\n||D\x12\x80CÐ½\x85C|@| |S| \x01||\x02þ\x1f||ú/||\x081\x10CI:Im_PRO_AEAWB_Set_Area error. 'aeawb_area'is NULL\n|\\1\x10Cÿÿ|ü#|ÿ |\x02\x1b\x06\x82C\x1b\x0c\x1aC\x8acÊk#}\x82C\x1b\x06\x1b\x0c\x1aCÊc\nl#~\x82C\x1b\x06\x1b\x0c\x1aC\ndJl\x82C \x7f|\x06|\x0c\x02CJdú÷\x06ø"
+sec=100 name='IMG-SAM7' va=0x5d63f term='awb' ctx='d)\n||||I:Im_PRO_AEAWB_Ctrl. detect_addr=NULL\n||D\x12\x80CÐ½\x85C|@| |S| \x01||\x02þ\x1f||ú/||\x081\x10CI:Im_PRO_AEAWB_Set_Area error. \'aeawb_area\'is NULL\n|\\1\x10Cÿÿ|ü#|ÿ |\x02\x1b\x06\x82C\x1b\x0c\x1aC\x8acÊk#}\x82C\x1b\x06\x1b\x0c\x1aCÊc\nl#~\x82C\x1b\x06\x1b\x0c\x1aC\ndJl\x82C \x7f|\x06|\x0c\x02CJdú÷\x06ø| \x06äòJòIóH¦÷Fÿò\xa0¦÷Cÿ¦÷BÿûHDä\x10µ\x04|cÐù÷ìÿøI\x88l"x|\n|\x02\x10C\x88d\x8alcxÿ |\x02\x82C\x1b\x02\x1aC\x8adÊl£x'
+sec=100 name='IMG-SAM7' va=0x5d656 term='awb' ctx='trl. detect_addr=NULL\n||D\x12\x80CÐ½\x85C|@| |S| \x01||\x02þ\x1f||ú/||\x081\x10CI:Im_PRO_AEAWB_Set_Area error. \'aeawb_area\'is NULL\n|\\1\x10Cÿÿ|ü#|ÿ |\x02\x1b\x06\x82C\x1b\x0c\x1aC\x8acÊk#}\x82C\x1b\x06\x1b\x0c\x1aCÊc\nl#~\x82C\x1b\x06\x1b\x0c\x1aC\ndJl\x82C \x7f|\x06|\x0c\x02CJdú÷\x06ø| \x06äòJòIóH¦÷Fÿò\xa0¦÷Cÿ¦÷BÿûHDä\x10µ\x04|cÐù÷ìÿøI\x88l"x|\n|\x02\x10C\x88d\x8alcxÿ |\x02\x82C\x1b\x02\x1aC\x8adÊl£x\x12\n\x12\x02\x1aCÊdÊlãx\x82C\x1b\x02\x1aCÊd\nm#'
+sec=100 name='IMG-SAM7' va=0x5da93 term='awb' ctx="{í\x07m\x0c)CÕ\x01©Cå{í\x07-\x0c)C\x15\x02©C%|í\x07í\x0b)CU\x02©Ce|í\x07\xad\x0b)C\x95\x02©C¥|í\x07m\x0b)CÕ\x02©Cå|KàÃàÉà\x8e\x14||\x082\x10Cô~\x05CI:Im_PRO_AEAWB_Set_Lv_Gate. lv_gate=NULL\n|||\x01||\x02|@| ÿÿ|þI:Im_PRO_AEAWB_Set_Matrix_Lv_Gate. mt_lv_gate=NULL\n|ÿ\x01||¼%\x10CÔ½\x85CD\x12\x80CË\x15||X'\x10C|0| í\x07-\x0b)C\x15\x03©C%}í\x07í\n)CU\x03©Ce}í\x07\xad\n)C\x95\x03©C¥}í\x07m\n)CÕ\x03©Cå}í\x07-\n)C\x15\x04©C"
+sec=100 name='IMG-SAM7' va=0x5dacb term='awb' ctx="\x02©Cå|KàÃàÉà\x8e\x14||\x082\x10Cô~\x05CI:Im_PRO_AEAWB_Set_Lv_Gate. lv_gate=NULL\n|||\x01||\x02|@| ÿÿ|þI:Im_PRO_AEAWB_Set_Matrix_Lv_Gate. mt_lv_gate=NULL\n|ÿ\x01||¼%\x10CÔ½\x85CD\x12\x80CË\x15||X'\x10C|0| í\x07-\x0b)C\x15\x03©C%}í\x07í\n)CU\x03©Ce}í\x07\xad\n)C\x95\x03©C¥}í\x07m\n)CÕ\x03©Cå}í\x07-\n)C\x15\x04©C%~í\x07í\t)CU\x04©Ce~í\x07\xad\t)C\x95\x04©C¥~í\x07m\t)CÕ\x04©Cå~í\x07-\t)C\x15\x05©C%\x7fí\x07í\x08)C"
+sec=100 name='IMG-SAM7' va=0x62f87 term='awb' ctx='\x0e\x80â\x19 Öå|À\xa0á/||ê\x88\x0e||I:Im_PRO_ELF_Set_Noisefunc error. nfunc==NULL\n||\x80@| ||ÿ\x7f3\x15||I:Im_PRO_AEAWB_Set_Line_Data_Position error. line_info=NULL\n||||Ì\x16||I:Im_PRO_AF_Ctrl_Horizon error. tap max value over!! (%d)\n||Ð|Àáÿ\x10Áã\x020\x81á| \xa0áð Ìáº\x01Öá\\\x11\x95å!\x18\xa0á\x01\x18\xa0á\x01|\x80á\\\x01\x85å\x1c|Öåd\x11\x95åÿ\x10Áã\x01|\x80ád\x01\x85å\x1d|'
+sec=100 name='IMG-SAM7' va=0xfe3b8 term='flash' ctx='||TestSD0|TestSD1|</SystemAnalyserTests>||TestFPGA||||TestI2C|GetADC||TestADC|TestLED|TestFlashMID||||TestFlashID|TestCF||TestHDMI||||TestSDRAMAL|TestSDRAMDL|TestCOM|TestWLAN||||ReadSN||WriteSN|TestGPIO||||TestPOWERSP|TestGPS|TestCPU|TestSDRAMDEV||||StartTSW||||TestDcc|GetLo'
+sec=100 name='IMG-SAM7' va=0xfe3bc term='hmi' ctx='stSD0|TestSD1|</SystemAnalyserTests>||TestFPGA||||TestI2C|GetADC||TestADC|TestLED|TestFlashMID||||TestFlashID|TestCF||TestHDMI||||TestSDRAMAL|TestSDRAMDL|TestCOM|TestWLAN||||ReadSN||WriteSN|TestGPIO||||TestPOWERSP|TestGPS|TestCPU|TestSDRAMDEV||||StartTSW||||TestDcc|GetLog|'
+sec=100 name='IMG-SAM7' va=0xfe3c8 term='flash' ctx='1|</SystemAnalyserTests>||TestFPGA||||TestI2C|GetADC||TestADC|TestLED|TestFlashMID||||TestFlashID|TestCF||TestHDMI||||TestSDRAMAL|TestSDRAMDL|TestCOM|TestWLAN||||ReadSN||WriteSN|TestGPIO||||TestPOWERSP|TestGPS|TestCPU|TestSDRAMDEV||||StartTSW||||TestDcc|GetLog||TestFlash|||N'
+sec=100 name='IMG-SAM7' va=0xfe478 term='flash' ctx='N|TestGPIO||||TestPOWERSP|TestGPS|TestCPU|TestSDRAMDEV||||StartTSW||||TestDcc|GetLog||TestFlash|||NotOk|||Ok||SetErrorLvl|TestAudio|||EndTestSeq||StartTestSeq||||SetPower||||Test3DAxis||NotInit|last||||debug/logs/sam7|tst_NextWritePosition: ERROR. ret=0x%x. Failed to reset f'
+sec=100 name='IMG-SAM7' va=0xfea34 term='flash' ctx='ceived %i)||||tst_DCC_StartTest: Parameter Count Error (required %i | received %i)||||tst_flash_StartTest: Parameter Count Error (required %i | received %i)||tst_flashID_StartTest: Parameter Count Error (required %i | received %i)||||tst_flashMID_StartTest: Parameter Count E'
+sec=100 name='IMG-SAM7' va=0xfea7c term='flash' ctx='ceived %i)||||tst_flash_StartTest: Parameter Count Error (required %i | received %i)||tst_flashID_StartTest: Parameter Count Error (required %i | received %i)||||tst_flashMID_StartTest: Parameter Count Error (required %i | received %i)|||tst_fpga_StartTest: Parameter Count E'
+sec=100 name='IMG-SAM7' va=0xfeac8 term='flash' ctx='ived %i)||tst_flashID_StartTest: Parameter Count Error (required %i | received %i)||||tst_flashMID_StartTest: Parameter Count Error (required %i | received %i)|||tst_fpga_StartTest: Parameter Count Error (required %i | received %i)|||tst_gpio_StartTest: Parameter Count Error'
+sec=100 name='IMG-SAM7' va=0xfeacc term='hmi' ctx=' %i)||tst_flashID_StartTest: Parameter Count Error (required %i | received %i)||||tst_flashMID_StartTest: Parameter Count Error (required %i | received %i)|||tst_fpga_StartTest: Parameter Count Error (required %i | received %i)|||tst_gpio_StartTest: Parameter Count Error ('
+sec=100 name='IMG-SAM7' va=0xff245 term='flash' ctx='|[I]   -> execute several memory tests; all test can be cancelled with key pressed\n\r|[I]  flash   : in case of copy to flash this option has to be used\n\r||||[I]  measure the value of the NTC on the sensor board with ADC channel 2 and\n\r||[I]              - try to recover bloc'
+sec=100 name='IMG-SAM7' va=0xff262 term='flash' ctx='ory tests; all test can be cancelled with key pressed\n\r|[I]  flash   : in case of copy to flash this option has to be used\n\r||||[I]  measure the value of the NTC on the sensor board with ADC channel 2 and\n\r||[I]              - try to recover block at <blockadr> after overera'
+sec=100 name='IMG-SAM7' va=0x1025cb term='awb' ctx='DS-5_Workspace/SystemAnalyserM7/Utils/M7_API/Project/ImageMacro/src/im_xch.c|||I:Im_PRO_AEAWB_Set_AEYK. aeyk value over!! (aeykr:0x%04X aeykgr:0x%04X aeykgb:0x%04X aeykb:0x%04X)\n|I:Im_PRO_OBL_Set_Border error. border1 > border2\n (border1 %d, border2 %d)\n|I:Im_PRO_OBT_Set_B'
+sec=100 name='IMG-SAM7' va=0x102767 term='awb' ctx=" (%d)\n|I:Im_PRO_OB_Set_Interrupt error. 'permission_flg' value over!! (%d)\n||||I:Im_PRO_AEAWB_Set_Interrupt error. 'permission_flg' value over!! (%d)\n|I:Im_PRO_SDC_Set_Interrupt error. 'permission_flg' value over!! (%d)\n|||I:Im_PRO_NRD_Set_Interrupt error. 'permission_flg'"
+sec=100 name='IMG-SAM7' va=0x103117 term='awb' ctx='out_start_position + out_size) > %d]. (out_start_position(%d),out_size(%d)\n||||I:Im_PRO_AEAWB_Set_Area. input value over!! (pos_x:%d pos_y:%d width:%d lines:%d)\n||I:Im_PRO_AEAWB_Set_CW. input value over!! (aechw:%d aecvw:%d awchw:%d awcvw:%d)\n||||I:Im_PRO_PZSFTA_Start_ELF_'
+sec=100 name='IMG-SAM7' va=0x10316b term='awb' ctx='PRO_AEAWB_Set_Area. input value over!! (pos_x:%d pos_y:%d width:%d lines:%d)\n||I:Im_PRO_AEAWB_Set_CW. input value over!! (aechw:%d aecvw:%d awchw:%d awcvw:%d)\n||||I:Im_PRO_PZSFTA_Start_ELF_Zero_Lv error. input param:[shift_type] value over!! <= 1\n||||C:/Workspace/DS-5_Work'
+
+=== FROZEN SO FAR ===
+top-level WB mode 3 = DAYLIGHT is firmware-proven; input+0x18 is a separate 10-way preset selector
