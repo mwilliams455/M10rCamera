@@ -1,0 +1,111 @@
+name: M10-R v1.45 round helper B2Y start bridge
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v145-round-helper-b2y-start.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Resolve round helper and B2Y start bridge
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v145_round_helper_b2y_start.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;PFX=4
+          th=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);th.detail=True;th.skipdata=True
+          ar=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);ar.detail=True;ar.skipdata=True
+          def off(a):return PFX+a-BASE
+          def dis(md,a,z):return list(md.disasm(b[off(a):off(z)],a))
+          def cstr(a,limit=260):
+            o=off(a)
+            if not 0<=o<len(b):return None
+            e=b.find(b'\0',o,min(len(b),o+limit));q=b[o:e]
+            return q.decode('ascii','replace') if e>o and all(0x20<=x<=0x7e for x in q) else None
+          def lit(i,thumb):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=(((i.address+4)&~3) if thumb else i.address+8)+i.operands[1].mem.disp;o=off(la)
+                if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+            except:pass
+          def adr(i):
+            try:
+              if i.mnemonic=='adr' and len(i.operands)>=2 and i.operands[1].type==ARM_OP_IMM:
+                a=((i.address+4)&~3)+i.operands[1].imm;return a,cstr(a)
+            except:pass
+          def fmt(i,thumb=True):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i,thumb)
+            if q:
+              s+=f' ; LIT {q[0]:#x}->{q[1]:#x}';st=cstr(q[1])
+              if st:s+=f' STRING={st!r}'
+            if thumb:
+              a=adr(i)
+              if a:s+=f' ; ADR_EFF {a[0]:#x}'+(f' STRING={a[1]!r}' if a[1] else '')
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:s+=f' ; CALL {(i.operands[0].imm&~1):#x}'
+            return s
+          print('M10-R v1.45 ROUND HELPER / B2Y START BRIDGE')
+          print('\n=== soft-float helpers used by 0x421A0A44 ===')
+          for name,a,z in [
+            ('421e6050',0x421e6050,0x421e61a0),
+            ('421e670c',0x421e670c,0x421e6790),
+            ('421e69e0',0x421e69e0,0x421e6a40),
+            ('421e6a6c',0x421e6a6c,0x421e6b2c),
+            ('421e6b2c',0x421e6b2c,0x421e6c10),
+            ('421e6d44',0x421e6d44,0x421e6db0)]:
+            print(f'\n-- {name} --')
+            for i in dis(ar,a,z):print(fmt(i,False))
+          print('\n=== 0x421A0A44 round candidate ===')
+          for i in dis(ar,0x421a0a44,0x421a0b1c):print(fmt(i,False))
+          print('\n=== ca9_StartColorManagement 0x420A2EB0..0x420A2FB4 ===')
+          for i in dis(th,0x420a2eb0,0x420a2fb4):print(fmt(i,True))
+          print('\n=== color start caller / B2Y init 0x420A7860..0x420A7930 ===')
+          for i in dis(th,0x420a7860,0x420a7930):print(fmt(i,True))
+          print('\n=== direct calls to fill_parameter / B2Y config init in local color-control region ===')
+          for target in (0x420a591c,0x420a5de4,0x420a2eb0,0x420a363a):
+            hs=[]
+            for i in dis(th,0x420a7000,0x420a8000):
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and (i.operands[0].imm&~1)==target:hs.append(i.address)
+            print(hex(target),[hex(x) for x in hs])
+          print('\n=== B2Y globals 0x43705830/0x43705950 local literal references ===')
+          for target in (0x43705830,0x43705950):
+            pat=struct.pack('<I',target);q=0;ps=[]
+            while True:
+              q=b.find(pat,q)
+              if q<0:break
+              ps.append(BASE+q-PFX);q+=1
+            print(hex(target),[hex(x) for x in ps])
+            for i in dis(th,0x420a5000,0x420a8000):
+              q=lit(i,True)
+              if q and q[1]==target:print(fmt(i,True))
+          print('\n=== TARGET ===')
+          print('Prove 0x421A0A44 semantics from its arithmetic/compare helpers and establish start-time relationship among fill_parameter, B2Y config construction, and CA9 color-management submission.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v145_round_helper_b2y_start.txt
+          git commit -m 'research: record v1.45 round helper B2Y start bridge' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
