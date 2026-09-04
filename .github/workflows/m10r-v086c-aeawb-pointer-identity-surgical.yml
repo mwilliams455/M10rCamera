@@ -1,0 +1,92 @@
+name: M10-R v0.86c AEAWB pointer identity surgical
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v086c-aeawb-pointer-identity-surgical.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Surgical C++ xref scan and narrow disassembly
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          cat >/tmp/scan.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <iostream>
+          #include <map>
+          #include <set>
+          #include <vector>
+          using namespace std;
+          static uint16_t u16(const vector<uint8_t>&b,size_t p){return uint16_t(b[p])|(uint16_t(b[p+1])<<8);} static uint32_t u32(const vector<uint8_t>&b,size_t p){return uint32_t(b[p])|(uint32_t(b[p+1])<<8)|(uint32_t(b[p+2])<<16)|(uint32_t(b[p+3])<<24);} static int32_t sx25(uint32_t x){return (x&(1u<<24))?int32_t(x|0xfe000000u):int32_t(x);} 
+          int main(){ifstream f("/tmp/sections/092_IMG-System.bin",ios::binary);vector<uint8_t>b((istreambuf_iterator<char>(f)),{});const uint32_t base=0x42000000;const size_t pfx=4;set<uint32_t>want={0x420dadb6,0x420a3104,0x420dca28,0x420dc974,0x420e0850,0x420de0f0,0x420e05b4};set<uint32_t>vals={0x408efe10,0x00014080,0x408f0390,0x408f0410,0x43705a60,0x420dadb7,0x420a3105};map<uint32_t,vector<uint32_t>>pools;
+          for(size_t p=pfx;p+4<=b.size();++p){uint32_t v=u32(b,p);if(vals.count(v)){uint32_t a=base+uint32_t(p-pfx);pools[v].push_back(a);cout<<"LIT "<<hex<<v<<" "<<a<<"\n";}}
+          for(size_t p=pfx;p+4<=b.size();p+=2){uint16_t h1=u16(b,p);uint32_t a=base+uint32_t(p-pfx);if((h1&0xf800)==0x2000 && (h1&0xff)==0x85)cout<<"MOV85 "<<hex<<a<<"\n";uint16_t h2=u16(b,p+2);if((h1&0xf800)==0xf000 && (h2&0xd000)==0xd000){uint32_t S=(h1>>10)&1,J1=(h2>>13)&1,J2=(h2>>11)&1,I1=1-(J1^S),I2=1-(J2^S);uint32_t imm=(S<<24)|(I1<<23)|(I2<<22)|((h1&0x3ff)<<12)|((h2&0x7ff)<<1);uint32_t t=uint32_t(int64_t(a+4)+sx25(imm));if(want.count(t))cout<<"CALL "<<hex<<t<<" "<<a<<"\n";}if((h1&0xf800)==0x4800){uint32_t la=((a+4)&~3u)+((h1&0xff)<<2);for(auto &kv:pools)for(uint32_t pa:kv.second)if(la==pa)cout<<"LDRX "<<hex<<kv.first<<" "<<a<<" "<<pa<<"\n";}}
+          }
+          CPP
+          g++ -O3 -std=c++17 /tmp/scan.cpp -o /tmp/scan && /tmp/scan > /tmp/hits.txt
+          python3 - <<'PY' > research/M10R_v086c_aeawb_pointer_identity_surgical.txt
+          from pathlib import Path
+          import struct,collections
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_REG_PC,ARM_OP_IMM
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();base=0x42000000;pfx=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(a):return pfx+a-base
+          def dump(s,e,title):
+            s=max(base,s);e=min(base+len(b)-pfx,e);print('\n===',title,hex(s),'..',hex(e),'===')
+            for i in md.disasm(b[off(s):off(e)],s):
+              if i.id==0:continue
+              extra=''
+              try:
+                if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                  la=((i.address+4)&~3)+i.operands[1].mem.disp;lo=off(la)
+                  if 0<=lo<=len(b)-4:extra=f' ; LIT {hex(la)}->{hex(struct.unpack_from("<I",b,lo)[0])}'
+                if i.mnemonic.startswith('bl') and i.operands and i.operands[0].type==ARM_OP_IMM:extra+=f' ; CALL {hex(i.operands[0].imm&~1)}'
+              except Exception:pass
+              print(f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}{extra}')
+          hits=collections.defaultdict(list)
+          for line in Path('/tmp/hits.txt').read_text().splitlines():
+            q=line.split();hits[q[0]].append(tuple(int(x,16) for x in q[1:]))
+          print('M10-R v0.86c SURGICAL AFAEAWB -> CA9 POINTER IDENTITY')
+          print(Path('/tmp/hits.txt').read_text())
+          dump(0x420dac40,0x420dad00,'AFAEAWB CONFIG: BASE, +0x14080, +0x80')
+          dump(0x420dadb0,0x420dadcc,'BASE+0x14080 HELPER')
+          dump(0x420a3104,0x420a3210,'KNOWN CA9 PARAMETER BUILDER')
+          for t,a in hits['CALL']:
+            dump(a-0x50,a+0x78,f'DIRECT CALL target {hex(t)} at {hex(a)}')
+          for v,a,pool in hits['LDRX']:
+            if v in (0x408efe10,0x14080,0x408f0390,0x408f0410,0x43705a60):dump(a-0x34,a+0x58,f'LITERAL XREF value {hex(v)} code {hex(a)} pool {hex(pool)}')
+          for (a,) in hits['MOV85'][:100]:dump(a-0x28,a+0x50,f'MOVS #0x85 / +0x480 CANDIDATE {hex(a)}')
+          print('\n=== PRODUCER FACT FROM CONFIG ===')
+          print('0x420DAC86 loads 0x14080; [r4+4] + 0x14080 is stored via state base 0x408F0390 at +0x7C (absolute slot 0x408F040C).')
+          print('[r4+4] + 0x80 is stored via the same state base at +0x78 (absolute slot 0x408F0408).')
+          print('\n=== FREEZE RULE ===')
+          print('Do not equate either sub-buffer with workflow+0x480 unless one of the caller/xref contexts establishes the explicit copy/dataflow.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v086c_aeawb_pointer_identity_surgical.txt
+          git commit -m 'research: record v0.86c surgical AEAWB pointer identity' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
