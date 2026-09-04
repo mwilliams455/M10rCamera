@@ -1,0 +1,115 @@
+name: M10-R v0.61 LV transition and AE-lock
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v061-lv-transition-aelock.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m10r-metering-latch-trace
+          fetch-depth: 0
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace LV transition and AE-lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v061_lv_transition_aelock.txt
+          from pathlib import Path
+          import struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_REG_PC
+          b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes();base=0x08000000;pfx=4;code=b[pfx:]
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def sx(v,bits):return v-(1<<bits) if v&(1<<(bits-1)) else v
+          def off(a):return pfx+a-base
+          def u32(a):
+              o=off(a);return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+          def astr(a,n=260):
+              o=off(a)
+              if not 0<=o<len(b):return None
+              z=b.find(b'\0',o,min(len(b),o+n));z=z if z>=0 else min(len(b),o+n)
+              try:s=b[o:z].decode('ascii')
+              except:return None
+              return s if len(s)>3 and all(c in '\r\n\t' or ' '<=c<='~' for c in s) else None
+          def fmt(i):
+              if i.id==0:return f'{i.address:08x}: .byte {i.op_str}'
+              ex=''
+              try:
+                  if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                      la=((i.address+4)&~3)+i.operands[1].mem.disp;v=u32(la)
+                      if v is not None:
+                          s=astr(v);ex=f' ; LIT {la:#x}->{v:#x}'+(f' STRING={s!r}' if s else '')
+                  if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:ex+=f' ; CALL {i.operands[0].imm:#x}'
+              except:pass
+              return f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}{ex}'
+          def dump(a,z,title):
+              a=max(base,a);z=min(base+len(code),z);print(f'\n=== {title} {a:#x}..{z:#x} ===')
+              for i in md.disasm(b[off(a):off(z)],a):print(fmt(i))
+          def callers(target):
+              out=[]
+              for p in range(0,len(code)-4,2):
+                  h1,h2=struct.unpack_from('<HH',code,p)
+                  if (h1&0xf800)!=0xf000 or (h2&0xd000)!=0xd000:continue
+                  s=(h1>>10)&1;imm10=h1&0x3ff;j1=(h2>>13)&1;j2=(h2>>11)&1;imm11=h2&0x7ff;i1=(~(j1^s))&1;i2=(~(j2^s))&1
+                  imm25=(s<<24)|(i1<<23)|(i2<<22)|(imm10<<12)|(imm11<<1);dst=(base+p+4+sx(imm25,25))&0xffffffff
+                  if (dst&~1)==(target&~1):out.append(base+p)
+              return out
+          print('M10-R v0.61 LV TRANSITION / AE-LOCK TRACE')
+          print('Known: ADAE=0x2001ADAE, ADBB=0x2001ADBB, AE_lock=0x2001AD6E, cached calculation Bv=0x2000012A.')
+          for a,z,name in [
+              (0x08002ee8,0x08002fe0,'PREPARE LIVE VIEW/VIDEO'),
+              (0x08003068,0x0800357a,'LVVIDEOSYNC RECEIVE'),
+              (0x0800e160,0x0800e1a0,'EXPOSURE UPDATE IMMEDIATE HELPER'),
+              (0x0800d6a8,0x0800d850,'FINAL BV SOURCE SELECTOR'),
+              (0x0800d91c,0x0800dba0,'EXPOSURE INPUT BUILDER'),
+              (0x080203b4,0x08020580,'EXPOSURE CALCULATOR ENTRY/CACHE GATE CONTEXT')]:
+              dump(a,z,name)
+          targets=[
+              (0x08002ee8,'prepare LV/video handler'),
+              (0x08003068,'LVVideoSync receive'),
+              (0x0800e186,'synchronous exposure rebuild'),
+              (0x0800d6a8,'final Bv selector'),
+              (0x0800d91c,'exposure builder'),
+              (0x080203b4,'exposure calculator'),
+              (0x0800dc4a,'exposure event post'),
+              (0x0800248e,'AE-lock receiver')]
+          for t,name in targets:
+              cc=callers(t);print('\nCALLERS',name,hex(t),[hex(x) for x in cc])
+              for a in cc[:30]:dump(a-0x70,a+0x80,name+' CALLER '+hex(a))
+          print('\nADAE/LOCK/CACHE LITERAL REFERENCES')
+          for val,name in ((0x2001adae,'ADAE'),(0x2001adbb,'ADBB'),(0x2001ad6e,'AE_LOCK'),(0x2000012a,'CACHED_CALC_BV')):
+              pat=struct.pack('<I',val);q=0;hits=[]
+              while True:
+                  q=b.find(pat,q)
+                  if q<0:break
+                  hits.append(base+q-pfx);q+=1
+              print(name,hex(val),'literal-pool VAs',[hex(x) for x in hits])
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v061_lv_transition_aelock.txt
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: record v0.61 LV transition and AE-lock trace'
+          git pull --rebase origin m10r-metering-latch-trace
+          git push origin HEAD:m10r-metering-latch-trace
