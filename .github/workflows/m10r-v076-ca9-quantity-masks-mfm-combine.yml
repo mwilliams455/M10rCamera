@@ -1,0 +1,101 @@
+name: M10-R v0.76 CA9 quantity masks and MFM combine
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v076-ca9-quantity-masks-mfm-combine.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Recover firmware and inspect CA9 quantity masks / MFM combine
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 tools/m10r_unpack.py /tmp/M10-R.FW /tmp/M10R_unpacked.bin >/dev/null
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v076_ca9_quantity_masks_mfm_combine.txt
+          from pathlib import Path
+          from collections import Counter
+          import struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_ARM,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_OP_REG,ARM_REG_PC
+
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes(); base=0x40000000; pfx=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN); md.detail=True
+          def off(a): return pfx+a-base
+          def one(a):
+              o=off(a)
+              if o<0 or o+4>len(b): return None
+              ds=list(md.disasm(b[o:o+4],a,1)); return ds[0] if ds else None
+          def asc_at(a,maxn=180):
+              o=off(a)
+              if not (0<=o<len(b)): return None
+              z=b.find(b'\0',o,min(len(b),o+maxn))
+              if z<0: return None
+              s=b[o:z]
+              if len(s)<4 or any(c<0x20 or c>0x7e for c in s): return None
+              return s.decode('ascii','replace')
+          def dump(s,e):
+              a=s&~3
+              while a<e:
+                  i=one(a)
+                  if i:
+                      extra=''
+                      if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                          la=a+8+i.operands[1].mem.disp; lo=off(la)
+                          if 0<=lo<=len(b)-4:
+                              v=struct.unpack_from('<I',b,lo)[0]
+                              st=asc_at(v&~1)
+                              extra=f' ; LIT {hex(la)}->{hex(v)}'+(f" STRING='{st}'" if st else '')
+                      print(f'{i.address:08x}: {i.mnemonic:9s} {i.op_str}{extra}')
+                  a+=4
+
+          print('M10-R v0.76 CA9 QUANTITY MASKS / MFM COMBINE')
+          print('SECTION 099 IMG-CA9_System base',hex(base),'size',hex(len(b)))
+          print('\nSTATIC QUANTITY TABLES: consecutive 0x160-byte blocks')
+          tables=[('Integral_ID1',0x4001349c),('MFM_ID2',0x400135fc),('AVfield_ID3',0x4001375c)]
+          for name,a in tables:
+              d=b[off(a):off(a)+0x160]
+              c=Counter(d)
+              print(f'\n=== {name} {hex(a)} len={len(d)} sum={sum(d)} nonzero={sum(x!=0 for x in d)} ===')
+              print('COUNTS',sorted(c.items()))
+              print('MINMAX',min(d),max(d))
+              # 0x160 = 352 = 22*16; print canonical 16 rows x 22 cols.
+              print('MATRIX_16x22')
+              for r in range(16):
+                  row=d[r*22:(r+1)*22]
+                  print(f'{r:02d}: '+' '.join(f'{x:3d}' for x in row))
+
+          print('\n=== DYNAMIC SPOT TABLE BUILDER 0x400003e0..0x40000610 ===')
+          dump(0x400003e0,0x40000610)
+
+          print('\n=== MFM COMBINATION REGION 0x40000de0..0x40001380 ===')
+          dump(0x40000de0,0x40001380)
+
+          print('\n=== MFM REGION CALLS ===')
+          for a in range(0x40000de0,0x40001380,4):
+              i=one(a)
+              if i and i.mnemonic.startswith('bl') and i.operands and i.operands[0].type==ARM_OP_IMM:
+                  print(hex(a),'->',hex(i.operands[0].imm&~1))
+
+          print('\n=== MFM RESULT-RELATED HALFWORD STORES ===')
+          for a in range(0x40000de0,0x40001380,4):
+              i=one(a)
+              if not i or not i.mnemonic.startswith('strh'): continue
+              print(f'{i.address:08x}: {i.mnemonic:9s} {i.op_str}')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v076_ca9_quantity_masks_mfm_combine.txt
+          git commit -m 'research: record v0.76 CA9 quantity masks and MFM combine' || exit 0
+          git push
