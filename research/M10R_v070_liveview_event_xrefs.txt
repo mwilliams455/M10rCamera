@@ -1,0 +1,337 @@
+M10-R v0.70 CAP_LIVEVIEW EVENT/STATE STRING XREFS
+STRING 0x421c4a4c 'CAP_LIVEVIEW_CCPU_READY'
+STRING 0x421c4a67 '@CAP_LIVEVIEW_IMG_READY'
+STRING 0x421c4a80 'CAP_LIVEVIEW_STOP'
+STRING 0x421c4a94 'CAP_LIVEVIEW_INITIALIZE_PHOTO'
+STRING 0x421c4ab7 '@CAP_LIVEVIEW_INITIALIZE_WSET_PHOTO'
+STRING 0x421c4adc 'CAP_LIVEVIEW_INITIALIZE_VIDEO'
+STRING 0x421c4afc 'CAP_LIVEVIEW_INITIALIZE_CAPTURE_VIDEO'
+STRING 0x421c4b27 '@CAP_LIVEVIEW_WFQ_EMPTY'
+STRING 0x421c4b40 'CAP_LIVEVIEW_FIRST_FRAME_READY'
+STRING 0x421c4b60 'CAP_LIVEVIEW_N_FRAME_READY'
+STRING 0x421c4b7f '@CAP_LIVEVIEW_LAST_FRAME_READY'
+STRING 0x421c4ba0 'CAP_LIVEVIEW_RESET_SENSOR'
+STRING 0x421c4bbf '@CAP_LIVEVIEW_CALIBRATION_STOP'
+STRING 0x421c4fb4 'CAP_LIVEVIEW_VIDEO_STORING_FINISHED'
+STRING 0x421e19ec 'CAP_LIVEVIEW_CCPU_READY'
+STRING 0x421e1a04 'CAP_LIVEVIEW_IMG_READY'
+STRING 0x421e1a1c 'CAP_LIVEVIEW_STOP'
+STRING 0x421e1a30 'CAP_LIVEVIEW_INITIALIZE_PHOTO'
+STRING 0x421e1a50 'CAP_LIVEVIEW_INITIALIZE_WSET_PHOTO'
+STRING 0x421e1a74 'CAP_LIVEVIEW_INITIALIZE_VIDEO'
+STRING 0x421e1a94 'CAP_LIVEVIEW_INITIALIZE_CAPTURE_VIDEO'
+STRING 0x421e1abc 'CAP_LIVEVIEW_WFQ_EMPTY'
+STRING 0x421e1ad4 'CAP_LIVEVIEW_FIRST_FRAME_READY'
+STRING 0x421e1af4 'CAP_LIVEVIEW_N_FRAME_READY'
+STRING 0x421e1b10 'CAP_LIVEVIEW_LAST_FRAME_READY'
+STRING 0x421e1b30 'CAP_LIVEVIEW_RESET_SENSOR'
+STRING 0x421e1b4c 'CAP_LIVEVIEW_CALIBRATION_STOP'
+STRING 0x421e1b6c 'CAP_LIVEVIEW_VIDEO_STORING_FINISHED'
+STRING 0x4284cb34 'cap_liveview_frame_ready: event Parameter is wrong, should be never 0'
+STRING 0x4284cfdc 'cap_liveview_frame_ready: VIDEO_SIZE=%d Kbyte | STREAM SIZE=%d Kbyte'
+
+XREFS 'CAP_LIVEVIEW_CCPU_READY' 0x421c4a4c []
+
+XREFS '@CAP_LIVEVIEW_IMG_READY' 0x421c4a67 []
+
+XREFS 'CAP_LIVEVIEW_STOP' 0x421c4a80 []
+
+XREFS 'CAP_LIVEVIEW_INITIALIZE_PHOTO' 0x421c4a94 []
+
+XREFS '@CAP_LIVEVIEW_INITIALIZE_WSET_PHOTO' 0x421c4ab7 []
+
+XREFS 'CAP_LIVEVIEW_INITIALIZE_VIDEO' 0x421c4adc []
+
+XREFS 'CAP_LIVEVIEW_INITIALIZE_CAPTURE_VIDEO' 0x421c4afc []
+
+XREFS '@CAP_LIVEVIEW_WFQ_EMPTY' 0x421c4b27 []
+
+XREFS 'CAP_LIVEVIEW_FIRST_FRAME_READY' 0x421c4b40 []
+
+XREFS 'CAP_LIVEVIEW_N_FRAME_READY' 0x421c4b60 []
+
+XREFS '@CAP_LIVEVIEW_LAST_FRAME_READY' 0x421c4b7f []
+
+XREFS 'CAP_LIVEVIEW_RESET_SENSOR' 0x421c4ba0 []
+
+XREFS '@CAP_LIVEVIEW_CALIBRATION_STOP' 0x421c4bbf []
+
+XREFS 'CAP_LIVEVIEW_VIDEO_STORING_FINISHED' 0x421c4fb4 []
+
+XREFS 'CAP_LIVEVIEW_CCPU_READY' 0x421e19ec []
+
+XREFS 'CAP_LIVEVIEW_IMG_READY' 0x421e1a04 []
+
+XREFS 'CAP_LIVEVIEW_STOP' 0x421e1a1c []
+
+XREFS 'CAP_LIVEVIEW_INITIALIZE_PHOTO' 0x421e1a30 []
+
+XREFS 'CAP_LIVEVIEW_INITIALIZE_WSET_PHOTO' 0x421e1a50 []
+
+XREFS 'CAP_LIVEVIEW_INITIALIZE_VIDEO' 0x421e1a74 []
+
+XREFS 'CAP_LIVEVIEW_INITIALIZE_CAPTURE_VIDEO' 0x421e1a94 []
+
+XREFS 'CAP_LIVEVIEW_WFQ_EMPTY' 0x421e1abc []
+
+XREFS 'CAP_LIVEVIEW_FIRST_FRAME_READY' 0x421e1ad4 []
+
+XREFS 'CAP_LIVEVIEW_N_FRAME_READY' 0x421e1af4 []
+
+XREFS 'CAP_LIVEVIEW_LAST_FRAME_READY' 0x421e1b10 []
+
+XREFS 'CAP_LIVEVIEW_RESET_SENSOR' 0x421e1b30 []
+
+XREFS 'CAP_LIVEVIEW_CALIBRATION_STOP' 0x421e1b4c []
+
+XREFS 'CAP_LIVEVIEW_VIDEO_STORING_FINISHED' 0x421e1b6c []
+
+XREFS 'cap_liveview_frame_ready: event Parameter is wrong, should be never 0' 0x4284cb34 ['0x421d02a4']
+-- around pointer 0x421d02a4 --
+421d0224: movs       r0, r5
+421d0226: adds       r0, #8
+421d0228: adds       r0, r0, r1
+421d022a: ldr        r0, [r0, #0x6c]
+421d022c: lsrs       r2, r0, #0xa
+421d022e: ldr        r1, [pc, #0x78] ; LIT 0x421d02a8->0x4284cfdc STRING='cap_liveview_frame_ready: VIDEO_SIZE=%d Kbyte | STREAM SIZE=%d Kbyte'
+421d0230: movs       r0, #2
+421d0232: bl         #0x42140150
+421d0236: movs       r2, r5
+421d0238: ldr        r0, [pc, #0x70] ; LIT 0x421d02ac->0x408df030
+421d023a: ldr        r1, [sp, #4]
+421d023c: ldr        r0, [r0]
+421d023e: bl         #0x4213af10
+421d0242: movs       r2, r5
+421d0244: ldr        r0, [pc, #0x64] ; LIT 0x421d02ac->0x408df030
+421d0246: ldr        r1, [sp, #4]
+421d0248: ldr        r0, [r0]
+421d024a: bl         #0x4219d5dc
+421d024e: movs       r2, r5
+421d0250: ldr        r0, [pc, #0x58] ; LIT 0x421d02ac->0x408df030
+421d0252: ldr        r1, [sp, #4]
+421d0254: ldr        r0, [r0]
+421d0256: bl         #0x4209cf14
+421d025a: ldr        r0, [sp, #8]
+421d025c: add        sp, #0x14
+421d025e: pop        {r4, r5, r6, r7, pc}
+421d0260: .byte 0xfc, 0xf0
+421d0262: lsls       r5, r1
+421d0264: stm        r3!, {r2, r4, r5, r6, r7}
+421d0266: cmp        r4, r0
+421d0268: stm        r3!, {r7}
+421d026a: cmp        r4, r0
+421d026c: str        r3, [r4, #0x14]
+421d026e: ldrsh      r0, [r6, r5]
+421d0270: ldr        r4, [r5, #0x14]
+421d0272: str        r6, [r6, #0x54]
+421d0274: ldr        r6, [r6, #0x14]
+421d0276: strb       r5, [r4, #0x1d]
+421d0278: str        r7, [r3, #0x64]
+421d027a: str        r2, [r6, #0x14]
+421d027c: str        r5, [r5, #0x54]
+421d027e: strb       r7, [r3, #9]
+421d0280: str        r5, [r4, #0x14]
+421d0282: ldrb       r4, [r4, #5]
+421d0284: movs       r0, #0x3a
+421d0286: ldr        r5, [r2, #0x64]
+421d0288: ldr        r3, [r5, #0x64]
+421d028a: strb       r7, [r5, #0x1d]
+421d028c: movs       r0, #0x6e
+421d028e: strb       r5, [r4, #0x19]
+421d0290: ldr        r5, [r4, #0x64]
+421d0292: movs       r0, #0x74
+421d0294: strb       r6, [r4, #9]
+421d0296: ldr        r1, [r4, #0x54]
+421d0298: movs       r0, #0x65
+421d029a: strb       r5, [r4, #0x19]
+421d029c: ldr        r5, [r4, #0x64]
+421d029e: cmp        r6, #0x74
+421d02a0: movs       r1, r4
+421d02a2: movs       r0, r0
+421d02a4: ldm        r3!, {r2, r4, r5}
+421d02a6: cmp        r4, r0
+421d02a8: ldm        r7, {r2, r3, r4, r6, r7}
+421d02aa: cmp        r4, r0
+421d02ac: bics       r0, r0, #0x46800000
+421d02b0: push       {r4, lr}
+421d02b2: movs       r4, r0
+421d02b4: ldr        r0, [pc, #0x20] ; LIT 0x421d02d8->0x408df034
+421d02b6: ldrb       r0, [r0]
+421d02b8: cmp        r0, #1
+421d02ba: bne        #0x421d02c8
+421d02bc: movs       r2, #0x40
+421d02be: ldr        r1, [pc, #0x1c] ; LIT 0x421d02dc->0x408df038
+421d02c0: movs       r0, r4
+421d02c2: blx        #0x4204f2ec
+421d02c6: pop        {r4, pc}
+421d02c8: movs       r2, #0x40
+421d02ca: ldr        r1, [pc, #0x14] ; LIT 0x421d02e0->0x408df078
+421d02cc: movs       r0, r4
+421d02ce: blx        #0x4204f2ec
+421d02d2: mov        r8, r8
+421d02d4: b          #0x421d02c6
+421d02d6: movs       r0, r0
+421d02d8: bics       r0, r4, #0x46800000
+421d02dc: bics       r0, r8, #0x46800000
+421d02e0: orns       r0, r8, #0x46800000
+421d02e4: push       {r4, r5, r6, lr}
+421d02e6: movs       r0, #0x52
+421d02e8: bl         #0x4214be4c
+421d02ec: movs       r5, r0
+421d02ee: movs       r6, #0
+421d02f0: bl         #0x42186058
+421d02f4: movs       r4, r0
+421d02f6: bl         #0x421d0360
+421d02fa: cmp        r0, #0
+421d02fc: bne        #0x421d0300
+421d02fe: pop        {r4, r5, r6, pc}
+421d0300: cmp        r4, #2
+421d0302: beq        #0x421d030c
+421d0304: cmp        r4, #0
+421d0306: beq        #0x421d030c
+421d0308: movs       r0, #0
+421d030a: b          #0x421d02fe
+421d030c: movs       r0, #0x22
+421d030e: bl         #0x421be890
+421d0312: cmp        r0, #0xa3
+421d0314: beq        #0x421d0324
+421d0316: movs       r0, #0x22
+421d0318: bl         #0x421be890
+421d031c: cmp        r0, #0xa4
+421d031e: beq        #0x421d0324
+421d0320: movs       r0, #0
+421d0322: b          #0x421d02fe
+421d0324: cmp        r5, #1
+421d0326: bne        #0x421d032a
+421d0328: movs       r6, #1
+421d032a: movs       r0, r6
+421d032c: b          #0x421d02fe
+421d032e: movs       r0, r0
+421d0330: push       {r4, lr}
+421d0332: movs       r4, #0
+421d0334: ldr        r0, [pc, #0x1c] ; LIT 0x421d0354->0x408df030
+
+XREFS 'cap_liveview_frame_ready: VIDEO_SIZE=%d Kbyte | STREAM SIZE=%d Kbyte' 0x4284cfdc ['0x421d02a8']
+-- around pointer 0x421d02a8 --
+421d0228: adds       r0, r0, r1
+421d022a: ldr        r0, [r0, #0x6c]
+421d022c: lsrs       r2, r0, #0xa
+421d022e: ldr        r1, [pc, #0x78] ; LIT 0x421d02a8->0x4284cfdc STRING='cap_liveview_frame_ready: VIDEO_SIZE=%d Kbyte | STREAM SIZE=%d Kbyte'
+421d0230: movs       r0, #2
+421d0232: bl         #0x42140150
+421d0236: movs       r2, r5
+421d0238: ldr        r0, [pc, #0x70] ; LIT 0x421d02ac->0x408df030
+421d023a: ldr        r1, [sp, #4]
+421d023c: ldr        r0, [r0]
+421d023e: bl         #0x4213af10
+421d0242: movs       r2, r5
+421d0244: ldr        r0, [pc, #0x64] ; LIT 0x421d02ac->0x408df030
+421d0246: ldr        r1, [sp, #4]
+421d0248: ldr        r0, [r0]
+421d024a: bl         #0x4219d5dc
+421d024e: movs       r2, r5
+421d0250: ldr        r0, [pc, #0x58] ; LIT 0x421d02ac->0x408df030
+421d0252: ldr        r1, [sp, #4]
+421d0254: ldr        r0, [r0]
+421d0256: bl         #0x4209cf14
+421d025a: ldr        r0, [sp, #8]
+421d025c: add        sp, #0x14
+421d025e: pop        {r4, r5, r6, r7, pc}
+421d0260: .byte 0xfc, 0xf0
+421d0262: lsls       r5, r1
+421d0264: stm        r3!, {r2, r4, r5, r6, r7}
+421d0266: cmp        r4, r0
+421d0268: stm        r3!, {r7}
+421d026a: cmp        r4, r0
+421d026c: str        r3, [r4, #0x14]
+421d026e: ldrsh      r0, [r6, r5]
+421d0270: ldr        r4, [r5, #0x14]
+421d0272: str        r6, [r6, #0x54]
+421d0274: ldr        r6, [r6, #0x14]
+421d0276: strb       r5, [r4, #0x1d]
+421d0278: str        r7, [r3, #0x64]
+421d027a: str        r2, [r6, #0x14]
+421d027c: str        r5, [r5, #0x54]
+421d027e: strb       r7, [r3, #9]
+421d0280: str        r5, [r4, #0x14]
+421d0282: ldrb       r4, [r4, #5]
+421d0284: movs       r0, #0x3a
+421d0286: ldr        r5, [r2, #0x64]
+421d0288: ldr        r3, [r5, #0x64]
+421d028a: strb       r7, [r5, #0x1d]
+421d028c: movs       r0, #0x6e
+421d028e: strb       r5, [r4, #0x19]
+421d0290: ldr        r5, [r4, #0x64]
+421d0292: movs       r0, #0x74
+421d0294: strb       r6, [r4, #9]
+421d0296: ldr        r1, [r4, #0x54]
+421d0298: movs       r0, #0x65
+421d029a: strb       r5, [r4, #0x19]
+421d029c: ldr        r5, [r4, #0x64]
+421d029e: cmp        r6, #0x74
+421d02a0: movs       r1, r4
+421d02a2: movs       r0, r0
+421d02a4: ldm        r3!, {r2, r4, r5}
+421d02a6: cmp        r4, r0
+421d02a8: ldm        r7, {r2, r3, r4, r6, r7}
+421d02aa: cmp        r4, r0
+421d02ac: bics       r0, r0, #0x46800000
+421d02b0: push       {r4, lr}
+421d02b2: movs       r4, r0
+421d02b4: ldr        r0, [pc, #0x20] ; LIT 0x421d02d8->0x408df034
+421d02b6: ldrb       r0, [r0]
+421d02b8: cmp        r0, #1
+421d02ba: bne        #0x421d02c8
+421d02bc: movs       r2, #0x40
+421d02be: ldr        r1, [pc, #0x1c] ; LIT 0x421d02dc->0x408df038
+421d02c0: movs       r0, r4
+421d02c2: blx        #0x4204f2ec
+421d02c6: pop        {r4, pc}
+421d02c8: movs       r2, #0x40
+421d02ca: ldr        r1, [pc, #0x14] ; LIT 0x421d02e0->0x408df078
+421d02cc: movs       r0, r4
+421d02ce: blx        #0x4204f2ec
+421d02d2: mov        r8, r8
+421d02d4: b          #0x421d02c6
+421d02d6: movs       r0, r0
+421d02d8: bics       r0, r4, #0x46800000
+421d02dc: bics       r0, r8, #0x46800000
+421d02e0: orns       r0, r8, #0x46800000
+421d02e4: push       {r4, r5, r6, lr}
+421d02e6: movs       r0, #0x52
+421d02e8: bl         #0x4214be4c
+421d02ec: movs       r5, r0
+421d02ee: movs       r6, #0
+421d02f0: bl         #0x42186058
+421d02f4: movs       r4, r0
+421d02f6: bl         #0x421d0360
+421d02fa: cmp        r0, #0
+421d02fc: bne        #0x421d0300
+421d02fe: pop        {r4, r5, r6, pc}
+421d0300: cmp        r4, #2
+421d0302: beq        #0x421d030c
+421d0304: cmp        r4, #0
+421d0306: beq        #0x421d030c
+421d0308: movs       r0, #0
+421d030a: b          #0x421d02fe
+421d030c: movs       r0, #0x22
+421d030e: bl         #0x421be890
+421d0312: cmp        r0, #0xa3
+421d0314: beq        #0x421d0324
+421d0316: movs       r0, #0x22
+421d0318: bl         #0x421be890
+421d031c: cmp        r0, #0xa4
+421d031e: beq        #0x421d0324
+421d0320: movs       r0, #0
+421d0322: b          #0x421d02fe
+421d0324: cmp        r5, #1
+421d0326: bne        #0x421d032a
+421d0328: movs       r6, #1
+421d032a: movs       r0, r6
+421d032c: b          #0x421d02fe
+421d032e: movs       r0, r0
+421d0330: push       {r4, lr}
+421d0332: movs       r4, #0
+421d0334: ldr        r0, [pc, #0x1c] ; LIT 0x421d0354->0x408df030
+421d0336: ldr        r0, [r0]
+421d0338: cmp        r0, #0
