@@ -1,0 +1,403 @@
+################ CTRL RECORD COMMAND BOUNDARY ################
+
+=== CTRL COMMAND WRAPPER AROUND 0x08009B2C 0x8009ae0..0x8009bc0 ===
+08009ae0: movs       r0, #0x1b
+08009ae2: bl         #0x80093dc ; CALL 0x80093dc
+08009ae6: pop        {r0, pc}
+08009ae8: push       {r7, lr}
+08009aea: ldr.w      r0, [pc, #0x99c] ; LIT 0x800a488->0x804c25c
+08009aee: ldr        r0, [r0]
+08009af0: str        r0, [sp]
+08009af2: movs       r0, #0
+08009af4: strb.w     r0, [sp]
+08009af8: movs       r2, #1
+08009afa: mov        r1, sp
+08009afc: movs       r0, #0x1c
+08009afe: bl         #0x80093dc ; CALL 0x80093dc
+08009b02: pop        {r0, pc}
+08009b04: push       {r4, r5, lr}
+08009b06: sub        sp, #0x14
+08009b08: movs       r4, r0
+08009b0a: ldr.w      r0, [pc, #0x980] ; LIT 0x800a48c->0x804b5c0
+08009b0e: ldm        r0, {r0, r1, r2, r3}
+08009b10: mov        r5, sp
+08009b12: stm.w      r5, {r0, r1, r2, r3}
+08009b16: mov        r1, sp
+08009b18: movs       r0, r4
+08009b1a: bl         #0x80029ec ; CALL 0x80029ec
+08009b1e: movs       r2, #0xd
+08009b20: mov        r1, sp
+08009b22: movs       r0, #0x50
+08009b24: bl         #0x80093dc ; CALL 0x80093dc
+08009b28: add        sp, #0x14
+08009b2a: pop        {r4, r5, pc}
+08009b2c: push       {r4, lr}
+08009b2e: sub        sp, #0x50
+08009b30: movs       r4, r0
+08009b32: mov        r0, sp
+08009b34: movs       r1, #0x4c
+08009b36: bl         #0x8008a1c ; CALL 0x8008a1c
+08009b3a: mov        r1, sp
+08009b3c: movs       r0, r4
+08009b3e: bl         #0x8003068 ; CALL 0x8003068
+08009b42: movs       r2, #0x49
+08009b44: mov        r1, sp
+08009b46: movs       r0, #0x32
+08009b48: bl         #0x80093dc ; CALL 0x80093dc
+08009b4c: add        sp, #0x50
+08009b4e: pop        {r4, pc}
+08009b50: push       {r4, lr}
+08009b52: sub        sp, #0x28
+08009b54: movs       r4, r0
+08009b56: mov        r0, sp
+08009b58: movs       r1, #0x24
+08009b5a: bl         #0x8008a1c ; CALL 0x8008a1c
+08009b5e: mov        r1, sp
+08009b60: movs       r0, r4
+08009b62: bl         #0x80035b4 ; CALL 0x80035b4
+08009b66: movs       r2, #0x21
+08009b68: mov        r1, sp
+08009b6a: movs       r0, #0x33
+08009b6c: bl         #0x80093dc ; CALL 0x80093dc
+08009b70: add        sp, #0x28
+08009b72: pop        {r4, pc}
+08009b74: push       {lr}
+08009b76: sub        sp, #0x24
+08009b78: mov        r0, sp
+08009b7a: ldr.w      r1, [pc, #0x914] ; LIT 0x800a490->0x8048738
+08009b7e: vldmia     r1, {d0, d1, d2, d3}
+08009b82: vstmia     r0, {d0, d1, d2, d3}
+08009b86: mov        r0, sp
+08009b88: bl         #0x8002e08 ; CALL 0x8002e08
+08009b8c: movs       r2, #0x1e
+08009b8e: mov        r1, sp
+08009b90: movs       r0, #0x23
+08009b92: bl         #0x80093dc ; CALL 0x80093dc
+08009b96: add        sp, #0x24
+08009b98: pop        {pc}
+08009b9a: push.w     {r4, r5, r6, r7, r8, sb, lr}
+08009b9e: sub        sp, #0xc
+08009ba0: movs       r4, r0
+08009ba2: movs       r5, r1
+08009ba4: ldr.w      r0, [pc, #0x8ec] ; LIT 0x800a494->0x804c260
+08009ba8: ldr        r0, [r0]
+08009baa: str        r0, [sp, #4]
+08009bac: ldr.w      r0, [pc, #0x8e8] ; LIT 0x800a498->0x804c264
+08009bb0: ldr        r0, [r0]
+08009bb2: str        r0, [sp]
+08009bb4: movs       r6, r4
+08009bb6: movs       r7, r4
+08009bb8: movs.w     sb, #0
+08009bbc: uxtb       r5, r5
+08009bbe: cmp        r5, #0x40
+
+=== CTRL RECORD INGEST 0x08003068 0x8003050..0x8003180 ===
+08003050: add        r2, sp, #0x2e0
+08003052: movs       r0, #1
+08003054: ldr        r4, [r7, r1]
+08003056: lsrs       r4, r0, #0x20
+08003058: add        r4, sp, #0x60
+0800305a: movs       r0, #1
+0800305c: add        r5, sp, #0x2b0
+0800305e: movs       r0, #1
+08003060: ldr        r4, [r4, r2]
+08003062: lsrs       r4, r0, #0x20
+08003064: asrs       r4, r0, #5
+08003066: lsrs       r4, r0, #0x20
+08003068: push.w     {r4, r5, r6, r7, r8, sb, lr}
+0800306c: sub        sp, #0x3c
+0800306e: movs       r4, r0
+08003070: movs       r5, r1
+08003072: add        r0, sp, #0x2c
+08003074: bl         #0x8011316 ; CALL 0x8011316
+08003078: movs.w     sb, #0
+0800307c: movs       r6, #0
+0800307e: movs       r7, #0
+08003080: movs.w     r8, #0
+08003084: ldr.w      r0, [pc, #0x7d8] ; LIT 0x8003860->0x2001ac14
+08003088: ldrb       r0, [r0]
+0800308a: ubfx       r0, r0, #2, #1
+0800308e: ands       r0, r0, #1
+08003092: ldrb       r1, [r4, #4]
+08003094: ubfx       r1, r1, #2, #1
+08003098: ands       r1, r1, #1
+0800309c: cmp        r0, r1
+0800309e: bne        #0x8003124
+080030a0: ldr.w      r0, [pc, #0x7bc] ; LIT 0x8003860->0x2001ac14
+080030a4: ldrb       r0, [r0]
+080030a6: ubfx       r0, r0, #6, #1
+080030aa: ands       r0, r0, #1
+080030ae: ldrb       r1, [r4, #4]
+080030b0: ubfx       r1, r1, #6, #1
+080030b4: ands       r1, r1, #1
+080030b8: cmp        r0, r1
+080030ba: bne        #0x8003124
+080030bc: ldr.w      r0, [pc, #0x7a0] ; LIT 0x8003860->0x2001ac14
+080030c0: ldrb       r0, [r0]
+080030c2: ubfx       r0, r0, #5, #1
+080030c6: ands       r0, r0, #1
+080030ca: ldrb       r1, [r4, #4]
+080030cc: ubfx       r1, r1, #5, #1
+080030d0: ands       r1, r1, #1
+080030d4: cmp        r0, r1
+080030d6: bne        #0x8003124
+080030d8: ldr.w      r0, [pc, #0x784] ; LIT 0x8003860->0x2001ac14
+080030dc: ldrb       r0, [r0]
+080030de: ubfx       r0, r0, #3, #1
+080030e2: ands       r0, r0, #1
+080030e6: ldrb       r1, [r4, #4]
+080030e8: ubfx       r1, r1, #3, #1
+080030ec: ands       r1, r1, #1
+080030f0: cmp        r0, r1
+080030f2: bne        #0x8003124
+080030f4: ldr.w      r0, [pc, #0x768] ; LIT 0x8003860->0x2001ac14
+080030f8: ldrb       r0, [r0]
+080030fa: uxtb       r0, r0
+080030fc: lsrs       r0, r0, #7
+080030fe: ldrb       r1, [r4, #4]
+08003100: uxtb       r1, r1
+08003102: lsrs       r1, r1, #7
+08003104: cmp        r0, r1
+08003106: bne        #0x8003124
+08003108: ldr.w      r0, [pc, #0x754] ; LIT 0x8003860->0x2001ac14
+0800310c: ldrb       r0, [r0]
+0800310e: ubfx       r0, r0, #1, #1
+08003112: ands       r0, r0, #1
+08003116: ldrb       r1, [r4, #4]
+08003118: ubfx       r1, r1, #1, #1
+0800311c: ands       r1, r1, #1
+08003120: cmp        r0, r1
+08003122: beq        #0x8003128
+08003124: movs       r0, #1
+08003126: mov        r8, r0
+08003128: ldrb       r0, [r4, #4]
+0800312a: ldr.w      r1, [pc, #0x734] ; LIT 0x8003860->0x2001ac14
+0800312e: str        r0, [r1]
+08003130: ldr.w      r0, [r4, #0x1d]
+08003134: ldr.w      r1, [pc, #0x738] ; LIT 0x8003870->0x2001ac10
+08003138: str        r0, [r1]
+0800313a: ldr.w      r0, [r4, #0x41]
+0800313e: bl         #0x801c898 ; CALL 0x801c898
+08003142: sxth       r0, r0
+08003144: bl         #0x800e094 ; CALL 0x800e094
+08003148: ldrsh.w    r0, [r4, #0x3b]
+0800314c: bl         #0x800e02c ; CALL 0x800e02c
+08003150: ldr.w      r0, [pc, #0x70c] ; LIT 0x8003860->0x2001ac14
+08003154: ldrb       r0, [r0]
+08003156: ubfx       r0, r0, #4, #1
+0800315a: uxtb       r0, r0
+0800315c: cmp        r0, #0
+0800315e: beq        #0x80031dc
+08003160: movs       r0, #1
+08003162: bl         #0x800e006 ; CALL 0x800e006
+08003166: movs       r0, #0
+08003168: ldr.w      r1, [pc, #0x6f0] ; LIT 0x800385c->0x2001adae
+0800316c: strb       r0, [r1]
+0800316e: ldr.w      r0, [pc, #0x6f0] ; LIT 0x8003860->0x2001ac14
+08003172: ldrb       r0, [r0]
+08003174: ands       r0, r0, #0xbf
+08003178: ldr.w      r1, [pc, #0x6e4] ; LIT 0x8003860->0x2001ac14
+0800317c: strb       r0, [r1]
+
+DIRECT_CALLERS 0x8009b2c ['0x8009fc8']
+
+=== CALLER 0x8009fc8 0x8009f68..0x800a038 ===
+08009f68: b          #0x800a056
+08009f6a: movs       r0, r5
+08009f6c: bl         #0x8002da4 ; CALL 0x8002da4
+08009f70: movs       r1, #0
+08009f72: movs       r0, r4
+08009f74: uxtb       r0, r0
+08009f76: bl         #0x800943a ; CALL 0x800943a
+08009f7a: b          #0x800a056
+08009f7c: bl         #0x8002dca ; CALL 0x8002dca
+08009f80: movs       r1, #0
+08009f82: movs       r0, r4
+08009f84: uxtb       r0, r0
+08009f86: bl         #0x800943a ; CALL 0x800943a
+08009f8a: b          #0x800a056
+08009f8c: bl         #0x8009b74 ; CALL 0x8009b74
+08009f90: b          #0x800a056
+08009f92: bl         #0x8002dec ; CALL 0x8002dec
+08009f96: movs       r1, #0
+08009f98: movs       r0, r4
+08009f9a: uxtb       r0, r0
+08009f9c: bl         #0x800943a ; CALL 0x800943a
+08009fa0: b          #0x800a056
+08009fa2: movs       r0, r5
+08009fa4: bl         #0x8002ee8 ; CALL 0x8002ee8
+08009fa8: movs       r1, #0
+08009faa: movs       r0, r4
+08009fac: uxtb       r0, r0
+08009fae: bl         #0x800943a ; CALL 0x800943a
+08009fb2: b          #0x800a056
+08009fb4: movs       r0, r5
+08009fb6: bl         #0x8002fec ; CALL 0x8002fec
+08009fba: movs       r1, #0
+08009fbc: movs       r0, r4
+08009fbe: uxtb       r0, r0
+08009fc0: bl         #0x800943a ; CALL 0x800943a
+08009fc4: b          #0x800a056
+08009fc6: movs       r0, r5
+08009fc8: bl         #0x8009b2c ; CALL 0x8009b2c
+08009fcc: b          #0x800a056
+08009fce: movs       r0, r5
+08009fd0: bl         #0x8009b50 ; CALL 0x8009b50
+08009fd4: b          #0x800a056
+08009fd6: movs       r1, #0
+08009fd8: movs       r0, r4
+08009fda: uxtb       r0, r0
+08009fdc: bl         #0x800943a ; CALL 0x800943a
+08009fe0: b          #0x800a056
+08009fe2: movs       r0, r5
+08009fe4: bl         #0x8009978 ; CALL 0x8009978
+08009fe8: b          #0x800a056
+08009fea: movs       r0, r5
+08009fec: bl         #0x8009b04 ; CALL 0x8009b04
+08009ff0: b          #0x800a056
+08009ff2: movs       r0, r5
+08009ff4: bl         #0x80026cc ; CALL 0x80026cc
+08009ff8: uxtb       r0, r0
+08009ffa: bl         #0x8009a1e ; CALL 0x8009a1e
+08009ffe: b          #0x800a056
+0800a000: movs       r0, r5
+0800a002: bl         #0x8002710 ; CALL 0x8002710
+0800a006: uxtb       r0, r0
+0800a008: bl         #0x8009a3c ; CALL 0x8009a3c
+0800a00c: b          #0x800a056
+0800a00e: movs       r1, r4
+0800a010: uxtb       r1, r1
+0800a012: movs       r0, r5
+0800a014: bl         #0x8009b9a ; CALL 0x8009b9a
+0800a018: b          #0x800a056
+0800a01a: bl         #0x800278c ; CALL 0x800278c
+0800a01e: bl         #0x8009a5a ; CALL 0x8009a5a
+0800a022: b          #0x800a056
+0800a024: movs       r0, r5
+0800a026: bl         #0x80027a0 ; CALL 0x80027a0
+0800a02a: uxtb       r0, r0
+0800a02c: bl         #0x8009a76 ; CALL 0x8009a76
+0800a030: b          #0x800a056
+0800a032: movs       r1, #0
+0800a034: movs       r0, r4
+0800a036: uxtb       r0, r0
+
+DIRECT_CALLERS 0x8003068 ['0x8009b3e']
+
+=== CALLER 0x8009b3e 0x8009ade..0x8009bae ===
+08009ade: mov        r1, sp
+08009ae0: movs       r0, #0x1b
+08009ae2: bl         #0x80093dc ; CALL 0x80093dc
+08009ae6: pop        {r0, pc}
+08009ae8: push       {r7, lr}
+08009aea: ldr.w      r0, [pc, #0x99c] ; LIT 0x800a488->0x804c25c
+08009aee: ldr        r0, [r0]
+08009af0: str        r0, [sp]
+08009af2: movs       r0, #0
+08009af4: strb.w     r0, [sp]
+08009af8: movs       r2, #1
+08009afa: mov        r1, sp
+08009afc: movs       r0, #0x1c
+08009afe: bl         #0x80093dc ; CALL 0x80093dc
+08009b02: pop        {r0, pc}
+08009b04: push       {r4, r5, lr}
+08009b06: sub        sp, #0x14
+08009b08: movs       r4, r0
+08009b0a: ldr.w      r0, [pc, #0x980] ; LIT 0x800a48c->0x804b5c0
+08009b0e: ldm        r0, {r0, r1, r2, r3}
+08009b10: mov        r5, sp
+08009b12: stm.w      r5, {r0, r1, r2, r3}
+08009b16: mov        r1, sp
+08009b18: movs       r0, r4
+08009b1a: bl         #0x80029ec ; CALL 0x80029ec
+08009b1e: movs       r2, #0xd
+08009b20: mov        r1, sp
+08009b22: movs       r0, #0x50
+08009b24: bl         #0x80093dc ; CALL 0x80093dc
+08009b28: add        sp, #0x14
+08009b2a: pop        {r4, r5, pc}
+08009b2c: push       {r4, lr}
+08009b2e: sub        sp, #0x50
+08009b30: movs       r4, r0
+08009b32: mov        r0, sp
+08009b34: movs       r1, #0x4c
+08009b36: bl         #0x8008a1c ; CALL 0x8008a1c
+08009b3a: mov        r1, sp
+08009b3c: movs       r0, r4
+08009b3e: bl         #0x8003068 ; CALL 0x8003068
+08009b42: movs       r2, #0x49
+08009b44: mov        r1, sp
+08009b46: movs       r0, #0x32
+08009b48: bl         #0x80093dc ; CALL 0x80093dc
+08009b4c: add        sp, #0x50
+08009b4e: pop        {r4, pc}
+08009b50: push       {r4, lr}
+08009b52: sub        sp, #0x28
+08009b54: movs       r4, r0
+08009b56: mov        r0, sp
+08009b58: movs       r1, #0x24
+08009b5a: bl         #0x8008a1c ; CALL 0x8008a1c
+08009b5e: mov        r1, sp
+08009b60: movs       r0, r4
+08009b62: bl         #0x80035b4 ; CALL 0x80035b4
+08009b66: movs       r2, #0x21
+08009b68: mov        r1, sp
+08009b6a: movs       r0, #0x33
+08009b6c: bl         #0x80093dc ; CALL 0x80093dc
+08009b70: add        sp, #0x28
+08009b72: pop        {r4, pc}
+08009b74: push       {lr}
+08009b76: sub        sp, #0x24
+08009b78: mov        r0, sp
+08009b7a: ldr.w      r1, [pc, #0x914] ; LIT 0x800a490->0x8048738
+08009b7e: vldmia     r1, {d0, d1, d2, d3}
+08009b82: vstmia     r0, {d0, d1, d2, d3}
+08009b86: mov        r0, sp
+08009b88: bl         #0x8002e08 ; CALL 0x8002e08
+08009b8c: movs       r2, #0x1e
+08009b8e: mov        r1, sp
+08009b90: movs       r0, #0x23
+08009b92: bl         #0x80093dc ; CALL 0x80093dc
+08009b96: add        sp, #0x24
+08009b98: pop        {pc}
+08009b9a: push.w     {r4, r5, r6, r7, r8, sb, lr}
+08009b9e: sub        sp, #0xc
+08009ba0: movs       r4, r0
+08009ba2: movs       r5, r1
+08009ba4: ldr.w      r0, [pc, #0x8ec] ; LIT 0x800a494->0x804c260
+08009ba8: ldr        r0, [r0]
+08009baa: str        r0, [sp, #4]
+
+################ CROSS-SECTION STRING / CONSTANT SEARCH ################
+STRING_HIT 90 CTRL-System fileoff 0x3a818 va 0x803a814 text 'LVVideoSync last frame received (AV %i, SV %i, TV %i, Image ID %i, Max ISO %i, Max TV %i, Flags vl %i lf %i rlv %i mag %i vr %i vs %i exps %i)\r\n'
+STRING_HIT 90 CTRL-System fileoff 0x3a9c4 va 0x803a9c0 text 'LVVideoSync received (AV %i, SV %i, TV %i, Image ID %i, Max ISO %i, Max TV %i, Flags vl %i lf %i rlv %i mag %i vr %i vs %i exps %i)\r\n'
+STRING_HIT 90 CTRL-System fileoff 0x3a81a va 0x803a816 text 'VideoSync last frame received (AV %i, SV %i, TV %i, Image ID %i, Max ISO %i, Max TV %i, Flags vl %i lf %i rlv %i mag %i vr %i vs %i exps %i)\r\n'
+STRING_HIT 90 CTRL-System fileoff 0x3a9c6 va 0x803a9c2 text 'VideoSync received (AV %i, SV %i, TV %i, Image ID %i, Max ISO %i, Max TV %i, Flags vl %i lf %i rlv %i mag %i vr %i vs %i exps %i)\r\n'
+STRING_HIT 92 IMG-System fileoff 0xb8582 va 0xb8582 text 'LVVIDEO_PARAM'
+  IMG_ADR_REFS []
+STRING_HIT 92 IMG-System fileoff 0xb8a1e va 0xb8a1e text 'LVVIDEO_SYNC'
+  IMG_ADR_REFS []
+STRING_HIT 92 IMG-System fileoff 0xb9c72 va 0xb9c72 text 'LVVIDEO'
+  IMG_ADR_REFS []
+STRING_HIT 92 IMG-System fileoff 0xbb404 va 0xbb404 text 'LVVIDEO'
+  IMG_ADR_REFS []
+STRING_HIT 92 IMG-System fileoff 0xbbeef va 0xbbeef text 'LVVIDEO_PARAM'
+  IMG_ADR_REFS []
+STRING_HIT 92 IMG-System fileoff 0xbc5da va 0xbc5da text 'LVVIDEO_SYNC'
+  IMG_ADR_REFS []
+STRING_HIT 92 IMG-System fileoff 0xbd685 va 0xbd685 text 'LVVIDEO_SYNC'
+  IMG_ADR_REFS []
+STRING_HIT 92 IMG-System fileoff 0xbd71a va 0xbd71a text 'LVVIDEO_PARAM'
+  IMG_ADR_REFS []
+STRING_HIT 92 IMG-System fileoff 0xbdf15 va 0xbdf15 text 'LVVIDEO'
+  IMG_ADR_REFS []
+STRING_HIT 92 IMG-System fileoff 0xbe70b va 0xbe70b text 'LVVIDEO'
+  IMG_ADR_REFS []
+STRING_HIT 92 IMG-System fileoff 0xc0f1e va 0xc0f1e text 'LVVIDEO'
+  IMG_ADR_REFS []
+
+CONSTANT EVENT_78000032 0x78000032
+  92 IMG-System hits ['0xab8bc'] count 1
+
+CONSTANT PACK_BASE 0x408f0ec0
+  92 IMG-System hits ['0xab4a8', '0xab540', '0xb6b78', '0xb7270', '0xb74e8', '0xb79cc', '0xbbcbc', '0xbf2e4', '0xbf668', '0x16225c', '0x16a9e0', '0x16def8'] count 12
