@@ -1,0 +1,72 @@
+name: M10-R v0.71 object20c comparison map
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v071-object20c-read-comparisons.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  reduce:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m10r-metering-latch-trace
+          fetch-depth: 0
+      - name: Map state comparisons after object20c reads
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > research/M10R_v071_object20c_read_comparisons.txt
+          from pathlib import Path
+          import re
+          L=Path('research/M10R_v068_global_object20c_signature.txt').read_text(errors='replace').splitlines()
+          sections=[];cur=None
+          for line in L:
+              m=re.match(r'^=== HIT (0x[0-9a-fA-F]+) r(\d+) ===$',line)
+              if m:
+                  if cur: sections.append(cur)
+                  cur=[int(m.group(1),16),int(m.group(2)),[]]
+              elif cur:
+                  if line.startswith('=== HIT '): pass
+                  else: cur[2].append(line)
+          if cur: sections.append(cur)
+          print('M10-R v0.71 OBJECT+0x20C READ COMPARISON MAP')
+          rows=[]
+          for hit,reg,lines in sections:
+              access_addr=hit+8
+              # find exact +20c read line
+              idx=None
+              for n,x in enumerate(lines):
+                  if x.startswith(f'{access_addr:08x}:') and re.search(r'ldr\s+r0, \[r0, #4\]',x): idx=n;break
+              if idx is None: continue
+              following=lines[idx:idx+18]
+              cmps=[x for x in following[1:] if re.search(r':\s+cmp',x)]
+              branches=[x for x in following[1:] if re.search(r':\s+b(?:eq|ne|gt|lt|ge|le|hi|hs|lo|ls)\s',x)]
+              rows.append((hit,following[0],cmps[:3],branches[:3]))
+          print('READ_SITES',len(rows))
+          for hit,read,cmps,branches in rows:
+              print('\nSITE',hex(hit))
+              print(read)
+              for x in cmps: print('CMP',x)
+              for x in branches: print('BR',x)
+          from collections import Counter
+          vals=Counter()
+          for _,_,cmps,_ in rows:
+              for x in cmps:
+                  m=re.search(r'#(0x[0-9a-fA-F]+|\d+)',x)
+                  if m: vals[int(m.group(1),0)]+=1
+          print('\nCOMPARE_CONSTANT_COUNTS',[(hex(k),v) for k,v in sorted(vals.items())])
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v071_object20c_read_comparisons.txt
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: map v0.71 object20c comparisons'
+          git pull --rebase origin m10r-metering-latch-trace
+          git push origin HEAD:m10r-metering-latch-trace
