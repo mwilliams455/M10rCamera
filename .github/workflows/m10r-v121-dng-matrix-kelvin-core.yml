@@ -1,0 +1,156 @@
+name: M10-R v1.21 DNG matrix Kelvin color core
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v121-dng-matrix-kelvin-core.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace DNG matrices and CA9 Kelvin core
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v121_dng_matrix_kelvin_core.txt
+          from pathlib import Path
+          import struct, math
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_ARM,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+
+          def ascii_at(buf,base,pfx,va,limit=240):
+            o=pfx+va-base
+            if o<0 or o>=len(buf):return None
+            e=buf.find(b'\0',o,min(len(buf),o+limit))
+            if e<=o:return None
+            r=buf[o:e]
+            if len(r)>=4 and all(0x20<=x<=0x7e for x in r):return r.decode('ascii','replace')
+          def words(buf,base,pfx,va,n=16):
+            o=pfx+va-base
+            if o<0 or o+4>len(buf):return []
+            n=min(n,(len(buf)-o)//4)
+            return [struct.unpack_from('<I',buf,o+4*i)[0] for i in range(n)]
+
+          # IMG-System Thumb color-management wrapper/core.
+          ib=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); IBASE=0x42000000; IPFX=4
+          t=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);t.detail=True
+          def idis(a,z):return list(t.disasm(ib[IPFX+a-IBASE:IPFX+z-IBASE],a))
+          def ilit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;o=IPFX+la-IBASE
+                if 0<=o<=len(ib)-4:return la,struct.unpack_from('<I',ib,o)[0]
+            except:pass
+          def ifmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            q=ilit(i)
+            if q:
+              la,v=q;s+=f' ; LIT {hex(la)}->{hex(v)}'
+              st=ascii_at(ib,IBASE,IPFX,v)
+              if st:s+=f' STRING={st!r}'
+            if i.mnemonic=='adr' and len(i.operands)>=2 and i.operands[1].type==ARM_OP_IMM:
+              v=i.operands[1].imm; st=ascii_at(ib,IBASE,IPFX,v)
+              if st:s+=f' ; ADR_STRING={st!r}'
+            return s
+          print('M10-R v1.21 DNG MATRIX / KELVIN COLOR CORE')
+          print('\n=== IMG COLOR MANAGEMENT EXECUTION CORE 0x420A3800..0x420A4700 ===')
+          for i in idis(0x420a3800,0x420a4700): print(ifmt(i))
+
+          # Explicitly locate diagnostic strings and code/data pointer occurrences.
+          print('\n=== IMG COLOR DIAGNOSTIC STRING LOCATIONS / RAW POINTERS ===')
+          needles=(b'DNG CM1',b'DNG CM2',b'Color Temperature CM1',b'Color Temperature CM2',b'[in] color space',b'[out] CC0',b'[out] CC1',b'Color Management finished',b'Matrix_LT',b'Matrix_HT',b'Matrix_DT')
+          for n in needles:
+            p=0
+            while True:
+              p=ib.find(n,p)
+              if p<0:break
+              s=p
+              while s>0 and 0x20<=ib[s-1]<=0x7e:s-=1
+              e=p
+              while e<len(ib) and 0x20<=ib[e]<=0x7e:e+=1
+              va=IBASE+s-IPFX; txt=ib[s:e].decode('ascii','replace')
+              pat=struct.pack('<I',va); hs=[];q=0
+              while True:
+                q=ib.find(pat,q)
+                if q<0:break
+                hs.append(IBASE+q-IPFX);q+=1
+              print(hex(va),repr(txt),'word_xrefs',[hex(x) for x in hs])
+              p=e+1
+
+          # CA9 System ARM math / matrix routines.
+          cb=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes(); CBASE=0x40000000; CPFX=4
+          a=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);a.detail=True
+          def cdis(x,z):return list(a.disasm(cb[CPFX+x-CBASE:CPFX+z-CBASE],x))
+          def clit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=(i.address+8)+i.operands[1].mem.disp;o=CPFX+la-CBASE
+                if 0<=o<=len(cb)-4:return la,struct.unpack_from('<I',cb,o)[0]
+            except:pass
+          def cfmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            q=clit(i)
+            if q:
+              la,v=q;s+=f' ; LIT {hex(la)}->{hex(v)}'
+              st=ascii_at(cb,CBASE,CPFX,v)
+              if st:s+=f' STRING={st!r}'
+            return s
+          ranges=[
+            ('Temperature_FromXY binary search',0x400050a0,0x40005240),
+            ('Temperature_ToXYCoord',0x40005360,0x40005520),
+            ('MatrixInterpolate',0x40005cc0,0x40005f40),
+            ('ColorSpec_SetWhiteXY',0x40006040,0x40006210),
+            ('ColorSpec_NeutralToXY',0x40006230,0x40006420),
+            ('Kelvin / color core',0x4000ad80,0x4000b020),
+            ('WhiteBalance entry neighborhood',0x4000b380,0x4000b780),
+          ]
+          for title,x,z in ranges:
+            print(f'\n=== CA9 ARM {title} {hex(x)}..{hex(z)} ===')
+            for i in cdis(x,z):print(cfmt(i))
+
+          print('\n=== CA9 LITERAL TARGET CATALOG FOR MATRIX/TEMP RANGES ===')
+          targets=[]
+          for title,x,z in ranges:
+            for i in cdis(x,z):
+              q=clit(i)
+              if q:
+                la,v=q
+                if v not in targets:targets.append(v)
+          for v in targets:
+            st=ascii_at(cb,CBASE,CPFX,v)
+            ws=words(cb,CBASE,CPFX,v,18) if CBASE<=v<CBASE+len(cb)-CPFX else []
+            print(hex(v),'STRING='+repr(st) if st else '', 'WORDS='+' '.join(f'{x:08x}' for x in ws))
+            if ws:
+              fs=[]
+              for w in ws:
+                try:fs.append(struct.unpack('<f',struct.pack('<I',w))[0])
+                except:fs.append(float('nan'))
+              if all(math.isfinite(x) for x in fs):print(' floats',' '.join(f'{x:.8g}' for x in fs))
+
+          print('\n=== COLOR-SCIENCE BOUNDARY TARGET ===')
+          print('Recover DNG CM1/CM2 matrices and their illuminant temperatures separately from rendered CC0/CC1 and later B2Y gamma/tone/look stages.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v121_dng_matrix_kelvin_core.txt
+          git commit -m 'research: record v1.21 DNG matrix and Kelvin color core' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
