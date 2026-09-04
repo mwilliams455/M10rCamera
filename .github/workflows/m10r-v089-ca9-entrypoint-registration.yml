@@ -1,0 +1,111 @@
+name: M10-R v0.89 CA9 entrypoint registration
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v089-ca9-entrypoint-registration.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace indirect CA9 entry registration and workflow payload owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v089_ca9_entrypoint_registration.txt
+          from pathlib import Path
+          import struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          IMG=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); BASE=0x42000000; PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(a):return PFX+a-BASE
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp; lo=off(la)
+                if 0<=lo<=len(IMG)-4:return la,struct.unpack_from('<I',IMG,lo)[0]
+            except:pass
+          def tgt(i):
+            try:
+              if i.mnemonic.startswith('bl') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm&~1
+            except:pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i);t=tgt(i)
+            if q:s+=f' ; LIT {hex(q[0])}->{hex(q[1])}'
+            if t is not None:s+=f' ; CALL {hex(t)}'
+            return s
+          def dump(a,z,title):
+            a=max(BASE,a);z=min(BASE+len(IMG)-PFX,z);print('\n===',title,hex(a),'..',hex(z),'===')
+            for i in md.disasm(IMG[off(a):off(z)],a):
+              if i.id:print(fmt(i))
+          def raw(buf,v):
+            pat=struct.pack('<I',v);out=[];p=0
+            while 1:
+              p=buf.find(pat,p)
+              if p<0:return out
+              out.append(p);p+=1
+          print('M10-R v0.89 CA9 ENTRYPOINT REGISTRATION / WORKFLOW PAYLOAD OWNER')
+          print('Known: 0x420A2FB4 wraps 0x420A3104 and saves workflow pointer in 0x408187EC; no direct BL callers were found in v0.88.')
+          targets=[(0x420a2fb5,'Thumb entry wrapper 0x420A2FB4'),(0x420a2fb4,'even wrapper address'),(0x420a2ffd,'Thumb sibling 0x420A2FFC'),(0x420a2eb1,'Thumb sibling 0x420A2EB0'),(0x420a835d,'Thumb workflow payload consumer 0x420A835C'),(0x420a789d,'CA9 callback 0x420A789C')]
+          print('\n=== RAW FUNCTION-POINTER OCCURRENCES ACROSS EXTRACTED SECTIONS ===')
+          for v,name in targets:
+            total=0
+            for f in sorted(Path('/tmp/sections').glob('*.bin')):
+              bb=f.read_bytes();xs=raw(bb,v)
+              if xs:
+                total+=len(xs);print(name,hex(v),f.name,'count',len(xs),'offsets',*[hex(x) for x in xs[:50]])
+            if total==0:print(name,hex(v),'count 0')
+          print('\n=== IMG TABLE CONTEXT FOR WRAPPER/SIBLING POINTERS ===')
+          for v,name in targets:
+            for p in raw(IMG,v):
+              a=BASE+p-PFX
+              print('\n',name,hex(v),'raw @',hex(a))
+              lo=max(PFX,p-0x60);hi=min(len(IMG),p+0x64)
+              for q in range(lo-(lo%4),hi-(hi%4),4):
+                if q<0 or q+4>len(IMG):continue
+                w=struct.unpack_from('<I',IMG,q)[0];aa=BASE+q-PFX
+                tag=' CODEPTR' if 0x42000001<=w<=0x429fffff and w&1 else ''
+                print(f'{aa:08x}: {w:08x}{tag}')
+          # Narrow code around all known workflow entry/consumer routines.
+          dump(0x420a2e60,0x420a3070,'CA9 exported entrypoint cluster')
+          dump(0x420a7800,0x420a7950,'CA9 callbacks using saved workflow global')
+          dump(0x420a8320,0x420a86c0,'workflow payload consumer / state bridge')
+          # Search actual instructions in the CA9 module for literals equal to wrapper pointer and saved globals.
+          ins=[i for i in md.disasm(IMG[off(0x42080000):off(0x420b0000)],0x42080000) if i.id]
+          for value,name in [(0x420a2fb5,'wrapper Thumb ptr'),(0x408187ec,'saved workflow global'),(0x408187f0,'saved callback global'),(0x43705aa4,'secondary CA9 block')]:
+            hs=[]
+            for n,i in enumerate(ins):
+              q=lit(i)
+              if q and q[1]==value:hs.append(n)
+            print(f'\n=== CA9 MODULE LITERAL XREFS {name} {hex(value)} count {len(hs)} ===')
+            for n in hs:
+              print('\n---',hex(ins[n].address),'---')
+              for j in range(max(0,n-20),min(len(ins),n+35)):print(fmt(ins[j]))
+          print('\n=== NEXT DECISION ===')
+          print('If 0x420A2FB5 appears in an interface/dispatch table, trace the owner/registration of that table. If no static pointer exists anywhere, treat the wrapper as dynamically registered or reached through a veneer and trace the sibling entrypoint cluster / saved workflow callbacks instead.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v089_ca9_entrypoint_registration.txt
+          git commit -m 'research: record v0.89 CA9 entrypoint registration' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
