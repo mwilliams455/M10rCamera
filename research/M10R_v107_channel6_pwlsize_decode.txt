@@ -1,0 +1,476 @@
+M10-R v1.07 CHANNEL-6 PWLSIZE DECODE
+Known channel6 startup descriptor +0x08 = [0x408F0410]; mode 0x11 sets that global to 0x1B80 = 7040.
+
+=== SWITCH HELPER 0x4209F988 0x4209f940..0x4209fa10 ===
+4209f940: movs       r0, #0x3a
+4209f942: ldr        r6, [r4, #0x14]
+4209f944: str        r4, [r5, #0x54]
+4209f946: ldr        r0, [r4, #0x60]
+4209f948: ldr        r1, [r4, #0x54]
+4209f94a: movs       r0, #0x65
+4209f94c: movs       r0, #0x3d
+4209f94e: strb       r5, [r4, #0xc]
+4209f950: movs       r0, r0
+4209f952: movs       r0, r0
+4209f954: str        r1, [r0]
+4209f956: bx         lr
+4209f958: strb       r1, [r0]
+4209f95a: bx         lr
+4209f95c: push       {r4, r5}
+4209f95e: movs       r4, r0
+4209f960: movs       r2, #0
+4209f962: movs       r0, r2
+4209f964: ldrb       r3, [r1]
+4209f966: lsls       r2, r2, #7
+4209f968: adds       r0, r0, #1
+4209f96a: lsls       r5, r3, #0x19
+4209f96c: lsrs       r5, r5, #0x19
+4209f96e: orrs       r2, r5
+4209f970: adds       r1, r1, #1
+4209f972: lsls       r3, r3, #0x18
+4209f974: bmi        #0x4209f964
+4209f976: str        r2, [r4]
+4209f978: pop        {r4, r5}
+4209f97a: bx         lr
+4209f97c: movs       r0, #1
+4209f97e: b          #0x4209fcc2
+4209f980: lsls       r2, r2, #2
+4209f982: b          #0x4209fa88
+4209f984: vrhadd.u16 d14, d14, d31
+4209f988: stm        r0!, {r0}
+4209f98a: b          #0x4209f44a
+4209f98c: movs       r4, r1
+4209f98e: b          #0x4209fc38
+4209f990: adds       r0, #0xc
+4209f992: movs       r7, #0xde
+4209f994: adds       r0, #3
+4209f996: adds       r7, #0xde
+4209f998: stm        r0!, {r0, r1, r7}
+4209f99a: b          #0x4209faba
+4209f99c: vrhadd.u16 d14, d12, d31
+4209f9a0: asrs       r1, r0, #2
+4209f9a2: b          #0x4209fce6
+4209f9a4: lsls       r1, r0, #0x16
+4209f9a6: b          #0x4209fcca
+4209f9a8: movs       r4, r0
+4209f9aa: asrs       r0, r4, #0xe
+4209f9ac: cmp        r2, #0xa1
+4209f9ae: b          #0x4209fd12
+4209f9b0: movs       r0, #0x14
+4209f9b2: b          #0x4209f4f4
+4209f9b4: movs       r1, r0
+4209f9b6: asrs       r0, r0, #0xe
+4209f9b8: lsrs       r1, r4, #0xa
+4209f9ba: b          #0x4209fc62
+4209f9bc: movs       r2, r0
+4209f9be: lsls       r0, r0, #0xe
+4209f9c0: movs       r1, r0
+4209f9c2: b          #0x420a0066
+4209f9c4: movs       r5, r0
+4209f9c6: lsls       r0, r4, #0xe
+4209f9c8: vrhadd.u16 d14, d14, d31
+4209f9cc: lsls       r7, r7, #0x1f
+4209f9ce: movs       r0, r0
+4209f9d0: movs       r2, #1
+4209f9d2: lsls       r1, r1, #1
+4209f9d4: lsls       r2, r2, #0x15
+4209f9d6: cmn        r1, r2
+4209f9d8: bne        #0x4209f9de
+4209f9da: cmp        r0, #0
+4209f9dc: beq        #0x4209f9e2
+4209f9de: movs       r0, #0
+4209f9e0: bx         lr
+4209f9e2: movs       r0, #1
+4209f9e4: bx         lr
+4209f9e6: movs       r0, r0
+4209f9e8: cmp        r0, #0
+4209f9ea: beq        #0x4209f9ee
+4209f9ec: movs       r0, #1
+4209f9ee: orrs       r1, r0
+4209f9f0: lsls       r0, r1, #1
+4209f9f2: ldr        r1, [pc, #8] ; LIT 0x4209f9fc->0x7ff00000
+4209f9f4: lsrs       r0, r0, #1
+4209f9f6: subs       r0, r1, r0
+4209f9f8: lsrs       r0, r0, #0x1f
+4209f9fa: bx         lr
+4209f9fc: movs       r0, r0
+4209f9fe: ldrb       r0, [r6, #0x1f]
+4209fa00: ldr        r7, [pc, #0x3dc] ; LIT 0x4209fde0->0xe59d1034
+4209fa02: push.w     {r1, lr}
+4209fa06: b          #0x4209fd4a
+4209fa08: asrs       r0, r0, #0x20
+4209fa0a: b          #0x420a014e
+4209fa0c: beq        #0x4209fab0
+4209fa0e: b          #0x4209feac
+
+=== PW_INIT SWITCH + SIZE ARITHMETIC 0x420e05d0..0x420e0660 ===
+420e05d0: ldrh       r1, [r6]
+420e05d2: lsls       r1, r1, #8
+420e05d4: ldr        r2, [pc, #0x204] ; LIT 0x420e07dc->0x20004d00
+420e05d6: adds       r1, r1, r2
+420e05d8: ldr        r0, [r6, #4]
+420e05da: str        r0, [r1, #0x1c]
+420e05dc: ldrh       r0, [r6]
+420e05de: movs       r3, r0
+420e05e0: blx        #0x4209f988
+420e05e4: lsls       r1, r1, #0x18
+420e05e6: lsrs       r7, r0, #0x20
+420e05e8: lsrs       r1, r1, #8
+420e05ea: adds       r4, #0xb
+420e05ec: subs       r4, #0x3b
+420e05ee: lsls       r3, r0, #1
+420e05f0: mov        r8, r8
+420e05f2: mov        r8, r8
+420e05f4: mov        r8, r8
+420e05f6: mov        r8, r8
+420e05f8: mov        r8, r8
+420e05fa: cmp        r7, #1
+420e05fc: bne        #0x420e062c
+420e05fe: movs       r2, #0xc
+420e0600: ldr        r1, [r6, #8]
+420e0602: muls       r1, r2, r1
+420e0604: movs       r0, r1
+420e0606: blx        #0x421e6648
+420e060a: movs       r2, #0
+420e060c: ldr        r3, [pc, #0x1d0] ; LIT 0x420e07e0->0x40200000
+420e060e: str        r1, [sp, #4]
+420e0610: str        r0, [sp]
+420e0612: blx        #0x421e61d0
+420e0616: movs       r4, r0
+420e0618: movs       r5, r1
+420e061a: movs       r2, #0
+420e061c: ldr        r3, [pc, #0x1c4] ; LIT 0x420e07e4->0x3fe00000
+420e061e: movs       r0, r4
+420e0620: movs       r1, r5
+420e0622: blx        #0x421e6050
+420e0626: movs       r4, r0
+420e0628: movs       r5, r1
+420e062a: b          #0x420e0638
+420e062c: ldr        r1, [r6, #8]
+420e062e: lsls       r0, r1, #1
+420e0630: blx        #0x421e6648
+420e0634: movs       r4, r0
+420e0636: movs       r5, r1
+420e0638: movs       r0, r4
+420e063a: movs       r1, r5
+420e063c: blx        #0x421e65a4
+420e0640: ldrh       r1, [r6]
+420e0642: lsls       r1, r1, #8
+420e0644: ldr        r2, [pc, #0x194] ; LIT 0x420e07dc->0x20004d00
+420e0646: adds       r1, r1, r2
+420e0648: str        r0, [r1, #0x20]
+420e064a: b          #0x420e066c
+420e064c: movs       r0, #0
+420e064e: ldrh       r1, [r6]
+420e0650: lsls       r1, r1, #8
+420e0652: ldr        r2, [pc, #0x188] ; LIT 0x420e07dc->0x20004d00
+420e0654: adds       r1, r1, r2
+420e0656: str        r0, [r1, #0x20]
+420e0658: b          #0x420e066c
+420e065a: mov        r8, r8
+420e065c: movs       r0, #0
+420e065e: ldrh       r1, [r6]
+
+RAW BYTES 0x420E05E0..0x420E0600
+0x420e05e0 bf f7 d2 e9 09 06 07 08 09 0a 0b 34 3b 3c 43 00
+0x420e05f0 c0 46 c0 46 c0 46 c0 46 c0 46 01 2f 16 d1 0c 22
+
+=== helper 421e6648 THUMB 0x421e6648..0x421e66d8 ===
+421e6648: subs       r7, #0x10
+421e664a: b          #0x421e692c
+421e664c: asrs       r0, r2, #0xc
+421e664e: b          #0x421e69b2
+421e6650: movs       r5, r0
+421e6652: lsrs       r0, r0, #8
+421e6654: adds       r0, #0x1d
+421e6656: b          #0x421e6b20
+421e6658: subs       r3, #1
+421e665a: b          #0x421e6b64
+421e665c: lsrs       r1, r0, #0xa
+421e665e: b          #0x421e69a2
+421e6660: cmp        r2, #3
+421e6662: b          #0x421e69a6
+421e6664: asrs       r1, r4, #0x16
+421e6666: b          #0x421e676e
+421e6668: vrhadd.u16 d14, d14, d31
+421e666c: movs       r0, r0
+421e666e: b          #0x421e6db2
+421e6670: vrhadd.u16 d14, d14, d31
+421e6674: subs       r7, #0x11
+421e6676: b          #0x421e6958
+421e6678: adds       r0, #0xb
+421e667a: b          #0x421e6b24
+421e667c: movs       r1, r2
+421e667e: subs       r2, #0
+421e6680: asrs       r1, r2, #0xc
+421e6682: b          #0x421e69e6
+421e6684: movs       r0, r1
+421e6686: subs       r0, r0, r0
+421e6688: subs       r7, #0x10
+421e668a: b          #0x421e696c
+421e668c: asrs       r0, r2, #0xc
+421e668e: b          #0x421e69f2
+421e6690: vrhadd.u16 d0, d14, d31
+421e6694: adds       r0, #0x1d
+421e6696: b          #0x421e6b60
+421e6698: subs       r3, #1
+421e669a: b          #0x421e6ba4
+421e669c: movs       r5, #0xa1
+421e669e: b          #0x421e69e2
+421e66a0: lsrs       r1, r0, #0xa
+421e66a2: b          #0x421e69e6
+421e66a4: subs       r3, r0, r0
+421e66a6: b          #0x421e67ae
+421e66a8: vrhadd.u16 d14, d14, d31
+421e66ac: stm        r0!, {r5}
+421e66ae: b          #0x421e6b78
+421e66b0: adds       r0, r6, #0
+421e66b2: b          #0x421e69b8
+421e66b4: lsls       r0, r2, #0xc
+421e66b6: b          #0x421e6a1a
+421e66b8: adds       r0, #0x32
+421e66ba: b          #0x421e6b84
+421e66bc: subs       r3, #1
+421e66be: b          #0x421e6bc8
+421e66c0: subs       r3, r0, r0
+421e66c2: b          #0x421e67c8
+421e66c4: vrhadd.u16 d14, d14, d31
+421e66c8: ands       r0, r2
+421e66ca: stmdb      sp!, {lr}
+421e66ce: b          #0x421e6b98
+421e66d0: stm        r0!, {r1, r4, r5}
+421e66d2: b          #0x421e6b9c
+421e66d4: b          #0x421e6718
+421e66d6: b          #0x421e6ba2
+
+=== helper 421e61d0 THUMB 0x421e61d0..0x421e6260 ===
+421e61d0: rors       r0, r0
+421e61d2: push.w     {r4, r5}
+421e61d8: stm        r2!, {r3, r4, r5, r7}
+421e61da: b          #0x421e5d1c
+421e61dc: tst        r1, r4
+421e61de: b          #0x421e659a
+421e61e0: tst        r3, r4
+421e61e2: asrs       r4, r3, #7
+421e61e4: lsls       r2, r7, #1
+421e61e6: lsrs       r0, r0, #8
+421e61e8: str        r3, [r0, r0]
+421e61ea: b          #0x421e6230
+421e61ec: tst        r1, r4
+421e61ee: b          #0x421e622a
+421e61f0: ldr        r7, [pc, #0x294] ; LIT 0x421e6488->0x87878888
+421e61f2: b          #0x421e64fe
+421e61f4: strh       r3, [r4, r0]
+421e61f6: asrs       r4, r3, #0x20
+421e61f8: lsls       r6, r4, #1
+421e61fa: lsrs       r0, r0, #8
+421e61fc: ands       r5, r0
+421e61fe: b          #0x421e628a
+421e6200: str        r2, [r0, r4]
+421e6202: b          #0x421e6946
+421e6204: asrs       r1, r0, #0x16
+421e6206: b          #0x421e6514
+421e6208: adds       r5, #0x83
+421e620a: b          #0x421e6518
+421e620c: subs       r0, r4, r2
+421e620e: b          #0x421e6514
+421e6210: subs       r2, #0xa2
+421e6212: b          #0x421e651c
+421e6214: movs       r3, r0
+421e6216: b          #0x421e64bc
+421e6218: blxns      pc
+421e621a: b          #0x421e6726
+421e621c: lsls       r0, r0, #0x16
+421e621e: b          #0x421e6562
+421e6220: movs       r5, #0x82
+421e6222: b          #0x421e6566
+421e6224: movs       r2, r0
+421e6226: lsls       r0, r2, #5
+421e6228: ldr        r0, [pc, #8] ; LIT 0x421e6234->0xe28f6f57
+421e622a: b          #0x421e6736
+421e622c: lsls       r7, r1, #1
+421e622e: lsrs       r0, r0, #8
+421e6230: ldrb       r3, [r4, r0]
+421e6232: b          #0x421e6576
+421e6234: ldr        r7, [r2, #0x74]
+421e6236: b          #0x421e6758
+421e6238: str        r5, [r0]
+421e623a: b          #0x421e61ea
+421e623c: ldr        r3, [r4, r0]
+421e623e: b          #0x421e6582
+421e6240: lsls       r6, r2, #0x16
+421e6242: b          #0x421e6254
+421e6244: strb       r1, [r0, #0x10]
+421e6246: b          #0x421e6718
+421e6248: lsls       r6, r2, #0x1e
+421e624a: b          #0x421e625c
+421e624c: strb       r7, [r4, #0x1e]
+421e624e: b          #0x421e6592
+421e6250: str        r7, [r2, #0x38]
+421e6252: b          #0x421e6366
+421e6254: str        r0, [r0]
+421e6256: b          #0x421e6746
+421e6258: ldrh       r1, [r0]
+421e625a: b          #0x421e682e
+421e625c: stm        r6!, {r0, r1, r2, r4, r7}
+421e625e: b          #0x421e637e
+
+=== helper 421e6050 THUMB 0x421e6050..0x421e60e0 ===
+421e6050: movs       r3, r0
+421e6052: b          #0x421e62b8
+421e6054: ands       r0, r2
+421e6058: adds       r1, #2
+421e605a: tst        r3, r4
+421e605c: lsls       r4, r7, #0xc
+421e605e: ldr        r2, [pc, #0] ; LIT 0x421e6060->0xe0504002
+421e6060: ands       r2, r0
+421e6062: b          #0x421e6106
+421e6064: stm        r0!, {r0, r1}
+421e6066: b          #0x421e620c
+421e6068: movs       r3, r0
+421e606a: cmp        r2, #0
+421e606c: movs       r0, #4
+421e606e: b          #0x421e6196
+421e6070: adds       r0, #0xc
+421e6072: b          #0x421e61bc
+421e6074: movs       r4, r0
+421e6076: b          #0x421e611a
+421e6078: asrs       r4, r1, #0x20
+421e607a: b          #0x421e6200
+421e607c: b          #0x421e62b8
+421e607e: b          #0x421e5bc0
+421e6080: ldr        r2, [pc, #0x84] ; LIT 0x421e6108->0xe27ce01f
+421e6082: b          #0x421e63c6
+421e6084: ldm        r2!, {r0, r1, r5}
+421e6086: b          #0x421e6112
+421e6088: lsls       r3, r0, #2
+421e608a: b          #0x421e62ca
+421e608c: lsrs       r4, r0, #0xa
+421e608e: asrs       r6, r7, #4
+421e6090: movs       r7, r6
+421e6092: lsrs       r0, r0, #8
+421e6094: adds       r0, #0xe
+421e6096: b          #0x421e6420
+421e6098: b          #0x421e60dc
+421e609a: b          #0x421e6596
+421e609c: subs       r4, r0, r0
+421e609e: b          #0x421e6424
+421e60a0: adds       r6, #1
+421e60a2: b          #0x421e67ac
+421e60a4: movs       r4, r2
+421e60a6: subs       r2, #0
+421e60a8: lsrs       r2, r6, #0x10
+421e60aa: b          #0x421e61ce
+421e60ac: adds       r3, r6, #0
+421e60ae: b          #0x421e61f4
+421e60b0: lsrs       r3, r2, #0x18
+421e60b2: b          #0x421e61d6
+421e60b4: asrs       r0, r0, #0x20
+421e60b6: b          #0x421e661c
+421e60b8: lsls       r1, r0, #0x18
+421e60ba: b          #0x421e6760
+421e60bc: movs       r0, r3
+421e60be: cmp        r2, #0
+421e60c0: subs       r4, r0, r0
+421e60c2: b          #0x421e61c8
+421e60c4: cmp        r6, #0x12
+421e60c6: b          #0x421e642a
+421e60c8: ands       r0, r2
+421e60ca: pop.w      {r1, r2, r3, r4, r8, sb, sl, fp, ip, sp, lr, pc}
+421e60ce: str        r7, [r5, r4]
+421e60d0: movs       r1, r0
+421e60d2: b          #0x421e65f6
+421e60d4: movs       r0, #0x82
+421e60d6: adds       r1, #0xb0
+421e60d8: vrhadd.u16 d1, d14, d31
+421e60dc: movs       r0, r0
+421e60de: b          #0x421e6782
+
+=== helper 421e65a4 THUMB 0x421e65a4..0x421e6634 ===
+421e65a4: subs       r2, #0x21
+421e65a6: b          #0x421e68ea
+421e65a8: subs       r3, #1
+421e65aa: b          #0x421e6a34
+421e65ac: adds       r0, #0x1e
+421e65ae: b          #0x421e6a98
+421e65b0: stm        r0!, {r5}
+421e65b2: adr        r2, #0x1cc
+421e65b4: movs       r4, r0
+421e65b6: rev        r0, r0
+421e65b8: movs       r1, #2
+421e65ba: b          #0x421e6cfe
+421e65bc: movs       r5, #0x81
+421e65be: b          #0x421e68c6
+421e65c0: cmp        r2, #0xa0
+421e65c2: b          #0x421e68ea
+421e65c4: lsls       r2, r6, #0xc
+421e65c6: b          #0x421e692a
+421e65c8: vrhadd.u16 d14, d14, d31
+421e65cc: movs       r1, r0
+421e65ce: b          #0x421e67f4
+421e65d0: movs       r7, r0
+421e65d2: ldr        r2, [pc, #0] ; LIT 0x421e65d4->0xe3530010
+421e65d4: movs       r0, r2
+421e65d6: b          #0x421e6c80
+421e65d8: movs       r0, r0
+421e65da: stm        r3!, {r5, r7}
+421e65dc: vrhadd.u16 d12, d14, d31
+421e65e0: ldm        r6!, {r1, r2, r3, r4, r5}
+421e65e2: b          #0x421e6aec
+421e65e4: movs       r1, r0
+421e65e6: b          #0x421e6ce2
+421e65e8: movs       r3, r0
+421e65ea: lsrs       r0, r0, #8
+421e65ec: movs       r0, r0
+421e65ee: b          #0x421e6db2
+421e65f0: vrhadd.u16 d14, d14, d31
+421e65f4: movs       r0, r0
+421e65f6: b          #0x421e6d3a
+421e65f8: vrhadd.u16 d14, d14, d31
+421e65fc: eors       r0, r6
+421e65fe: push.w     {r2, r6, r7}
+421e6602: add.w      r4, r0, r2, lsr #10
+421e6606: strh       r1, [r1, #2]
+421e6608: movs       r0, r0
+421e660a: b          #0x421e6d4e
+421e660c: vrhadd.u16 d14, d14, d31
+421e6614: movs       r1, #2
+421e6616: b          #0x421e6a3a
+421e6618: movs       r0, r0
+421e661a: rsbs       r0, r4, #0
+421e661c: subs       r7, #0x10
+421e661e: b          #0x421e6900
+421e6620: asrs       r0, r2, #0xc
+421e6622: b          #0x421e6986
+421e6624: movs       r5, r0
+421e6626: lsrs       r0, r0, #8
+421e6628: adds       r0, #0x1d
+421e662a: b          #0x421e6af4
+421e662c: subs       r3, #1
+421e662e: b          #0x421e6b38
+421e6630: lsrs       r1, r0, #0xa
+421e6632: b          #0x421e6976
+
+=== SWITCH TABLE CANDIDATE BYTES ===
+0x420e05e4 0906 u8s [9, 6]
+0x420e05e6 0708 u8s [7, 8]
+0x420e05e8 090a u8s [9, 10]
+0x420e05ea 0b34 u8s [11, 52]
+0x420e05ec 3b3c u8s [59, 60]
+0x420e05ee 4300 u8s [67, 0]
+0x420e05f0 c046 u8s [192, 70]
+0x420e05f2 c046 u8s [192, 70]
+0x420e05f4 c046 u8s [192, 70]
+0x420e05f6 c046 u8s [192, 70]
+0x420e05f8 c046 u8s [192, 70]
+
+=== NUMERIC FINGERPRINTS ===
+mode11_value 7040
+22*16 352
+7040/(22*16) 20 remainder 0
+2*7040 14080 /352= 40
+12*7040 84480 /352= 240
+3/2*7040 10560 /352= 30
+
+=== DECISION ===
+Determine channel6 branch through the inline switch and exact math helper semantics. Freeze a per-cell producer stride only if PWLSIZE or its source is demonstrably total 352-cell payload bytes, not merely an unrelated sensor/window dimension.
