@@ -1,0 +1,3786 @@
+M10-R v0.56 BV SOURCE SWITCH / SHUTTERMIRROR TRACE
+
+=== FINAL BV SELECTOR 0x0800D6A8 0x800d650..0x800d820 ===
+0800d650: movs       r1, #0x90
+0800d652: lsrs       r4, r0, #0x20
+0800d654: cbnz       r0, #0x800d6b2
+0800d656: lsrs       r4, r0, #0x20
+0800d658: .byte 0x64, 0xb7
+0800d65a: lsrs       r4, r0, #0x20
+0800d65c: push       {r4, lr}
+0800d65e: sub        sp, #0x20
+0800d660: bl         #0x801124c ; CALL 0x801124c
+0800d664: movs       r4, r0
+0800d666: mov        r0, sp
+0800d668: movs       r1, #0x1c
+0800d66a: bl         #0x8008a1c ; CALL 0x8008a1c
+0800d66e: ldr.w      r0, [pc, #0xc40] ; LIT 0x800e2b0->0x2000003c
+0800d672: bl         #0x800c4b0 ; CALL 0x800c4b0
+0800d676: ldrb.w     r0, [r4, #0x79]
+0800d67a: ands       r0, r0, #1
+0800d67e: cmp        r0, #0
+0800d680: beq        #0x800d696
+0800d682: mov        r0, sp
+0800d684: adds       r1, r4, #1
+0800d686: movs       r2, #0x1c
+0800d688: bl         #0x801d024 ; CALL 0x801d024
+0800d68c: ldrsh.w    r0, [r4, #0x13]
+0800d690: bl         #0x8011ccc ; CALL 0x8011ccc
+0800d694: b          #0x800d69c
+0800d696: mov        r0, sp
+0800d698: bl         #0x800ce70 ; CALL 0x800ce70
+0800d69c: mov        r1, sp
+0800d69e: movs       r0, #0
+0800d6a0: bl         #0x800ce3c ; CALL 0x800ce3c
+0800d6a4: add        sp, #0x20
+0800d6a6: pop        {r4, pc}
+0800d6a8: push.w     {r4, r5, r6, r7, r8, sb, sl, fp, lr}
+0800d6ac: sub        sp, #0x14
+0800d6ae: movs       r4, #0
+0800d6b0: bl         #0x8011d08 ; CALL 0x8011d08
+0800d6b4: movs       r5, r0
+0800d6b6: bl         #0x8011d2e ; CALL 0x8011d2e
+0800d6ba: strh.w     r0, [sp, #0x10]
+0800d6be: movs       r7, #0
+0800d6c0: bl         #0x801124c ; CALL 0x801124c
+0800d6c4: mov        r8, r0
+0800d6c6: movs       r6, r5
+0800d6c8: ldrb.w     r0, [r8, #0x79]
+0800d6cc: ands       r0, r0, #1
+0800d6d0: cmp        r0, #0
+0800d6d2: bne        #0x800d6fe
+0800d6d4: movs       r0, #0
+0800d6d6: ldr.w      r1, [pc, #0xbdc] ; LIT 0x800e2b4->0x2001ad72
+0800d6da: strb       r0, [r1]
+0800d6dc: bl         #0x80146f6 ; CALL 0x80146f6
+0800d6e0: cmp        r0, #0
+0800d6e2: bne        #0x800d6ec
+0800d6e4: bl         #0x8001a38 ; CALL 0x8001a38
+0800d6e8: cmp        r0, #0
+0800d6ea: beq        #0x800d746
+0800d6ec: movs       r0, #5
+0800d6ee: bl         #0x80184d8 ; CALL 0x80184d8
+0800d6f2: bl         #0x8011da8 ; CALL 0x8011da8
+0800d6f6: movs       r6, r0
+0800d6f8: movs       r0, #1
+0800d6fa: movs       r7, r0
+0800d6fc: b          #0x800d746
+0800d6fe: bl         #0x80146f6 ; CALL 0x80146f6
+0800d702: cmp        r0, #0
+0800d704: bne        #0x800d70e
+0800d706: bl         #0x8001a38 ; CALL 0x8001a38
+0800d70a: cmp        r0, #0
+0800d70c: beq        #0x800d728
+0800d70e: movs       r0, #0
+0800d710: ldr.w      r1, [pc, #0xba0] ; LIT 0x800e2b4->0x2001ad72
+0800d714: strb       r0, [r1]
+0800d716: movs       r0, #5
+0800d718: bl         #0x80184d8 ; CALL 0x80184d8
+0800d71c: bl         #0x8011da8 ; CALL 0x8011da8
+0800d720: movs       r6, r0
+0800d722: movs       r0, #1
+0800d724: movs       r7, r0
+0800d726: b          #0x800d746
+0800d728: ldr.w      r0, [pc, #0xb8c] ; LIT 0x800e2b8->0x2001ad76
+0800d72c: ldrb       r0, [r0]
+0800d72e: cmp        r0, #0
+0800d730: bne        #0x800d746
+0800d732: movs       r0, #1
+0800d734: ldr.w      r1, [pc, #0xb7c] ; LIT 0x800e2b4->0x2001ad72
+0800d738: strb       r0, [r1]
+0800d73a: movs       r0, #5
+0800d73c: bl         #0x80184d8 ; CALL 0x80184d8
+0800d740: bl         #0x8011d7a ; CALL 0x8011d7a
+0800d744: movs       r6, r0
+0800d746: sxth       r6, r6
+0800d748: sxth       r5, r5
+0800d74a: adds.w     r0, r5, #0x19
+0800d74e: cmp        r6, r0
+0800d750: bge        #0x800d77a
+0800d752: sxth       r5, r5
+0800d754: subs.w     r0, r5, #0x19
+0800d758: sxth       r6, r6
+0800d75a: cmp        r0, r6
+0800d75c: bge        #0x800d77a
+0800d75e: bl         #0x8011d2e ; CALL 0x8011d2e
+0800d762: ldrsh.w    r1, [sp, #0x10]
+0800d766: adds       r1, #0x19
+0800d768: cmp        r0, r1
+0800d76a: bge        #0x800d77a
+0800d76c: bl         #0x8011d2e ; CALL 0x8011d2e
+0800d770: ldrsh.w    r1, [sp, #0x10]
+0800d774: subs       r1, #0x19
+0800d776: cmp        r1, r0
+0800d778: blt        #0x800d84c
+0800d77a: movs       r0, #0
+0800d77c: ldr.w      r1, [pc, #0xb3c] ; LIT 0x800e2bc->0x2001ad79
+0800d780: strb       r0, [r1]
+0800d782: uxtb       r7, r7
+0800d784: cmp        r7, #0
+0800d786: beq        #0x800d7e0
+0800d788: bl         #0x8010eda ; CALL 0x8010eda
+0800d78c: mov        sb, r0
+0800d78e: bl         #0x8010f16 ; CALL 0x8010f16
+0800d792: mov        sl, r0
+0800d794: bl         #0x8010f0e ; CALL 0x8010f0e
+0800d798: mov        fp, r0
+0800d79a: bl         #0x8011d2e ; CALL 0x8011d2e
+0800d79e: movs       r1, #0
+0800d7a0: str        r1, [sp, #0xc]
+0800d7a2: ldr.w      r1, [pc, #0xc38] ; LIT 0x800e3dc->0x2001abe4
+0800d7a6: ldrb       r1, [r1]
+0800d7a8: ubfx       r1, r1, #2, #1
+0800d7ac: uxtb       r1, r1
+0800d7ae: str        r1, [sp, #8]
+0800d7b0: uxtb.w     sb, sb
+0800d7b4: str.w      sb, [sp, #4]
+0800d7b8: sxth.w     sl, sl
+0800d7bc: str.w      sl, [sp]
+0800d7c0: mov        r3, fp
+0800d7c2: sxth       r3, r3
+0800d7c4: ldrsh.w    r2, [r8, #0x13]
+0800d7c8: movs       r1, r0
+0800d7ca: sxth       r1, r1
+0800d7cc: ldr.w      r0, [pc, #0xaf0] ; LIT 0x800e2c0->0x2001ad1c
+0800d7d0: ldrsh.w    r0, [r0]
+0800d7d4: bl         #0x800f98c ; CALL 0x800f98c
+0800d7d8: sxth       r0, r0
+0800d7da: bl         #0x8011ccc ; CALL 0x8011ccc
+0800d7de: b          #0x800d832
+0800d7e0: bl         #0x8010eda ; CALL 0x8010eda
+0800d7e4: mov        sb, r0
+0800d7e6: bl         #0x8010f16 ; CALL 0x8010f16
+0800d7ea: mov        sl, r0
+0800d7ec: bl         #0x8010f0e ; CALL 0x8010f0e
+0800d7f0: mov        fp, r0
+0800d7f2: bl         #0x8011d2e ; CALL 0x8011d2e
+0800d7f6: movs       r1, r0
+0800d7f8: movs       r0, #1
+0800d7fa: str        r0, [sp, #0xc]
+0800d7fc: ldr.w      r0, [pc, #0xbdc] ; LIT 0x800e3dc->0x2001abe4
+0800d800: ldrb       r0, [r0]
+0800d802: ubfx       r0, r0, #2, #1
+0800d806: uxtb       r0, r0
+0800d808: str        r0, [sp, #8]
+0800d80a: uxtb.w     sb, sb
+0800d80e: str.w      sb, [sp, #4]
+0800d812: sxth.w     sl, sl
+0800d816: str.w      sl, [sp]
+0800d81a: mov        r3, fp
+0800d81c: sxth       r3, r3
+0800d81e: .byte 0xb8, 0xf9
+
+=== TSKSHUTTERMIRROR OWNER CLUSTER 0x80141c0..0x8014730 ===
+080141c0: pop        {r0, pc}
+080141c2: push       {r4, lr}
+080141c4: sub        sp, #8
+080141c6: bl         #0x801124c ; CALL 0x801124c
+080141ca: movs       r4, r0
+080141cc: ldr.w      r0, [pc, #0x944] ; LIT 0x8014b14->0x804c1c4
+080141d0: ldr        r0, [r0]
+080141d2: str        r0, [sp]
+080141d4: ldrh.w     r0, [r4, #0x4a]
+080141d8: str        r0, [sp]
+080141da: mov        r1, sp
+080141dc: movs       r0, #0xa
+080141de: bl         #0x800cdfc ; CALL 0x800cdfc
+080141e2: pop        {r0, r1, r4, pc}
+080141e4: push       {r7, lr}
+080141e6: bl         #0x80191e4 ; CALL 0x80191e4
+080141ea: movs       r1, #0x80
+080141ec: ldr.w      r0, [pc, #0x928] ; LIT 0x8014b18->0x2001aa78
+080141f0: ldrb       r0, [r0, #5]
+080141f2: bl         #0x801cf40 ; CALL 0x801cf40
+080141f6: pop        {r0, pc}
+080141f8: push       {r7, lr}
+080141fa: movs       r0, #1
+080141fc: ldr.w      r1, [pc, #0x90c] ; LIT 0x8014b0c->0x2001adba
+08014200: strb       r0, [r1]
+08014202: bl         #0x801ceb6 ; CALL 0x801ceb6
+08014206: movs       r2, r0
+08014208: ldr.w      r1, [pc, #0x910] ; LIT 0x8014b1c->0x8047090 STRING='Start exposure (sys. time %i ms)\r\n'
+0801420c: movs       r0, #0
+0801420e: bl         #0x8008ee0 ; CALL 0x8008ee0
+08014212: bl         #0x801ce2c ; CALL 0x801ce2c
+08014216: bl         #0x8011bd4 ; CALL 0x8011bd4
+0801421a: bl         #0x801939c ; CALL 0x801939c
+0801421e: bl         #0x8012026 ; CALL 0x8012026
+08014222: bl         #0x801ce3c ; CALL 0x801ce3c
+08014226: pop        {r0, pc}
+08014228: push       {r7, lr}
+0801422a: ldr.w      r0, [pc, #0x8e0] ; LIT 0x8014b0c->0x2001adba
+0801422e: ldrb       r0, [r0]
+08014230: cmp        r0, #0
+08014232: beq        #0x801424a
+08014234: bl         #0x80193e8 ; CALL 0x80193e8
+08014238: ldr.w      r0, [pc, #0x8d0] ; LIT 0x8014b0c->0x2001adba
+0801423c: ldrb       r0, [r0]
+0801423e: cmp        r0, #0
+08014240: beq        #0x801424a
+08014242: movs       r0, #5
+08014244: bl         #0x801ceaa ; CALL 0x801ceaa
+08014248: b          #0x8014238
+0801424a: pop        {r0, pc}
+0801424c: push       {r7, lr}
+0801424e: bl         #0x8019284 ; CALL 0x8019284
+08014252: movs       r1, #0x80
+08014254: ldr.w      r0, [pc, #0x8c0] ; LIT 0x8014b18->0x2001aa78
+08014258: ldrb       r0, [r0, #5]
+0801425a: bl         #0x801cf40 ; CALL 0x801cf40
+0801425e: bl         #0x800e16c ; CALL 0x800e16c
+08014262: pop        {r0, pc}
+08014264: push       {r7, lr}
+08014266: bl         #0x80190d4 ; CALL 0x80190d4
+0801426a: movs       r1, #0x80
+0801426c: ldr.w      r0, [pc, #0x8a8] ; LIT 0x8014b18->0x2001aa78
+08014270: ldrb       r0, [r0, #5]
+08014272: bl         #0x801cf40 ; CALL 0x801cf40
+08014276: pop        {r0, pc}
+08014278: push       {r7, lr}
+0801427a: bl         #0x80190ec ; CALL 0x80190ec
+0801427e: movs       r1, #0x80
+08014280: ldr.w      r0, [pc, #0x894] ; LIT 0x8014b18->0x2001aa78
+08014284: ldrb       r0, [r0, #5]
+08014286: bl         #0x801cf40 ; CALL 0x801cf40
+0801428a: pop        {r0, pc}
+0801428c: push       {r7, lr}
+0801428e: ldr.w      r0, [pc, #0x890] ; LIT 0x8014b20->0x2001adbb
+08014292: ldrb       r0, [r0]
+08014294: cmp        r0, #0
+08014296: bne        #0x80142b0
+08014298: movs       r0, #1
+0801429a: ldr.w      r1, [pc, #0x884] ; LIT 0x8014b20->0x2001adbb
+0801429e: strb       r0, [r1]
+080142a0: bl         #0x8019104 ; CALL 0x8019104
+080142a4: movs       r1, #0x80
+080142a6: ldr.w      r0, [pc, #0x870] ; LIT 0x8014b18->0x2001aa78
+080142aa: ldrb       r0, [r0, #5]
+080142ac: bl         #0x801cf40 ; CALL 0x801cf40
+080142b0: pop        {r0, pc}
+080142b2: push       {r7, lr}
+080142b4: ldr.w      r0, [pc, #0x868] ; LIT 0x8014b20->0x2001adbb
+080142b8: ldrb       r0, [r0]
+080142ba: cmp        r0, #0
+080142bc: beq        #0x80142da
+080142be: bl         #0x801917c ; CALL 0x801917c
+080142c2: movs       r1, #0x80
+080142c4: ldr.w      r0, [pc, #0x850] ; LIT 0x8014b18->0x2001aa78
+080142c8: ldrb       r0, [r0, #5]
+080142ca: bl         #0x801cf40 ; CALL 0x801cf40
+080142ce: bl         #0x800e16c ; CALL 0x800e16c
+080142d2: movs       r0, #0
+080142d4: ldr.w      r1, [pc, #0x848] ; LIT 0x8014b20->0x2001adbb
+080142d8: strb       r0, [r1]
+080142da: pop        {r0, pc}
+080142dc: push       {r4, lr}
+080142de: movs       r4, r0
+080142e0: bl         #0x8011238 ; CALL 0x8011238
+080142e4: cmp        r0, #0
+080142e6: beq        #0x80142f6
+080142e8: movs       r1, r4
+080142ea: ldr.w      r0, [pc, #0x82c] ; LIT 0x8014b18->0x2001aa78
+080142ee: ldrb       r0, [r0, #5]
+080142f0: bl         #0x801cf26 ; CALL 0x801cf26
+080142f4: b          #0x8014302
+080142f6: movs       r2, r4
+080142f8: ldr.w      r1, [pc, #0x828] ; LIT 0x8014b24->0x803c0d8 STRING='RTOS system not initialized yet, events not available (TskShutterMirror event 0x%08X)!\r\n'
+080142fc: movs       r0, #1
+080142fe: bl         #0x8008ee0 ; CALL 0x8008ee0
+08014302: pop        {r4, pc}
+08014304: push       {r7, lr}
+08014306: bl         #0x80141c2 ; CALL 0x80141c2
+0801430a: pop        {r0, pc}
+0801430c: push       {r7, lr}
+0801430e: movs.w     r1, #-0x80000000
+08014312: ldr.w      r0, [pc, #0x804] ; LIT 0x8014b18->0x2001aa78
+08014316: ldrb       r0, [r0, #5]
+08014318: bl         #0x801cf40 ; CALL 0x801cf40
+0801431c: pop        {r0, pc}
+0801431e: bx         lr
+08014320: bx         lr
+08014322: push       {r4, lr}
+08014324: sub        sp, #8
+08014326: ldr.w      r0, [pc, #0x800] ; LIT 0x8014b28->0x804c1d0
+0801432a: ldr        r0, [r0]
+0801432c: str        r0, [sp]
+0801432e: movs.w     r1, #-1
+08014332: ldr.w      r0, [pc, #0x7e4] ; LIT 0x8014b18->0x2001aa78
+08014336: ldrb       r0, [r0, #5]
+08014338: bl         #0x801cf40 ; CALL 0x801cf40
+0801433c: str        r0, [sp]
+0801433e: ldrb.w     r0, [sp, #3]
+08014342: ands       r0, r0, #0xc0
+08014346: cmp        r0, #0x40
+08014348: bne        #0x8014360
+0801434a: ldr        r4, [sp]
+0801434c: movs       r2, #0x64
+0801434e: movs.w     r1, #-0x80000000
+08014352: ldr.w      r0, [pc, #0x7c4] ; LIT 0x8014b18->0x2001aa78
+08014356: ldrb       r0, [r0, #5]
+08014358: bl         #0x801cf4e ; CALL 0x801cf4e
+0801435c: orrs       r0, r4
+0801435e: str        r0, [sp]
+08014360: ldrb.w     r0, [sp, #3]
+08014364: uxtb       r0, r0
+08014366: lsrs       r0, r0, #7
+08014368: uxtb       r0, r0
+0801436a: cmp        r0, #0
+0801436c: bne        #0x80143e0
+0801436e: movs       r0, #1
+08014370: ldr.w      r1, [pc, #0x7b8] ; LIT 0x8014b2c->0x2001adbc
+08014374: strb       r0, [r1]
+08014376: ldrb.w     r0, [sp]
+0801437a: ubfx       r0, r0, #5, #1
+0801437e: uxtb       r0, r0
+08014380: cmp        r0, #0
+08014382: beq        #0x8014390
+08014384: bl         #0x801428c ; CALL 0x801428c
+08014388: mov.w      r0, #0x400
+0801438c: bl         #0x801002e ; CALL 0x801002e
+08014390: ldrb.w     r0, [sp]
+08014394: ubfx       r0, r0, #6, #1
+08014398: uxtb       r0, r0
+0801439a: cmp        r0, #0
+0801439c: beq        #0x80143a2
+0801439e: bl         #0x80142b2 ; CALL 0x80142b2
+080143a2: ldrb.w     r0, [sp]
+080143a6: ubfx       r0, r0, #3, #1
+080143aa: uxtb       r0, r0
+080143ac: cmp        r0, #0
+080143ae: beq        #0x80143b4
+080143b0: bl         #0x8014264 ; CALL 0x8014264
+080143b4: ldrb.w     r0, [sp]
+080143b8: ubfx       r0, r0, #4, #1
+080143bc: uxtb       r0, r0
+080143be: cmp        r0, #0
+080143c0: beq        #0x80143c6
+080143c2: bl         #0x8014278 ; CALL 0x8014278
+080143c6: movs       r0, #0
+080143c8: ldr.w      r1, [pc, #0x760] ; LIT 0x8014b2c->0x2001adbc
+080143cc: strb       r0, [r1]
+080143ce: movs       r2, #1
+080143d0: movs.w     r1, #-0x80000000
+080143d4: ldr.w      r0, [pc, #0x740] ; LIT 0x8014b18->0x2001aa78
+080143d8: ldrb       r0, [r0, #5]
+080143da: bl         #0x801cf4e ; CALL 0x801cf4e
+080143de: b          #0x80143f4
+080143e0: ldr        r0, [sp]
+080143e2: bic        r0, r0, #0xc0000000
+080143e6: str        r0, [sp]
+080143e8: ldr        r0, [sp]
+080143ea: cmp        r0, #0
+080143ec: beq        #0x80143f4
+080143ee: ldr        r0, [sp]
+080143f0: bl         #0x80142dc ; CALL 0x80142dc
+080143f4: pop        {r0, r1, r4, pc}
+080143f6: bx         lr
+080143f8: bx         lr
+080143fa: push       {r7, lr}
+080143fc: movs       r0, #1
+080143fe: bl         #0x801ceaa ; CALL 0x801ceaa
+08014402: pop        {r0, pc}
+08014404: bx         lr
+08014406: push       {r7, lr}
+08014408: movs       r0, #1
+0801440a: ldr.w      r1, [pc, #0x720] ; LIT 0x8014b2c->0x2001adbc
+0801440e: strb       r0, [r1]
+08014410: ldr.w      r0, [pc, #0x70c] ; LIT 0x8014b20->0x2001adbb
+08014414: ldrb       r0, [r0]
+08014416: cmp        r0, #0
+08014418: beq        #0x801442c
+0801441a: movs       r2, #1
+0801441c: movs       r1, #0x40
+0801441e: ldr.w      r0, [pc, #0x6f8] ; LIT 0x8014b18->0x2001aa78
+08014422: ldrb       r0, [r0, #5]
+08014424: bl         #0x801cf4e ; CALL 0x801cf4e
+08014428: bl         #0x80142b2 ; CALL 0x80142b2
+0801442c: movs       r0, #1
+0801442e: bl         #0x8012c44 ; CALL 0x8012c44
+08014432: movs       r1, #1
+08014434: ldr.w      r0, [pc, #0x6e0] ; LIT 0x8014b18->0x2001aa78
+08014438: ldrb       r0, [r0, #5]
+0801443a: bl         #0x801cf40 ; CALL 0x801cf40
+0801443e: bl         #0x800187e ; CALL 0x800187e
+08014442: ldrsb.w    r0, [r0]
+08014446: cmp        r0, #0
+08014448: bne        #0x8014452
+0801444a: movs       r1, #0
+0801444c: movs       r0, #0x14
+0801444e: bl         #0x800cdfc ; CALL 0x800cdfc
+08014452: bl         #0x80141e4 ; CALL 0x80141e4
+08014456: movs       r0, #6
+08014458: bl         #0x800c40c ; CALL 0x800c40c
+0801445c: movs       r0, #0x40
+0801445e: bl         #0x801002e ; CALL 0x801002e
+08014462: pop        {r0, pc}
+08014464: push       {r3, r4, r5, r6, r7, lr}
+08014466: ldr.w      r0, [pc, #0x6c8] ; LIT 0x8014b30->0x804c1d4
+0801446a: ldr        r0, [r0]
+0801446c: str        r0, [sp]
+0801446e: bl         #0x8011bc0 ; CALL 0x8011bc0
+08014472: movs       r4, r0
+08014474: movs       r5, #1
+08014476: mov.w      r7, #0x3e8
+0801447a: mov.w      r6, #0x3e8
+0801447e: ldr.w      r0, [pc, #0x6b4] ; LIT 0x8014b34->0x1e8480
+08014482: cmp        r4, r0
+08014484: blo        #0x80144a0
+08014486: bl         #0x800de58 ; CALL 0x800de58
+0801448a: cmp        r0, #3
+0801448c: beq        #0x80144a0
+0801448e: movs       r0, r4
+08014490: bl         #0x80118cc ; CALL 0x80118cc
+08014494: movs       r5, r0
+08014496: movs       r0, r5
+08014498: uxth       r0, r0
+0801449a: bl         #0x8011dda ; CALL 0x8011dda
+0801449e: subs       r5, r5, #1
+080144a0: mov.w      r2, #0x3e8
+080144a4: movs       r1, #2
+080144a6: ldr.w      r0, [pc, #0x670] ; LIT 0x8014b18->0x2001aa78
+080144aa: ldrb       r0, [r0, #5]
+080144ac: bl         #0x801cf4e ; CALL 0x801cf4e
+080144b0: str        r0, [sp]
+080144b2: ldrb.w     r0, [sp]
+080144b6: ubfx       r0, r0, #1, #1
+080144ba: uxtb       r0, r0
+080144bc: cmp        r0, #0
+080144be: bne        #0x80144d6
+080144c0: movw       r0, #0x9803
+080144c4: bl         #0x800c6ac ; CALL 0x800c6ac
+080144c8: movs       r1, #2
+080144ca: ldr.w      r0, [pc, #0x64c] ; LIT 0x8014b18->0x2001aa78
+080144ce: ldrb       r0, [r0, #5]
+080144d0: bl         #0x801cf40 ; CALL 0x801cf40
+080144d4: str        r0, [sp]
+080144d6: bl         #0x80141f8 ; CALL 0x80141f8
+080144da: movs       r0, #0x10
+080144dc: bl         #0x800dc4a ; CALL 0x800dc4a
+080144e0: movs       r0, #0xa
+080144e2: bl         #0x801ceaa ; CALL 0x801ceaa
+080144e6: movs       r0, #0
+080144e8: ldr.w      r1, [pc, #0x640] ; LIT 0x8014b2c->0x2001adbc
+080144ec: strb       r0, [r1]
+080144ee: bl         #0x800de58 ; CALL 0x800de58
+080144f2: cmp        r0, #3
+080144f4: bne        #0x8014564
+080144f6: ldrb.w     r0, [sp]
+080144fa: ubfx       r0, r0, #2, #1
+080144fe: uxtb       r0, r0
+08014500: cmp        r0, #0
+08014502: bne        #0x801453e
+08014504: bl         #0x8019446 ; CALL 0x8019446
+08014508: mov.w      r1, #0x3e8
+0801450c: udiv       r0, r0, r1
+08014510: cmp        r0, r6
+08014512: blo        #0x801452c
+08014514: movs       r0, r5
+08014516: uxth       r0, r0
+08014518: bl         #0x8011dda ; CALL 0x8011dda
+0801451c: adds       r5, r5, #1
+0801451e: adds.w     r7, r7, #0x3e8
+08014522: adds.w     r6, r6, #0x3e8
+08014526: movs       r0, #0x1d
+08014528: bl         #0x80014bc ; CALL 0x80014bc
+0801452c: movs       r2, #0x64
+0801452e: movs       r1, #4
+08014530: ldr.w      r0, [pc, #0x5e4] ; LIT 0x8014b18->0x2001aa78
+08014534: ldrb       r0, [r0, #5]
+08014536: bl         #0x801cf4e ; CALL 0x801cf4e
+0801453a: str        r0, [sp]
+0801453c: b          #0x80144f6
+0801453e: bl         #0x8019446 ; CALL 0x8019446
+08014542: mov.w      r1, #0x3e8
+08014546: udiv       r0, r0, r1
+0801454a: subs.w     r1, r6, #0x1f4
+0801454e: cmp        r0, r1
+08014550: blo        #0x80145d4
+08014552: movs       r0, r5
+08014554: uxth       r0, r0
+08014556: bl         #0x8011dda ; CALL 0x8011dda
+0801455a: adds       r5, r5, #1
+0801455c: movs       r0, #0x1d
+0801455e: bl         #0x80014bc ; CALL 0x80014bc
+08014562: b          #0x80145d4
+08014564: ldr.w      r0, [pc, #0x5cc] ; LIT 0x8014b34->0x1e8480
+08014568: cmp        r4, r0
+0801456a: blo        #0x80145be
+0801456c: ldrb.w     r0, [sp]
+08014570: ubfx       r0, r0, #2, #1
+08014574: uxtb       r0, r0
+08014576: cmp        r0, #0
+08014578: bne        #0x80145b4
+0801457a: bl         #0x8019446 ; CALL 0x8019446
+0801457e: mov.w      r1, #0x3e8
+08014582: udiv       r0, r0, r1
+08014586: cmp        r0, r6
+08014588: blo        #0x80145a2
+0801458a: uxth       r5, r5
+0801458c: cmp        r5, #0
+0801458e: beq        #0x80145a2
+08014590: movs       r0, r5
+08014592: uxth       r0, r0
+08014594: bl         #0x8011dda ; CALL 0x8011dda
+08014598: subs       r5, r5, #1
+0801459a: adds.w     r7, r7, #0x3e8
+0801459e: adds.w     r6, r6, #0x3e8
+080145a2: movs       r2, #0x64
+080145a4: movs       r1, #4
+080145a6: ldr.w      r0, [pc, #0x570] ; LIT 0x8014b18->0x2001aa78
+080145aa: ldrb       r0, [r0, #5]
+080145ac: bl         #0x801cf4e ; CALL 0x801cf4e
+080145b0: str        r0, [sp]
+080145b2: b          #0x801456c
+080145b4: movs       r0, r5
+080145b6: uxth       r0, r0
+080145b8: bl         #0x8011dda ; CALL 0x8011dda
+080145bc: b          #0x80145d4
+080145be: mov.w      r0, #0x3e8
+080145c2: udiv       r0, r4, r0
+080145c6: adds       r7, r0, r7
+080145c8: movs       r1, #4
+080145ca: ldr.w      r0, [pc, #0x54c] ; LIT 0x8014b18->0x2001aa78
+080145ce: ldrb       r0, [r0, #5]
+080145d0: bl         #0x801cf40 ; CALL 0x801cf40
+080145d4: bl         #0x8014228 ; CALL 0x8014228
+080145d8: mov.w      r0, #0x200
+080145dc: bl         #0x8000fd8 ; CALL 0x8000fd8
+080145e0: lsls       r2, r7, #1
+080145e2: mov.w      r1, #0x300
+080145e6: ldr.w      r0, [pc, #0x530] ; LIT 0x8014b18->0x2001aa78
+080145ea: ldrb       r0, [r0, #5]
+080145ec: bl         #0x801cf4e ; CALL 0x801cf4e
+080145f0: str        r0, [sp]
+080145f2: ldrb.w     r0, [sp, #1]
+080145f6: movs       r1, #3
+080145f8: tst        r0, r1
+080145fa: bne        #0x8014614
+080145fc: movw       r0, #0x9804
+08014600: bl         #0x800c6ac ; CALL 0x800c6ac
+08014604: mov.w      r1, #0x300
+08014608: ldr.w      r0, [pc, #0x50c] ; LIT 0x8014b18->0x2001aa78
+0801460c: ldrb       r0, [r0, #5]
+0801460e: bl         #0x801cf40 ; CALL 0x801cf40
+08014612: str        r0, [sp]
+08014614: ldrb.w     r0, [sp, #1]
+08014618: ubfx       r0, r0, #1, #1
+0801461c: uxtb       r0, r0
+0801461e: cmp        r0, #0
+08014620: beq        #0x8014634
+08014622: movs       r1, #0
+08014624: movs       r0, #0x12
+08014626: bl         #0x800cdfc ; CALL 0x800cdfc
+0801462a: movs       r0, #1
+0801462c: ldr.w      r1, [pc, #0x4f0] ; LIT 0x8014b20->0x2001adbb
+08014630: strb       r0, [r1]
+08014632: b          #0x801463c
+08014634: movs       r0, #0
+08014636: ldr.w      r1, [pc, #0x4e8] ; LIT 0x8014b20->0x2001adbb
+0801463a: strb       r0, [r1]
+0801463c: movs       r0, #1
+0801463e: ldr.w      r1, [pc, #0x4ec] ; LIT 0x8014b2c->0x2001adbc
+08014642: strb       r0, [r1]
+08014644: bl         #0x801424c ; CALL 0x801424c
+08014648: ldr.w      r0, [pc, #0x4e8] ; LIT 0x8014b34->0x1e8480
+0801464c: cmp        r4, r0
+0801464e: blo        #0x801466a
+08014650: bl         #0x800de58 ; CALL 0x800de58
+08014654: cmp        r0, #3
+08014656: beq        #0x801466a
+08014658: movs       r0, r4
+0801465a: bl         #0x80118cc ; CALL 0x80118cc
+0801465e: movs       r5, r0
+08014660: movs       r0, r5
+08014662: uxth       r0, r0
+08014664: bl         #0x8011dda ; CALL 0x8011dda
+08014668: b          #0x8014670
+0801466a: movs       r0, #0
+0801466c: bl         #0x8011dda ; CALL 0x8011dda
+08014670: bl         #0x800c5b4 ; CALL 0x800c5b4
+08014674: movs       r2, r0
+08014676: ldr.w      r1, [pc, #0x4c0] ; LIT 0x8014b38->0x803b864 STRING='-------------------------------------------------------------------> Exp. process duration : %i ms\r\n\r\n'
+0801467a: movs       r0, #0
+0801467c: bl         #0x8008ee0 ; CALL 0x8008ee0
+08014680: ldr.w      r1, [pc, #0x4b8] ; LIT 0x8014b3c->0x80000008
+08014684: ldr.w      r0, [pc, #0x490] ; LIT 0x8014b18->0x2001aa78
+08014688: ldrb       r0, [r0, #5]
+0801468a: bl         #0x801cf40 ; CALL 0x801cf40
+0801468e: str        r0, [sp]
+08014690: ldrb.w     r0, [sp, #3]
+08014694: uxtb       r0, r0
+08014696: lsrs       r0, r0, #7
+08014698: uxtb       r0, r0
+0801469a: cmp        r0, #0
+0801469c: bne        #0x80146be
+0801469e: ldrb.w     r0, [sp]
+080146a2: ubfx       r0, r0, #3, #1
+080146a6: uxtb       r0, r0
+080146a8: cmp        r0, #0
+080146aa: beq        #0x80146b0
+080146ac: bl         #0x8014264 ; CALL 0x8014264
+080146b0: movs.w     r1, #-0x80000000
+080146b4: ldr.w      r0, [pc, #0x460] ; LIT 0x8014b18->0x2001aa78
+080146b8: ldrb       r0, [r0, #5]
+080146ba: bl         #0x801cf40 ; CALL 0x801cf40
+080146be: pop        {r0, r4, r5, r6, r7, pc}
+080146c0: movs       r0, #0
+080146c2: ldr.w      r1, [pc, #0x468] ; LIT 0x8014b2c->0x2001adbc
+080146c6: strb       r0, [r1]
+080146c8: bx         lr
+080146ca: bx         lr
+080146cc: push       {r7, lr}
+080146ce: movs.w     r1, #-0x80000000
+080146d2: ldr.w      r0, [pc, #0x444] ; LIT 0x8014b18->0x2001aa78
+080146d6: ldrb       r0, [r0, #5]
+080146d8: bl         #0x801cf40 ; CALL 0x801cf40
+080146dc: pop        {r0, pc}
+080146de: bx         lr
+080146e0: bx         lr
+080146e2: push       {r7, lr}
+080146e4: movs.w     r1, #-0x80000000
+080146e8: ldr.w      r0, [pc, #0x42c] ; LIT 0x8014b18->0x2001aa78
+080146ec: ldrb       r0, [r0, #5]
+080146ee: bl         #0x801cf40 ; CALL 0x801cf40
+080146f2: pop        {r0, pc}
+080146f4: bx         lr
+080146f6: ldr.w      r0, [pc, #0x428] ; LIT 0x8014b20->0x2001adbb
+080146fa: ldrb       r0, [r0]
+080146fc: bx         lr
+080146fe: ldr.w      r0, [pc, #0x40c] ; LIT 0x8014b0c->0x2001adba
+08014702: ldrb       r0, [r0]
+08014704: bx         lr
+08014706: ldr.w      r0, [pc, #0x424] ; LIT 0x8014b2c->0x2001adbc
+0801470a: ldrb       r0, [r0]
+0801470c: bx         lr
+0801470e: movs       r0, r0
+08014710: push.w     {r4, r5, r6, r7, r8, sb, sl, fp, lr}
+08014714: sub        sp, #0x14
+08014716: movs       r4, r0
+08014718: ldr.w      r0, [pc, #0x424] ; LIT 0x8014b40->0x804c1c8
+0801471c: ldr        r0, [r0]
+0801471e: str        r0, [sp]
+08014720: ldr.w      r0, [pc, #0x420] ; LIT 0x8014b44->0x804c1cc
+08014724: ldr        r0, [r0]
+08014726: str        r0, [sp, #0xc]
+08014728: ldr.w      r2, [pc, #0x41c] ; LIT 0x8014b48->0x804be60
+0801472c: ldrd       r0, r1, [r2]
+
+=== SHUTTERMIRROR START/STOP HELPERS 0x8019080..0x8019240 ===
+08019080: adds       r4, r5, #0
+08019082: movs       r0, #1
+08019084: bl         #0x8008ee0 ; CALL 0x8008ee0
+08019088: b          #0x80190d0
+0801908a: movs       r0, #1
+0801908c: ldr.w      r1, [pc, #0xc20] ; LIT 0x8019cb0->0x2001add2
+08019090: strb       r0, [r1]
+08019092: b          #0x80190d0
+08019094: movs       r0, #1
+08019096: ldr.w      r1, [pc, #0x3bc] ; LIT 0x8019454->0x2001add3
+0801909a: strb       r0, [r1]
+0801909c: movs       r1, #1
+0801909e: movs       r0, #0
+080190a0: bl         #0x801ae48 ; CALL 0x801ae48
+080190a4: ldr        r0, [r7]
+080190a6: uxth       r0, r0
+080190a8: bl         #0x8018786 ; CALL 0x8018786
+080190ac: ldr        r2, [r7]
+080190ae: ldr.w      r1, [pc, #0xc04] ; LIT 0x8019cb4->0x80495bc STRING='X sync timer test (%i us)\r\n'
+080190b2: movs       r0, #2
+080190b4: bl         #0x8008ee0 ; CALL 0x8008ee0
+080190b8: b          #0x80190d0
+080190ba: bl         #0x8025c08 ; CALL 0x8025c08
+080190be: b          #0x80190d0
+080190c0: b          #0x80190d0
+080190c2: movs       r3, #5
+080190c4: movs       r2, r5
+080190c6: ldr.w      r1, [pc, #0xc70] ; LIT 0x8019d38->0x803fb98 STRING='Shutter & Mirror error: wrong adjust data size! (%i != %i)\r\n'
+080190ca: movs       r0, #3
+080190cc: bl         #0x8008ee0 ; CALL 0x8008ee0
+080190d0: pop.w      {r4, r5, r6, r7, r8, sb, sl, pc}
+080190d4: push       {r7, lr}
+080190d6: ldr.w      r1, [pc, #0xc64] ; LIT 0x8019d3c->0x804a268 STRING='Mirror not available\r\n'
+080190da: movs       r0, #1
+080190dc: bl         #0x8008ee0 ; CALL 0x8008ee0
+080190e0: bl         #0x8014176 ; CALL 0x8014176
+080190e4: pop        {r0, pc}
+080190e6: movs       r0, r0
+080190e8: adr        r2, #0xe0
+080190ea: lsrs       r4, r0, #0x20
+080190ec: push       {r7, lr}
+080190ee: ldr.w      r1, [pc, #0xc4c] ; LIT 0x8019d3c->0x804a268 STRING='Mirror not available\r\n'
+080190f2: movs       r0, #1
+080190f4: bl         #0x8008ee0 ; CALL 0x8008ee0
+080190f8: bl         #0x801411c ; CALL 0x801411c
+080190fc: pop        {r0, pc}
+080190fe: movs       r0, r0
+08019100: add        r4, sp, #0x1d0
+08019102: movs       r0, #1
+08019104: push       {r4, lr}
+08019106: bl         #0x80269d8 ; CALL 0x80269d8
+0801910a: movs       r4, r0
+0801910c: sxtb       r4, r4
+0801910e: cmp        r4, #0
+08019110: bne        #0x801913a
+08019112: movs       r0, #4
+08019114: bl         #0x8026994 ; CALL 0x8026994
+08019118: cmp        r0, #0
+0801911a: bne        #0x8019124
+0801911c: movs       r0, #1
+0801911e: bl         #0x801ceaa ; CALL 0x801ceaa
+08019122: b          #0x8019112
+08019124: bl         #0x80269be ; CALL 0x80269be
+08019128: cmp        r0, #0
+0801912a: bne        #0x8019134
+0801912c: movs       r0, #1
+0801912e: bl         #0x801ceaa ; CALL 0x801ceaa
+08019132: b          #0x8019124
+08019134: bl         #0x80269d8 ; CALL 0x80269d8
+08019138: movs       r4, r0
+0801913a: sxtb       r4, r4
+0801913c: cmp        r4, #1
+0801913e: beq        #0x801915c
+08019140: movs       r0, #8
+08019142: bl         #0x801d64e ; CALL 0x801d64e
+08019146: movs       r1, #3
+08019148: movs       r0, #0xe
+0801914a: bl         #0x8018a94 ; CALL 0x8018a94
+0801914e: sxtb       r4, r4
+08019150: movs       r2, r4
+08019152: ldr.w      r1, [pc, #0xd10] ; LIT 0x8019e64->0x80409c0 STRING='Shutter: Open shutter not possible! (shutter status %i)\r\n'
+08019156: movs       r0, #3
+08019158: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801915c: bl         #0x8014130 ; CALL 0x8014130
+08019160: pop        {r4, pc}
+08019162: movs       r0, r0
+08019164: subs       r4, r0, r0
+08019166: lsrs       r4, r0, #0x20
+08019168: ldr        r0, [r3, #0x68]
+0801916a: strh       r2, [r2, #0x18]
+0801916c: ldm        r2!, {r6, r7}
+0801916e: subs       r7, #0xe9
+08019170: movs       r0, r0
+08019172: ands       r5, r0
+08019174: stm        r2!, {r3, r4}
+08019176: lsrs       r4, r0, #0x20
+08019178: stm        r2!, {r2, r3, r4}
+0801917a: lsrs       r4, r0, #0x20
+0801917c: push       {r4, lr}
+0801917e: bl         #0x80269d8 ; CALL 0x80269d8
+08019182: movs       r4, r0
+08019184: sxtb       r4, r4
+08019186: cmp        r4, #1
+08019188: bne        #0x80191b2
+0801918a: movs       r0, #3
+0801918c: bl         #0x8026994 ; CALL 0x8026994
+08019190: cmp        r0, #0
+08019192: bne        #0x801919c
+08019194: movs       r0, #1
+08019196: bl         #0x801ceaa ; CALL 0x801ceaa
+0801919a: b          #0x801918a
+0801919c: bl         #0x80269be ; CALL 0x80269be
+080191a0: cmp        r0, #0
+080191a2: bne        #0x80191ac
+080191a4: movs       r0, #1
+080191a6: bl         #0x801ceaa ; CALL 0x801ceaa
+080191aa: b          #0x801919c
+080191ac: bl         #0x80269d8 ; CALL 0x80269d8
+080191b0: movs       r4, r0
+080191b2: sxtb       r4, r4
+080191b4: cmp        r4, #0
+080191b6: beq        #0x80191d4
+080191b8: movs       r0, #8
+080191ba: bl         #0x801d64e ; CALL 0x801d64e
+080191be: movs       r1, #4
+080191c0: movs       r0, #0xe
+080191c2: bl         #0x8018a94 ; CALL 0x8018a94
+080191c6: sxtb       r4, r4
+080191c8: movs       r2, r4
+080191ca: ldr.w      r1, [pc, #0xd1c] ; LIT 0x8019ee8->0x80409fc STRING='Shutter: Close shutter not possible! (shutter status %i)\r\n'
+080191ce: movs       r0, #3
+080191d0: bl         #0x8008ee0 ; CALL 0x8008ee0
+080191d4: bl         #0x801414e ; CALL 0x801414e
+080191d8: pop        {r4, pc}
+080191da: movs       r0, r0
+080191dc: add        r5, sp, #0x100
+080191de: movs       r0, #1
+080191e0: stm        r2!, {r5}
+080191e2: lsrs       r4, r0, #0x20
+080191e4: push       {r4, lr}
+080191e6: bl         #0x80269d8 ; CALL 0x80269d8
+080191ea: movs       r4, r0
+080191ec: bl         #0x801ceb6 ; CALL 0x801ceb6
+080191f0: movs       r1, r0
+080191f2: movs       r0, #2
+080191f4: bl         #0x8018a94 ; CALL 0x8018a94
+080191f8: sxtb       r4, r4
+080191fa: cmp        r4, #0
+080191fc: beq        #0x8019204
+080191fe: sxtb       r4, r4
+08019200: cmp        r4, #1
+08019202: bne        #0x8019254
+08019204: sxtb       r4, r4
+08019206: cmp        r4, #1
+08019208: bne        #0x801922c
+0801920a: movs       r0, #3
+0801920c: bl         #0x8026994 ; CALL 0x8026994
+08019210: cmp        r0, #0
+08019212: bne        #0x801921c
+08019214: movs       r0, #1
+08019216: bl         #0x801ceaa ; CALL 0x801ceaa
+0801921a: b          #0x801920a
+0801921c: bl         #0x80269be ; CALL 0x80269be
+08019220: cmp        r0, #0
+08019222: bne        #0x801922c
+08019224: movs       r0, #1
+08019226: bl         #0x801ceaa ; CALL 0x801ceaa
+0801922a: b          #0x801921c
+0801922c: movs       r0, #5
+0801922e: bl         #0x8026994 ; CALL 0x8026994
+08019232: cmp        r0, #0
+08019234: bne        #0x801923e
+08019236: movs       r0, #1
+08019238: bl         #0x801ceaa ; CALL 0x801ceaa
+0801923c: b          #0x801922c
+0801923e: .byte 0x0d, 0xf0
+
+CALLERS FINAL BV SELECTOR 0x800d6a8 ['0x800dd28']
+
+=== FINAL BV SELECTOR CALLER 0x800dd28 0x800dc98..0x800ddc8 ===
+0800dc98: bl         #0x8011cf0 ; CALL 0x8011cf0
+0800dc9c: movs       r0, #0
+0800dc9e: bl         #0x800dee0 ; CALL 0x800dee0
+0800dca2: bl         #0x800d91c ; CALL 0x800d91c
+0800dca6: movs.w     r0, #0x20000
+0800dcaa: bl         #0x801002e ; CALL 0x801002e
+0800dcae: pop        {r0, pc}
+0800dcb0: push       {r7, lr}
+0800dcb2: movs.w     r1, #-0x80000000
+0800dcb6: ldr.w      r0, [pc, #0x858] ; LIT 0x800e510->0x2001aa78
+0800dcba: ldrb       r0, [r0, #7]
+0800dcbc: bl         #0x801cf40 ; CALL 0x801cf40
+0800dcc0: pop        {r0, pc}
+0800dcc2: bx         lr
+0800dcc4: bx         lr
+0800dcc6: push       {r4, lr}
+0800dcc8: sub        sp, #8
+0800dcca: ldr.w      r0, [pc, #0x84c] ; LIT 0x800e518->0x804c098
+0800dcce: ldr        r0, [r0]
+0800dcd0: str        r0, [sp]
+0800dcd2: movs.w     r1, #-1
+0800dcd6: ldr.w      r0, [pc, #0x838] ; LIT 0x800e510->0x2001aa78
+0800dcda: ldrb       r0, [r0, #7]
+0800dcdc: bl         #0x801cf40 ; CALL 0x801cf40
+0800dce0: str        r0, [sp]
+0800dce2: ldrb.w     r0, [sp, #3]
+0800dce6: ands       r0, r0, #0xc0
+0800dcea: cmp        r0, #0x40
+0800dcec: bne        #0x800dd04
+0800dcee: ldr        r4, [sp]
+0800dcf0: movs       r2, #0x64
+0800dcf2: movs.w     r1, #-0x80000000
+0800dcf6: ldr.w      r0, [pc, #0x818] ; LIT 0x800e510->0x2001aa78
+0800dcfa: ldrb       r0, [r0, #7]
+0800dcfc: bl         #0x801cf4e ; CALL 0x801cf4e
+0800dd00: orrs       r0, r4
+0800dd02: str        r0, [sp]
+0800dd04: ldrb.w     r0, [sp, #3]
+0800dd08: uxtb       r0, r0
+0800dd0a: lsrs       r0, r0, #7
+0800dd0c: uxtb       r0, r0
+0800dd0e: cmp        r0, #0
+0800dd10: bne        #0x800dd5e
+0800dd12: ldrb.w     r0, [sp]
+0800dd16: ands       r0, r0, #1
+0800dd1a: cmp        r0, #0
+0800dd1c: beq        #0x800dd42
+0800dd1e: ldr.w      r0, [pc, #0x7fc] ; LIT 0x800e51c->0x2001ad78
+0800dd22: ldrb       r0, [r0]
+0800dd24: cmp        r0, #0
+0800dd26: bne        #0x800dd42
+0800dd28: bl         #0x800d6a8 ; CALL 0x800d6a8
+0800dd2c: ldrb.w     r1, [sp]
+0800dd30: ands       r2, r1, #0xfd
+0800dd34: orrs.w     r0, r1, r0, lsl #1
+0800dd38: ands       r0, r0, #2
+0800dd3c: orrs       r0, r2
+0800dd3e: strb.w     r0, [sp]
+0800dd42: ldrb.w     r0, [sp]
+0800dd46: ubfx       r0, r0, #1, #1
+0800dd4a: uxtb       r0, r0
+0800dd4c: cmp        r0, #0
+0800dd4e: beq        #0x800dd72
+0800dd50: bl         #0x8001a38 ; CALL 0x8001a38
+0800dd54: cmp        r0, #0
+0800dd56: bne        #0x800dd72
+0800dd58: bl         #0x800d91c ; CALL 0x800d91c
+0800dd5c: b          #0x800dd72
+0800dd5e: ldr        r0, [sp]
+0800dd60: bic        r0, r0, #0xc0000000
+0800dd64: str        r0, [sp]
+0800dd66: ldr        r0, [sp]
+0800dd68: cmp        r0, #0
+0800dd6a: beq        #0x800dd72
+0800dd6c: ldr        r0, [sp]
+0800dd6e: bl         #0x800dc4a ; CALL 0x800dc4a
+0800dd72: pop        {r0, r1, r4, pc}
+0800dd74: bx         lr
+0800dd76: bx         lr
+0800dd78: push       {r7, lr}
+0800dd7a: movs       r0, #1
+0800dd7c: bl         #0x801ceaa ; CALL 0x801ceaa
+0800dd80: pop        {r0, pc}
+0800dd82: bx         lr
+0800dd84: push       {r7, lr}
+0800dd86: movs       r1, #0x10
+0800dd88: ldr.w      r0, [pc, #0x784] ; LIT 0x800e510->0x2001aa78
+0800dd8c: ldrb       r0, [r0, #7]
+0800dd8e: bl         #0x801cf40 ; CALL 0x801cf40
+0800dd92: pop        {r0, pc}
+0800dd94: push       {r7, lr}
+0800dd96: ldr.w      r0, [pc, #0x788] ; LIT 0x800e520->0x804c09c
+0800dd9a: ldr        r0, [r0]
+0800dd9c: str        r0, [sp]
+0800dd9e: ldr.w      r1, [pc, #0x784] ; LIT 0x800e524->0x80000002
+0800dda2: ldr.w      r0, [pc, #0x76c] ; LIT 0x800e510->0x2001aa78
+0800dda6: ldrb       r0, [r0, #7]
+0800dda8: bl         #0x801cf40 ; CALL 0x801cf40
+0800ddac: str        r0, [sp]
+0800ddae: ldrb.w     r0, [sp]
+0800ddb2: ubfx       r0, r0, #1, #1
+0800ddb6: uxtb       r0, r0
+0800ddb8: cmp        r0, #0
+0800ddba: beq        #0x800ddc0
+0800ddbc: bl         #0x800d91c ; CALL 0x800d91c
+0800ddc0: pop        {r0, pc}
+0800ddc2: bx         lr
+0800ddc4: bx         lr
+0800ddc6: push       {r7, lr}
+
+CALLERS ADBB SET EVENT HANDLER 0x801428c ['0x8014384']
+
+=== ADBB SET EVENT HANDLER CALLER 0x8014384 0x80142f4..0x8014424 ===
+080142f4: b          #0x8014302
+080142f6: movs       r2, r4
+080142f8: ldr.w      r1, [pc, #0x828] ; LIT 0x8014b24->0x803c0d8 STRING='RTOS system not initialized yet, events not available (TskShutterMirror event 0x%08X)!\r\n'
+080142fc: movs       r0, #1
+080142fe: bl         #0x8008ee0 ; CALL 0x8008ee0
+08014302: pop        {r4, pc}
+08014304: push       {r7, lr}
+08014306: bl         #0x80141c2 ; CALL 0x80141c2
+0801430a: pop        {r0, pc}
+0801430c: push       {r7, lr}
+0801430e: movs.w     r1, #-0x80000000
+08014312: ldr.w      r0, [pc, #0x804] ; LIT 0x8014b18->0x2001aa78
+08014316: ldrb       r0, [r0, #5]
+08014318: bl         #0x801cf40 ; CALL 0x801cf40
+0801431c: pop        {r0, pc}
+0801431e: bx         lr
+08014320: bx         lr
+08014322: push       {r4, lr}
+08014324: sub        sp, #8
+08014326: ldr.w      r0, [pc, #0x800] ; LIT 0x8014b28->0x804c1d0
+0801432a: ldr        r0, [r0]
+0801432c: str        r0, [sp]
+0801432e: movs.w     r1, #-1
+08014332: ldr.w      r0, [pc, #0x7e4] ; LIT 0x8014b18->0x2001aa78
+08014336: ldrb       r0, [r0, #5]
+08014338: bl         #0x801cf40 ; CALL 0x801cf40
+0801433c: str        r0, [sp]
+0801433e: ldrb.w     r0, [sp, #3]
+08014342: ands       r0, r0, #0xc0
+08014346: cmp        r0, #0x40
+08014348: bne        #0x8014360
+0801434a: ldr        r4, [sp]
+0801434c: movs       r2, #0x64
+0801434e: movs.w     r1, #-0x80000000
+08014352: ldr.w      r0, [pc, #0x7c4] ; LIT 0x8014b18->0x2001aa78
+08014356: ldrb       r0, [r0, #5]
+08014358: bl         #0x801cf4e ; CALL 0x801cf4e
+0801435c: orrs       r0, r4
+0801435e: str        r0, [sp]
+08014360: ldrb.w     r0, [sp, #3]
+08014364: uxtb       r0, r0
+08014366: lsrs       r0, r0, #7
+08014368: uxtb       r0, r0
+0801436a: cmp        r0, #0
+0801436c: bne        #0x80143e0
+0801436e: movs       r0, #1
+08014370: ldr.w      r1, [pc, #0x7b8] ; LIT 0x8014b2c->0x2001adbc
+08014374: strb       r0, [r1]
+08014376: ldrb.w     r0, [sp]
+0801437a: ubfx       r0, r0, #5, #1
+0801437e: uxtb       r0, r0
+08014380: cmp        r0, #0
+08014382: beq        #0x8014390
+08014384: bl         #0x801428c ; CALL 0x801428c
+08014388: mov.w      r0, #0x400
+0801438c: bl         #0x801002e ; CALL 0x801002e
+08014390: ldrb.w     r0, [sp]
+08014394: ubfx       r0, r0, #6, #1
+08014398: uxtb       r0, r0
+0801439a: cmp        r0, #0
+0801439c: beq        #0x80143a2
+0801439e: bl         #0x80142b2 ; CALL 0x80142b2
+080143a2: ldrb.w     r0, [sp]
+080143a6: ubfx       r0, r0, #3, #1
+080143aa: uxtb       r0, r0
+080143ac: cmp        r0, #0
+080143ae: beq        #0x80143b4
+080143b0: bl         #0x8014264 ; CALL 0x8014264
+080143b4: ldrb.w     r0, [sp]
+080143b8: ubfx       r0, r0, #4, #1
+080143bc: uxtb       r0, r0
+080143be: cmp        r0, #0
+080143c0: beq        #0x80143c6
+080143c2: bl         #0x8014278 ; CALL 0x8014278
+080143c6: movs       r0, #0
+080143c8: ldr.w      r1, [pc, #0x760] ; LIT 0x8014b2c->0x2001adbc
+080143cc: strb       r0, [r1]
+080143ce: movs       r2, #1
+080143d0: movs.w     r1, #-0x80000000
+080143d4: ldr.w      r0, [pc, #0x740] ; LIT 0x8014b18->0x2001aa78
+080143d8: ldrb       r0, [r0, #5]
+080143da: bl         #0x801cf4e ; CALL 0x801cf4e
+080143de: b          #0x80143f4
+080143e0: ldr        r0, [sp]
+080143e2: bic        r0, r0, #0xc0000000
+080143e6: str        r0, [sp]
+080143e8: ldr        r0, [sp]
+080143ea: cmp        r0, #0
+080143ec: beq        #0x80143f4
+080143ee: ldr        r0, [sp]
+080143f0: bl         #0x80142dc ; CALL 0x80142dc
+080143f4: pop        {r0, r1, r4, pc}
+080143f6: bx         lr
+080143f8: bx         lr
+080143fa: push       {r7, lr}
+080143fc: movs       r0, #1
+080143fe: bl         #0x801ceaa ; CALL 0x801ceaa
+08014402: pop        {r0, pc}
+08014404: bx         lr
+08014406: push       {r7, lr}
+08014408: movs       r0, #1
+0801440a: ldr.w      r1, [pc, #0x720] ; LIT 0x8014b2c->0x2001adbc
+0801440e: strb       r0, [r1]
+08014410: ldr.w      r0, [pc, #0x70c] ; LIT 0x8014b20->0x2001adbb
+08014414: ldrb       r0, [r0]
+08014416: cmp        r0, #0
+08014418: beq        #0x801442c
+0801441a: movs       r2, #1
+0801441c: movs       r1, #0x40
+0801441e: ldr.w      r0, [pc, #0x6f8] ; LIT 0x8014b18->0x2001aa78
+08014422: ldrb       r0, [r0, #5]
+
+CALLERS ADBB CLEAR EVENT HANDLER 0x80142b2 ['0x801439e', '0x8014428']
+
+=== ADBB CLEAR EVENT HANDLER CALLER 0x801439e 0x801430e..0x801443e ===
+0801430e: movs.w     r1, #-0x80000000
+08014312: ldr.w      r0, [pc, #0x804] ; LIT 0x8014b18->0x2001aa78
+08014316: ldrb       r0, [r0, #5]
+08014318: bl         #0x801cf40 ; CALL 0x801cf40
+0801431c: pop        {r0, pc}
+0801431e: bx         lr
+08014320: bx         lr
+08014322: push       {r4, lr}
+08014324: sub        sp, #8
+08014326: ldr.w      r0, [pc, #0x800] ; LIT 0x8014b28->0x804c1d0
+0801432a: ldr        r0, [r0]
+0801432c: str        r0, [sp]
+0801432e: movs.w     r1, #-1
+08014332: ldr.w      r0, [pc, #0x7e4] ; LIT 0x8014b18->0x2001aa78
+08014336: ldrb       r0, [r0, #5]
+08014338: bl         #0x801cf40 ; CALL 0x801cf40
+0801433c: str        r0, [sp]
+0801433e: ldrb.w     r0, [sp, #3]
+08014342: ands       r0, r0, #0xc0
+08014346: cmp        r0, #0x40
+08014348: bne        #0x8014360
+0801434a: ldr        r4, [sp]
+0801434c: movs       r2, #0x64
+0801434e: movs.w     r1, #-0x80000000
+08014352: ldr.w      r0, [pc, #0x7c4] ; LIT 0x8014b18->0x2001aa78
+08014356: ldrb       r0, [r0, #5]
+08014358: bl         #0x801cf4e ; CALL 0x801cf4e
+0801435c: orrs       r0, r4
+0801435e: str        r0, [sp]
+08014360: ldrb.w     r0, [sp, #3]
+08014364: uxtb       r0, r0
+08014366: lsrs       r0, r0, #7
+08014368: uxtb       r0, r0
+0801436a: cmp        r0, #0
+0801436c: bne        #0x80143e0
+0801436e: movs       r0, #1
+08014370: ldr.w      r1, [pc, #0x7b8] ; LIT 0x8014b2c->0x2001adbc
+08014374: strb       r0, [r1]
+08014376: ldrb.w     r0, [sp]
+0801437a: ubfx       r0, r0, #5, #1
+0801437e: uxtb       r0, r0
+08014380: cmp        r0, #0
+08014382: beq        #0x8014390
+08014384: bl         #0x801428c ; CALL 0x801428c
+08014388: mov.w      r0, #0x400
+0801438c: bl         #0x801002e ; CALL 0x801002e
+08014390: ldrb.w     r0, [sp]
+08014394: ubfx       r0, r0, #6, #1
+08014398: uxtb       r0, r0
+0801439a: cmp        r0, #0
+0801439c: beq        #0x80143a2
+0801439e: bl         #0x80142b2 ; CALL 0x80142b2
+080143a2: ldrb.w     r0, [sp]
+080143a6: ubfx       r0, r0, #3, #1
+080143aa: uxtb       r0, r0
+080143ac: cmp        r0, #0
+080143ae: beq        #0x80143b4
+080143b0: bl         #0x8014264 ; CALL 0x8014264
+080143b4: ldrb.w     r0, [sp]
+080143b8: ubfx       r0, r0, #4, #1
+080143bc: uxtb       r0, r0
+080143be: cmp        r0, #0
+080143c0: beq        #0x80143c6
+080143c2: bl         #0x8014278 ; CALL 0x8014278
+080143c6: movs       r0, #0
+080143c8: ldr.w      r1, [pc, #0x760] ; LIT 0x8014b2c->0x2001adbc
+080143cc: strb       r0, [r1]
+080143ce: movs       r2, #1
+080143d0: movs.w     r1, #-0x80000000
+080143d4: ldr.w      r0, [pc, #0x740] ; LIT 0x8014b18->0x2001aa78
+080143d8: ldrb       r0, [r0, #5]
+080143da: bl         #0x801cf4e ; CALL 0x801cf4e
+080143de: b          #0x80143f4
+080143e0: ldr        r0, [sp]
+080143e2: bic        r0, r0, #0xc0000000
+080143e6: str        r0, [sp]
+080143e8: ldr        r0, [sp]
+080143ea: cmp        r0, #0
+080143ec: beq        #0x80143f4
+080143ee: ldr        r0, [sp]
+080143f0: bl         #0x80142dc ; CALL 0x80142dc
+080143f4: pop        {r0, r1, r4, pc}
+080143f6: bx         lr
+080143f8: bx         lr
+080143fa: push       {r7, lr}
+080143fc: movs       r0, #1
+080143fe: bl         #0x801ceaa ; CALL 0x801ceaa
+08014402: pop        {r0, pc}
+08014404: bx         lr
+08014406: push       {r7, lr}
+08014408: movs       r0, #1
+0801440a: ldr.w      r1, [pc, #0x720] ; LIT 0x8014b2c->0x2001adbc
+0801440e: strb       r0, [r1]
+08014410: ldr.w      r0, [pc, #0x70c] ; LIT 0x8014b20->0x2001adbb
+08014414: ldrb       r0, [r0]
+08014416: cmp        r0, #0
+08014418: beq        #0x801442c
+0801441a: movs       r2, #1
+0801441c: movs       r1, #0x40
+0801441e: ldr.w      r0, [pc, #0x6f8] ; LIT 0x8014b18->0x2001aa78
+08014422: ldrb       r0, [r0, #5]
+08014424: bl         #0x801cf4e ; CALL 0x801cf4e
+08014428: bl         #0x80142b2 ; CALL 0x80142b2
+0801442c: movs       r0, #1
+0801442e: bl         #0x8012c44 ; CALL 0x8012c44
+08014432: movs       r1, #1
+08014434: ldr.w      r0, [pc, #0x6e0] ; LIT 0x8014b18->0x2001aa78
+08014438: ldrb       r0, [r0, #5]
+0801443a: bl         #0x801cf40 ; CALL 0x801cf40
+
+=== ADBB CLEAR EVENT HANDLER CALLER 0x8014428 0x8014398..0x80144c8 ===
+08014398: uxtb       r0, r0
+0801439a: cmp        r0, #0
+0801439c: beq        #0x80143a2
+0801439e: bl         #0x80142b2 ; CALL 0x80142b2
+080143a2: ldrb.w     r0, [sp]
+080143a6: ubfx       r0, r0, #3, #1
+080143aa: uxtb       r0, r0
+080143ac: cmp        r0, #0
+080143ae: beq        #0x80143b4
+080143b0: bl         #0x8014264 ; CALL 0x8014264
+080143b4: ldrb.w     r0, [sp]
+080143b8: ubfx       r0, r0, #4, #1
+080143bc: uxtb       r0, r0
+080143be: cmp        r0, #0
+080143c0: beq        #0x80143c6
+080143c2: bl         #0x8014278 ; CALL 0x8014278
+080143c6: movs       r0, #0
+080143c8: ldr.w      r1, [pc, #0x760] ; LIT 0x8014b2c->0x2001adbc
+080143cc: strb       r0, [r1]
+080143ce: movs       r2, #1
+080143d0: movs.w     r1, #-0x80000000
+080143d4: ldr.w      r0, [pc, #0x740] ; LIT 0x8014b18->0x2001aa78
+080143d8: ldrb       r0, [r0, #5]
+080143da: bl         #0x801cf4e ; CALL 0x801cf4e
+080143de: b          #0x80143f4
+080143e0: ldr        r0, [sp]
+080143e2: bic        r0, r0, #0xc0000000
+080143e6: str        r0, [sp]
+080143e8: ldr        r0, [sp]
+080143ea: cmp        r0, #0
+080143ec: beq        #0x80143f4
+080143ee: ldr        r0, [sp]
+080143f0: bl         #0x80142dc ; CALL 0x80142dc
+080143f4: pop        {r0, r1, r4, pc}
+080143f6: bx         lr
+080143f8: bx         lr
+080143fa: push       {r7, lr}
+080143fc: movs       r0, #1
+080143fe: bl         #0x801ceaa ; CALL 0x801ceaa
+08014402: pop        {r0, pc}
+08014404: bx         lr
+08014406: push       {r7, lr}
+08014408: movs       r0, #1
+0801440a: ldr.w      r1, [pc, #0x720] ; LIT 0x8014b2c->0x2001adbc
+0801440e: strb       r0, [r1]
+08014410: ldr.w      r0, [pc, #0x70c] ; LIT 0x8014b20->0x2001adbb
+08014414: ldrb       r0, [r0]
+08014416: cmp        r0, #0
+08014418: beq        #0x801442c
+0801441a: movs       r2, #1
+0801441c: movs       r1, #0x40
+0801441e: ldr.w      r0, [pc, #0x6f8] ; LIT 0x8014b18->0x2001aa78
+08014422: ldrb       r0, [r0, #5]
+08014424: bl         #0x801cf4e ; CALL 0x801cf4e
+08014428: bl         #0x80142b2 ; CALL 0x80142b2
+0801442c: movs       r0, #1
+0801442e: bl         #0x8012c44 ; CALL 0x8012c44
+08014432: movs       r1, #1
+08014434: ldr.w      r0, [pc, #0x6e0] ; LIT 0x8014b18->0x2001aa78
+08014438: ldrb       r0, [r0, #5]
+0801443a: bl         #0x801cf40 ; CALL 0x801cf40
+0801443e: bl         #0x800187e ; CALL 0x800187e
+08014442: ldrsb.w    r0, [r0]
+08014446: cmp        r0, #0
+08014448: bne        #0x8014452
+0801444a: movs       r1, #0
+0801444c: movs       r0, #0x14
+0801444e: bl         #0x800cdfc ; CALL 0x800cdfc
+08014452: bl         #0x80141e4 ; CALL 0x80141e4
+08014456: movs       r0, #6
+08014458: bl         #0x800c40c ; CALL 0x800c40c
+0801445c: movs       r0, #0x40
+0801445e: bl         #0x801002e ; CALL 0x801002e
+08014462: pop        {r0, pc}
+08014464: push       {r3, r4, r5, r6, r7, lr}
+08014466: ldr.w      r0, [pc, #0x6c8] ; LIT 0x8014b30->0x804c1d4
+0801446a: ldr        r0, [r0]
+0801446c: str        r0, [sp]
+0801446e: bl         #0x8011bc0 ; CALL 0x8011bc0
+08014472: movs       r4, r0
+08014474: movs       r5, #1
+08014476: mov.w      r7, #0x3e8
+0801447a: mov.w      r6, #0x3e8
+0801447e: ldr.w      r0, [pc, #0x6b4] ; LIT 0x8014b34->0x1e8480
+08014482: cmp        r4, r0
+08014484: blo        #0x80144a0
+08014486: bl         #0x800de58 ; CALL 0x800de58
+0801448a: cmp        r0, #3
+0801448c: beq        #0x80144a0
+0801448e: movs       r0, r4
+08014490: bl         #0x80118cc ; CALL 0x80118cc
+08014494: movs       r5, r0
+08014496: movs       r0, r5
+08014498: uxth       r0, r0
+0801449a: bl         #0x8011dda ; CALL 0x8011dda
+0801449e: subs       r5, r5, #1
+080144a0: mov.w      r2, #0x3e8
+080144a4: movs       r1, #2
+080144a6: ldr.w      r0, [pc, #0x670] ; LIT 0x8014b18->0x2001aa78
+080144aa: ldrb       r0, [r0, #5]
+080144ac: bl         #0x801cf4e ; CALL 0x801cf4e
+080144b0: str        r0, [sp]
+080144b2: ldrb.w     r0, [sp]
+080144b6: ubfx       r0, r0, #1, #1
+080144ba: uxtb       r0, r0
+080144bc: cmp        r0, #0
+080144be: bne        #0x80144d6
+080144c0: movw       r0, #0x9803
+080144c4: bl         #0x800c6ac ; CALL 0x800c6ac
+
+CALLERS SHUTTERMIRROR HELPER PRE 0x80190ec ['0x801427a']
+
+=== SHUTTERMIRROR HELPER PRE CALLER 0x801427a 0x80141ea..0x801431a ===
+080141ea: movs       r1, #0x80
+080141ec: ldr.w      r0, [pc, #0x928] ; LIT 0x8014b18->0x2001aa78
+080141f0: ldrb       r0, [r0, #5]
+080141f2: bl         #0x801cf40 ; CALL 0x801cf40
+080141f6: pop        {r0, pc}
+080141f8: push       {r7, lr}
+080141fa: movs       r0, #1
+080141fc: ldr.w      r1, [pc, #0x90c] ; LIT 0x8014b0c->0x2001adba
+08014200: strb       r0, [r1]
+08014202: bl         #0x801ceb6 ; CALL 0x801ceb6
+08014206: movs       r2, r0
+08014208: ldr.w      r1, [pc, #0x910] ; LIT 0x8014b1c->0x8047090 STRING='Start exposure (sys. time %i ms)\r\n'
+0801420c: movs       r0, #0
+0801420e: bl         #0x8008ee0 ; CALL 0x8008ee0
+08014212: bl         #0x801ce2c ; CALL 0x801ce2c
+08014216: bl         #0x8011bd4 ; CALL 0x8011bd4
+0801421a: bl         #0x801939c ; CALL 0x801939c
+0801421e: bl         #0x8012026 ; CALL 0x8012026
+08014222: bl         #0x801ce3c ; CALL 0x801ce3c
+08014226: pop        {r0, pc}
+08014228: push       {r7, lr}
+0801422a: ldr.w      r0, [pc, #0x8e0] ; LIT 0x8014b0c->0x2001adba
+0801422e: ldrb       r0, [r0]
+08014230: cmp        r0, #0
+08014232: beq        #0x801424a
+08014234: bl         #0x80193e8 ; CALL 0x80193e8
+08014238: ldr.w      r0, [pc, #0x8d0] ; LIT 0x8014b0c->0x2001adba
+0801423c: ldrb       r0, [r0]
+0801423e: cmp        r0, #0
+08014240: beq        #0x801424a
+08014242: movs       r0, #5
+08014244: bl         #0x801ceaa ; CALL 0x801ceaa
+08014248: b          #0x8014238
+0801424a: pop        {r0, pc}
+0801424c: push       {r7, lr}
+0801424e: bl         #0x8019284 ; CALL 0x8019284
+08014252: movs       r1, #0x80
+08014254: ldr.w      r0, [pc, #0x8c0] ; LIT 0x8014b18->0x2001aa78
+08014258: ldrb       r0, [r0, #5]
+0801425a: bl         #0x801cf40 ; CALL 0x801cf40
+0801425e: bl         #0x800e16c ; CALL 0x800e16c
+08014262: pop        {r0, pc}
+08014264: push       {r7, lr}
+08014266: bl         #0x80190d4 ; CALL 0x80190d4
+0801426a: movs       r1, #0x80
+0801426c: ldr.w      r0, [pc, #0x8a8] ; LIT 0x8014b18->0x2001aa78
+08014270: ldrb       r0, [r0, #5]
+08014272: bl         #0x801cf40 ; CALL 0x801cf40
+08014276: pop        {r0, pc}
+08014278: push       {r7, lr}
+0801427a: bl         #0x80190ec ; CALL 0x80190ec
+0801427e: movs       r1, #0x80
+08014280: ldr.w      r0, [pc, #0x894] ; LIT 0x8014b18->0x2001aa78
+08014284: ldrb       r0, [r0, #5]
+08014286: bl         #0x801cf40 ; CALL 0x801cf40
+0801428a: pop        {r0, pc}
+0801428c: push       {r7, lr}
+0801428e: ldr.w      r0, [pc, #0x890] ; LIT 0x8014b20->0x2001adbb
+08014292: ldrb       r0, [r0]
+08014294: cmp        r0, #0
+08014296: bne        #0x80142b0
+08014298: movs       r0, #1
+0801429a: ldr.w      r1, [pc, #0x884] ; LIT 0x8014b20->0x2001adbb
+0801429e: strb       r0, [r1]
+080142a0: bl         #0x8019104 ; CALL 0x8019104
+080142a4: movs       r1, #0x80
+080142a6: ldr.w      r0, [pc, #0x870] ; LIT 0x8014b18->0x2001aa78
+080142aa: ldrb       r0, [r0, #5]
+080142ac: bl         #0x801cf40 ; CALL 0x801cf40
+080142b0: pop        {r0, pc}
+080142b2: push       {r7, lr}
+080142b4: ldr.w      r0, [pc, #0x868] ; LIT 0x8014b20->0x2001adbb
+080142b8: ldrb       r0, [r0]
+080142ba: cmp        r0, #0
+080142bc: beq        #0x80142da
+080142be: bl         #0x801917c ; CALL 0x801917c
+080142c2: movs       r1, #0x80
+080142c4: ldr.w      r0, [pc, #0x850] ; LIT 0x8014b18->0x2001aa78
+080142c8: ldrb       r0, [r0, #5]
+080142ca: bl         #0x801cf40 ; CALL 0x801cf40
+080142ce: bl         #0x800e16c ; CALL 0x800e16c
+080142d2: movs       r0, #0
+080142d4: ldr.w      r1, [pc, #0x848] ; LIT 0x8014b20->0x2001adbb
+080142d8: strb       r0, [r1]
+080142da: pop        {r0, pc}
+080142dc: push       {r4, lr}
+080142de: movs       r4, r0
+080142e0: bl         #0x8011238 ; CALL 0x8011238
+080142e4: cmp        r0, #0
+080142e6: beq        #0x80142f6
+080142e8: movs       r1, r4
+080142ea: ldr.w      r0, [pc, #0x82c] ; LIT 0x8014b18->0x2001aa78
+080142ee: ldrb       r0, [r0, #5]
+080142f0: bl         #0x801cf26 ; CALL 0x801cf26
+080142f4: b          #0x8014302
+080142f6: movs       r2, r4
+080142f8: ldr.w      r1, [pc, #0x828] ; LIT 0x8014b24->0x803c0d8 STRING='RTOS system not initialized yet, events not available (TskShutterMirror event 0x%08X)!\r\n'
+080142fc: movs       r0, #1
+080142fe: bl         #0x8008ee0 ; CALL 0x8008ee0
+08014302: pop        {r4, pc}
+08014304: push       {r7, lr}
+08014306: bl         #0x80141c2 ; CALL 0x80141c2
+0801430a: pop        {r0, pc}
+0801430c: push       {r7, lr}
+0801430e: movs.w     r1, #-0x80000000
+08014312: ldr.w      r0, [pc, #0x804] ; LIT 0x8014b18->0x2001aa78
+08014316: ldrb       r0, [r0, #5]
+08014318: .byte 0x08, 0xf0
+
+CALLERS SHUTTERMIRROR HELPER SET-SIDE 0x8019104 ['0x80142a0']
+
+=== SHUTTERMIRROR HELPER SET-SIDE CALLER 0x80142a0 0x8014210..0x8014340 ===
+08014210: cdp2       p0, #6, c15, c7, c8, #0
+08014214: mcr2       p7, #0, pc, c11, c13, #7
+08014218: ldc2l      p0, c15, [sp], {5}
+0801421c: .byte 0xbf, 0xf8
+0801421e: bl         #0x8012026 ; CALL 0x8012026
+08014222: bl         #0x801ce3c ; CALL 0x801ce3c
+08014226: pop        {r0, pc}
+08014228: push       {r7, lr}
+0801422a: ldr.w      r0, [pc, #0x8e0] ; LIT 0x8014b0c->0x2001adba
+0801422e: ldrb       r0, [r0]
+08014230: cmp        r0, #0
+08014232: beq        #0x801424a
+08014234: bl         #0x80193e8 ; CALL 0x80193e8
+08014238: ldr.w      r0, [pc, #0x8d0] ; LIT 0x8014b0c->0x2001adba
+0801423c: ldrb       r0, [r0]
+0801423e: cmp        r0, #0
+08014240: beq        #0x801424a
+08014242: movs       r0, #5
+08014244: bl         #0x801ceaa ; CALL 0x801ceaa
+08014248: b          #0x8014238
+0801424a: pop        {r0, pc}
+0801424c: push       {r7, lr}
+0801424e: bl         #0x8019284 ; CALL 0x8019284
+08014252: movs       r1, #0x80
+08014254: ldr.w      r0, [pc, #0x8c0] ; LIT 0x8014b18->0x2001aa78
+08014258: ldrb       r0, [r0, #5]
+0801425a: bl         #0x801cf40 ; CALL 0x801cf40
+0801425e: bl         #0x800e16c ; CALL 0x800e16c
+08014262: pop        {r0, pc}
+08014264: push       {r7, lr}
+08014266: bl         #0x80190d4 ; CALL 0x80190d4
+0801426a: movs       r1, #0x80
+0801426c: ldr.w      r0, [pc, #0x8a8] ; LIT 0x8014b18->0x2001aa78
+08014270: ldrb       r0, [r0, #5]
+08014272: bl         #0x801cf40 ; CALL 0x801cf40
+08014276: pop        {r0, pc}
+08014278: push       {r7, lr}
+0801427a: bl         #0x80190ec ; CALL 0x80190ec
+0801427e: movs       r1, #0x80
+08014280: ldr.w      r0, [pc, #0x894] ; LIT 0x8014b18->0x2001aa78
+08014284: ldrb       r0, [r0, #5]
+08014286: bl         #0x801cf40 ; CALL 0x801cf40
+0801428a: pop        {r0, pc}
+0801428c: push       {r7, lr}
+0801428e: ldr.w      r0, [pc, #0x890] ; LIT 0x8014b20->0x2001adbb
+08014292: ldrb       r0, [r0]
+08014294: cmp        r0, #0
+08014296: bne        #0x80142b0
+08014298: movs       r0, #1
+0801429a: ldr.w      r1, [pc, #0x884] ; LIT 0x8014b20->0x2001adbb
+0801429e: strb       r0, [r1]
+080142a0: bl         #0x8019104 ; CALL 0x8019104
+080142a4: movs       r1, #0x80
+080142a6: ldr.w      r0, [pc, #0x870] ; LIT 0x8014b18->0x2001aa78
+080142aa: ldrb       r0, [r0, #5]
+080142ac: bl         #0x801cf40 ; CALL 0x801cf40
+080142b0: pop        {r0, pc}
+080142b2: push       {r7, lr}
+080142b4: ldr.w      r0, [pc, #0x868] ; LIT 0x8014b20->0x2001adbb
+080142b8: ldrb       r0, [r0]
+080142ba: cmp        r0, #0
+080142bc: beq        #0x80142da
+080142be: bl         #0x801917c ; CALL 0x801917c
+080142c2: movs       r1, #0x80
+080142c4: ldr.w      r0, [pc, #0x850] ; LIT 0x8014b18->0x2001aa78
+080142c8: ldrb       r0, [r0, #5]
+080142ca: bl         #0x801cf40 ; CALL 0x801cf40
+080142ce: bl         #0x800e16c ; CALL 0x800e16c
+080142d2: movs       r0, #0
+080142d4: ldr.w      r1, [pc, #0x848] ; LIT 0x8014b20->0x2001adbb
+080142d8: strb       r0, [r1]
+080142da: pop        {r0, pc}
+080142dc: push       {r4, lr}
+080142de: movs       r4, r0
+080142e0: bl         #0x8011238 ; CALL 0x8011238
+080142e4: cmp        r0, #0
+080142e6: beq        #0x80142f6
+080142e8: movs       r1, r4
+080142ea: ldr.w      r0, [pc, #0x82c] ; LIT 0x8014b18->0x2001aa78
+080142ee: ldrb       r0, [r0, #5]
+080142f0: bl         #0x801cf26 ; CALL 0x801cf26
+080142f4: b          #0x8014302
+080142f6: movs       r2, r4
+080142f8: ldr.w      r1, [pc, #0x828] ; LIT 0x8014b24->0x803c0d8 STRING='RTOS system not initialized yet, events not available (TskShutterMirror event 0x%08X)!\r\n'
+080142fc: movs       r0, #1
+080142fe: bl         #0x8008ee0 ; CALL 0x8008ee0
+08014302: pop        {r4, pc}
+08014304: push       {r7, lr}
+08014306: bl         #0x80141c2 ; CALL 0x80141c2
+0801430a: pop        {r0, pc}
+0801430c: push       {r7, lr}
+0801430e: movs.w     r1, #-0x80000000
+08014312: ldr.w      r0, [pc, #0x804] ; LIT 0x8014b18->0x2001aa78
+08014316: ldrb       r0, [r0, #5]
+08014318: bl         #0x801cf40 ; CALL 0x801cf40
+0801431c: pop        {r0, pc}
+0801431e: bx         lr
+08014320: bx         lr
+08014322: push       {r4, lr}
+08014324: sub        sp, #8
+08014326: ldr.w      r0, [pc, #0x800] ; LIT 0x8014b28->0x804c1d0
+0801432a: ldr        r0, [r0]
+0801432c: str        r0, [sp]
+0801432e: movs.w     r1, #-1
+08014332: ldr.w      r0, [pc, #0x7e4] ; LIT 0x8014b18->0x2001aa78
+08014336: ldrb       r0, [r0, #5]
+08014338: bl         #0x801cf40 ; CALL 0x801cf40
+0801433c: str        r0, [sp]
+0801433e: .byte 0x9d, 0xf8
+
+CALLERS SHUTTERMIRROR HELPER CLEAR-SIDE 0x801917c ['0x80142be']
+
+=== SHUTTERMIRROR HELPER CLEAR-SIDE CALLER 0x80142be 0x801422e..0x801435e ===
+0801422e: ldrb       r0, [r0]
+08014230: cmp        r0, #0
+08014232: beq        #0x801424a
+08014234: bl         #0x80193e8 ; CALL 0x80193e8
+08014238: ldr.w      r0, [pc, #0x8d0] ; LIT 0x8014b0c->0x2001adba
+0801423c: ldrb       r0, [r0]
+0801423e: cmp        r0, #0
+08014240: beq        #0x801424a
+08014242: movs       r0, #5
+08014244: bl         #0x801ceaa ; CALL 0x801ceaa
+08014248: b          #0x8014238
+0801424a: pop        {r0, pc}
+0801424c: push       {r7, lr}
+0801424e: bl         #0x8019284 ; CALL 0x8019284
+08014252: movs       r1, #0x80
+08014254: ldr.w      r0, [pc, #0x8c0] ; LIT 0x8014b18->0x2001aa78
+08014258: ldrb       r0, [r0, #5]
+0801425a: bl         #0x801cf40 ; CALL 0x801cf40
+0801425e: bl         #0x800e16c ; CALL 0x800e16c
+08014262: pop        {r0, pc}
+08014264: push       {r7, lr}
+08014266: bl         #0x80190d4 ; CALL 0x80190d4
+0801426a: movs       r1, #0x80
+0801426c: ldr.w      r0, [pc, #0x8a8] ; LIT 0x8014b18->0x2001aa78
+08014270: ldrb       r0, [r0, #5]
+08014272: bl         #0x801cf40 ; CALL 0x801cf40
+08014276: pop        {r0, pc}
+08014278: push       {r7, lr}
+0801427a: bl         #0x80190ec ; CALL 0x80190ec
+0801427e: movs       r1, #0x80
+08014280: ldr.w      r0, [pc, #0x894] ; LIT 0x8014b18->0x2001aa78
+08014284: ldrb       r0, [r0, #5]
+08014286: bl         #0x801cf40 ; CALL 0x801cf40
+0801428a: pop        {r0, pc}
+0801428c: push       {r7, lr}
+0801428e: ldr.w      r0, [pc, #0x890] ; LIT 0x8014b20->0x2001adbb
+08014292: ldrb       r0, [r0]
+08014294: cmp        r0, #0
+08014296: bne        #0x80142b0
+08014298: movs       r0, #1
+0801429a: ldr.w      r1, [pc, #0x884] ; LIT 0x8014b20->0x2001adbb
+0801429e: strb       r0, [r1]
+080142a0: bl         #0x8019104 ; CALL 0x8019104
+080142a4: movs       r1, #0x80
+080142a6: ldr.w      r0, [pc, #0x870] ; LIT 0x8014b18->0x2001aa78
+080142aa: ldrb       r0, [r0, #5]
+080142ac: bl         #0x801cf40 ; CALL 0x801cf40
+080142b0: pop        {r0, pc}
+080142b2: push       {r7, lr}
+080142b4: ldr.w      r0, [pc, #0x868] ; LIT 0x8014b20->0x2001adbb
+080142b8: ldrb       r0, [r0]
+080142ba: cmp        r0, #0
+080142bc: beq        #0x80142da
+080142be: bl         #0x801917c ; CALL 0x801917c
+080142c2: movs       r1, #0x80
+080142c4: ldr.w      r0, [pc, #0x850] ; LIT 0x8014b18->0x2001aa78
+080142c8: ldrb       r0, [r0, #5]
+080142ca: bl         #0x801cf40 ; CALL 0x801cf40
+080142ce: bl         #0x800e16c ; CALL 0x800e16c
+080142d2: movs       r0, #0
+080142d4: ldr.w      r1, [pc, #0x848] ; LIT 0x8014b20->0x2001adbb
+080142d8: strb       r0, [r1]
+080142da: pop        {r0, pc}
+080142dc: push       {r4, lr}
+080142de: movs       r4, r0
+080142e0: bl         #0x8011238 ; CALL 0x8011238
+080142e4: cmp        r0, #0
+080142e6: beq        #0x80142f6
+080142e8: movs       r1, r4
+080142ea: ldr.w      r0, [pc, #0x82c] ; LIT 0x8014b18->0x2001aa78
+080142ee: ldrb       r0, [r0, #5]
+080142f0: bl         #0x801cf26 ; CALL 0x801cf26
+080142f4: b          #0x8014302
+080142f6: movs       r2, r4
+080142f8: ldr.w      r1, [pc, #0x828] ; LIT 0x8014b24->0x803c0d8 STRING='RTOS system not initialized yet, events not available (TskShutterMirror event 0x%08X)!\r\n'
+080142fc: movs       r0, #1
+080142fe: bl         #0x8008ee0 ; CALL 0x8008ee0
+08014302: pop        {r4, pc}
+08014304: push       {r7, lr}
+08014306: bl         #0x80141c2 ; CALL 0x80141c2
+0801430a: pop        {r0, pc}
+0801430c: push       {r7, lr}
+0801430e: movs.w     r1, #-0x80000000
+08014312: ldr.w      r0, [pc, #0x804] ; LIT 0x8014b18->0x2001aa78
+08014316: ldrb       r0, [r0, #5]
+08014318: bl         #0x801cf40 ; CALL 0x801cf40
+0801431c: pop        {r0, pc}
+0801431e: bx         lr
+08014320: bx         lr
+08014322: push       {r4, lr}
+08014324: sub        sp, #8
+08014326: ldr.w      r0, [pc, #0x800] ; LIT 0x8014b28->0x804c1d0
+0801432a: ldr        r0, [r0]
+0801432c: str        r0, [sp]
+0801432e: movs.w     r1, #-1
+08014332: ldr.w      r0, [pc, #0x7e4] ; LIT 0x8014b18->0x2001aa78
+08014336: ldrb       r0, [r0, #5]
+08014338: bl         #0x801cf40 ; CALL 0x801cf40
+0801433c: str        r0, [sp]
+0801433e: ldrb.w     r0, [sp, #3]
+08014342: ands       r0, r0, #0xc0
+08014346: cmp        r0, #0x40
+08014348: bne        #0x8014360
+0801434a: ldr        r4, [sp]
+0801434c: movs       r2, #0x64
+0801434e: movs.w     r1, #-0x80000000
+08014352: ldr.w      r0, [pc, #0x7c4] ; LIT 0x8014b18->0x2001aa78
+08014356: ldrb       r0, [r0, #5]
+08014358: bl         #0x801cf4e ; CALL 0x801cf4e
+0801435c: orrs       r0, r4
+
+CALLERS BVCMOS UPDATE 0x800f228 ['0x800dc44', '0x800e000']
+
+=== BVCMOS UPDATE CALLER 0x800dc44 0x800dbb4..0x800dce4 ===
+0800dbb4: cmp        r1, r0
+0800dbb6: beq        #0x800dbc6
+0800dbb8: ldrsh.w    r0, [sp, #0x2a]
+0800dbbc: bl         #0x8011ca8 ; CALL 0x8011ca8
+0800dbc0: movs       r0, #0xe
+0800dbc2: bl         #0x80014bc ; CALL 0x80014bc
+0800dbc6: bl         #0x801147c ; CALL 0x801147c
+0800dbca: ldrsh.w    r1, [sp, #0x2c]
+0800dbce: sxth       r0, r0
+0800dbd0: cmp        r1, r0
+0800dbd2: beq        #0x800dbe2
+0800dbd4: ldrsh.w    r0, [sp, #0x2c]
+0800dbd8: bl         #0x8011462 ; CALL 0x8011462
+0800dbdc: movs       r0, #0xf
+0800dbde: bl         #0x80014bc ; CALL 0x80014bc
+0800dbe2: ldrsh.w    r0, [sp, #0x2e]
+0800dbe6: bl         #0x8011dbe ; CALL 0x8011dbe
+0800dbea: bl         #0x800e252 ; CALL 0x800e252
+0800dbee: ldrsh.w    r0, [sp, #0x32]
+0800dbf2: bl         #0x8001ad8 ; CALL 0x8001ad8
+0800dbf6: ldrb.w     r0, [sp, #0x34]
+0800dbfa: ldr.w      r1, [pc, #0x7e0] ; LIT 0x800e3dc->0x2001abe4
+0800dbfe: ldrb       r1, [r1]
+0800dc00: bfi        r1, r0, #0, #1
+0800dc04: ldr.w      r0, [pc, #0x7d4] ; LIT 0x800e3dc->0x2001abe4
+0800dc08: strb       r1, [r0]
+0800dc0a: ldrb.w     r0, [sp, #0x34]
+0800dc0e: uxtb       r0, r0
+0800dc10: lsrs       r0, r0, #2
+0800dc12: ldr.w      r1, [pc, #0x7c8] ; LIT 0x800e3dc->0x2001abe4
+0800dc16: ldrb       r1, [r1]
+0800dc18: bfi        r1, r0, #3, #1
+0800dc1c: ldr.w      r0, [pc, #0x7bc] ; LIT 0x800e3dc->0x2001abe4
+0800dc20: strb       r1, [r0]
+0800dc22: ldrb.w     r0, [sp, #0x34]
+0800dc26: uxtb       r0, r0
+0800dc28: lsrs       r0, r0, #1
+0800dc2a: ldr.w      r1, [pc, #0x7b0] ; LIT 0x800e3dc->0x2001abe4
+0800dc2e: ldrb       r1, [r1]
+0800dc30: bfi        r1, r0, #1, #1
+0800dc34: ldr.w      r0, [pc, #0x7a4] ; LIT 0x800e3dc->0x2001abe4
+0800dc38: strb       r1, [r0]
+0800dc3a: add        sp, #0xc4
+0800dc3c: pop.w      {r4, r5, r6, r7, r8, sb, pc}
+0800dc40: push       {r7, lr}
+0800dc42: movs       r0, #1
+0800dc44: bl         #0x800f228 ; CALL 0x800f228
+0800dc48: pop        {r0, pc}
+0800dc4a: push       {r4, lr}
+0800dc4c: movs       r4, r0
+0800dc4e: bl         #0x8011238 ; CALL 0x8011238
+0800dc52: cmp        r0, #0
+0800dc54: beq        #0x800dc64
+0800dc56: movs       r1, r4
+0800dc58: ldr.w      r0, [pc, #0x8b4] ; LIT 0x800e510->0x2001aa78
+0800dc5c: ldrb       r0, [r0, #7]
+0800dc5e: bl         #0x801cf26 ; CALL 0x801cf26
+0800dc62: b          #0x800dc70
+0800dc64: movs       r2, r4
+0800dc66: ldr.w      r1, [pc, #0x8ac] ; LIT 0x800e514->0x803cf00 STRING='RTOS system not initialized yet, events not available (TskAE event 0x%08X)!\r\n'
+0800dc6a: movs       r0, #1
+0800dc6c: bl         #0x8008ee0 ; CALL 0x8008ee0
+0800dc70: pop        {r4, pc}
+0800dc72: push       {r7, lr}
+0800dc74: bl         #0x800d65c ; CALL 0x800d65c
+0800dc78: movs       r0, #1
+0800dc7a: ldr.w      r1, [pc, #0x638] ; LIT 0x800e2b4->0x2001ad72
+0800dc7e: strb       r0, [r1]
+0800dc80: movs       r0, #5
+0800dc82: bl         #0x80184d8 ; CALL 0x80184d8
+0800dc86: movs       r1, #8
+0800dc88: ldr.w      r0, [pc, #0x884] ; LIT 0x800e510->0x2001aa78
+0800dc8c: ldrb       r0, [r0, #7]
+0800dc8e: bl         #0x801cf40 ; CALL 0x801cf40
+0800dc92: bl         #0x8011d7a ; CALL 0x8011d7a
+0800dc96: sxth       r0, r0
+0800dc98: bl         #0x8011cf0 ; CALL 0x8011cf0
+0800dc9c: movs       r0, #0
+0800dc9e: bl         #0x800dee0 ; CALL 0x800dee0
+0800dca2: bl         #0x800d91c ; CALL 0x800d91c
+0800dca6: movs.w     r0, #0x20000
+0800dcaa: bl         #0x801002e ; CALL 0x801002e
+0800dcae: pop        {r0, pc}
+0800dcb0: push       {r7, lr}
+0800dcb2: movs.w     r1, #-0x80000000
+0800dcb6: ldr.w      r0, [pc, #0x858] ; LIT 0x800e510->0x2001aa78
+0800dcba: ldrb       r0, [r0, #7]
+0800dcbc: bl         #0x801cf40 ; CALL 0x801cf40
+0800dcc0: pop        {r0, pc}
+0800dcc2: bx         lr
+0800dcc4: bx         lr
+0800dcc6: push       {r4, lr}
+0800dcc8: sub        sp, #8
+0800dcca: ldr.w      r0, [pc, #0x84c] ; LIT 0x800e518->0x804c098
+0800dcce: ldr        r0, [r0]
+0800dcd0: str        r0, [sp]
+0800dcd2: movs.w     r1, #-1
+0800dcd6: ldr.w      r0, [pc, #0x838] ; LIT 0x800e510->0x2001aa78
+0800dcda: ldrb       r0, [r0, #7]
+0800dcdc: bl         #0x801cf40 ; CALL 0x801cf40
+0800dce0: str        r0, [sp]
+0800dce2: .byte 0x9d, 0xf8
+
+=== BVCMOS UPDATE CALLER 0x800e000 0x800df70..0x800e0a0 ===
+0800df70: bl         #0x800e27a ; CALL 0x800e27a
+0800df74: strh.w     r0, [sp]
+0800df78: b          #0x800dfb2
+0800df7a: bl         #0x800e0b8 ; CALL 0x800e0b8
+0800df7e: strh.w     r0, [sp, #2]
+0800df82: bl         #0x8011da8 ; CALL 0x8011da8
+0800df86: ldrh.w     r1, [sp, #2]
+0800df8a: adds       r0, r1, r0
+0800df8c: ldrh.w     r1, [r5, #0x13]
+0800df90: subs       r0, r0, r1
+0800df92: strh.w     r0, [sp]
+0800df96: ldrsh.w    r0, [sp]
+0800df9a: cmp.w      r0, #0xe00
+0800df9e: ble        #0x800dfa8
+0800dfa0: mov.w      r0, #0xe00
+0800dfa4: strh.w     r0, [sp]
+0800dfa8: add.w      r1, sp, #2
+0800dfac: mov        r0, sp
+0800dfae: bl         #0x800ed2c ; CALL 0x800ed2c
+0800dfb2: movs       r0, #0
+0800dfb4: ldr.w      r1, [pc, #0x57c] ; LIT 0x800e534->0x2001ad73
+0800dfb8: strb       r0, [r1]
+0800dfba: ldrh.w     r0, [sp]
+0800dfbe: ldr.w      r1, [pc, #0x570] ; LIT 0x800e530->0x2001aa38
+0800dfc2: strh       r0, [r1, #2]
+0800dfc4: ldrh.w     r0, [sp, #2]
+0800dfc8: ldr.w      r1, [pc, #0x564] ; LIT 0x800e530->0x2001aa38
+0800dfcc: strh       r0, [r1, #4]
+0800dfce: ldrsh.w    r0, [sp]
+0800dfd2: bl         #0x801c70c ; CALL 0x801c70c
+0800dfd6: ldr.w      r1, [pc, #0x558] ; LIT 0x800e530->0x2001aa38
+0800dfda: str        r0, [r1, #8]
+0800dfdc: ldrsh.w    r0, [sp, #2]
+0800dfe0: bl         #0x801c830 ; CALL 0x801c830
+0800dfe4: ldr.w      r1, [pc, #0x548] ; LIT 0x800e530->0x2001aa38
+0800dfe8: str        r0, [r1, #0xc]
+0800dfea: movs       r0, #1
+0800dfec: ldr.w      r1, [pc, #0xcf0] ; LIT 0x800ece0->0x2001ad77
+0800dff0: strb       r0, [r1]
+0800dff2: movs       r0, #1
+0800dff4: ldr.w      r1, [pc, #0xcec] ; LIT 0x800ece4->0x2001ad74
+0800dff8: strb       r0, [r1]
+0800dffa: bl         #0x801074a ; CALL 0x801074a
+0800dffe: movs       r0, #0
+0800e000: bl         #0x800f228 ; CALL 0x800f228
+0800e004: pop        {r0, r1, r4, r5, r6, pc}
+0800e006: push       {r4, lr}
+0800e008: movs       r4, r0
+0800e00a: ldr.w      r0, [pc, #0x528] ; LIT 0x800e534->0x2001ad73
+0800e00e: strb       r4, [r0]
+0800e010: movs       r0, #0
+0800e012: ldr.w      r1, [pc, #0x4f0] ; LIT 0x800e504->0x2001abe0
+0800e016: str        r0, [r1]
+0800e018: ldr.w      r0, [pc, #0x518] ; LIT 0x800e534->0x2001ad73
+0800e01c: ldrb       r0, [r0]
+0800e01e: cmp        r0, #0
+0800e020: beq        #0x800e02a
+0800e022: movw       r0, #0xbb8
+0800e026: bl         #0x801075c ; CALL 0x801075c
+0800e02a: pop        {r4, pc}
+0800e02c: ldr.w      r1, [pc, #0xcb8] ; LIT 0x800ece8->0x20000118
+0800e030: strh       r0, [r1]
+0800e032: bx         lr
+0800e034: push       {r4, lr}
+0800e036: movs       r4, r0
+0800e038: sxth       r4, r4
+0800e03a: ldr.w      r0, [pc, #0xcb0] ; LIT 0x800ecec->0xfffffd81
+0800e03e: cmp        r4, r0
+0800e040: bge        #0x800e052
+0800e042: movs       r0, r4
+0800e044: sxth       r0, r0
+0800e046: bl         #0x8011bda ; CALL 0x8011bda
+0800e04a: ldr.w      r1, [pc, #0xca4] ; LIT 0x800ecf0->0x2000011a
+0800e04e: strh       r0, [r1]
+0800e050: b          #0x800e058
+0800e052: ldr.w      r0, [pc, #0xc9c] ; LIT 0x800ecf0->0x2000011a
+0800e056: strh       r4, [r0]
+0800e058: pop        {r4, pc}
+0800e05a: push       {r7, lr}
+0800e05c: bl         #0x8001a24 ; CALL 0x8001a24
+0800e060: movs       r1, r0
+0800e062: ldr.w      r0, [pc, #0xc8c] ; LIT 0x800ecf0->0x2000011a
+0800e066: ldrsh.w    r0, [r0]
+0800e06a: ldrb       r2, [r1]
+0800e06c: cmp        r2, #0
+0800e06e: beq        #0x800e076
+0800e070: ldrsh.w    r2, [r1, #2]
+0800e074: movs       r0, r2
+0800e076: sxth       r0, r0
+0800e078: pop        {r1, pc}
+0800e07a: push       {r4, lr}
+0800e07c: mov.w      r4, #0xc00
+0800e080: bl         #0x8001a48 ; CALL 0x8001a48
+0800e084: cmp        r0, #0
+0800e086: beq        #0x800e08e
+0800e088: mov.w      r0, #0xe00
+0800e08c: movs       r4, r0
+0800e08e: movs       r0, r4
+0800e090: sxth       r0, r0
+0800e092: pop        {r4, pc}
+0800e094: ldr.w      r1, [pc, #0xc5c] ; LIT 0x800ecf4->0x2000011c
+0800e098: strh       r0, [r1]
+0800e09a: bx         lr
+0800e09c: ldr.w      r0, [pc, #0xc54] ; LIT 0x800ecf4->0x2000011c
+
+CALLERS SELECTOR5 TRADITIONAL PACKET BUILD 0x80184d8 ['0x800d6ee', '0x800d718', '0x800d73c', '0x800dc82', '0x8013192', '0x80131c0', '0x8013ece', '0x8013f06', '0x801db9c', '0x801dba2', '0x801dc46', '0x801ddd8', '0x801e070', '0x801e076', '0x801e15c']
+
+=== SELECTOR5 TRADITIONAL PACKET BUILD CALLER 0x800d6ee 0x800d65e..0x800d78e ===
+0800d65e: sub        sp, #0x20
+0800d660: bl         #0x801124c ; CALL 0x801124c
+0800d664: movs       r4, r0
+0800d666: mov        r0, sp
+0800d668: movs       r1, #0x1c
+0800d66a: bl         #0x8008a1c ; CALL 0x8008a1c
+0800d66e: ldr.w      r0, [pc, #0xc40] ; LIT 0x800e2b0->0x2000003c
+0800d672: bl         #0x800c4b0 ; CALL 0x800c4b0
+0800d676: ldrb.w     r0, [r4, #0x79]
+0800d67a: ands       r0, r0, #1
+0800d67e: cmp        r0, #0
+0800d680: beq        #0x800d696
+0800d682: mov        r0, sp
+0800d684: adds       r1, r4, #1
+0800d686: movs       r2, #0x1c
+0800d688: bl         #0x801d024 ; CALL 0x801d024
+0800d68c: ldrsh.w    r0, [r4, #0x13]
+0800d690: bl         #0x8011ccc ; CALL 0x8011ccc
+0800d694: b          #0x800d69c
+0800d696: mov        r0, sp
+0800d698: bl         #0x800ce70 ; CALL 0x800ce70
+0800d69c: mov        r1, sp
+0800d69e: movs       r0, #0
+0800d6a0: bl         #0x800ce3c ; CALL 0x800ce3c
+0800d6a4: add        sp, #0x20
+0800d6a6: pop        {r4, pc}
+0800d6a8: push.w     {r4, r5, r6, r7, r8, sb, sl, fp, lr}
+0800d6ac: sub        sp, #0x14
+0800d6ae: movs       r4, #0
+0800d6b0: bl         #0x8011d08 ; CALL 0x8011d08
+0800d6b4: movs       r5, r0
+0800d6b6: bl         #0x8011d2e ; CALL 0x8011d2e
+0800d6ba: strh.w     r0, [sp, #0x10]
+0800d6be: movs       r7, #0
+0800d6c0: bl         #0x801124c ; CALL 0x801124c
+0800d6c4: mov        r8, r0
+0800d6c6: movs       r6, r5
+0800d6c8: ldrb.w     r0, [r8, #0x79]
+0800d6cc: ands       r0, r0, #1
+0800d6d0: cmp        r0, #0
+0800d6d2: bne        #0x800d6fe
+0800d6d4: movs       r0, #0
+0800d6d6: ldr.w      r1, [pc, #0xbdc] ; LIT 0x800e2b4->0x2001ad72
+0800d6da: strb       r0, [r1]
+0800d6dc: bl         #0x80146f6 ; CALL 0x80146f6
+0800d6e0: cmp        r0, #0
+0800d6e2: bne        #0x800d6ec
+0800d6e4: bl         #0x8001a38 ; CALL 0x8001a38
+0800d6e8: cmp        r0, #0
+0800d6ea: beq        #0x800d746
+0800d6ec: movs       r0, #5
+0800d6ee: bl         #0x80184d8 ; CALL 0x80184d8
+0800d6f2: bl         #0x8011da8 ; CALL 0x8011da8
+0800d6f6: movs       r6, r0
+0800d6f8: movs       r0, #1
+0800d6fa: movs       r7, r0
+0800d6fc: b          #0x800d746
+0800d6fe: bl         #0x80146f6 ; CALL 0x80146f6
+0800d702: cmp        r0, #0
+0800d704: bne        #0x800d70e
+0800d706: bl         #0x8001a38 ; CALL 0x8001a38
+0800d70a: cmp        r0, #0
+0800d70c: beq        #0x800d728
+0800d70e: movs       r0, #0
+0800d710: ldr.w      r1, [pc, #0xba0] ; LIT 0x800e2b4->0x2001ad72
+0800d714: strb       r0, [r1]
+0800d716: movs       r0, #5
+0800d718: bl         #0x80184d8 ; CALL 0x80184d8
+0800d71c: bl         #0x8011da8 ; CALL 0x8011da8
+0800d720: movs       r6, r0
+0800d722: movs       r0, #1
+0800d724: movs       r7, r0
+0800d726: b          #0x800d746
+0800d728: ldr.w      r0, [pc, #0xb8c] ; LIT 0x800e2b8->0x2001ad76
+0800d72c: ldrb       r0, [r0]
+0800d72e: cmp        r0, #0
+0800d730: bne        #0x800d746
+0800d732: movs       r0, #1
+0800d734: ldr.w      r1, [pc, #0xb7c] ; LIT 0x800e2b4->0x2001ad72
+0800d738: strb       r0, [r1]
+0800d73a: movs       r0, #5
+0800d73c: bl         #0x80184d8 ; CALL 0x80184d8
+0800d740: bl         #0x8011d7a ; CALL 0x8011d7a
+0800d744: movs       r6, r0
+0800d746: sxth       r6, r6
+0800d748: sxth       r5, r5
+0800d74a: adds.w     r0, r5, #0x19
+0800d74e: cmp        r6, r0
+0800d750: bge        #0x800d77a
+0800d752: sxth       r5, r5
+0800d754: subs.w     r0, r5, #0x19
+0800d758: sxth       r6, r6
+0800d75a: cmp        r0, r6
+0800d75c: bge        #0x800d77a
+0800d75e: bl         #0x8011d2e ; CALL 0x8011d2e
+0800d762: ldrsh.w    r1, [sp, #0x10]
+0800d766: adds       r1, #0x19
+0800d768: cmp        r0, r1
+0800d76a: bge        #0x800d77a
+0800d76c: bl         #0x8011d2e ; CALL 0x8011d2e
+0800d770: ldrsh.w    r1, [sp, #0x10]
+0800d774: subs       r1, #0x19
+0800d776: cmp        r1, r0
+0800d778: blt        #0x800d84c
+0800d77a: movs       r0, #0
+0800d77c: ldr.w      r1, [pc, #0xb3c] ; LIT 0x800e2bc->0x2001ad79
+0800d780: strb       r0, [r1]
+0800d782: uxtb       r7, r7
+0800d784: cmp        r7, #0
+0800d786: beq        #0x800d7e0
+0800d788: bl         #0x8010eda ; CALL 0x8010eda
+0800d78c: mov        sb, r0
+
+=== SELECTOR5 TRADITIONAL PACKET BUILD CALLER 0x800d718 0x800d688..0x800d7b8 ===
+0800d688: bl         #0x801d024 ; CALL 0x801d024
+0800d68c: ldrsh.w    r0, [r4, #0x13]
+0800d690: bl         #0x8011ccc ; CALL 0x8011ccc
+0800d694: b          #0x800d69c
+0800d696: mov        r0, sp
+0800d698: bl         #0x800ce70 ; CALL 0x800ce70
+0800d69c: mov        r1, sp
+0800d69e: movs       r0, #0
+0800d6a0: bl         #0x800ce3c ; CALL 0x800ce3c
+0800d6a4: add        sp, #0x20
+0800d6a6: pop        {r4, pc}
+0800d6a8: push.w     {r4, r5, r6, r7, r8, sb, sl, fp, lr}
+0800d6ac: sub        sp, #0x14
+0800d6ae: movs       r4, #0
+0800d6b0: bl         #0x8011d08 ; CALL 0x8011d08
+0800d6b4: movs       r5, r0
+0800d6b6: bl         #0x8011d2e ; CALL 0x8011d2e
+0800d6ba: strh.w     r0, [sp, #0x10]
+0800d6be: movs       r7, #0
+0800d6c0: bl         #0x801124c ; CALL 0x801124c
+0800d6c4: mov        r8, r0
+0800d6c6: movs       r6, r5
+0800d6c8: ldrb.w     r0, [r8, #0x79]
+0800d6cc: ands       r0, r0, #1
+0800d6d0: cmp        r0, #0
+0800d6d2: bne        #0x800d6fe
+0800d6d4: movs       r0, #0
+0800d6d6: ldr.w      r1, [pc, #0xbdc] ; LIT 0x800e2b4->0x2001ad72
+0800d6da: strb       r0, [r1]
+0800d6dc: bl         #0x80146f6 ; CALL 0x80146f6
+0800d6e0: cmp        r0, #0
+0800d6e2: bne        #0x800d6ec
+0800d6e4: bl         #0x8001a38 ; CALL 0x8001a38
+0800d6e8: cmp        r0, #0
+0800d6ea: beq        #0x800d746
+0800d6ec: movs       r0, #5
+0800d6ee: bl         #0x80184d8 ; CALL 0x80184d8
+0800d6f2: bl         #0x8011da8 ; CALL 0x8011da8
+0800d6f6: movs       r6, r0
+0800d6f8: movs       r0, #1
+0800d6fa: movs       r7, r0
+0800d6fc: b          #0x800d746
+0800d6fe: bl         #0x80146f6 ; CALL 0x80146f6
+0800d702: cmp        r0, #0
+0800d704: bne        #0x800d70e
+0800d706: bl         #0x8001a38 ; CALL 0x8001a38
+0800d70a: cmp        r0, #0
+0800d70c: beq        #0x800d728
+0800d70e: movs       r0, #0
+0800d710: ldr.w      r1, [pc, #0xba0] ; LIT 0x800e2b4->0x2001ad72
+0800d714: strb       r0, [r1]
+0800d716: movs       r0, #5
+0800d718: bl         #0x80184d8 ; CALL 0x80184d8
+0800d71c: bl         #0x8011da8 ; CALL 0x8011da8
+0800d720: movs       r6, r0
+0800d722: movs       r0, #1
+0800d724: movs       r7, r0
+0800d726: b          #0x800d746
+0800d728: ldr.w      r0, [pc, #0xb8c] ; LIT 0x800e2b8->0x2001ad76
+0800d72c: ldrb       r0, [r0]
+0800d72e: cmp        r0, #0
+0800d730: bne        #0x800d746
+0800d732: movs       r0, #1
+0800d734: ldr.w      r1, [pc, #0xb7c] ; LIT 0x800e2b4->0x2001ad72
+0800d738: strb       r0, [r1]
+0800d73a: movs       r0, #5
+0800d73c: bl         #0x80184d8 ; CALL 0x80184d8
+0800d740: bl         #0x8011d7a ; CALL 0x8011d7a
+0800d744: movs       r6, r0
+0800d746: sxth       r6, r6
+0800d748: sxth       r5, r5
+0800d74a: adds.w     r0, r5, #0x19
+0800d74e: cmp        r6, r0
+0800d750: bge        #0x800d77a
+0800d752: sxth       r5, r5
+0800d754: subs.w     r0, r5, #0x19
+0800d758: sxth       r6, r6
+0800d75a: cmp        r0, r6
+0800d75c: bge        #0x800d77a
+0800d75e: bl         #0x8011d2e ; CALL 0x8011d2e
+0800d762: ldrsh.w    r1, [sp, #0x10]
+0800d766: adds       r1, #0x19
+0800d768: cmp        r0, r1
+0800d76a: bge        #0x800d77a
+0800d76c: bl         #0x8011d2e ; CALL 0x8011d2e
+0800d770: ldrsh.w    r1, [sp, #0x10]
+0800d774: subs       r1, #0x19
+0800d776: cmp        r1, r0
+0800d778: blt        #0x800d84c
+0800d77a: movs       r0, #0
+0800d77c: ldr.w      r1, [pc, #0xb3c] ; LIT 0x800e2bc->0x2001ad79
+0800d780: strb       r0, [r1]
+0800d782: uxtb       r7, r7
+0800d784: cmp        r7, #0
+0800d786: beq        #0x800d7e0
+0800d788: bl         #0x8010eda ; CALL 0x8010eda
+0800d78c: mov        sb, r0
+0800d78e: bl         #0x8010f16 ; CALL 0x8010f16
+0800d792: mov        sl, r0
+0800d794: bl         #0x8010f0e ; CALL 0x8010f0e
+0800d798: mov        fp, r0
+0800d79a: bl         #0x8011d2e ; CALL 0x8011d2e
+0800d79e: movs       r1, #0
+0800d7a0: str        r1, [sp, #0xc]
+0800d7a2: ldr.w      r1, [pc, #0xc38] ; LIT 0x800e3dc->0x2001abe4
+0800d7a6: ldrb       r1, [r1]
+0800d7a8: ubfx       r1, r1, #2, #1
+0800d7ac: uxtb       r1, r1
+0800d7ae: str        r1, [sp, #8]
+0800d7b0: uxtb.w     sb, sb
+0800d7b4: str.w      sb, [sp, #4]
+
+=== SELECTOR5 TRADITIONAL PACKET BUILD CALLER 0x800d73c 0x800d6ac..0x800d7dc ===
+0800d6ac: sub        sp, #0x14
+0800d6ae: movs       r4, #0
+0800d6b0: bl         #0x8011d08 ; CALL 0x8011d08
+0800d6b4: movs       r5, r0
+0800d6b6: bl         #0x8011d2e ; CALL 0x8011d2e
+0800d6ba: strh.w     r0, [sp, #0x10]
+0800d6be: movs       r7, #0
+0800d6c0: bl         #0x801124c ; CALL 0x801124c
+0800d6c4: mov        r8, r0
+0800d6c6: movs       r6, r5
+0800d6c8: ldrb.w     r0, [r8, #0x79]
+0800d6cc: ands       r0, r0, #1
+0800d6d0: cmp        r0, #0
+0800d6d2: bne        #0x800d6fe
+0800d6d4: movs       r0, #0
+0800d6d6: ldr.w      r1, [pc, #0xbdc] ; LIT 0x800e2b4->0x2001ad72
+0800d6da: strb       r0, [r1]
+0800d6dc: bl         #0x80146f6 ; CALL 0x80146f6
+0800d6e0: cmp        r0, #0
+0800d6e2: bne        #0x800d6ec
+0800d6e4: bl         #0x8001a38 ; CALL 0x8001a38
+0800d6e8: cmp        r0, #0
+0800d6ea: beq        #0x800d746
+0800d6ec: movs       r0, #5
+0800d6ee: bl         #0x80184d8 ; CALL 0x80184d8
+0800d6f2: bl         #0x8011da8 ; CALL 0x8011da8
+0800d6f6: movs       r6, r0
+0800d6f8: movs       r0, #1
+0800d6fa: movs       r7, r0
+0800d6fc: b          #0x800d746
+0800d6fe: bl         #0x80146f6 ; CALL 0x80146f6
+0800d702: cmp        r0, #0
+0800d704: bne        #0x800d70e
+0800d706: bl         #0x8001a38 ; CALL 0x8001a38
+0800d70a: cmp        r0, #0
+0800d70c: beq        #0x800d728
+0800d70e: movs       r0, #0
+0800d710: ldr.w      r1, [pc, #0xba0] ; LIT 0x800e2b4->0x2001ad72
+0800d714: strb       r0, [r1]
+0800d716: movs       r0, #5
+0800d718: bl         #0x80184d8 ; CALL 0x80184d8
+0800d71c: bl         #0x8011da8 ; CALL 0x8011da8
+0800d720: movs       r6, r0
+0800d722: movs       r0, #1
+0800d724: movs       r7, r0
+0800d726: b          #0x800d746
+0800d728: ldr.w      r0, [pc, #0xb8c] ; LIT 0x800e2b8->0x2001ad76
+0800d72c: ldrb       r0, [r0]
+0800d72e: cmp        r0, #0
+0800d730: bne        #0x800d746
+0800d732: movs       r0, #1
+0800d734: ldr.w      r1, [pc, #0xb7c] ; LIT 0x800e2b4->0x2001ad72
+0800d738: strb       r0, [r1]
+0800d73a: movs       r0, #5
+0800d73c: bl         #0x80184d8 ; CALL 0x80184d8
+0800d740: bl         #0x8011d7a ; CALL 0x8011d7a
+0800d744: movs       r6, r0
+0800d746: sxth       r6, r6
+0800d748: sxth       r5, r5
+0800d74a: adds.w     r0, r5, #0x19
+0800d74e: cmp        r6, r0
+0800d750: bge        #0x800d77a
+0800d752: sxth       r5, r5
+0800d754: subs.w     r0, r5, #0x19
+0800d758: sxth       r6, r6
+0800d75a: cmp        r0, r6
+0800d75c: bge        #0x800d77a
+0800d75e: bl         #0x8011d2e ; CALL 0x8011d2e
+0800d762: ldrsh.w    r1, [sp, #0x10]
+0800d766: adds       r1, #0x19
+0800d768: cmp        r0, r1
+0800d76a: bge        #0x800d77a
+0800d76c: bl         #0x8011d2e ; CALL 0x8011d2e
+0800d770: ldrsh.w    r1, [sp, #0x10]
+0800d774: subs       r1, #0x19
+0800d776: cmp        r1, r0
+0800d778: blt        #0x800d84c
+0800d77a: movs       r0, #0
+0800d77c: ldr.w      r1, [pc, #0xb3c] ; LIT 0x800e2bc->0x2001ad79
+0800d780: strb       r0, [r1]
+0800d782: uxtb       r7, r7
+0800d784: cmp        r7, #0
+0800d786: beq        #0x800d7e0
+0800d788: bl         #0x8010eda ; CALL 0x8010eda
+0800d78c: mov        sb, r0
+0800d78e: bl         #0x8010f16 ; CALL 0x8010f16
+0800d792: mov        sl, r0
+0800d794: bl         #0x8010f0e ; CALL 0x8010f0e
+0800d798: mov        fp, r0
+0800d79a: bl         #0x8011d2e ; CALL 0x8011d2e
+0800d79e: movs       r1, #0
+0800d7a0: str        r1, [sp, #0xc]
+0800d7a2: ldr.w      r1, [pc, #0xc38] ; LIT 0x800e3dc->0x2001abe4
+0800d7a6: ldrb       r1, [r1]
+0800d7a8: ubfx       r1, r1, #2, #1
+0800d7ac: uxtb       r1, r1
+0800d7ae: str        r1, [sp, #8]
+0800d7b0: uxtb.w     sb, sb
+0800d7b4: str.w      sb, [sp, #4]
+0800d7b8: sxth.w     sl, sl
+0800d7bc: str.w      sl, [sp]
+0800d7c0: mov        r3, fp
+0800d7c2: sxth       r3, r3
+0800d7c4: ldrsh.w    r2, [r8, #0x13]
+0800d7c8: movs       r1, r0
+0800d7ca: sxth       r1, r1
+0800d7cc: ldr.w      r0, [pc, #0xaf0] ; LIT 0x800e2c0->0x2001ad1c
+0800d7d0: ldrsh.w    r0, [r0]
+0800d7d4: bl         #0x800f98c ; CALL 0x800f98c
+0800d7d8: sxth       r0, r0
+0800d7da: .byte 0x04, 0xf0
+
+=== SELECTOR5 TRADITIONAL PACKET BUILD CALLER 0x800dc82 0x800dbf2..0x800dd22 ===
+0800dbf2: bl         #0x8001ad8 ; CALL 0x8001ad8
+0800dbf6: ldrb.w     r0, [sp, #0x34]
+0800dbfa: ldr.w      r1, [pc, #0x7e0] ; LIT 0x800e3dc->0x2001abe4
+0800dbfe: ldrb       r1, [r1]
+0800dc00: bfi        r1, r0, #0, #1
+0800dc04: ldr.w      r0, [pc, #0x7d4] ; LIT 0x800e3dc->0x2001abe4
+0800dc08: strb       r1, [r0]
+0800dc0a: ldrb.w     r0, [sp, #0x34]
+0800dc0e: uxtb       r0, r0
+0800dc10: lsrs       r0, r0, #2
+0800dc12: ldr.w      r1, [pc, #0x7c8] ; LIT 0x800e3dc->0x2001abe4
+0800dc16: ldrb       r1, [r1]
+0800dc18: bfi        r1, r0, #3, #1
+0800dc1c: ldr.w      r0, [pc, #0x7bc] ; LIT 0x800e3dc->0x2001abe4
+0800dc20: strb       r1, [r0]
+0800dc22: ldrb.w     r0, [sp, #0x34]
+0800dc26: uxtb       r0, r0
+0800dc28: lsrs       r0, r0, #1
+0800dc2a: ldr.w      r1, [pc, #0x7b0] ; LIT 0x800e3dc->0x2001abe4
+0800dc2e: ldrb       r1, [r1]
+0800dc30: bfi        r1, r0, #1, #1
+0800dc34: ldr.w      r0, [pc, #0x7a4] ; LIT 0x800e3dc->0x2001abe4
+0800dc38: strb       r1, [r0]
+0800dc3a: add        sp, #0xc4
+0800dc3c: pop.w      {r4, r5, r6, r7, r8, sb, pc}
+0800dc40: push       {r7, lr}
+0800dc42: movs       r0, #1
+0800dc44: bl         #0x800f228 ; CALL 0x800f228
+0800dc48: pop        {r0, pc}
+0800dc4a: push       {r4, lr}
+0800dc4c: movs       r4, r0
+0800dc4e: bl         #0x8011238 ; CALL 0x8011238
+0800dc52: cmp        r0, #0
+0800dc54: beq        #0x800dc64
+0800dc56: movs       r1, r4
+0800dc58: ldr.w      r0, [pc, #0x8b4] ; LIT 0x800e510->0x2001aa78
+0800dc5c: ldrb       r0, [r0, #7]
+0800dc5e: bl         #0x801cf26 ; CALL 0x801cf26
+0800dc62: b          #0x800dc70
+0800dc64: movs       r2, r4
+0800dc66: ldr.w      r1, [pc, #0x8ac] ; LIT 0x800e514->0x803cf00 STRING='RTOS system not initialized yet, events not available (TskAE event 0x%08X)!\r\n'
+0800dc6a: movs       r0, #1
+0800dc6c: bl         #0x8008ee0 ; CALL 0x8008ee0
+0800dc70: pop        {r4, pc}
+0800dc72: push       {r7, lr}
+0800dc74: bl         #0x800d65c ; CALL 0x800d65c
+0800dc78: movs       r0, #1
+0800dc7a: ldr.w      r1, [pc, #0x638] ; LIT 0x800e2b4->0x2001ad72
+0800dc7e: strb       r0, [r1]
+0800dc80: movs       r0, #5
+0800dc82: bl         #0x80184d8 ; CALL 0x80184d8
+0800dc86: movs       r1, #8
+0800dc88: ldr.w      r0, [pc, #0x884] ; LIT 0x800e510->0x2001aa78
+0800dc8c: ldrb       r0, [r0, #7]
+0800dc8e: bl         #0x801cf40 ; CALL 0x801cf40
+0800dc92: bl         #0x8011d7a ; CALL 0x8011d7a
+0800dc96: sxth       r0, r0
+0800dc98: bl         #0x8011cf0 ; CALL 0x8011cf0
+0800dc9c: movs       r0, #0
+0800dc9e: bl         #0x800dee0 ; CALL 0x800dee0
+0800dca2: bl         #0x800d91c ; CALL 0x800d91c
+0800dca6: movs.w     r0, #0x20000
+0800dcaa: bl         #0x801002e ; CALL 0x801002e
+0800dcae: pop        {r0, pc}
+0800dcb0: push       {r7, lr}
+0800dcb2: movs.w     r1, #-0x80000000
+0800dcb6: ldr.w      r0, [pc, #0x858] ; LIT 0x800e510->0x2001aa78
+0800dcba: ldrb       r0, [r0, #7]
+0800dcbc: bl         #0x801cf40 ; CALL 0x801cf40
+0800dcc0: pop        {r0, pc}
+0800dcc2: bx         lr
+0800dcc4: bx         lr
+0800dcc6: push       {r4, lr}
+0800dcc8: sub        sp, #8
+0800dcca: ldr.w      r0, [pc, #0x84c] ; LIT 0x800e518->0x804c098
+0800dcce: ldr        r0, [r0]
+0800dcd0: str        r0, [sp]
+0800dcd2: movs.w     r1, #-1
+0800dcd6: ldr.w      r0, [pc, #0x838] ; LIT 0x800e510->0x2001aa78
+0800dcda: ldrb       r0, [r0, #7]
+0800dcdc: bl         #0x801cf40 ; CALL 0x801cf40
+0800dce0: str        r0, [sp]
+0800dce2: ldrb.w     r0, [sp, #3]
+0800dce6: ands       r0, r0, #0xc0
+0800dcea: cmp        r0, #0x40
+0800dcec: bne        #0x800dd04
+0800dcee: ldr        r4, [sp]
+0800dcf0: movs       r2, #0x64
+0800dcf2: movs.w     r1, #-0x80000000
+0800dcf6: ldr.w      r0, [pc, #0x818] ; LIT 0x800e510->0x2001aa78
+0800dcfa: ldrb       r0, [r0, #7]
+0800dcfc: bl         #0x801cf4e ; CALL 0x801cf4e
+0800dd00: orrs       r0, r4
+0800dd02: str        r0, [sp]
+0800dd04: ldrb.w     r0, [sp, #3]
+0800dd08: uxtb       r0, r0
+0800dd0a: lsrs       r0, r0, #7
+0800dd0c: uxtb       r0, r0
+0800dd0e: cmp        r0, #0
+0800dd10: bne        #0x800dd5e
+0800dd12: ldrb.w     r0, [sp]
+0800dd16: ands       r0, r0, #1
+0800dd1a: cmp        r0, #0
+0800dd1c: beq        #0x800dd42
+0800dd1e: ldr.w      r0, [pc, #0x7fc] ; LIT 0x800e51c->0x2001ad78
+
+=== SELECTOR5 TRADITIONAL PACKET BUILD CALLER 0x8013192 0x8013102..0x8013232 ===
+08013102: movs       r0, #1
+08013104: push       {r4, lr}
+08013106: movs       r4, r0
+08013108: ldr        r0, [pc, #0x1d0] ; LIT 0x80132dc->0x2001a9f4
+0801310a: ldrb       r0, [r0, #2]
+0801310c: ands       r0, r0, #1
+08013110: cmp        r0, #0
+08013112: beq        #0x8013134
+08013114: ldr        r0, [pc, #0x1c4] ; LIT 0x80132dc->0x2001a9f4
+08013116: ldrb       r0, [r0, #2]
+08013118: bfi        r0, r4, #1, #1
+0801311c: ldr        r1, [pc, #0x1bc] ; LIT 0x80132dc->0x2001a9f4
+0801311e: strb       r0, [r1, #2]
+08013120: uxtb       r4, r4
+08013122: cmp        r4, #1
+08013124: bne        #0x801312e
+08013126: movs       r0, #8
+08013128: bl         #0x8012c44 ; CALL 0x8012c44
+0801312c: b          #0x8013134
+0801312e: movs       r0, #0x10
+08013130: bl         #0x8012c44 ; CALL 0x8012c44
+08013134: pop        {r4, pc}
+08013136: push       {r4, r5, r6, lr}
+08013138: movs       r4, r0
+0801313a: movs       r5, r1
+0801313c: movs       r6, r4
+0801313e: cmp        r5, #2
+08013140: bne        #0x8013166
+08013142: ldrh       r0, [r6]
+08013144: ldr.w      r1, [pc, #0xc98] ; LIT 0x8013de0->0x2001abf0
+08013148: strh       r0, [r1]
+0801314a: ldr.w      r0, [pc, #0xc90] ; LIT 0x8013ddc->0x2000013b
+0801314e: ldrb       r0, [r0]
+08013150: cmp        r0, #0
+08013152: beq        #0x8013174
+08013154: ldr.w      r0, [pc, #0xc88] ; LIT 0x8013de0->0x2001abf0
+08013158: ldrh       r2, [r0]
+0801315a: ldr.w      r1, [pc, #0xc88] ; LIT 0x8013de4->0x8048e4c STRING='\t- Raw measure value : %i\r\n'
+0801315e: movs       r0, #2
+08013160: bl         #0x8008ee0 ; CALL 0x8008ee0
+08013164: b          #0x8013174
+08013166: movs       r3, #2
+08013168: movs       r2, r5
+0801316a: ldr.w      r1, [pc, #0xc88] ; LIT 0x8013df4->0x80422c8 STRING='Wrong size of preflash measure result (%i != %i)\r\n'
+0801316e: movs       r0, #3
+08013170: bl         #0x8008ee0 ; CALL 0x8008ee0
+08013174: pop        {r4, r5, r6, pc}
+08013176: movs       r0, r0
+08013178: add        r1, sp, #0x130
+0801317a: movs       r0, #1
+0801317c: movs       r0, r0
+0801317e: subs       r7, #0xf0
+08013180: push       {r4, r5, r6, lr}
+08013182: movs       r4, r0
+08013184: bl         #0x801ce2c ; CALL 0x801ce2c
+08013188: movs       r1, #0
+0801318a: movs       r0, #3
+0801318c: bl         #0x801ae48 ; CALL 0x801ae48
+08013190: movs       r0, #6
+08013192: bl         #0x80184d8 ; CALL 0x80184d8
+08013196: ldr.w      r0, [pc, #0xc48] ; LIT 0x8013de0->0x2001abf0
+0801319a: ldrh       r0, [r0]
+0801319c: movs       r5, r0
+0801319e: uxth       r4, r4
+080131a0: mov.w      r0, #0x3e8
+080131a4: sdiv       r0, r4, r0
+080131a8: bl         #0x801ceaa ; CALL 0x801ceaa
+080131ac: uxth       r4, r4
+080131ae: mov.w      r0, #0x3e8
+080131b2: sdiv       r1, r4, r0
+080131b6: mls        r0, r0, r1, r4
+080131ba: bl         #0x80168b4 ; CALL 0x80168b4
+080131be: movs       r0, #6
+080131c0: bl         #0x80184d8 ; CALL 0x80184d8
+080131c4: ldr.w      r0, [pc, #0xc18] ; LIT 0x8013de0->0x2001abf0
+080131c8: ldrh       r0, [r0]
+080131ca: subs       r0, r0, r5
+080131cc: movs       r6, r0
+080131ce: uxth       r6, r6
+080131d0: movw       r0, #0xfb5
+080131d4: cmp        r6, r0
+080131d6: blt        #0x80131de
+080131d8: movw       r0, #0xfb4
+080131dc: movs       r6, r0
+080131de: uxth       r6, r6
+080131e0: asrs       r0, r6, #2
+080131e2: subs       r0, #0xa
+080131e4: movs       r1, #5
+080131e6: sdiv       r0, r0, r1
+080131ea: ldr.w      r1, [pc, #0xbfc] ; LIT 0x8013de8->0x8039eac
+080131ee: ldrh.w     r6, [r1, r0, lsl #1]
+080131f2: uxth       r6, r6
+080131f4: movs       r2, r6
+080131f6: ldr.w      r1, [pc, #0xdd4] ; LIT 0x8013fcc->0x8049cc8 STRING='Read %d as new Uc0.\r\n'
+080131fa: movs       r0, #0
+080131fc: bl         #0x8008ee0 ; CALL 0x8008ee0
+08013200: movs       r1, #1
+08013202: movs       r0, #3
+08013204: bl         #0x801ae48 ; CALL 0x801ae48
+08013208: bl         #0x801ce3c ; CALL 0x801ce3c
+0801320c: movs       r0, r6
+0801320e: uxth       r0, r0
+08013210: pop        {r4, r5, r6, pc}
+08013212: movs       r0, r0
+08013214: movs       r1, r0
+08013216: movs       r0, #0
+08013218: sxth       r1, r1
+0801321a: cmp.w      r1, #0x800
+0801321e: ble        #0x80132be
+08013220: sxth       r1, r1
+08013222: cmp.w      r1, #0x900
+08013226: bge        #0x801324a
+08013228: sxth       r1, r1
+0801322a: subs.w     r2, r1, #0x800
+0801322e: vmov       s0, r2
+
+=== SELECTOR5 TRADITIONAL PACKET BUILD CALLER 0x80131c0 0x8013130..0x8013260 ===
+08013130: bl         #0x8012c44 ; CALL 0x8012c44
+08013134: pop        {r4, pc}
+08013136: push       {r4, r5, r6, lr}
+08013138: movs       r4, r0
+0801313a: movs       r5, r1
+0801313c: movs       r6, r4
+0801313e: cmp        r5, #2
+08013140: bne        #0x8013166
+08013142: ldrh       r0, [r6]
+08013144: ldr.w      r1, [pc, #0xc98] ; LIT 0x8013de0->0x2001abf0
+08013148: strh       r0, [r1]
+0801314a: ldr.w      r0, [pc, #0xc90] ; LIT 0x8013ddc->0x2000013b
+0801314e: ldrb       r0, [r0]
+08013150: cmp        r0, #0
+08013152: beq        #0x8013174
+08013154: ldr.w      r0, [pc, #0xc88] ; LIT 0x8013de0->0x2001abf0
+08013158: ldrh       r2, [r0]
+0801315a: ldr.w      r1, [pc, #0xc88] ; LIT 0x8013de4->0x8048e4c STRING='\t- Raw measure value : %i\r\n'
+0801315e: movs       r0, #2
+08013160: bl         #0x8008ee0 ; CALL 0x8008ee0
+08013164: b          #0x8013174
+08013166: movs       r3, #2
+08013168: movs       r2, r5
+0801316a: ldr.w      r1, [pc, #0xc88] ; LIT 0x8013df4->0x80422c8 STRING='Wrong size of preflash measure result (%i != %i)\r\n'
+0801316e: movs       r0, #3
+08013170: bl         #0x8008ee0 ; CALL 0x8008ee0
+08013174: pop        {r4, r5, r6, pc}
+08013176: movs       r0, r0
+08013178: add        r1, sp, #0x130
+0801317a: movs       r0, #1
+0801317c: movs       r0, r0
+0801317e: subs       r7, #0xf0
+08013180: push       {r4, r5, r6, lr}
+08013182: movs       r4, r0
+08013184: bl         #0x801ce2c ; CALL 0x801ce2c
+08013188: movs       r1, #0
+0801318a: movs       r0, #3
+0801318c: bl         #0x801ae48 ; CALL 0x801ae48
+08013190: movs       r0, #6
+08013192: bl         #0x80184d8 ; CALL 0x80184d8
+08013196: ldr.w      r0, [pc, #0xc48] ; LIT 0x8013de0->0x2001abf0
+0801319a: ldrh       r0, [r0]
+0801319c: movs       r5, r0
+0801319e: uxth       r4, r4
+080131a0: mov.w      r0, #0x3e8
+080131a4: sdiv       r0, r4, r0
+080131a8: bl         #0x801ceaa ; CALL 0x801ceaa
+080131ac: uxth       r4, r4
+080131ae: mov.w      r0, #0x3e8
+080131b2: sdiv       r1, r4, r0
+080131b6: mls        r0, r0, r1, r4
+080131ba: bl         #0x80168b4 ; CALL 0x80168b4
+080131be: movs       r0, #6
+080131c0: bl         #0x80184d8 ; CALL 0x80184d8
+080131c4: ldr.w      r0, [pc, #0xc18] ; LIT 0x8013de0->0x2001abf0
+080131c8: ldrh       r0, [r0]
+080131ca: subs       r0, r0, r5
+080131cc: movs       r6, r0
+080131ce: uxth       r6, r6
+080131d0: movw       r0, #0xfb5
+080131d4: cmp        r6, r0
+080131d6: blt        #0x80131de
+080131d8: movw       r0, #0xfb4
+080131dc: movs       r6, r0
+080131de: uxth       r6, r6
+080131e0: asrs       r0, r6, #2
+080131e2: subs       r0, #0xa
+080131e4: movs       r1, #5
+080131e6: sdiv       r0, r0, r1
+080131ea: ldr.w      r1, [pc, #0xbfc] ; LIT 0x8013de8->0x8039eac
+080131ee: ldrh.w     r6, [r1, r0, lsl #1]
+080131f2: uxth       r6, r6
+080131f4: movs       r2, r6
+080131f6: ldr.w      r1, [pc, #0xdd4] ; LIT 0x8013fcc->0x8049cc8 STRING='Read %d as new Uc0.\r\n'
+080131fa: movs       r0, #0
+080131fc: bl         #0x8008ee0 ; CALL 0x8008ee0
+08013200: movs       r1, #1
+08013202: movs       r0, #3
+08013204: bl         #0x801ae48 ; CALL 0x801ae48
+08013208: bl         #0x801ce3c ; CALL 0x801ce3c
+0801320c: movs       r0, r6
+0801320e: uxth       r0, r0
+08013210: pop        {r4, r5, r6, pc}
+08013212: movs       r0, r0
+08013214: movs       r1, r0
+08013216: movs       r0, #0
+08013218: sxth       r1, r1
+0801321a: cmp.w      r1, #0x800
+0801321e: ble        #0x80132be
+08013220: sxth       r1, r1
+08013222: cmp.w      r1, #0x900
+08013226: bge        #0x801324a
+08013228: sxth       r1, r1
+0801322a: subs.w     r2, r1, #0x800
+0801322e: vmov       s0, r2
+08013232: vcvt.f32.s32 s0, s0
+08013236: vldr       s1, [pc, #0x90]
+0801323a: vmul.f32   s0, s0, s1
+0801323e: vcvt.s32.f32 s0, s0
+08013242: vmov       r2, s0
+08013246: movs       r0, r2
+08013248: b          #0x80132be
+0801324a: sxth       r1, r1
+0801324c: cmp.w      r1, #0xa00
+08013250: bgt        #0x8013274
+08013252: sxth       r1, r1
+08013254: subs.w     r2, r1, #0x800
+08013258: vmov       s0, r2
+0801325c: vcvt.f32.s32 s0, s0
+
+=== SELECTOR5 TRADITIONAL PACKET BUILD CALLER 0x8013ece 0x8013e3e..0x8013f6e ===
+08013e3e: asrs       r0, r2, #0x20
+08013e40: mov.w      r2, #0x100
+08013e44: smulbb     r1, r1, r2
+08013e48: movs       r2, #6
+08013e4a: sdiv       r1, r1, r2
+08013e4e: subs       r0, r0, r1
+08013e50: strh.w     r0, [sb, #8]
+08013e54: ldr        r0, [pc, #0x2a4] ; LIT 0x80140fc->0x2000013b
+08013e56: ldrb       r0, [r0]
+08013e58: cmp        r0, #0
+08013e5a: beq        #0x8013e72
+08013e5c: ldrsh.w    r0, [sb, #0x10]
+08013e60: str        r0, [sp]
+08013e62: ldrsh.w    r3, [sb, #6]
+08013e66: ldrsh.w    r2, [sb, #8]
+08013e6a: ldr        r1, [pc, #0x294] ; LIT 0x8014100->0x8048e68 STRING='VB GN: %i MGN:%i PI: %i\r\n'
+08013e6c: movs       r0, #2
+08013e6e: bl         #0x8008ee0 ; CALL 0x8008ee0
+08013e72: ldr        r0, [pc, #0x27c] ; LIT 0x80140f0->0x2001a9f4
+08013e74: ldrb       r0, [r0, #1]
+08013e76: ubfx       r0, r0, #2, #1
+08013e7a: uxtb       r0, r0
+08013e7c: cmp        r0, #0
+08013e7e: beq        #0x8013e88
+08013e80: movs       r0, #5
+08013e82: bl         #0x801ceaa ; CALL 0x801ceaa
+08013e86: b          #0x8013e8e
+08013e88: movs       r0, #0x64
+08013e8a: bl         #0x801ceaa ; CALL 0x801ceaa
+08013e8e: bl         #0x8012520 ; CALL 0x8012520
+08013e92: ldr        r0, [pc, #0x268] ; LIT 0x80140fc->0x2000013b
+08013e94: ldrb       r0, [r0]
+08013e96: cmp        r0, #0
+08013e98: beq        #0x8013ea2
+08013e9a: ldr        r1, [pc, #0x268] ; LIT 0x8014104->0x804b260 STRING='Data sent.\r\n'
+08013e9c: movs       r0, #2
+08013e9e: bl         #0x8008ee0 ; CALL 0x8008ee0
+08013ea2: ldr        r0, [pc, #0x24c] ; LIT 0x80140f0->0x2001a9f4
+08013ea4: ldrb       r0, [r0, #1]
+08013ea6: ubfx       r0, r0, #2, #1
+08013eaa: uxtb       r0, r0
+08013eac: cmp        r0, #0
+08013eae: beq        #0x8013eb8
+08013eb0: movs       r0, #5
+08013eb2: bl         #0x801ceaa ; CALL 0x801ceaa
+08013eb6: b          #0x8013ebe
+08013eb8: movs       r0, #0x64
+08013eba: bl         #0x801ceaa ; CALL 0x801ceaa
+08013ebe: movs       r1, #0
+08013ec0: movs       r0, #3
+08013ec2: bl         #0x801ae48 ; CALL 0x801ae48
+08013ec6: movs       r0, #0xc8
+08013ec8: bl         #0x80168b4 ; CALL 0x80168b4
+08013ecc: movs       r0, #6
+08013ece: bl         #0x80184d8 ; CALL 0x80184d8
+08013ed2: ldr        r0, [pc, #0x234] ; LIT 0x8014108->0x2001abf0
+08013ed4: ldrh       r0, [r0]
+08013ed6: movs       r7, r0
+08013ed8: ldrb.w     r0, [sb, #1]
+08013edc: ubfx       r0, r0, #2, #1
+08013ee0: uxtb       r0, r0
+08013ee2: cmp        r0, #0
+08013ee4: beq        #0x8013ef2
+08013ee6: movw       r1, #0x1388
+08013eea: movs       r0, #0xff
+08013eec: bl         #0x8019b76 ; CALL 0x8019b76
+08013ef0: b          #0x8013efc
+08013ef2: movw       r1, #0x2710
+08013ef6: movs       r0, #0xff
+08013ef8: bl         #0x8019b76 ; CALL 0x8019b76
+08013efc: movw       r0, #0x2710
+08013f00: bl         #0x80168b4 ; CALL 0x80168b4
+08013f04: movs       r0, #6
+08013f06: bl         #0x80184d8 ; CALL 0x80184d8
+08013f0a: ldr        r0, [pc, #0x1fc] ; LIT 0x8014108->0x2001abf0
+08013f0c: ldrsh.w    r0, [r0]
+08013f10: subs       r0, r0, r7
+08013f12: movs       r6, r0
+08013f14: movs       r1, #1
+08013f16: movs       r0, #3
+08013f18: bl         #0x801ae48 ; CALL 0x801ae48
+08013f1c: ldr        r0, [pc, #0x1d0] ; LIT 0x80140f0->0x2001a9f4
+08013f1e: ldrb       r0, [r0, #1]
+08013f20: ubfx       r0, r0, #2, #1
+08013f24: uxtb       r0, r0
+08013f26: cmp        r0, #0
+08013f28: beq        #0x8013f32
+08013f2a: movs       r0, #5
+08013f2c: bl         #0x801ceaa ; CALL 0x801ceaa
+08013f30: b          #0x8013f38
+08013f32: movs       r0, #0x64
+08013f34: bl         #0x801ceaa ; CALL 0x801ceaa
+08013f38: sxth       r6, r6
+08013f3a: movw       r0, #0xfb5
+08013f3e: cmp        r6, r0
+08013f40: blt        #0x8013f48
+08013f42: movw       r0, #0xfb4
+08013f46: movs       r6, r0
+08013f48: sxth       r6, r6
+08013f4a: movs       r0, #4
+08013f4c: sdiv       r0, r6, r0
+08013f50: subs       r0, #0xa
+08013f52: movs       r1, #5
+08013f54: sdiv       r0, r0, r1
+08013f58: mov        r8, r0
+08013f5a: sxth.w     r8, r8
+08013f5e: cmp.w      r8, #0
+08013f62: bpl        #0x8013f68
+08013f64: movs       r0, #0
+08013f66: mov        r8, r0
+08013f68: sxth.w     r8, r8
+08013f6c: .byte 0xb8, 0xf1
+
+=== SELECTOR5 TRADITIONAL PACKET BUILD CALLER 0x8013f06 0x8013e76..0x8013fa6 ===
+08013e76: ubfx       r0, r0, #2, #1
+08013e7a: uxtb       r0, r0
+08013e7c: cmp        r0, #0
+08013e7e: beq        #0x8013e88
+08013e80: movs       r0, #5
+08013e82: bl         #0x801ceaa ; CALL 0x801ceaa
+08013e86: b          #0x8013e8e
+08013e88: movs       r0, #0x64
+08013e8a: bl         #0x801ceaa ; CALL 0x801ceaa
+08013e8e: bl         #0x8012520 ; CALL 0x8012520
+08013e92: ldr        r0, [pc, #0x268] ; LIT 0x80140fc->0x2000013b
+08013e94: ldrb       r0, [r0]
+08013e96: cmp        r0, #0
+08013e98: beq        #0x8013ea2
+08013e9a: ldr        r1, [pc, #0x268] ; LIT 0x8014104->0x804b260 STRING='Data sent.\r\n'
+08013e9c: movs       r0, #2
+08013e9e: bl         #0x8008ee0 ; CALL 0x8008ee0
+08013ea2: ldr        r0, [pc, #0x24c] ; LIT 0x80140f0->0x2001a9f4
+08013ea4: ldrb       r0, [r0, #1]
+08013ea6: ubfx       r0, r0, #2, #1
+08013eaa: uxtb       r0, r0
+08013eac: cmp        r0, #0
+08013eae: beq        #0x8013eb8
+08013eb0: movs       r0, #5
+08013eb2: bl         #0x801ceaa ; CALL 0x801ceaa
+08013eb6: b          #0x8013ebe
+08013eb8: movs       r0, #0x64
+08013eba: bl         #0x801ceaa ; CALL 0x801ceaa
+08013ebe: movs       r1, #0
+08013ec0: movs       r0, #3
+08013ec2: bl         #0x801ae48 ; CALL 0x801ae48
+08013ec6: movs       r0, #0xc8
+08013ec8: bl         #0x80168b4 ; CALL 0x80168b4
+08013ecc: movs       r0, #6
+08013ece: bl         #0x80184d8 ; CALL 0x80184d8
+08013ed2: ldr        r0, [pc, #0x234] ; LIT 0x8014108->0x2001abf0
+08013ed4: ldrh       r0, [r0]
+08013ed6: movs       r7, r0
+08013ed8: ldrb.w     r0, [sb, #1]
+08013edc: ubfx       r0, r0, #2, #1
+08013ee0: uxtb       r0, r0
+08013ee2: cmp        r0, #0
+08013ee4: beq        #0x8013ef2
+08013ee6: movw       r1, #0x1388
+08013eea: movs       r0, #0xff
+08013eec: bl         #0x8019b76 ; CALL 0x8019b76
+08013ef0: b          #0x8013efc
+08013ef2: movw       r1, #0x2710
+08013ef6: movs       r0, #0xff
+08013ef8: bl         #0x8019b76 ; CALL 0x8019b76
+08013efc: movw       r0, #0x2710
+08013f00: bl         #0x80168b4 ; CALL 0x80168b4
+08013f04: movs       r0, #6
+08013f06: bl         #0x80184d8 ; CALL 0x80184d8
+08013f0a: ldr        r0, [pc, #0x1fc] ; LIT 0x8014108->0x2001abf0
+08013f0c: ldrsh.w    r0, [r0]
+08013f10: subs       r0, r0, r7
+08013f12: movs       r6, r0
+08013f14: movs       r1, #1
+08013f16: movs       r0, #3
+08013f18: bl         #0x801ae48 ; CALL 0x801ae48
+08013f1c: ldr        r0, [pc, #0x1d0] ; LIT 0x80140f0->0x2001a9f4
+08013f1e: ldrb       r0, [r0, #1]
+08013f20: ubfx       r0, r0, #2, #1
+08013f24: uxtb       r0, r0
+08013f26: cmp        r0, #0
+08013f28: beq        #0x8013f32
+08013f2a: movs       r0, #5
+08013f2c: bl         #0x801ceaa ; CALL 0x801ceaa
+08013f30: b          #0x8013f38
+08013f32: movs       r0, #0x64
+08013f34: bl         #0x801ceaa ; CALL 0x801ceaa
+08013f38: sxth       r6, r6
+08013f3a: movw       r0, #0xfb5
+08013f3e: cmp        r6, r0
+08013f40: blt        #0x8013f48
+08013f42: movw       r0, #0xfb4
+08013f46: movs       r6, r0
+08013f48: sxth       r6, r6
+08013f4a: movs       r0, #4
+08013f4c: sdiv       r0, r6, r0
+08013f50: subs       r0, #0xa
+08013f52: movs       r1, #5
+08013f54: sdiv       r0, r0, r1
+08013f58: mov        r8, r0
+08013f5a: sxth.w     r8, r8
+08013f5e: cmp.w      r8, #0
+08013f62: bpl        #0x8013f68
+08013f64: movs       r0, #0
+08013f66: mov        r8, r0
+08013f68: sxth.w     r8, r8
+08013f6c: cmp.w      r8, #0xc8
+08013f70: blo        #0x8013f78
+08013f72: movs.w     r8, #0xc7
+08013f76: b          #0x8013f78
+08013f78: ldr        r0, [pc, #0x180] ; LIT 0x80140fc->0x2000013b
+08013f7a: ldrb       r0, [r0]
+08013f7c: cmp        r0, #0
+08013f7e: beq        #0x8013f8e
+08013f80: sxth.w     r8, r8
+08013f84: mov        r2, r8
+08013f86: ldr        r1, [pc, #0x184] ; LIT 0x801410c->0x804b270 STRING='TabIndex: %i \r\n'
+08013f88: movs       r0, #2
+08013f8a: bl         #0x8008ee0 ; CALL 0x8008ee0
+08013f8e: ldr        r0, [pc, #0x180] ; LIT 0x8014110->0x8039eac
+08013f90: sxth.w     r8, r8
+08013f94: ldrsh.w    r0, [r0, r8, lsl #1]
+08013f98: movs       r6, r0
+08013f9a: ldr        r0, [pc, #0x160] ; LIT 0x80140fc->0x2000013b
+08013f9c: ldrb       r0, [r0]
+08013f9e: cmp        r0, #0
+08013fa0: beq        #0x8013fae
+08013fa2: sxth       r6, r6
+08013fa4: movs       r2, r6
+
+=== SELECTOR5 TRADITIONAL PACKET BUILD CALLER 0x801db9c 0x801db0c..0x801dc3c ===
+0801db0c: ldr.w      r0, [pc, #0x924] ; LIT 0x801e434->0x2001ac34
+0801db10: ldrb       r0, [r0, #1]
+0801db12: ldr.w      r1, [pc, #0xba0] ; LIT 0x801e6b4->0x2001aa68
+0801db16: strb       r0, [r1, #4]
+0801db18: ldr.w      r0, [pc, #0x918] ; LIT 0x801e434->0x2001ac34
+0801db1c: ldrb       r2, [r0, #1]
+0801db1e: ldr.w      r1, [pc, #0xb9c] ; LIT 0x801e6bc->0x804b470 STRING='\t - type %i\r\n'
+0801db22: movs       r0, #0
+0801db24: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801db28: ldr.w      r0, [pc, #0xb88] ; LIT 0x801e6b4->0x2001aa68
+0801db2c: ldrb       r3, [r0, #6]
+0801db2e: ldr.w      r0, [pc, #0xb84] ; LIT 0x801e6b4->0x2001aa68
+0801db32: ldrb       r2, [r0, #7]
+0801db34: ldr.w      r1, [pc, #0xb88] ; LIT 0x801e6c0->0x80471b0 STRING='\t - Pr. date (week %i, year %i)\r\n'
+0801db38: movs       r0, #0
+0801db3a: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801db3e: ldr.w      r0, [pc, #0xb78] ; LIT 0x801e6b8->0x2001aaf4
+0801db42: ldrb       r2, [r0, #8]
+0801db44: ldr.w      r1, [pc, #0xb7c] ; LIT 0x801e6c4->0x8049f80 STRING='\t - capacity %i %%\r\n'
+0801db48: movs       r0, #0
+0801db4a: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801db4e: ldr.w      r0, [pc, #0xb68] ; LIT 0x801e6b8->0x2001aaf4
+0801db52: ldrh       r2, [r0, #4]
+0801db54: ldr.w      r1, [pc, #0xb70] ; LIT 0x801e6c8->0x804ac54 STRING='\t - current %i mA\r\n'
+0801db58: movs       r0, #0
+0801db5a: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801db5e: ldr.w      r0, [pc, #0xb58] ; LIT 0x801e6b8->0x2001aaf4
+0801db62: ldrh       r2, [r0, #2]
+0801db64: ldr.w      r1, [pc, #0xb64] ; LIT 0x801e6cc->0x804ac68 STRING='\t - voltage %i mV\r\n'
+0801db68: movs       r0, #0
+0801db6a: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801db6e: ldr.w      r0, [pc, #0xb48] ; LIT 0x801e6b8->0x2001aaf4
+0801db72: ldrsh.w    r0, [r0, #6]
+0801db76: bl         #0x801ef7c ; CALL 0x801ef7c
+0801db7a: movs       r2, #0
+0801db7c: ldr.w      r3, [pc, #0x7c0] ; LIT 0x801e340->0x40240000
+0801db80: bl         #0x801efac ; CALL 0x801efac
+0801db84: movs       r2, r0
+0801db86: movs       r3, r1
+0801db88: ldr.w      r1, [pc, #0xb44] ; LIT 0x801e6d0->0x80491cc STRING='\t - temperature %0.2f C\r\n'
+0801db8c: movs       r0, #0
+0801db8e: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801db92: bl         #0x801e404 ; CALL 0x801e404
+0801db96: bl         #0x801e348 ; CALL 0x801e348
+0801db9a: movs       r0, #1
+0801db9c: bl         #0x80184d8 ; CALL 0x80184d8
+0801dba0: movs       r0, #2
+0801dba2: bl         #0x80184d8 ; CALL 0x80184d8
+0801dba6: bl         #0x801e664 ; CALL 0x801e664
+0801dbaa: ldr.w      r0, [pc, #0x78c] ; LIT 0x801e338->0x2001aa58
+0801dbae: ldrb       r0, [r0]
+0801dbb0: cmp        r0, #3
+0801dbb2: bge        #0x801dbc6
+0801dbb4: movs       r3, #2
+0801dbb6: ldr.w      r0, [pc, #0x780] ; LIT 0x801e338->0x2001aa58
+0801dbba: ldrb       r2, [r0]
+0801dbbc: ldr.w      r1, [pc, #0xb14] ; LIT 0x801e6d4->0x803f918 STRING='Capacity (%i %%) to low (limit %i %%) at start up -> shutdown\r\n'
+0801dbc0: movs       r0, #1
+0801dbc2: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801dbc6: bl         #0x801e43c ; CALL 0x801e43c
+0801dbca: b          #0x801dbe6
+0801dbcc: ldr.w      r0, [pc, #0x768] ; LIT 0x801e338->0x2001aa58
+0801dbd0: ldrb       r0, [r0, #0xc]
+0801dbd2: orrs       r0, r0, #0x40
+0801dbd6: ldr.w      r1, [pc, #0x760] ; LIT 0x801e338->0x2001aa58
+0801dbda: strb       r0, [r1, #0xc]
+0801dbdc: ldr.w      r1, [pc, #0xbcc] ; LIT 0x801e7ac->0x804164c STRING='No genuine battery or adapter connected! -> shutdown\r\n'
+0801dbe0: movs       r0, #1
+0801dbe2: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801dbe6: bl         #0x801e1e0 ; CALL 0x801e1e0
+0801dbea: cmp        r0, #0
+0801dbec: bne        #0x801dbf6
+0801dbee: movs       r0, #1
+0801dbf0: bl         #0x801ceaa ; CALL 0x801ceaa
+0801dbf4: b          #0x801dbe6
+0801dbf6: movs       r0, #0
+0801dbf8: bl         #0x801e8f4 ; CALL 0x801e8f4
+0801dbfc: pop        {r0, pc}
+0801dbfe: movs       r0, r0
+0801dc00: str        r0, [sp, #0x3b0]
+0801dc02: lsrs       r4, r0, #0x20
+0801dc04: strh       r0, [r7, #0x1a]
+0801dc06: lsrs       r4, r0, #0x20
+0801dc08: push.w     {r4, r5, r6, r7, r8, sb, lr}
+0801dc0c: sub        sp, #0xc
+0801dc0e: ldr.w      r4, [pc, #0x728] ; LIT 0x801e338->0x2001aa58
+0801dc12: ldr.w      r0, [pc, #0xaa0] ; LIT 0x801e6b4->0x2001aa68
+0801dc16: ldrb.w     r8, [r0, #2]
+0801dc1a: ldr.w      r0, [pc, #0xa98] ; LIT 0x801e6b4->0x2001aa68
+0801dc1e: ldrb.w     sb, [r0]
+0801dc22: movs       r5, #5
+0801dc24: movs       r6, #0
+0801dc26: movs       r7, #0
+0801dc28: ldr.w      r0, [pc, #0x7d4] ; LIT 0x801e400->0x2001adbd
+0801dc2c: ldrb       r0, [r0]
+0801dc2e: cmp        r0, #0
+0801dc30: beq        #0x801dc44
+0801dc32: ldr.w      r1, [pc, #0xb7c] ; LIT 0x801e7b0->0x80491e8 STRING='Update system status...\r\n'
+0801dc36: movs       r0, #2
+0801dc38: bl         #0x8008ee0 ; CALL 0x8008ee0
+
+=== SELECTOR5 TRADITIONAL PACKET BUILD CALLER 0x801dba2 0x801db12..0x801dc42 ===
+0801db12: ldr.w      r1, [pc, #0xba0] ; LIT 0x801e6b4->0x2001aa68
+0801db16: strb       r0, [r1, #4]
+0801db18: ldr.w      r0, [pc, #0x918] ; LIT 0x801e434->0x2001ac34
+0801db1c: ldrb       r2, [r0, #1]
+0801db1e: ldr.w      r1, [pc, #0xb9c] ; LIT 0x801e6bc->0x804b470 STRING='\t - type %i\r\n'
+0801db22: movs       r0, #0
+0801db24: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801db28: ldr.w      r0, [pc, #0xb88] ; LIT 0x801e6b4->0x2001aa68
+0801db2c: ldrb       r3, [r0, #6]
+0801db2e: ldr.w      r0, [pc, #0xb84] ; LIT 0x801e6b4->0x2001aa68
+0801db32: ldrb       r2, [r0, #7]
+0801db34: ldr.w      r1, [pc, #0xb88] ; LIT 0x801e6c0->0x80471b0 STRING='\t - Pr. date (week %i, year %i)\r\n'
+0801db38: movs       r0, #0
+0801db3a: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801db3e: ldr.w      r0, [pc, #0xb78] ; LIT 0x801e6b8->0x2001aaf4
+0801db42: ldrb       r2, [r0, #8]
+0801db44: ldr.w      r1, [pc, #0xb7c] ; LIT 0x801e6c4->0x8049f80 STRING='\t - capacity %i %%\r\n'
+0801db48: movs       r0, #0
+0801db4a: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801db4e: ldr.w      r0, [pc, #0xb68] ; LIT 0x801e6b8->0x2001aaf4
+0801db52: ldrh       r2, [r0, #4]
+0801db54: ldr.w      r1, [pc, #0xb70] ; LIT 0x801e6c8->0x804ac54 STRING='\t - current %i mA\r\n'
+0801db58: movs       r0, #0
+0801db5a: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801db5e: ldr.w      r0, [pc, #0xb58] ; LIT 0x801e6b8->0x2001aaf4
+0801db62: ldrh       r2, [r0, #2]
+0801db64: ldr.w      r1, [pc, #0xb64] ; LIT 0x801e6cc->0x804ac68 STRING='\t - voltage %i mV\r\n'
+0801db68: movs       r0, #0
+0801db6a: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801db6e: ldr.w      r0, [pc, #0xb48] ; LIT 0x801e6b8->0x2001aaf4
+0801db72: ldrsh.w    r0, [r0, #6]
+0801db76: bl         #0x801ef7c ; CALL 0x801ef7c
+0801db7a: movs       r2, #0
+0801db7c: ldr.w      r3, [pc, #0x7c0] ; LIT 0x801e340->0x40240000
+0801db80: bl         #0x801efac ; CALL 0x801efac
+0801db84: movs       r2, r0
+0801db86: movs       r3, r1
+0801db88: ldr.w      r1, [pc, #0xb44] ; LIT 0x801e6d0->0x80491cc STRING='\t - temperature %0.2f C\r\n'
+0801db8c: movs       r0, #0
+0801db8e: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801db92: bl         #0x801e404 ; CALL 0x801e404
+0801db96: bl         #0x801e348 ; CALL 0x801e348
+0801db9a: movs       r0, #1
+0801db9c: bl         #0x80184d8 ; CALL 0x80184d8
+0801dba0: movs       r0, #2
+0801dba2: bl         #0x80184d8 ; CALL 0x80184d8
+0801dba6: bl         #0x801e664 ; CALL 0x801e664
+0801dbaa: ldr.w      r0, [pc, #0x78c] ; LIT 0x801e338->0x2001aa58
+0801dbae: ldrb       r0, [r0]
+0801dbb0: cmp        r0, #3
+0801dbb2: bge        #0x801dbc6
+0801dbb4: movs       r3, #2
+0801dbb6: ldr.w      r0, [pc, #0x780] ; LIT 0x801e338->0x2001aa58
+0801dbba: ldrb       r2, [r0]
+0801dbbc: ldr.w      r1, [pc, #0xb14] ; LIT 0x801e6d4->0x803f918 STRING='Capacity (%i %%) to low (limit %i %%) at start up -> shutdown\r\n'
+0801dbc0: movs       r0, #1
+0801dbc2: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801dbc6: bl         #0x801e43c ; CALL 0x801e43c
+0801dbca: b          #0x801dbe6
+0801dbcc: ldr.w      r0, [pc, #0x768] ; LIT 0x801e338->0x2001aa58
+0801dbd0: ldrb       r0, [r0, #0xc]
+0801dbd2: orrs       r0, r0, #0x40
+0801dbd6: ldr.w      r1, [pc, #0x760] ; LIT 0x801e338->0x2001aa58
+0801dbda: strb       r0, [r1, #0xc]
+0801dbdc: ldr.w      r1, [pc, #0xbcc] ; LIT 0x801e7ac->0x804164c STRING='No genuine battery or adapter connected! -> shutdown\r\n'
+0801dbe0: movs       r0, #1
+0801dbe2: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801dbe6: bl         #0x801e1e0 ; CALL 0x801e1e0
+0801dbea: cmp        r0, #0
+0801dbec: bne        #0x801dbf6
+0801dbee: movs       r0, #1
+0801dbf0: bl         #0x801ceaa ; CALL 0x801ceaa
+0801dbf4: b          #0x801dbe6
+0801dbf6: movs       r0, #0
+0801dbf8: bl         #0x801e8f4 ; CALL 0x801e8f4
+0801dbfc: pop        {r0, pc}
+0801dbfe: movs       r0, r0
+0801dc00: str        r0, [sp, #0x3b0]
+0801dc02: lsrs       r4, r0, #0x20
+0801dc04: strh       r0, [r7, #0x1a]
+0801dc06: lsrs       r4, r0, #0x20
+0801dc08: push.w     {r4, r5, r6, r7, r8, sb, lr}
+0801dc0c: sub        sp, #0xc
+0801dc0e: ldr.w      r4, [pc, #0x728] ; LIT 0x801e338->0x2001aa58
+0801dc12: ldr.w      r0, [pc, #0xaa0] ; LIT 0x801e6b4->0x2001aa68
+0801dc16: ldrb.w     r8, [r0, #2]
+0801dc1a: ldr.w      r0, [pc, #0xa98] ; LIT 0x801e6b4->0x2001aa68
+0801dc1e: ldrb.w     sb, [r0]
+0801dc22: movs       r5, #5
+0801dc24: movs       r6, #0
+0801dc26: movs       r7, #0
+0801dc28: ldr.w      r0, [pc, #0x7d4] ; LIT 0x801e400->0x2001adbd
+0801dc2c: ldrb       r0, [r0]
+0801dc2e: cmp        r0, #0
+0801dc30: beq        #0x801dc44
+0801dc32: ldr.w      r1, [pc, #0xb7c] ; LIT 0x801e7b0->0x80491e8 STRING='Update system status...\r\n'
+0801dc36: movs       r0, #2
+0801dc38: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801dc3c: movs       r0, #4
+0801dc3e: ldr.w      r1, [pc, #0x7c0] ; LIT 0x801e400->0x2001adbd
+
+=== SELECTOR5 TRADITIONAL PACKET BUILD CALLER 0x801dc46 0x801dbb6..0x801dce6 ===
+0801dbb6: ldr.w      r0, [pc, #0x780] ; LIT 0x801e338->0x2001aa58
+0801dbba: ldrb       r2, [r0]
+0801dbbc: ldr.w      r1, [pc, #0xb14] ; LIT 0x801e6d4->0x803f918 STRING='Capacity (%i %%) to low (limit %i %%) at start up -> shutdown\r\n'
+0801dbc0: movs       r0, #1
+0801dbc2: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801dbc6: bl         #0x801e43c ; CALL 0x801e43c
+0801dbca: b          #0x801dbe6
+0801dbcc: ldr.w      r0, [pc, #0x768] ; LIT 0x801e338->0x2001aa58
+0801dbd0: ldrb       r0, [r0, #0xc]
+0801dbd2: orrs       r0, r0, #0x40
+0801dbd6: ldr.w      r1, [pc, #0x760] ; LIT 0x801e338->0x2001aa58
+0801dbda: strb       r0, [r1, #0xc]
+0801dbdc: ldr.w      r1, [pc, #0xbcc] ; LIT 0x801e7ac->0x804164c STRING='No genuine battery or adapter connected! -> shutdown\r\n'
+0801dbe0: movs       r0, #1
+0801dbe2: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801dbe6: bl         #0x801e1e0 ; CALL 0x801e1e0
+0801dbea: cmp        r0, #0
+0801dbec: bne        #0x801dbf6
+0801dbee: movs       r0, #1
+0801dbf0: bl         #0x801ceaa ; CALL 0x801ceaa
+0801dbf4: b          #0x801dbe6
+0801dbf6: movs       r0, #0
+0801dbf8: bl         #0x801e8f4 ; CALL 0x801e8f4
+0801dbfc: pop        {r0, pc}
+0801dbfe: movs       r0, r0
+0801dc00: str        r0, [sp, #0x3b0]
+0801dc02: lsrs       r4, r0, #0x20
+0801dc04: strh       r0, [r7, #0x1a]
+0801dc06: lsrs       r4, r0, #0x20
+0801dc08: push.w     {r4, r5, r6, r7, r8, sb, lr}
+0801dc0c: sub        sp, #0xc
+0801dc0e: ldr.w      r4, [pc, #0x728] ; LIT 0x801e338->0x2001aa58
+0801dc12: ldr.w      r0, [pc, #0xaa0] ; LIT 0x801e6b4->0x2001aa68
+0801dc16: ldrb.w     r8, [r0, #2]
+0801dc1a: ldr.w      r0, [pc, #0xa98] ; LIT 0x801e6b4->0x2001aa68
+0801dc1e: ldrb.w     sb, [r0]
+0801dc22: movs       r5, #5
+0801dc24: movs       r6, #0
+0801dc26: movs       r7, #0
+0801dc28: ldr.w      r0, [pc, #0x7d4] ; LIT 0x801e400->0x2001adbd
+0801dc2c: ldrb       r0, [r0]
+0801dc2e: cmp        r0, #0
+0801dc30: beq        #0x801dc44
+0801dc32: ldr.w      r1, [pc, #0xb7c] ; LIT 0x801e7b0->0x80491e8 STRING='Update system status...\r\n'
+0801dc36: movs       r0, #2
+0801dc38: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801dc3c: movs       r0, #4
+0801dc3e: ldr.w      r1, [pc, #0x7c0] ; LIT 0x801e400->0x2001adbd
+0801dc42: strb       r0, [r1]
+0801dc44: movs       r0, #1
+0801dc46: bl         #0x80184d8 ; CALL 0x80184d8
+0801dc4a: ldrb       r0, [r4, #0xd]
+0801dc4c: movs       r5, r0
+0801dc4e: ldrb       r0, [r4, #0xe]
+0801dc50: movs       r6, r0
+0801dc52: ldrb       r0, [r4, #0xf]
+0801dc54: movs       r7, r0
+0801dc56: ldr.w      r0, [pc, #0x7dc] ; LIT 0x801e434->0x2001ac34
+0801dc5a: ldrb       r0, [r0]
+0801dc5c: ands       r0, r0, #1
+0801dc60: cmp        r0, #0
+0801dc62: beq.w      #0x801ddb4
+0801dc66: movs       r0, #1
+0801dc68: bl         #0x80179f4 ; CALL 0x80179f4
+0801dc6c: movs       r1, r0
+0801dc6e: ldr.w      r0, [pc, #0xa48] ; LIT 0x801e6b8->0x2001aaf4
+0801dc72: movs       r2, #0xa
+0801dc74: bl         #0x801d024 ; CALL 0x801d024
+0801dc78: ldr.w      r0, [pc, #0xa3c] ; LIT 0x801e6b8->0x2001aaf4
+0801dc7c: ldrb       r0, [r0]
+0801dc7e: ubfx       r0, r0, #5, #1
+0801dc82: uxtb       r0, r0
+0801dc84: cmp        r0, #0
+0801dc86: beq        #0x801dce0
+0801dc88: ldr.w      r0, [pc, #0xa28] ; LIT 0x801e6b4->0x2001aa68
+0801dc8c: ldrb       r0, [r0, #1]
+0801dc8e: mov        r8, r0
+0801dc90: ldr.w      r0, [pc, #0xa24] ; LIT 0x801e6b8->0x2001aaf4
+0801dc94: ldrb       r0, [r0, #8]
+0801dc96: ldr.w      r1, [pc, #0xa1c] ; LIT 0x801e6b4->0x2001aa68
+0801dc9a: strb       r0, [r1, #1]
+0801dc9c: mov        r0, r8
+0801dc9e: ldr.w      r1, [pc, #0xa14] ; LIT 0x801e6b4->0x2001aa68
+0801dca2: ldrb       r1, [r1, #1]
+0801dca4: uxtb       r0, r0
+0801dca6: cmp        r0, r1
+0801dca8: bhs        #0x801dcc8
+0801dcaa: ldr.w      r0, [pc, #0xa08] ; LIT 0x801e6b4->0x2001aa68
+0801dcae: strb.w     r8, [r0, #1]
+0801dcb2: ldr.w      r0, [pc, #0xa00] ; LIT 0x801e6b4->0x2001aa68
+0801dcb6: ldrb       r3, [r0, #1]
+0801dcb8: uxtb.w     r8, r8
+0801dcbc: mov        r2, r8
+0801dcbe: ldr.w      r1, [pc, #0xaf4] ; LIT 0x801e7b4->0x8045ebc STRING='Camera capacity increase! (%i -> %i)\r\n'
+0801dcc2: movs       r0, #1
+0801dcc4: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801dcc8: ldr.w      r0, [pc, #0x9e8] ; LIT 0x801e6b4->0x2001aa68
+0801dccc: ldrb       r0, [r0, #2]
+0801dcce: mov        r8, r0
+0801dcd0: ldr.w      r0, [pc, #0x9e0] ; LIT 0x801e6b4->0x2001aa68
+0801dcd4: ldrb       r0, [r0, #1]
+0801dcd6: bl         #0x801ea14 ; CALL 0x801ea14
+0801dcda: ldr.w      r1, [pc, #0x9d8] ; LIT 0x801e6b4->0x2001aa68
+0801dcde: strb       r0, [r1, #2]
+0801dce0: ldr.w      r0, [pc, #0x9d4] ; LIT 0x801e6b8->0x2001aaf4
+0801dce4: ldrb       r0, [r0]
+
+=== SELECTOR5 TRADITIONAL PACKET BUILD CALLER 0x801ddd8 0x801dd48..0x801de78 ===
+0801dd48: bl         #0x801ef7c ; CALL 0x801ef7c
+0801dd4c: movs       r2, #0
+0801dd4e: ldr.w      r3, [pc, #0x5f0] ; LIT 0x801e340->0x40240000
+0801dd52: bl         #0x801efac ; CALL 0x801efac
+0801dd56: movs       r2, r0
+0801dd58: movs       r3, r1
+0801dd5a: ldr.w      r1, [pc, #0xa60] ; LIT 0x801e7bc->0x8040894 STRING='Temperature (Battery) changed: %0.1f C (from %0.1f C)!!!\r\n'
+0801dd5e: movs       r0, #1
+0801dd60: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801dd64: ldr.w      r0, [pc, #0xa50] ; LIT 0x801e7b8->0x2001adc0
+0801dd68: ldrb       r0, [r0]
+0801dd6a: adds       r0, r0, #1
+0801dd6c: ldr.w      r1, [pc, #0xa48] ; LIT 0x801e7b8->0x2001adc0
+0801dd70: strb       r0, [r1]
+0801dd72: b          #0x801dd88
+0801dd74: ldr.w      r0, [pc, #0x940] ; LIT 0x801e6b8->0x2001aaf4
+0801dd78: ldrh       r0, [r0, #6]
+0801dd7a: ldr.w      r1, [pc, #0x938] ; LIT 0x801e6b4->0x2001aa68
+0801dd7e: strh       r0, [r1, #0xa]
+0801dd80: movs       r0, #0
+0801dd82: ldr.w      r1, [pc, #0xa34] ; LIT 0x801e7b8->0x2001adc0
+0801dd86: strb       r0, [r1]
+0801dd88: ldr.w      r0, [pc, #0x674] ; LIT 0x801e400->0x2001adbd
+0801dd8c: ldrb       r0, [r0]
+0801dd8e: cmp        r0, #0
+0801dd90: beq        #0x801ddd6
+0801dd92: ldr.w      r0, [pc, #0x66c] ; LIT 0x801e400->0x2001adbd
+0801dd96: ldrb       r0, [r0]
+0801dd98: subs       r0, r0, #1
+0801dd9a: ldr.w      r1, [pc, #0x664] ; LIT 0x801e400->0x2001adbd
+0801dd9e: strb       r0, [r1]
+0801dda0: ldr.w      r1, [pc, #0xb44] ; LIT 0x801e8e8->0x804ac7c STRING='Camera battery:\r\n'
+0801dda4: movs       r0, #2
+0801dda6: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801ddaa: ldr.w      r0, [pc, #0x90c] ; LIT 0x801e6b8->0x2001aaf4
+0801ddae: bl         #0x801e6d8 ; CALL 0x801e6d8
+0801ddb2: b          #0x801ddd6
+0801ddb4: ldr.w      r0, [pc, #0x648] ; LIT 0x801e400->0x2001adbd
+0801ddb8: ldrb       r0, [r0]
+0801ddba: cmp        r0, #0
+0801ddbc: beq        #0x801ddd6
+0801ddbe: ldr.w      r0, [pc, #0x640] ; LIT 0x801e400->0x2001adbd
+0801ddc2: ldrb       r0, [r0]
+0801ddc4: subs       r0, r0, #1
+0801ddc6: ldr.w      r1, [pc, #0x638] ; LIT 0x801e400->0x2001adbd
+0801ddca: strb       r0, [r1]
+0801ddcc: ldr.w      r1, [pc, #0xb1c] ; LIT 0x801e8ec->0x8048498 STRING='Camera battery not inserted\r\n'
+0801ddd0: movs       r0, #2
+0801ddd2: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801ddd6: movs       r0, #2
+0801ddd8: bl         #0x80184d8 ; CALL 0x80184d8
+0801dddc: bl         #0x801e404 ; CALL 0x801e404
+0801dde0: bl         #0x801e348 ; CALL 0x801e348
+0801dde4: bl         #0x801e664 ; CALL 0x801e664
+0801dde8: bl         #0x801e43c ; CALL 0x801e43c
+0801ddec: ldrb       r0, [r4]
+0801ddee: cmp        r0, #2
+0801ddf0: bge        #0x801de00
+0801ddf2: movs       r3, #2
+0801ddf4: ldrb       r2, [r4]
+0801ddf6: ldr.w      r1, [pc, #0xaf8] ; LIT 0x801e8f0->0x8042774 STRING='Capacity (%i %%) to low (limit %i %%) -> shutdown\r\n'
+0801ddfa: movs       r0, #1
+0801ddfc: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801de00: mov        r0, r8
+0801de02: ldr.w      r1, [pc, #0x8b0] ; LIT 0x801e6b4->0x2001aa68
+0801de06: ldrb       r1, [r1, #2]
+0801de08: uxtb       r0, r0
+0801de0a: cmp        r0, r1
+0801de0c: bne        #0x801de1c
+0801de0e: mov        r0, sb
+0801de10: ldr.w      r1, [pc, #0x8a0] ; LIT 0x801e6b4->0x2001aa68
+0801de14: ldrb       r1, [r1]
+0801de16: uxtb       r0, r0
+0801de18: cmp        r0, r1
+0801de1a: beq        #0x801de22
+0801de1c: movs       r0, #0x14
+0801de1e: bl         #0x80014bc ; CALL 0x80014bc
+0801de22: movs       r0, r5
+0801de24: ldrb       r1, [r4, #0xd]
+0801de26: uxtb       r0, r0
+0801de28: cmp        r0, r1
+0801de2a: beq        #0x801de32
+0801de2c: movs       r0, #0x18
+0801de2e: bl         #0x80014bc ; CALL 0x80014bc
+0801de32: movs       r0, r6
+0801de34: ldrb       r1, [r4, #0xe]
+0801de36: uxtb       r0, r0
+0801de38: cmp        r0, r1
+0801de3a: beq        #0x801de42
+0801de3c: movs       r0, #0x19
+0801de3e: bl         #0x80014bc ; CALL 0x80014bc
+0801de42: movs       r0, r7
+0801de44: ldrb       r1, [r4, #0xf]
+0801de46: uxtb       r0, r0
+0801de48: cmp        r0, r1
+0801de4a: beq        #0x801de52
+0801de4c: movs       r0, #0x1a
+0801de4e: bl         #0x80014bc ; CALL 0x80014bc
+0801de52: ldr.w      r0, [pc, #0xb4c] ; LIT 0x801e9a0->0x2001ad32
+0801de56: ldrsh.w    r0, [r0]
+0801de5a: ldr.w      r1, [pc, #0x4dc] ; LIT 0x801e338->0x2001aa58
+0801de5e: ldrsh.w    r1, [r1, #8]
+0801de62: cmp        r0, r1
+0801de64: bne        #0x801de7a
+0801de66: ldr.w      r0, [pc, #0xb3c] ; LIT 0x801e9a4->0x2001ad34
+0801de6a: ldrsh.w    r0, [r0]
+0801de6e: ldr.w      r1, [pc, #0x4c8] ; LIT 0x801e338->0x2001aa58
+0801de72: ldrsh.w    r1, [r1, #0xa]
+0801de76: cmp        r0, r1
+
+=== SELECTOR5 TRADITIONAL PACKET BUILD CALLER 0x801e070 0x801dfe0..0x801e110 ===
+0801dfe0: bx         lr
+0801dfe2: bx         lr
+0801dfe4: push       {r7, lr}
+0801dfe6: movs       r0, #1
+0801dfe8: bl         #0x801ceaa ; CALL 0x801ceaa
+0801dfec: pop        {r0, pc}
+0801dfee: bx         lr
+0801dff0: push       {r7, lr}
+0801dff2: movs       r2, #1
+0801dff4: movs       r1, #1
+0801dff6: ldr.w      r0, [pc, #0x9cc] ; LIT 0x801e9c4->0x2001aa78
+0801dffa: ldrb       r0, [r0, #3]
+0801dffc: bl         #0x801cf4e ; CALL 0x801cf4e
+0801e000: movs       r1, #2
+0801e002: ldr.w      r0, [pc, #0x9c0] ; LIT 0x801e9c4->0x2001aa78
+0801e006: ldrb       r0, [r0, #3]
+0801e008: bl         #0x801cf40 ; CALL 0x801cf40
+0801e00c: pop        {r0, pc}
+0801e00e: movs       r0, r0
+0801e010: str        r1, [sp, #0x90]
+0801e012: lsrs       r4, r0, #0x20
+0801e014: push       {r7, lr}
+0801e016: bl         #0x801df54 ; CALL 0x801df54
+0801e01a: pop        {r0, pc}
+0801e01c: bx         lr
+0801e01e: bx         lr
+0801e020: push       {r7, lr}
+0801e022: movs.w     r1, #-0x80000000
+0801e026: ldr.w      r0, [pc, #0x99c] ; LIT 0x801e9c4->0x2001aa78
+0801e02a: ldrb       r0, [r0, #3]
+0801e02c: bl         #0x801cf40 ; CALL 0x801cf40
+0801e030: pop        {r0, pc}
+0801e032: bx         lr
+0801e034: bx         lr
+0801e036: push       {r7, lr}
+0801e038: movs.w     r1, #-0x80000000
+0801e03c: ldr.w      r0, [pc, #0x984] ; LIT 0x801e9c4->0x2001aa78
+0801e040: ldrb       r0, [r0, #3]
+0801e042: bl         #0x801cf40 ; CALL 0x801cf40
+0801e046: pop        {r0, pc}
+0801e048: add        r4, sp, #0x100
+0801e04a: lsrs       r4, r0, #0x20
+0801e04c: str        r1, [sp, #0x20]
+0801e04e: lsrs       r4, r0, #0x20
+0801e050: add        r5, sp, #0x2f8
+0801e052: movs       r0, #1
+0801e054: strb       r4, [r7, #3]
+0801e056: lsrs       r4, r0, #0x20
+0801e058: strb       r0, [r4, #4]
+0801e05a: lsrs       r4, r0, #0x20
+0801e05c: bx         lr
+0801e05e: push       {r3, r4, r5, lr}
+0801e060: movs       r4, #0
+0801e062: movs       r5, #0
+0801e064: ldr.w      r1, [pc, #0x96c] ; LIT 0x801e9d4->0x80484b8 STRING='Check start up possibility\r\n'
+0801e068: movs       r0, #0
+0801e06a: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e06e: movs       r0, #1
+0801e070: bl         #0x80184d8 ; CALL 0x80184d8
+0801e074: movs       r0, #2
+0801e076: bl         #0x80184d8 ; CALL 0x80184d8
+0801e07a: sxtb       r5, r5
+0801e07c: cmp        r5, #0
+0801e07e: bne        #0x801e092
+0801e080: movs       r0, #0
+0801e082: bl         #0x801ad18 ; CALL 0x801ad18
+0801e086: movs       r5, r0
+0801e088: mov.w      r0, #0x3e8
+0801e08c: bl         #0x80168b4 ; CALL 0x80168b4
+0801e090: b          #0x801e07a
+0801e092: sxtb       r5, r5
+0801e094: cmp        r5, #1
+0801e096: beq        #0x801e0c8
+0801e098: ldr        r0, [pc, #0x29c] ; LIT 0x801e338->0x2001aa58
+0801e09a: ldrh       r0, [r0, #2]
+0801e09c: movw       r1, #0x1771
+0801e0a0: cmp        r0, r1
+0801e0a2: blt        #0x801e0b4
+0801e0a4: ldr.w      r1, [pc, #0x930] ; LIT 0x801e9d8->0x80484d8 STRING='System status ok -> start up\r\n'
+0801e0a8: movs       r0, #0
+0801e0aa: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e0ae: movs       r0, #1
+0801e0b0: movs       r4, r0
+0801e0b2: b          #0x801e0d2
+0801e0b4: movw       r3, #0x1770
+0801e0b8: ldr        r0, [pc, #0x27c] ; LIT 0x801e338->0x2001aa58
+0801e0ba: ldrh       r2, [r0, #2]
+0801e0bc: ldr.w      r1, [pc, #0x91c] ; LIT 0x801e9dc->0x803f958 STRING='Voltage (%i mV) to low (limit %i mV) at start up -> shutdown\r\n'
+0801e0c0: movs       r0, #0
+0801e0c2: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e0c6: b          #0x801e0d2
+0801e0c8: ldr.w      r1, [pc, #0xd34] ; LIT 0x801ee00->0x8045ee4 STRING='Switched off at start up -> shutdown\r\n'
+0801e0cc: movs       r0, #0
+0801e0ce: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e0d2: movs       r0, r4
+0801e0d4: uxtb       r0, r0
+0801e0d6: pop        {r1, r4, r5, pc}
+0801e0d8: push       {r7, lr}
+0801e0da: movs       r0, #1
+0801e0dc: ldr        r1, [pc, #0x320] ; LIT 0x801e400->0x2001adbd
+0801e0de: strb       r0, [r1]
+0801e0e0: movs       r0, #1
+0801e0e2: bl         #0x801defc ; CALL 0x801defc
+0801e0e6: pop        {r0, pc}
+0801e0e8: ldr.w      r0, [pc, #0x5c8] ; LIT 0x801e6b4->0x2001aa68
+0801e0ec: bx         lr
+0801e0ee: ldr        r0, [pc, #0x248] ; LIT 0x801e338->0x2001aa58
+0801e0f0: bx         lr
+0801e0f2: movs       r0, r0
+0801e0f4: strh       r0, [r3, #0x20]
+0801e0f6: lsrs       r4, r0, #0x20
+0801e0f8: ldr        r0, [pc, #0x23c] ; LIT 0x801e338->0x2001aa58
+0801e0fa: ldrsh.w    r0, [r0, #0xa]
+0801e0fe: bx         lr
+0801e100: ldr        r0, [pc, #0x234] ; LIT 0x801e338->0x2001aa58
+0801e102: ldrsh.w    r0, [r0, #8]
+0801e106: bx         lr
+0801e108: ldr.w      r0, [pc, #0xd54] ; LIT 0x801ee60->0x2001aa58
+0801e10c: ldrb       r0, [r0, #0xd]
+0801e10e: bx         lr
+
+=== SELECTOR5 TRADITIONAL PACKET BUILD CALLER 0x801e076 0x801dfe6..0x801e116 ===
+0801dfe6: movs       r0, #1
+0801dfe8: bl         #0x801ceaa ; CALL 0x801ceaa
+0801dfec: pop        {r0, pc}
+0801dfee: bx         lr
+0801dff0: push       {r7, lr}
+0801dff2: movs       r2, #1
+0801dff4: movs       r1, #1
+0801dff6: ldr.w      r0, [pc, #0x9cc] ; LIT 0x801e9c4->0x2001aa78
+0801dffa: ldrb       r0, [r0, #3]
+0801dffc: bl         #0x801cf4e ; CALL 0x801cf4e
+0801e000: movs       r1, #2
+0801e002: ldr.w      r0, [pc, #0x9c0] ; LIT 0x801e9c4->0x2001aa78
+0801e006: ldrb       r0, [r0, #3]
+0801e008: bl         #0x801cf40 ; CALL 0x801cf40
+0801e00c: pop        {r0, pc}
+0801e00e: movs       r0, r0
+0801e010: str        r1, [sp, #0x90]
+0801e012: lsrs       r4, r0, #0x20
+0801e014: push       {r7, lr}
+0801e016: bl         #0x801df54 ; CALL 0x801df54
+0801e01a: pop        {r0, pc}
+0801e01c: bx         lr
+0801e01e: bx         lr
+0801e020: push       {r7, lr}
+0801e022: movs.w     r1, #-0x80000000
+0801e026: ldr.w      r0, [pc, #0x99c] ; LIT 0x801e9c4->0x2001aa78
+0801e02a: ldrb       r0, [r0, #3]
+0801e02c: bl         #0x801cf40 ; CALL 0x801cf40
+0801e030: pop        {r0, pc}
+0801e032: bx         lr
+0801e034: bx         lr
+0801e036: push       {r7, lr}
+0801e038: movs.w     r1, #-0x80000000
+0801e03c: ldr.w      r0, [pc, #0x984] ; LIT 0x801e9c4->0x2001aa78
+0801e040: ldrb       r0, [r0, #3]
+0801e042: bl         #0x801cf40 ; CALL 0x801cf40
+0801e046: pop        {r0, pc}
+0801e048: add        r4, sp, #0x100
+0801e04a: lsrs       r4, r0, #0x20
+0801e04c: str        r1, [sp, #0x20]
+0801e04e: lsrs       r4, r0, #0x20
+0801e050: add        r5, sp, #0x2f8
+0801e052: movs       r0, #1
+0801e054: strb       r4, [r7, #3]
+0801e056: lsrs       r4, r0, #0x20
+0801e058: strb       r0, [r4, #4]
+0801e05a: lsrs       r4, r0, #0x20
+0801e05c: bx         lr
+0801e05e: push       {r3, r4, r5, lr}
+0801e060: movs       r4, #0
+0801e062: movs       r5, #0
+0801e064: ldr.w      r1, [pc, #0x96c] ; LIT 0x801e9d4->0x80484b8 STRING='Check start up possibility\r\n'
+0801e068: movs       r0, #0
+0801e06a: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e06e: movs       r0, #1
+0801e070: bl         #0x80184d8 ; CALL 0x80184d8
+0801e074: movs       r0, #2
+0801e076: bl         #0x80184d8 ; CALL 0x80184d8
+0801e07a: sxtb       r5, r5
+0801e07c: cmp        r5, #0
+0801e07e: bne        #0x801e092
+0801e080: movs       r0, #0
+0801e082: bl         #0x801ad18 ; CALL 0x801ad18
+0801e086: movs       r5, r0
+0801e088: mov.w      r0, #0x3e8
+0801e08c: bl         #0x80168b4 ; CALL 0x80168b4
+0801e090: b          #0x801e07a
+0801e092: sxtb       r5, r5
+0801e094: cmp        r5, #1
+0801e096: beq        #0x801e0c8
+0801e098: ldr        r0, [pc, #0x29c] ; LIT 0x801e338->0x2001aa58
+0801e09a: ldrh       r0, [r0, #2]
+0801e09c: movw       r1, #0x1771
+0801e0a0: cmp        r0, r1
+0801e0a2: blt        #0x801e0b4
+0801e0a4: ldr.w      r1, [pc, #0x930] ; LIT 0x801e9d8->0x80484d8 STRING='System status ok -> start up\r\n'
+0801e0a8: movs       r0, #0
+0801e0aa: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e0ae: movs       r0, #1
+0801e0b0: movs       r4, r0
+0801e0b2: b          #0x801e0d2
+0801e0b4: movw       r3, #0x1770
+0801e0b8: ldr        r0, [pc, #0x27c] ; LIT 0x801e338->0x2001aa58
+0801e0ba: ldrh       r2, [r0, #2]
+0801e0bc: ldr.w      r1, [pc, #0x91c] ; LIT 0x801e9dc->0x803f958 STRING='Voltage (%i mV) to low (limit %i mV) at start up -> shutdown\r\n'
+0801e0c0: movs       r0, #0
+0801e0c2: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e0c6: b          #0x801e0d2
+0801e0c8: ldr.w      r1, [pc, #0xd34] ; LIT 0x801ee00->0x8045ee4 STRING='Switched off at start up -> shutdown\r\n'
+0801e0cc: movs       r0, #0
+0801e0ce: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e0d2: movs       r0, r4
+0801e0d4: uxtb       r0, r0
+0801e0d6: pop        {r1, r4, r5, pc}
+0801e0d8: push       {r7, lr}
+0801e0da: movs       r0, #1
+0801e0dc: ldr        r1, [pc, #0x320] ; LIT 0x801e400->0x2001adbd
+0801e0de: strb       r0, [r1]
+0801e0e0: movs       r0, #1
+0801e0e2: bl         #0x801defc ; CALL 0x801defc
+0801e0e6: pop        {r0, pc}
+0801e0e8: ldr.w      r0, [pc, #0x5c8] ; LIT 0x801e6b4->0x2001aa68
+0801e0ec: bx         lr
+0801e0ee: ldr        r0, [pc, #0x248] ; LIT 0x801e338->0x2001aa58
+0801e0f0: bx         lr
+0801e0f2: movs       r0, r0
+0801e0f4: strh       r0, [r3, #0x20]
+0801e0f6: lsrs       r4, r0, #0x20
+0801e0f8: ldr        r0, [pc, #0x23c] ; LIT 0x801e338->0x2001aa58
+0801e0fa: ldrsh.w    r0, [r0, #0xa]
+0801e0fe: bx         lr
+0801e100: ldr        r0, [pc, #0x234] ; LIT 0x801e338->0x2001aa58
+0801e102: ldrsh.w    r0, [r0, #8]
+0801e106: bx         lr
+0801e108: ldr.w      r0, [pc, #0xd54] ; LIT 0x801ee60->0x2001aa58
+0801e10c: ldrb       r0, [r0, #0xd]
+0801e10e: bx         lr
+0801e110: ldr.w      r0, [pc, #0xd4c] ; LIT 0x801ee60->0x2001aa58
+0801e114: ldrb       r0, [r0, #0xe]
+
+=== SELECTOR5 TRADITIONAL PACKET BUILD CALLER 0x801e15c 0x801e0cc..0x801e1fc ===
+0801e0cc: movs       r0, #0
+0801e0ce: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e0d2: movs       r0, r4
+0801e0d4: uxtb       r0, r0
+0801e0d6: pop        {r1, r4, r5, pc}
+0801e0d8: push       {r7, lr}
+0801e0da: movs       r0, #1
+0801e0dc: ldr        r1, [pc, #0x320] ; LIT 0x801e400->0x2001adbd
+0801e0de: strb       r0, [r1]
+0801e0e0: movs       r0, #1
+0801e0e2: bl         #0x801defc ; CALL 0x801defc
+0801e0e6: pop        {r0, pc}
+0801e0e8: ldr.w      r0, [pc, #0x5c8] ; LIT 0x801e6b4->0x2001aa68
+0801e0ec: bx         lr
+0801e0ee: ldr        r0, [pc, #0x248] ; LIT 0x801e338->0x2001aa58
+0801e0f0: bx         lr
+0801e0f2: movs       r0, r0
+0801e0f4: strh       r0, [r3, #0x20]
+0801e0f6: lsrs       r4, r0, #0x20
+0801e0f8: ldr        r0, [pc, #0x23c] ; LIT 0x801e338->0x2001aa58
+0801e0fa: ldrsh.w    r0, [r0, #0xa]
+0801e0fe: bx         lr
+0801e100: ldr        r0, [pc, #0x234] ; LIT 0x801e338->0x2001aa58
+0801e102: ldrsh.w    r0, [r0, #8]
+0801e106: bx         lr
+0801e108: ldr.w      r0, [pc, #0xd54] ; LIT 0x801ee60->0x2001aa58
+0801e10c: ldrb       r0, [r0, #0xd]
+0801e10e: bx         lr
+0801e110: ldr.w      r0, [pc, #0xd4c] ; LIT 0x801ee60->0x2001aa58
+0801e114: ldrb       r0, [r0, #0xe]
+0801e116: bx         lr
+0801e118: ldr.w      r0, [pc, #0xd44] ; LIT 0x801ee60->0x2001aa58
+0801e11c: ldrb       r0, [r0, #0xf]
+0801e11e: bx         lr
+0801e120: ldr.w      r0, [pc, #0x8bc] ; LIT 0x801e9e0->0x20000150
+0801e124: ldrb       r0, [r0]
+0801e126: bx         lr
+0801e128: ldr.w      r0, [pc, #0x8b8] ; LIT 0x801e9e4->0x2001ac3c
+0801e12c: vldr       s0, [r0]
+0801e130: bx         lr
+0801e132: ldr.w      r0, [pc, #0xcd8] ; LIT 0x801ee0c->0x2001ac40
+0801e136: vldr       s0, [r0]
+0801e13a: bx         lr
+0801e13c: push       {r7, lr}
+0801e13e: ldr.w      r0, [pc, #0x8a8] ; LIT 0x801e9e8->0x2001adbe
+0801e142: ldrb       r0, [r0]
+0801e144: cmp        r0, #0
+0801e146: bne        #0x801e15a
+0801e148: bl         #0x801ceb6 ; CALL 0x801ceb6
+0801e14c: ldr.w      r1, [pc, #0x89c] ; LIT 0x801e9ec->0x2001ac38
+0801e150: str        r0, [r1]
+0801e152: movs       r0, #1
+0801e154: ldr.w      r1, [pc, #0x890] ; LIT 0x801e9e8->0x2001adbe
+0801e158: strb       r0, [r1]
+0801e15a: movs       r0, #3
+0801e15c: bl         #0x80184d8 ; CALL 0x80184d8
+0801e160: pop        {r0, pc}
+0801e162: movs       r0, r0
+0801e164: str        r1, [sp, #0x100]
+0801e166: lsrs       r4, r0, #0x20
+0801e168: strh       r0, [r3, #0x22]
+0801e16a: lsrs       r4, r0, #0x20
+0801e16c: strb       r4, [r0, #5]
+0801e16e: lsrs       r4, r0, #0x20
+0801e170: strh       r0, [r7, #0x22]
+0801e172: lsrs       r4, r0, #0x20
+0801e174: push       {r7, lr}
+0801e176: ldr.w      r1, [pc, #0x878] ; LIT 0x801e9f0->0x8049204 STRING='Firmware switches active:\r\n'
+0801e17a: movs       r0, #2
+0801e17c: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e180: ldr.w      r1, [pc, #0x870] ; LIT 0x801e9f4->0x804ac90 STRING='\tPublic switches:\r\n'
+0801e184: movs       r0, #2
+0801e186: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e18a: ldr.w      r1, [pc, #0x86c] ; LIT 0x801e9f8->0x8049220 STRING='\t\t- X sync always enabled\r\n'
+0801e18e: movs       r0, #2
+0801e190: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e194: ldr.w      r1, [pc, #0x864] ; LIT 0x801e9fc->0x80471d4 STRING='\t\t- Shutter silent mode included\r\n'
+0801e198: movs       r0, #2
+0801e19a: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e19e: ldr.w      r1, [pc, #0x860] ; LIT 0x801ea00->0x804923c STRING='\tTime measure switches:\r\n'
+0801e1a2: movs       r0, #2
+0801e1a4: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e1a8: ldr.w      r1, [pc, #0x858] ; LIT 0x801ea04->0x8049f98 STRING='\tDebug info switches:\r\n'
+0801e1ac: movs       r0, #2
+0801e1ae: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e1b2: ldr.w      r1, [pc, #0x854] ; LIT 0x801ea08->0x80484f8 STRING='\t\t- Image all signals info\r\n'
+0801e1b6: movs       r0, #2
+0801e1b8: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e1bc: ldr.w      r1, [pc, #0x84c] ; LIT 0x801ea0c->0x8049258 STRING='\t\t- AF all signals info\r\n'
+0801e1c0: movs       r0, #2
+0801e1c2: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e1c6: ldr.w      r1, [pc, #0x848] ; LIT 0x801ea10->0x8049274 STRING='\t\t- Lens all signals info\r\n'
+0801e1ca: movs       r0, #2
+0801e1cc: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e1d0: ldr.w      r1, [pc, #0xc90] ; LIT 0x801ee64->0x80471f8 STRING='\t\t- Op. controls all signals info\r\n'
+0801e1d4: movs       r0, #2
+0801e1d6: bl         #0x8008ee0 ; CALL 0x8008ee0
+0801e1da: pop        {r0, pc}
+0801e1dc: str        r1, [sp, #0x170]
+0801e1de: lsrs       r4, r0, #0x20
+0801e1e0: push       {r4, lr}
+0801e1e2: movs       r4, #1
+0801e1e4: ldr.w      r0, [pc, #0x800] ; LIT 0x801e9e8->0x2001adbe
+0801e1e8: ldrb       r0, [r0]
+0801e1ea: cmp        r0, #0
+0801e1ec: beq        #0x801e204
+0801e1ee: bl         #0x801ceb6 ; CALL 0x801ceb6
+0801e1f2: ldr.w      r1, [pc, #0x7f8] ; LIT 0x801e9ec->0x2001ac38
+0801e1f6: ldr        r1, [r1]
+0801e1f8: adds.w     r1, r1, #0x12c
+
+STRING HITS AROUND SHUTTER/MIRROR/EXPOSURE
+0x803c112 'ShutterMirror event 0x%08X)!\r\n'
+0x803ca14 'Shutter: Service exposure not possible! (shutter prereleased failed (status %i))\r\n'
+0x803da04 'Shutter: Rewind shutter not possible! (shutter status %i, expected %i)\r\n'
+0x803e414 'Shutter control state: cocking in traditional mode undefined step %i\r\n'
+0x803e45c 'Shutter control state: cocking in live view mode undefined step %i\r\n'
+0x803efe4 'Shutter control state: switch to traditional undefined step %i\r\n'
+0x803f02b 'Shutter is in live view state, switch to traditional for test.\r\n'
+0x803fb58 'Shutter: Service exposure not possible! (shutter status %i)\r\n'
+0x803fb98 'Shutter & Mirror error: wrong adjust data size! (%i != %i)\r\n'
+0x803fbd8 'Shutter: Prerelease shutter not possible! (shutter status %i)\r\n'
+0x803fd98 'Shutter control state: switch to live view undefined step %i\r\n'
+0x803fdd8 'Shutter control timer test not possible, timer already used.\r\n'
+0x80409c0 'Shutter: Open shutter not possible! (shutter status %i)\r\n'
+0x80409fc 'Shutter: Close shutter not possible! (shutter status %i)\r\n'
+0x8040d08 'Shutter control state: start exposure undefined step %i\r\n'
+0x8041a3c 'Shutter: Exposure not possible! (shutter status %i)\r\n'
+0x8041cdc 'Shutter control state: prerelease undefined step %i\r\n'
+0x8041d17 'Shutter is in undefined state, test not possible!\r\n'
+0x8041d51 'Shutter other process run, test not possible!\r\n'
+0x8041d89 'Shutter wrong status (%i), test not possible!\r\n'
+0x8042400 'Shutter control received (state %i, flags 0x%02X)\r\n'
+0x80429e4 'Shutter: Exposure not run! (shutter status %i)\r\n'
+0x8042e2b 'Shutter other process run, test not possible!\r\n'
+0x8042e5f 'Shutter is in wrong state, test not possible!\r\n'
+0x80432b9 'Shutter task ready for exposure\r\n'
+0x8044dac 'Shutter: Undefined HW trigger point (%i)!\r\n'
+0x804514b 'Shutter switch to traditional (close)\r\n'
+0x80451b9 'Shutter mode %i\r\n'
+0x80460ec 'Shutter: Service exposure with %i us\r\n'
+0x80464d9 'Shutter exposure not possible!\r\n'
+0x80464ff 'Shutter switch to live view (open)\r\n'
+0x8046f37 'Shutter actions %i\r\n'
+0x80471d8 'Shutter silent mode included\r\n'
+0x8047414 'Shutter: Service exposure done\r\n'
+0x80476a1 'Shutter MO_LS peak detected!\r\n'
+0x80476c5 'Shutter PWM control timeout!\r\n'
+0x804799f 'Shutter 1000 to %d.\r\n'
+0x80479bf 'Shutter 2000 to %d.\r\n'
+0x80479df 'Shutter 4000 to %d.\r\n'
+0x80479fe 'Shutter adjust done.\r\n'
+0x8047a1f 'Shutter X delay to %d.\r\n'
+0x8047d5d 'Shutter not calibrated\r\n'
+0x80485d8 'Shutter actions store failed.\r\n'
+0x80485f8 'Shutter actions store done. \r\n'
+0x804895d 'Shutter MO_LS timeout!\r\n'
+0x804897d 'Shutter X sync missed!\r\n'
+0x8048998 'Shutter control idle state!\r\n'
+0x8048b43 'Shutter 30 to %d.\r\n'
+0x8048b5f 'Shutter 60 to %d.\r\n'
+0x8048b7b 'Shutter 125 to %d.\r\n'
+0x8048b97 'Shutter 250 to %d.\r\n'
+0x8048bb3 'Shutter 500 to %d.\r\n'
+0x8048d18 'Shutter diagnose info:\r\n'
+0x8048e15 'Shutter & Mirror - %i\r\n'
+0x8049194 'Shutter mirror error %i\r\n'
+0x804a583 'Shutter prerelease\r\n'
+0x804a59b 'Shutter exposure\r\n'
+0x804af77 'Shutter rewind\r\n'
+0x803c119 'Mirror event 0x%08X)!\r\n'
+0x803fba2 'Mirror error: wrong adjust data size! (%i != %i)\r\n'
+0x80458f4 'Mirror control received (state %i)\r\n'
+0x8048e1f 'Mirror - %i\r\n'
+0x804a268 'Mirror not available\r\n'
+0x804a7cc 'Mirror down error'
+0x804abdc 'Mirror down ready\r\n'
+0x804ac04 'Mirror up ready\r\n'
+0x804b0b0 'Mirror up error'
+0x804b3f0 'Mirror up...\r\n'
+0x803b45a 'shutter motor CCW with PWM (X - running time in us, XX - duty cycle in percent)\r\n'
+0x803b4c5 'shutter motor CW with PWM (X - running time in us, XX - duty cycle in percent)\r\n'
+0x803c194 'shutter motor undefined control test (motor %i, ctrl %i, %i us, duty cycle %i %%).\r\n'
+0x803c92e 'shutter actions %i, op. counter %i s, camera on count %i)\r\n'
+0x803ca3d 'shutter prereleased failed (status %i))\r\n'
+0x803cac3 'shutter to traditional failed until check shutter position on power on.\r\n'
+0x803caed 'shutter position on power on.\r\n'
+0x803d840 'shutter motor CCW with PWM (running time %i us, duty cycle %i %%).\r\n'
+0x803da14 'shutter not possible! (shutter status %i, expected %i)\r\n'
+0x803da2b 'shutter status %i, expected %i)\r\n'
+0x803db41 'shutter motor test (motor %i, ctrl %i, duty cycle %i %%).\r\n'
+0x803e1a0 'shutter switch motor CCW (X - running time in us)\r\n'
+0x803e1e7 'shutter switch motor CW (X - running time in us)\r\n'
+0x803e220 'shutter motor CW with PWM (running time %i us, duty cycle %i %%).\r\n'
+0x803f8ab 'shutter motor CCW (X - running time in us)\r\n'
+0x803f8ea 'shutter motor CW (X - running time in us)\r\n'
+0x803fb81 'shutter status %i)\r\n'
+0x803fbec 'shutter not possible! (shutter status %i)\r\n'
+0x803fc03 'shutter status %i)\r\n'
+0x803fe5c 'shutter motor control test (motor %i, ctrl %i, %i us).\r\n'
+0x80401ec 'shutter ready:\t\t%i ms\r\n'
+0x8040837 'shutter ?" for options help\r\n'
+0x80409ce 'shutter not possible! (shutter status %i)\r\n'
+0x80409e5 'shutter status %i)\r\n'
+0x8040a0b 'shutter not possible! (shutter status %i)\r\n'
+0x8040a22 'shutter status %i)\r\n'
+0x80415a8 'shutter switch motor CCW (running time %i us).\r\n'
+0x8041a5d 'shutter status %i)\r\n'
+0x8041cae 'shutter switch motor control command (%i)\r\n'
+0x8041dc1 'shutter process: \t- Rewind shutter (traditional)\r\n'
+0x8041ddc 'shutter (traditional)\r\n'
+0x8041df9 'shutter process: \t- Rewind shutter (live view)\r\n'
+0x8041e14 'shutter (live view)\r\n'
+0x8042710 'shutter switch motor CW (running time %i us).\r\n'
+0x8042a00 'shutter status %i)\r\n'
+0x8042dfe 'shutter main motor control command (%i)\r\n'
+0x8042e95 'shutter process: \t- Switch to traditional\r\n'
+0x8042ed6 'shutter position on power on.\r\n'
+0x8042f0c 'shutter position on power on.\r\n'
+0x8043c40 'shutter motor CW (running time %i us).\r\n'
+0x8043c70 'shutter motor CCW (running time %i us).\r\n'
+0x8044121 'shutter process: \t- Switch to live view\r\n'
+0x8044de0 'shutter exposure not available!\r\n'
+0x8045178 'shutter control timer test (%i us).\r\n'
+0x80451a5 'shutter process: \t- Shutter mode %i\r\n'
+0x80451d1 'shutter process: \t- Exposure %i us\r\n'
+0x804551e 'shutter actions.\r\n'
+0x8045e70 'shutter control processes test\r\n'
+0x804605e 'shutter actions !!!\r\n'
+0x804652e 'shutter control state! (%i)\r\n'
+0x8046579 'shutter motor test (motor %i).\r\n'
+0x80465a1 'shutter process: \t- Prerelease\r\n'
+0x8046902 'shutter actions: %10i.\r\n'
+0x80473da 'shutter actions !!!\r\n'
+0x8047a3e 'shutter after service\r\n'
+0x8048348 'shutter test\r\n'
+0x804836d 'shutter\r\n'
+0x8048902 'shutter motor (%i)\r\n'
+0x8048bcd 'shutter for service\r\n'
+0x80490a9 'shutter\r\n'
+0x80490c5 'shutter\r\n'
+0x8049c0f 'shutter module'
+0x8049f3d 'shutter ready\r\n'
+0x8049f56 'shutter ready\r\n'
+0x804a7be 'shutter error'
+0x804a7e5 'shutter error'
+0x804b416 'shutter\r\n'
+0x804b425 'shutter\r\n'
+0x804bbf8 'shutter'
+0x8042147 'mirror up:\t%i ms\r\n'
+0x8044418 'mirror up to AZ_SO:\t\t\t%i ms\r\n'
+0x8044444 'mirror up to SK_SO:\t\t\t%i ms\r\n'
+0x8044470 'mirror up to exposure:\t\t%i ms\r\n'
+0x804565e 'mirror up mode %i\r\n'
+0x8046a00 'mirror up:\t\t\t\t%i ms\r\n'
+0x8047b6b 'mirror up\r\n'
+0x8047b89 'mirror up\r\n'
+0x804919c 'mirror error %i\r\n'
+0x804aa13 'mirror down\r\n'
+0x804b293 'mirror up\r\n'
+0x803a6dc 'exposure parameter for response (BV_Ext %i, BV_IR %i, BV %i, AV %i, SV %i, TV %i, ISO %i, Exp. time %i us, bracketing pic. nr. %i, interval pic. nr. %i)\r\n'
+0x803b107 'exposure delay : %i ms (burst mode %i)\r\n'
+0x803bd32 'exposure parameter for response (AV %i, SV %i, TV %i, ISO %i, Exp. time %i us)\r\n'
+0x803bfdc 'exposure (remaining wait time overflow (%i s, sys. time %i ms))\r\n'
+0x803c086 'exposure parameter for response (AV %i, SV %i, TV %i, ISO %i, Exp. time %i us)\r\n'
+0x803c4b7 "exposure time -> already in LV sync available, don't transmit! (TV 0x%04X, %i us)\r\n"
+0x803ca25 'exposure not possible! (shutter prereleased failed (status %i))\r\n'
+0x803d288 'exposure time timer test (X - exposure time in us)\r\n'
+0x803d2a6 'exposure time in us)\r\n'
+0x803d640 'exposure (set alarm for %i s, sys. time %i ms)\r\n'
+0x803d68c 'exposure time (X - exposure time in TV * 256).\r\n'
+0x803d69f 'exposure time in TV * 256).\r\n'
+0x803d75b "exposure time -> status unchanged, don't transmit! (TV 0x%04X, %i us)\r\n"
+0x803de58 'exposure request:\t%i ms\r\n'
+0x803e6f4 'exposure (Reset %i s, sys. time %i ms)\r\n'
+0x803ec36 'exposure X> Service exposure (X - exposure time in us)\r\n'
+0x803ec4a 'exposure (X - exposure time in us)\r\n'
+0x803ec58 'exposure time in us)\r\n'
+0x803f3a4 'exposure request to enter exposure state:\t\t%i ms\r\n'
+0x803f3be 'exposure state:\t\t%i ms\r\n'
+0x803f3ea 'exposure state to transmit ready:\t\t%i ms\r\n'
+0x803fb69 'exposure not possible! (shutter status %i)\r\n'
+0x80400ea 'exposure state to lens ready:\t\t\t0 ms\r\n'
+0x8040126 'exposure state to lens ready:\t\t\t%i ms\r\n'
+0x8040162 'exposure state to flash ready:\t\t\t0 ms\r\n'
+0x804019e 'exposure state to flash ready:\t\t\t%i ms\r\n'
+0x80401da 'exposure state to shutter ready:\t\t%i ms\r\n'
+0x80403bf 'exposure program (X - program).\r\n'
+0x80406a2 'exposure program '
+0x80406de 'exposure time '
+0x804071a 'exposure speed '
+0x8040d25 'exposure undefined step %i\r\n'
+0x8040f36 'exposure:\t\t\t%i ms\r\n'
+0x80410e1 'exposure (Image ID %i, exp. time %i us)\r\n'
+0x8041115 'exposure time received (0x%04X (%i) (%i us))\r\n'
+0x80420e0 'exposure to image\r\n'
+0x804220a 'exposure metering mode 0x%02X\r\n'
+0x80424b1 'exposure request request.\r\n'
+0x8042629 'exposure program '
+0x804265d 'exposure speed '
+0x80426e1 'exposure (%i, delay %i s (timer %i ms))\r\n'
+0x804329e 'exposure\r\n'
+0x80432d0 'exposure\r\n'
+0x80432f6 'exposure from image\r\n'
+0x8043321 'exposure delay : %i ms\r\n'
+0x80433ae 'exposure correction 0x%04X\r\n'
+0x80439ae 'exposure request (%i ms)\r\n'
+0x8043bfd 'exposure time '
+0x8044401 'exposure\r\n'
+0x804447d 'exposure:\t\t%i ms\r\n'
+0x804449c 'exposure to X sync:\t\t\t%i ms\r\n'
+0x80444c8 'exposure to rewind:\t\t\t%i ms\r\n'
+0x804465b 'exposure (Image ID %i)\r\n'
+0x8044de8 'exposure not available!\r\n'
+0x8044ebe 'exposure parameter (0x%08X).\r\n'
+0x80457c6 'exposure received\r\n'
+0x80457f0 'exposure received\r\n'
+0x804599a 'exposure received (Image ID %i)\r\n'
+0x8045c3f 'exposure time (TV 0x%04X, %i us)\r\n'
+0x8045e32 'exposure %i us\r\n'
+0x8045e48 'exposure time timer test (%i us)\r\n'
+0x80460fd 'exposure with %i us\r\n'
+0x80464e1 'exposure not possible!\r\n'
+0x8046550 'exposure time timer test (%i us).\r\n'
+0x8046999 'exposure time\r\n'
+0x80469bf 'exposure state\r\n'
+0x8046a24 'exposure:\t\t\t\t%i ms\r\n'
+0x8046b89 'exposure (pic nr. %i)\r\n'
+0x8046eb0 'exposure\r\n'
+0x8047096 'exposure (sys. time %i ms)\r\n'
+0x8047425 'exposure done\r\n'
+0x8047520 'exposure (%i).\r\n'
+0x8047bab 'exposure\r\n'
+0x8047dcd 'exposure\r\n'
+0x8047e1c 'exposure time received\r\n'
+0x8047efc 'exposure program to %i\r\n'
+0x8048727 'exposure (%i).\r\n'
+0x8048d45 'exposure\r\n'
+0x8048f1e 'exposure\r\n'
+0x8048fdd 'exposure done\r\n'
+0x80490d8 'exposure (%i us)\r\n'
+0x804a5a3 'exposure\r\n'
+0x804ac20 'exposure'
+0x804b2a5 'exposure\r\n'
+0x803ee18 'Exposure cor.; Exposure cor.; EV limit; EV limit; '
+0x803ee27 'Exposure cor.; EV limit; EV limit; '
+0x803fe18 'Exposure time timer test not possible, timer already used.\r\n'
+0x8041a45 'Exposure not possible! (shutter status %i)\r\n'
+0x8041e2c 'Exposure not possible, process timer already used!\r\n'
+0x804216b 'Exposure process duration : %i ms\r\n'
+0x80424a2 'Exposure> Stop exposure request request.\r\n'
+0x80429ed 'Exposure not run! (shutter status %i)\r\n'
+0x8042b50 'Exposure correction value (0x%04X | %i | %f |).\r\n'
+0x8043571 'Exposure\r\n'
+0x80435dc 'Exposure compensation received (0x%04X (%i))\r\n'
+0x804408c 'Exposure not possible, timer already used!\r\n'
+0x80443c1 'Exposure request received\r\n'
+0x80451e5 'Exposure %i us\r\n'
+0x8045804 'Exposure metering mode received (%i)\r\n'
+0x8045e1c 'Exposure time of last exposure %i us\r\n'
+0x8046bec 'Exposure program received (%i)\r\n'
+0x8049c85 'Exposure done...\r\n'
+0x804b0e0 'Exposure error'
+0x804b324 'Exposure'
