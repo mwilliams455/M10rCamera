@@ -1,0 +1,99 @@
+name: M10-R v0.86b AEAWB to CA9 pointer bounded
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v086b-aeawb-to-ca9-pointer-bounded.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Bounded pointer identity trace
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v086b_aeawb_to_ca9_pointer_bounded.txt
+          from pathlib import Path
+          import struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_REG_PC,ARM_OP_IMM
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); BASE=0x42000000; PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+          def off(a): return PFX+a-BASE
+          def lit(i):
+            try:
+              if i.id and i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp; lo=off(la)
+                if 0<=lo<=len(b)-4:return la,struct.unpack_from('<I',b,lo)[0]
+            except Exception: pass
+          def target(i):
+            try:
+              if i.id and i.mnemonic.startswith('bl') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm&~1
+            except Exception: pass
+          def fmt(i):
+            x=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            q=lit(i)
+            if q:x+=f' ; LIT {hex(q[0])}->{hex(q[1])}'
+            t=target(i)
+            if t is not None:x+=f' ; CALL {hex(t)}'
+            return x
+          def dis(a,z):
+            lo=max(0,off(a)); hi=min(len(b),off(z)); return [i for i in md.disasm(b[lo:hi],a) if i.id]
+          def dump(title,a,z):
+            print('\n===',title,hex(a),hex(z),'===')
+            for i in dis(a,z): print(fmt(i))
+          print('M10-R v0.86b AFAEAWB -> CA9 POINTER IDENTITY BOUNDED')
+          print('Known facts under test: workflow +0x480 is consumed by CA9 parameter builder 0x420A3104; v0.85 identified AFAEAWB/prepro owner around 0x420DA200..0x420DAE40.')
+          dump('CA9 builder / caller cluster',0x420a2f80,0x420a36a0)
+          dump('AFAEAWB owner cluster',0x420d8f00,0x420db080)
+          dump('AFAEAWB nearby helpers',0x420dc800,0x420de300)
+          dump('AFAEAWB later helpers',0x420e0400,0x420e0b00)
+          vals={0x408efe10:'AFAEAWB global root',0x14080:'AFAEAWB +0x14080 offset',0x43705a60:'CA9 parameter block'}
+          print('\n=== RAW 32-BIT OCCURRENCES + LOCAL CONTEXT ===')
+          seen=set()
+          for v,name in vals.items():
+            pat=struct.pack('<I',v); p=0; hits=[]
+            while True:
+              p=b.find(pat,p)
+              if p<0: break
+              hits.append(BASE+p-PFX); p+=1
+            print(name,hex(v),'count',len(hits),*[hex(x) for x in hits[:80]])
+            for h in hits[:40]:
+              a=max(BASE,(h-0x80)&~1); z=min(BASE+len(b)-PFX,h+0x84)
+              key=(a,z)
+              if key in seen: continue
+              seen.add(key); dump(f'context around {name} literal @{hex(h)}',a,z)
+          print('\n=== TARGETED DIRECT-CALL SEARCH IN BOUNDED CODE REGIONS ===')
+          wanted={0x420dadb6,0x420a3104,0x420dca28,0x420dc974,0x420e0850,0x420de0f0,0x420e05b4}
+          regions=[(0x420a0000,0x420a9000),(0x420d8000,0x420e2000)]
+          for a,z in regions:
+            for i in dis(a,z):
+              t=target(i)
+              if t in wanted: print(fmt(i))
+          print('\n=== INTERPRETATION RULE ===')
+          print('Freeze pointer identity only with explicit dataflow carrying AFAEAWB base/base+0x80/base+0x14080 into the workflow field later read as +0x480 by 0x420A3104. Proximity alone is insufficient.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v086b_aeawb_to_ca9_pointer_bounded.txt
+          git commit -m 'research: record bounded v0.86b AEAWB pointer trace' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
