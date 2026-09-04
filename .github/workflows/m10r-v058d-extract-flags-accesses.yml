@@ -1,0 +1,83 @@
+name: M10-R v0.58d exact IMG flags accesses
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v058d-extract-flags-accesses.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  summarize:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m10r-metering-latch-trace
+          fetch-depth: 0
+      - name: Extract exact shared flag accesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > research/M10R_v058d_img_command32_flags_exact_accesses.txt
+          from pathlib import Path
+          import re
+          lines=Path('research/M10R_v058b_img_flag_literal_slice.txt').read_text(errors='replace').splitlines()
+          # Unique disassembly lines only; v0.58b repeats windows around many refs.
+          inst={}
+          for l in lines:
+              m=re.match(r'^([0-9a-fA-F]{8}):\s+(.*)$',l)
+              if m: inst.setdefault(int(m.group(1),16),l)
+          addrs=sorted(inst);index={a:i for i,a in enumerate(addrs)}
+          print('M10-R v0.58d EXACT IMG COMMAND32 FLAGS ACCESS TRACE')
+          print('Target shared base 0x408F0EC0; command32 template 0x408F0EC9; flags byte 0x408F0ECD = base+0x0D = template+4.')
+          loads=[]
+          for a in addrs:
+              l=inst[a].lower()
+              if 'lit ' not in l: continue
+              if '->0x408f0ec0' in l or '->0x408f0ec9' in l or '->0x408f0ecd' in l:
+                  m=re.search(r':\s+ldr(?:\.w)?\s+(r\d+|ip|lr|r[89]|sb|sl),',l)
+                  if m:
+                      target=0x408f0ec0 if '->0x408f0ec0' in l else (0x408f0ec9 if '->0x408f0ec9' in l else 0x408f0ecd)
+                      loads.append((a,m.group(1),target))
+          print('BASE_LOAD_COUNT',len(loads))
+          hits=[]
+          for a,reg,target in loads:
+              i=index[a]
+              for b in addrs[i+1:i+40]:
+                  if b-a>0x80: break
+                  l=inst[b].lower()
+                  # memory access through the tracked register
+                  mm=re.search(r'\[\s*'+re.escape(reg)+r'(?:,\s*#(0x[0-9a-f]+|\d+))?\s*\]',l)
+                  if mm:
+                      disp=int(mm.group(1),0) if mm.group(1) else 0
+                      eff=target+disp
+                      if eff==0x408f0ecd:
+                          hits.append((a,reg,target,b,disp,inst[b]))
+                  # stop after clear register overwrite (ignore stores because reg is base operand not dest)
+                  md=re.match(r'^[0-9a-f]{8}:\s+([a-z0-9.]+)\s+([^,\s]+)',l)
+                  if md and md.group(2)==reg:
+                      mn=md.group(1)
+                      if not mn.startswith(('str','cmp','tst','cb','push')) and b!=a:
+                          break
+          # dedupe by access address
+          uniq={h[3]:h for h in hits}
+          print('EXACT_ACCESS_COUNT',len(uniq))
+          for b,h in sorted(uniq.items()):
+              a,reg,target,_,disp,line=h
+              print('\nACCESS',hex(b),'BASELOAD',hex(a),'BASE',hex(target),'REG',reg,'DISP',hex(disp))
+              # nearby unique instructions
+              j=index[b]
+              for x in addrs[max(0,j-14):min(len(addrs),j+18)]:
+                  if abs(x-b)<=0x38: print(inst[x])
+          PY
+      - name: Commit summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v058d_img_command32_flags_exact_accesses.txt
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: record exact command32 flag accesses'
+          git pull --rebase origin m10r-metering-latch-trace
+          git push origin HEAD:m10r-metering-latch-trace
