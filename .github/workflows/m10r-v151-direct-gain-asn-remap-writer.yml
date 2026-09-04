@@ -1,0 +1,122 @@
+name: M10-R v1.51 direct gain ASN remap writer
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v151-direct-gain-asn-remap-writer.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace direct WB gains and CA9 ASN-remap output writer
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text(); a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n"); z=p.index("\n          CPP",a); Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v151_direct_gain_asn_remap_writer.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          def env(path,base,mode,pfx=4):
+            b=Path(path).read_bytes(); md=Cs(CS_ARCH_ARM,mode|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+            def off(a):return pfx+a-base
+            def dis(a,z):return list(md.disasm(b[off(a):off(z)],a))
+            def cstr(a,n=260):
+              o=off(a)
+              if not 0<=o<len(b):return None
+              e=b.find(b'\0',o,min(len(b),o+n));q=b[o:e]
+              return q.decode('ascii','replace') if e>o and all(32<=x<127 for x in q) else None
+            def lit(i):
+              try:
+                if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                  pc=((i.address+4)&~3) if mode==CS_MODE_THUMB else i.address+8
+                  la=pc+i.operands[1].mem.disp;o=off(la)
+                  if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+              except:pass
+            def call(i):
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm&~1
+            def fmt(i):
+              s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i)
+              if q:s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'+(f' STRING={cstr(q[1])!r}' if cstr(q[1]) else '')
+              c=call(i)
+              if c is not None:s+=f' ; CALL {c:#x}'
+              return s
+            return b,md,off,dis,cstr,lit,call,fmt
+          ib,imd,ioff,idis,ics,ilit,icall,ifmt=env('/tmp/sections/092_IMG-System.bin',0x42000000,CS_MODE_THUMB)
+          cb,cmd,coff,cdis,ccs,clit,ccall,cfmt=env('/tmp/sections/099_IMG-CA9_System.bin',0x40000000,CS_MODE_ARM)
+          print('M10-R v1.51 DIRECT WB GAIN / ASN REMAP WRITER')
+          print('\n=== IMG source copier 0x420A805C..0x420A8158 ===')
+          for i in idis(0x420a805c,0x420a8158):print(ifmt(i))
+          print('\n=== direct callers of IMG source copier ===')
+          ilocal=idis(0x42090000,0x420b0000)
+          print([hex(i.address) for i in ilocal if icall(i)==0x420a805c])
+          print('\n=== IMG StartColorManagement packet builder + submit helper ===')
+          for i in idis(0x420a2eb0,0x420a35c0):print(ifmt(i))
+          print('\n=== CA9 all memory accesses with displacement B8/C0/C8 ===')
+          ins=list(cmd.disasm(cb[4:],0x40000000)); hits=[]
+          for i in ins:
+            try:
+              ds=[o.mem.disp for o in i.operands if o.type==ARM_OP_MEM]
+              if any(x in (0xb8,0xc0,0xc8) for x in ds):hits.append(i.address)
+            except:pass
+          print([hex(x) for x in hits])
+          # group hit neighborhoods and nearest preceding ARM prologues
+          funcs=[]
+          for a in hits:
+            cand=None
+            for j in cdis(max(0x40000000,a-0x300),a+4):
+              if (j.mnemonic in ('push','stmdb') or j.mnemonic.startswith('stm')) and 'sp' in j.op_str and 'lr' in j.op_str:cand=j.address
+            if cand is not None and cand not in funcs:funcs.append(cand)
+          print('candidate_functions',[hex(x) for x in funcs])
+          for st in funcs:
+            print(f'\n-- candidate function {st:#x} --')
+            for i in cdis(st,min(st+0x700,0x40000000+len(cb)-4)):print(cfmt(i))
+          print('\n=== direct callers of candidate functions ===')
+          for st in funcs:
+            callers=[i.address for i in ins if ccall(i)==st]
+            print(hex(st),[hex(x) for x in callers])
+          print('\n=== candidate table-search/interpolation function around 0x40003980..0x40003C80 ===')
+          for i in cdis(0x40003980,0x40003c80):print(cfmt(i))
+          print('\n=== callers into 0x40003980..0x40003C80 entry/prologue points ===')
+          # discover prologues in range, then callers
+          ps=[]
+          for i in cdis(0x40003900,0x40003d00):
+            if (i.mnemonic in ('push','stmdb') or i.mnemonic.startswith('stm')) and 'sp' in i.op_str and 'lr' in i.op_str:ps.append(i.address)
+          print('prologues',[hex(x) for x in ps])
+          for st in ps:
+            callers=[i.address for i in ins if ccall(i)==st]
+            print(hex(st),[hex(x) for x in callers])
+          print('\n=== CA9 literal occurrences of shared IMG addresses ===')
+          for t in (0x43705760,0x43705830,0x43705950,0x408fe124,0x408fe130,0x408fe15c):
+            pat=struct.pack('<I',t);p=0;hs=[]
+            while True:
+              p=cb.find(pat,p)
+              if p<0:break
+              hs.append(0x40000000+p-4);p+=4
+            print(hex(t),[hex(x) for x in hs])
+          print('\n=== PROVEN DIRECT GAIN EQUIVALENCE ===')
+          print('input +0x2D0/+0x2D4/+0x2D8 copied as u32 to 0x408FE124/+4/+8 respectively')
+          print('same source low16 values sign-extended and copied to fill_parameter +0xF4/+0xF6/+0xF8 = R/G/B gains')
+          print('B2Y MMIO packing therefore: reg 0x2002008C low11=R, bits16..26=B; reg 0x20020090 low11=G, bits16..26=G')
+          print('max gain clamp 2000 fits 11-bit hardware field (0..2047); note this dimensional fit, while clamp is separately proven in fill_parameter')
+          print('\n=== TARGET ===')
+          print('Identify the CA9 function that writes remapped ASN output +0xB8/+0xC0/+0xC8 and determine whether the <=31 pair TF table is its interpolation control. Preserve direct WB-gain and matrix paths as parallel proven mechanisms.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v151_direct_gain_asn_remap_writer.txt
+          git commit -m 'research: record v1.51 direct gain and ASN remap writer' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
