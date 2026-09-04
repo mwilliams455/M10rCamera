@@ -1,0 +1,109 @@
+name: M10-R v1.61b CA9 ASN triplet TF consumer
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v161b-ca9-asn-triplet-tf-consumer.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace ASN triplet mutation and TF config consumers resiliently
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text(); a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n"); z=p.index("\n          CPP",a); Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v161b_ca9_asn_triplet_tf_consumer.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes(); BASE=0x40000000; PFX=4; END=BASE+len(b)-PFX
+          def off(a): return PFX+a-BASE
+          def mk(mode):
+            m=Cs(CS_ARCH_ARM,mode|CS_MODE_LITTLE_ENDIAN); m.detail=True; m.skipdata=True; return m
+          arm=mk(CS_MODE_ARM); thumb=mk(CS_MODE_THUMB)
+          def dis(md,a,z):
+            a=max(BASE,a);z=min(END,z)
+            if z<=a:return []
+            return list(md.disasm(b[off(a):off(z)],a))
+          def ops(i):
+            try:return i.operands
+            except:return []
+          def call(i):
+            oo=ops(i)
+            if i.mnemonic in ('bl','blx') and oo and oo[0].type==ARM_OP_IMM:return oo[0].imm&~1
+          def fmt(i):
+            c=call(i);s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            if c is not None:s+=f' ; CALL {c:#x}'
+            return s
+          print('M10-R v1.61b CA9 ASN TRIPLET / TF CONSUMER TRACE')
+          core=dis(arm,0x40003af4,0x40004050)
+          print('\n=== core references to ASN local sp+0x150..0x164 ===')
+          for i in core:
+            if any(o.type==ARM_OP_MEM and i.reg_name(o.mem.base)=='sp' and 0x150<=o.mem.disp<=0x164 for o in ops(i)):print(fmt(i))
+          print('\n=== calls near construction/use of sp+0x150 ===')
+          for n,i in enumerate(core):
+            c=call(i)
+            if c is None:continue
+            w=core[max(0,n-12):n+1]
+            if any('#0x150' in x.op_str or '#0x154' in x.op_str or '#0x158' in x.op_str or '#0x15c' in x.op_str or '#0x160' in x.op_str or '#0x164' in x.op_str for x in w):
+              print(f'\n-- call {c:#x} at {i.address:#x} --')
+              for x in w:print(fmt(x))
+          targets=[0x400060f0,0x40005e94,0x40004490,0x400053ec,0x40012ffc,0x40012e24,0x40012fd0,0x40013658,0x40012ff8]
+          print('\n=== focused helper entry windows ===')
+          for t in targets:
+            print(f'\n-- helper {t:#x} --')
+            for x in dis(arm,t,t+0x500):print(fmt(x))
+          wanted={0x128,0x12c,0x134}
+          for md,label in [(arm,'ARM'),(thumb,'THUMB')]:
+            hits=[]
+            # stream in bounded 0x10000 chunks to avoid giant list and tolerate mixed data
+            a=BASE
+            while a<END:
+              for i in dis(md,a,min(END,a+0x10000)):
+                for o in ops(i):
+                  if o.type==ARM_OP_MEM and o.mem.disp in wanted:
+                    hits.append((i.address,o.mem.disp));break
+              a+=0x10000
+            print(f'\n=== {label} exact target-displacement hits ===')
+            print([(hex(a),hex(d)) for a,d in hits])
+            for a,d in hits[:120]:
+              print(f'\n-- {label} hit {a:#x} disp={d:#x} --')
+              for x in dis(md,a-0x80,a+0x120):print(fmt(x))
+          # ARM functions that use at least two target fields within first 0x500 bytes.
+          allarm=[];a=BASE
+          while a<END:
+            allarm.extend(dis(arm,a,min(END,a+0x10000)));a+=0x10000
+          pro=[]
+          for i in allarm:
+            if (i.mnemonic=='push' and 'lr' in i.op_str) or (i.mnemonic=='stmdb' and 'sp!' in i.op_str and 'lr' in i.op_str):pro.append(i.address)
+          print('\n=== ARM prologues with >=2 target displacements ===')
+          for a in pro:
+            ds=set();w=dis(arm,a,a+0x500)
+            for i in w:
+              for o in ops(i):
+                if o.type==ARM_OP_MEM and o.mem.disp in wanted:ds.add(o.mem.disp)
+            if len(ds)>=2:
+              print(hex(a),[hex(x) for x in sorted(ds)])
+              for i in w:print(fmt(i))
+          print('\n=== TARGET ===')
+          print('Locate the exact ASN triplet mutator and exact consumer of serialized TF enable/count/pair fields.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v161b_ca9_asn_triplet_tf_consumer.txt
+          git commit -m 'research: record v1.61b ASN triplet and TF consumer trace' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
