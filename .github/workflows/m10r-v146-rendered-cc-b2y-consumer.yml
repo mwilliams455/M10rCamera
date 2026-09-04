@@ -1,0 +1,131 @@
+name: M10-R v1.46 rendered CC B2Y consumer
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v146-rendered-cc-b2y-consumer.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace rendered CC globals into B2Y consumers
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v146_rendered_cc_b2y_consumer.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(a):return PFX+a-BASE
+          def dis(a,z):return list(md.disasm(b[off(a):off(z)],a))
+          def cstr(a,limit=300):
+            o=off(a)
+            if not 0<=o<len(b):return None
+            e=b.find(b'\0',o,min(len(b),o+limit));q=b[o:e]
+            return q.decode('ascii','replace') if e>o and all(0x20<=x<=0x7e for x in q) else None
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;o=off(la)
+                if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+            except:pass
+          def adr(i):
+            try:
+              if i.mnemonic=='adr' and len(i.operands)>=2 and i.operands[1].type==ARM_OP_IMM:
+                a=((i.address+4)&~3)+i.operands[1].imm;return a,cstr(a)
+            except:pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i)
+            if q:
+              s+=f' ; LIT {q[0]:#x}->{q[1]:#x}';st=cstr(q[1])
+              if st:s+=f' STRING={st!r}'
+            a=adr(i)
+            if a:s+=f' ; ADR_EFF {a[0]:#x}'+(f' STRING={a[1]!r}' if a[1] else '')
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:s+=f' ; CALL {(i.operands[0].imm&~1):#x}'
+            return s
+          targets=[0x408fe130,0x408fe15c,0x43705760,0x43705830,0x43705950]
+          print('M10-R v1.46 RENDERED CC / B2Y CONSUMER')
+          print('\n=== literal pools ===')
+          pools={}
+          for t in targets:
+            pat=struct.pack('<I',t);q=0;hs=[]
+            while True:
+              q=b.find(pat,q)
+              if q<0:break
+              hs.append(BASE+q-PFX);q+=1
+            pools[t]=hs;print(hex(t),[hex(x) for x in hs])
+          print('\n=== code refs to rendered CC globals 0x408FE130/15C ===')
+          ins=dis(0x42000000,0x421e0000)
+          refs=[]
+          wanted={p:t for t,ps in pools.items() for p in ps}
+          for i in ins:
+            q=lit(i)
+            if q and q[0] in wanted:
+              refs.append((i.address,wanted[q[0]]));print(fmt(i))
+          print('\n=== neighborhoods around CC-global refs ===')
+          for a,t in refs:
+            if t not in (0x408fe130,0x408fe15c):continue
+            print(f'\n-- ref {a:#x} target {t:#x} --')
+            for i in dis(max(BASE,a-0x70),min(BASE+len(b)-PFX,a+0xa0)):print(fmt(i))
+          print('\n=== owner prologues and callers for CC-global refs ===')
+          starts=[]
+          for a,t in refs:
+            if t not in (0x408fe130,0x408fe15c):continue
+            st=None
+            for i in dis(max(BASE,a-0x600),a+2):
+              if i.mnemonic=='push' and 'lr' in i.op_str:st=i.address
+            if st and st not in starts:starts.append(st)
+          print('starts',[hex(x) for x in starts])
+          for st in starts:
+            hs=[]
+            for i in ins:
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and (i.operands[0].imm&~1)==st:hs.append(i.address)
+            print(hex(st),'callers',[hex(x) for x in hs[:80]])
+          print('\n=== ColorManagementFinished rendered CC writes ===')
+          for i in dis(0x420a35f0,0x420a3a20):
+            q=lit(i)
+            if (q and q[1] in (0x408fe130,0x408fe15c)) or 0x420a36a0<=i.address<=0x420a38d0:print(fmt(i))
+          print('\n=== B2Y config builder / globals references ===')
+          for a,t in refs:
+            if t in (0x43705830,0x43705950):print(fmt(next(i for i in ins if i.address==a)))
+          print('\n=== B2Y strings and references around color code ===')
+          for needle in (b'B2Y_CC0_CA9_CM.bin',b'B2Y_TF_REMAPPING_CA9_CM.bin',b'B2Y'):
+            p=0
+            while True:
+              p=b.find(needle,p)
+              if p<0:break
+              a=BASE+p-PFX;s=p
+              while s>0 and 0x20<=b[s-1]<=0x7e:s-=1
+              e=p
+              while e<len(b) and 0x20<=b[e]<=0x7e:e+=1
+              print(hex(a),repr(b[s:e].decode('ascii','replace')));p=e+1
+          print('\n=== TARGET ===')
+          print('Determine whether per-frame white balance reaches B2Y through rendered CC0/CC1 matrices at 0x408FE130/15C, rather than through a distinct B2Y RGB gain register path.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v146_rendered_cc_b2y_consumer.txt
+          git commit -m 'research: record v1.46 rendered CC B2Y consumer' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
