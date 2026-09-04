@@ -1,0 +1,96 @@
+name: M10-R v1.70 CA9 CM pointer taint
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v170-ca9-cm-pointer-taint.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Symbolically trace request and config pointers in CA9 CM core
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v170_ca9_cm_pointer_taint.txt
+          from pathlib import Path
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes();BASE=0x40000000;PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);md.detail=True
+          def dis(a,z):return list(md.disasm(b[PFX+a-BASE:PFX+z-BASE],a))
+          W=dis(0x40003af4,0x40004050)
+          def rn(i,r):return i.reg_name(r)
+          tags={'r0':('REQ',0)}
+          stack={}
+          def tstr(t):return '-' if not t else f'{t[0]}{t[1]:+#x}'
+          def getreg(i,op):
+            return rn(i,op.reg) if op.type==ARM_OP_REG else None
+          print('M10-R v1.70 CA9 CM POINTER TAINT')
+          print('Seed r0=REQ at entry 0x40003af4. CFG is the pointer loaded from REQ+0x24.')
+          for i in W:
+            oo=i.operands
+            # report memory accesses before mutating tags
+            memreports=[]
+            for o in oo:
+              if o.type==ARM_OP_MEM:
+                br=rn(i,o.mem.base); bt=tags.get(br)
+                if bt:
+                  eff=bt[1]+o.mem.disp
+                  memreports.append((bt[0],eff,br,o.mem.disp))
+            if memreports:
+              print(f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}  ACCESS '+', '.join(f'{k}{e:+#x}' for k,e,_,__ in memreports))
+            # recognize stack store/load of tagged pointer regs
+            if i.mnemonic.startswith('str') and len(oo)>=2 and oo[0].type==ARM_OP_REG and oo[1].type==ARM_OP_MEM and rn(i,oo[1].mem.base)=='sp':
+              sreg=rn(i,oo[0].reg); stack[oo[1].mem.disp]=tags.get(sreg)
+            if i.mnemonic.startswith('ldr') and len(oo)>=2 and oo[0].type==ARM_OP_REG and oo[1].type==ARM_OP_MEM:
+              d=rn(i,oo[0].reg); br=rn(i,oo[1].mem.base); bt=tags.get(br)
+              if br=='sp' and oo[1].mem.disp in stack:
+                if stack[oo[1].mem.disp]: tags[d]=stack[oo[1].mem.disp]
+                else: tags.pop(d,None)
+              elif bt and bt[0]=='REQ' and bt[1]+oo[1].mem.disp==0x24:
+                tags[d]=('CFG',0); print(f'  -> {d}=CFG at {i.address:#x}')
+              else:
+                tags.pop(d,None)
+            elif i.mnemonic in ('mov','movs') and len(oo)>=2 and oo[0].type==ARM_OP_REG and oo[1].type==ARM_OP_REG:
+              d=rn(i,oo[0].reg);s=rn(i,oo[1].reg)
+              if s in tags:tags[d]=tags[s]
+              else:tags.pop(d,None)
+            elif i.mnemonic in ('add','adds','sub','subs') and len(oo)>=2 and oo[0].type==ARM_OP_REG:
+              d=rn(i,oo[0].reg)
+              # forms add d,s,#imm or add d,#imm
+              src=None;imm=None
+              if len(oo)>=3 and oo[1].type==ARM_OP_REG and oo[2].type==ARM_OP_IMM:
+                src=rn(i,oo[1].reg);imm=oo[2].imm
+              elif len(oo)>=2 and oo[1].type==ARM_OP_IMM:
+                src=d;imm=oo[1].imm
+              if src in tags and imm is not None:
+                k,v=tags[src];tags[d]=(k,v+(-imm if i.mnemonic.startswith('sub') else imm))
+              elif src is not None:tags.pop(d,None)
+            # report calls and any tagged arg registers
+            if i.mnemonic in ('bl','blx'):
+              args=[f'{r}={tstr(tags.get(r))}' for r in ('r0','r1','r2','r3') if tags.get(r)]
+              if args:print(f'  CALL_TAGGED {i.address:#x} {i.op_str}: '+', '.join(args))
+              # caller-saved tags lost
+              for r in ('r0','r1','r2','r3','r12'):tags.pop(r,None)
+          print('\n=== FINAL CLAIM CHECK ===')
+          print('Look for REQ+0x1, CFG+0x128, CFG+0x12c, CFG+0x130, CFG+0x134, or a callee receiving raw CFG. Absence means op40 CM core cannot consume TF table/remap gate directly or via tagged CFG argument.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v170_ca9_cm_pointer_taint.txt
+          git commit -m 'research: record v1.70 CA9 CM pointer taint' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
