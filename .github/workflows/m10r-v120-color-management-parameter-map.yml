@@ -1,0 +1,138 @@
+name: M10-R v1.20 color management parameter map
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v120-color-management-parameter-map.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Map ca9_cm_fill_parameter and selector
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v120_color_management_parameter_map.txt
+          from pathlib import Path
+          import struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); BASE=0x42000000; PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True
+          def off(a): return PFX+a-BASE
+          def dis(a,z): return list(md.disasm(b[off(a):off(z)],a))
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp; lo=off(la)
+                if 0<=lo<=len(b)-4:return la,struct.unpack_from('<I',b,lo)[0]
+            except: pass
+          def call(i):
+            try:
+              if i.mnemonic.startswith('bl') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm&~1
+            except: pass
+          def str_at(v):
+            if not (BASE<=v<BASE+len(b)-PFX):return None
+            o=off(v); e=b.find(b'\0',o,min(len(b),o+200))
+            if e<=o:return None
+            r=b[o:e]
+            if len(r)>=4 and all(0x20<=x<=0x7e for x in r):return r.decode('ascii','replace')
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            q=lit(i)
+            if q:
+              la,v=q;s+=f' ; LIT {hex(la)}->{hex(v)}'
+              st=str_at(v)
+              if st:s+=f' STRING={st!r}'
+            t=call(i)
+            if t is not None:s+=f' ; CALL {hex(t)}'
+            return s
+          def dump(title,a,z):
+            print(f'\n=== {title} {hex(a)}..{hex(z)} ===')
+            for i in dis(a,z):print(fmt(i))
+          print('M10-R v1.20 COLOR MANAGEMENT PARAMETER MAP')
+          print('Targets: ca9_cm_fill_parameter 0x420A591C and selector/helper 0x420A5F1C.')
+          dump('ca9_cm_fill_parameter',0x420a591c,0x420a5b10)
+          dump('cm selector/helper 0x420A5F1C',0x420a5ef0,0x420a6100)
+
+          print('\n=== WORKFLOW FIELD READS IN ca9_cm_fill_parameter ===')
+          for i in dis(0x420a591c,0x420a5b10):
+            try:
+              if i.mnemonic.startswith('ldr'):
+                for o in i.operands:
+                  if o.type==ARM_OP_MEM and 0<=o.mem.disp<=0x800:
+                    print(fmt(i),'disp',hex(o.mem.disp))
+            except: pass
+          print('\n=== STORES IN ca9_cm_fill_parameter ===')
+          for i in dis(0x420a591c,0x420a5b10):
+            if i.mnemonic.startswith('str'): print(fmt(i))
+          print('\n=== DIRECT CALL TARGETS ===')
+          seen=[]
+          for i in dis(0x420a591c,0x420a5b10):
+            t=call(i)
+            if t is not None and t not in seen:seen.append(t)
+          for t in seen:print(hex(t))
+          for t in seen:
+            if BASE<=t<BASE+len(b)-PFX and t not in (0x421e6648,0x421e61d0,0x421e65a4):
+              dump(f'callee {hex(t)}',max(BASE,t-0x10),min(BASE+len(b)-PFX,t+0x100))
+
+          print('\n=== GLOBAL 0x43705760 READERS/WRITERS NEAR CA9 COLOR MODULE ===')
+          for a in range(0x420a3000,0x420a9000,2):
+            ins=dis(a,a+4)
+            if not ins:continue
+            q=lit(ins[0])
+            if q and q[1]==0x43705760:
+              print(f'\n--- literal ref @{hex(a)} ---')
+              for x in dis(max(0x420a3000,a-0x30),min(0x420a9000,a+0x80)):print(fmt(x))
+
+          print('\n=== SELECTED COLOR STRINGS + POINTER XREFS IN IMG-SYSTEM ===')
+          terms=(b'_B2YMODE',b'AWBGAIN',b'ColorManagement',b'color management',b'gamma',b'Gamma',b'CCM',b'Matrix',b'matrix',b'sRGB',b'AdobeRGB',b'Vivid',b'Natural',b'Standard')
+          found=[]
+          for term in terms:
+            p=0
+            while True:
+              p=b.find(term,p)
+              if p<0:break
+              s0=p
+              while s0>0 and 0x20<=b[s0-1]<=0x7e:s0-=1
+              e=p
+              while e<len(b) and 0x20<=b[e]<=0x7e:e+=1
+              va=BASE+s0-PFX; txt=b[s0:e].decode('ascii','replace')
+              found.append((va,txt));p=e+1
+          for va,txt in found:
+            pat=struct.pack('<I',va); hits=[]; p=0
+            while True:
+              p=b.find(pat,p)
+              if p<0:break
+              hits.append(BASE+p-PFX);p+=1
+            print(hex(va),repr(txt),'xrefs',[hex(x) for x in hits[:30]])
+            for h in hits[:8]:
+              for x in dis(max(BASE,h-0x30),min(BASE+len(b)-PFX,h+0x60)):print(fmt(x))
+
+          print('\n=== DECISION TARGET ===')
+          print('Classify ca9_cm_fill_parameter fields into scalar tuning, mode/table selection, WB/color transform, and output rendering. Identify pointer/table producers before interpreting values visually.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v120_color_management_parameter_map.txt
+          git commit -m 'research: record v1.20 color management parameter map' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
