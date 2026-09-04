@@ -1,0 +1,1956 @@
+M10-R v1.57 CA9 CALLBACK REGISTRATION / EXACT OPCODE 0x40
+
+=== data occurrences register_func 0x4000beb8 ===
+[]
+
+=== data occurrences callback_global 0x40026810 ===
+['0x4000c06c']
+-- pool/data 0x4000c06c --
+ARM 4000bec8: ldr        r2, [pc, #0x19c] ; LIT 0x4000c06c->0x40026810
+ARM 4000c024: ldr        r1, [pc, #0x40] ; LIT 0x4000c06c->0x40026810
+
+=== exact calls to register function ===
+ARM []
+THUMB []
+
+=== exact immediate CMP/TEQ #0x40 ===
+ARM ['0x40006364']
+-- ARM cmp40 0x40006364 --
+400062e4: ldm        r4, {r6, r7, r8, sb, sl}
+400062e8: ldr        r4, [pc, #0x174] ; LIT 0x40006464->0x4001c844
+400062ec: ldrb       r5, [r4]
+400062f0: add        ip, r5, r5, lsl #3
+400062f4: add        ip, fp, ip, lsl #2
+400062f8: stm        ip, {r0, r1, r2, r3, r6, r7, r8, sb, sl}
+400062fc: add        r0, r5, #1
+40006300: and        r0, r0, #0xff
+40006304: strb       r0, [r4]
+40006308: cmp        r0, #0x1e
+4000630c: bne        #0x40006318
+40006310: mov        r0, #0
+40006314: strb       r0, [r4]
+40006318: pop        {r4, r5, r6, r7, r8, sb, sl, fp}
+4000631c: bx         lr
+40006320: push       {r4, r5, r6, r7, r8, sb, lr}
+40006324: ldr        r5, [pc, #0x138] ; LIT 0x40006464->0x4001c844
+40006328: sub        sp, sp, #0x14
+4000632c: ldr        r4, [pc, #0x134] ; LIT 0x40006468->0x40026aec
+40006330: ldrb       r0, [r5, #1]
+40006334: add        r1, r0, r0, lsl #3
+40006338: ldr        r0, [r4, r1, lsl #2]
+4000633c: cmn        r0, #0x80000001
+40006340: beq        #0x4000645c
+40006344: cmp        r0, #0x2000000
+40006348: beq        #0x40006388
+4000634c: cmp        r0, #1
+40006350: beq        #0x40006398
+40006354: cmp        r0, #0x10
+40006358: beq        #0x400063dc
+4000635c: cmp        r0, #0x20
+40006360: beq        #0x400063a4
+40006364: cmp        r0, #0x40
+40006368: beq        #0x400063b0
+4000636c: cmp        r0, #0x30
+40006370: beq        #0x400063bc
+40006374: cmp        r0, #0x50
+40006378: beq        #0x400063c8
+4000637c: cmp        r0, #0x70
+40006380: beq        #0x400063d4
+40006384: b          #0x400063dc
+40006388: add        r1, pc, #0xdc
+4000638c: mov        r0, #4
+40006390: bl         #0x4000ded4 ; CALL 0x4000ded4
+40006394: b          #0x400063dc
+40006398: add        r0, r4, r1, lsl #2
+4000639c: bl         #0x4000df6c ; CALL 0x4000df6c
+400063a0: b          #0x400063dc
+400063a4: add        r0, r4, r1, lsl #2
+400063a8: bl         #0x4000b59c ; CALL 0x4000b59c
+400063ac: b          #0x400063dc
+400063b0: add        r0, r4, r1, lsl #2
+400063b4: bl         #0x40004050 ; CALL 0x40004050
+400063b8: b          #0x400063dc
+400063bc: add        r0, r4, r1, lsl #2
+400063c0: bl         #0x40000790 ; CALL 0x40000790
+400063c4: b          #0x400063dc
+400063c8: add        r0, r4, r1, lsl #2
+400063cc: bl         #0x4000dc74 ; CALL 0x4000dc74
+400063d0: b          #0x400063dc
+400063d4: add        r0, r4, r1, lsl #2
+400063d8: bl         #0x40007618 ; CALL 0x40007618
+400063dc: ldrb       r0, [r5, #1]
+400063e0: add        r0, r0, r0, lsl #3
+400063e4: add        ip, r4, r0, lsl #2
+400063e8: ldr        r1, [ip, #4]
+400063ec: cmp        r1, #0
+400063f0: beq        #0x40006410
+400063f4: ldr        r0, [r4, r0, lsl #2]
+400063f8: ldrd       r2, r3, [ip, #8]
+400063fc: add        ip, ip, #0x10
+40006400: ldm        ip, {r6, r7, r8, sb, ip}
+40006404: str        ip, [sp, #0x10]
+40006408: stm        sp, {r6, r7, r8, sb}
+4000640c: bl         #0x4000de1c ; CALL 0x4000de1c
+40006410: ldrb       r1, [r5, #1]
+40006414: mov        r0, #0
+40006418: mvn        ip, #0x80000000
+4000641c: add        r3, r1, #1
+40006420: add        r2, r1, r1, lsl #3
+40006424: and        r3, r3, #0xff
+40006428: cmp        r3, #0x1e
+4000642c: add        r1, r4, r2, lsl #2
+40006430: str        r0, [r1, #4]
+40006434: str        r0, [r1, #8]
+40006438: str        r0, [r1, #0xc]
+4000643c: str        r0, [r1, #0x10]
+40006440: str        r0, [r1, #0x14]
+40006444: str        r0, [r1, #0x18]
+40006448: str        r0, [r1, #0x1c]
+4000644c: str        r0, [r1, #0x20]
+40006450: str        ip, [r4, r2, lsl #2]
+40006454: strb       r3, [r5, #1]
+40006458: strbeq     r0, [r5, #1]
+4000645c: add        sp, sp, #0x14
+40006460: pop        {r4, r5, r6, r7, r8, sb, pc}
+40006464: andmi      ip, r1, r4, asr #16
+40006468: andmi      r6, r2, ip, ror #21
+4000646c: svcpl      #0x396163
+40006470: strbtvc    r6, [lr], #-0xf63
+40006474: svcpl      #0x6c6f72
+40006478: .byte      0x4d, 0x61, 0x6e, 0x61
+4000647c: ldmdahs    r2!, {r0, r1, r2, r5, r6, r8, sl, sp, lr} ^
+40006480: eorhs      r2, sp, sb, lsr #32
+THUMB ['0x40018a12', '0x40018a52', '0x40018a92', '0x40018ad2', '0x40018b12', '0x40018b52', '0x40018b92', '0x40018bd2']
+-- THUMB cmp40 0x40018a12 --
+40018992: movs       r6, #0x40
+40018994: lsrs       r2, r0, #0x12
+40018996: movs       r6, #0x50
+40018998: lsrs       r2, r0, #0x12
+4001899a: movs       r6, #0x60
+4001899c: lsrs       r2, r0, #0x12
+4001899e: movs       r6, #0x70
+400189a0: lsrs       r2, r0, #0x12
+400189a2: movs       r6, #0x80
+400189a4: lsrs       r2, r0, #0x12
+400189a6: movs       r6, #0x90
+400189a8: lsrs       r2, r0, #0x12
+400189aa: movs       r6, #0xa0
+400189ac: lsrs       r2, r0, #0x12
+400189ae: movs       r6, #0xb0
+400189b0: lsrs       r2, r0, #0x12
+400189b2: movs       r6, #0xc0
+400189b4: lsrs       r2, r0, #0x12
+400189b6: movs       r6, #0xd0
+400189b8: lsrs       r2, r0, #0x12
+400189ba: movs       r6, #0xe0
+400189bc: lsrs       r2, r0, #0x12
+400189be: movs       r6, #0xf0
+400189c0: lsrs       r2, r0, #0x12
+400189c2: movs       r7, #0
+400189c4: lsrs       r2, r0, #0x12
+400189c6: movs       r7, #0x10
+400189c8: lsrs       r2, r0, #0x12
+400189ca: movs       r7, #0x20
+400189cc: lsrs       r2, r0, #0x12
+400189ce: movs       r7, #0x30
+400189d0: lsrs       r2, r0, #0x12
+400189d2: movs       r7, #0x40
+400189d4: lsrs       r2, r0, #0x12
+400189d6: movs       r7, #0x50
+400189d8: lsrs       r2, r0, #0x12
+400189da: movs       r7, #0x60
+400189dc: lsrs       r2, r0, #0x12
+400189de: movs       r7, #0x70
+400189e0: lsrs       r2, r0, #0x12
+400189e2: movs       r7, #0x80
+400189e4: lsrs       r2, r0, #0x12
+400189e6: movs       r7, #0x90
+400189e8: lsrs       r2, r0, #0x12
+400189ea: movs       r7, #0xa0
+400189ec: lsrs       r2, r0, #0x12
+400189ee: movs       r7, #0xb0
+400189f0: lsrs       r2, r0, #0x12
+400189f2: movs       r7, #0xc0
+400189f4: lsrs       r2, r0, #0x12
+400189f6: movs       r7, #0xd0
+400189f8: lsrs       r2, r0, #0x12
+400189fa: movs       r7, #0xe0
+400189fc: lsrs       r2, r0, #0x12
+400189fe: movs       r7, #0xf0
+40018a00: lsrs       r2, r0, #0x12
+40018a02: cmp        r0, #0
+40018a04: lsrs       r2, r0, #0x12
+40018a06: cmp        r0, #0x10
+40018a08: lsrs       r2, r0, #0x12
+40018a0a: cmp        r0, #0x20
+40018a0c: lsrs       r2, r0, #0x12
+40018a0e: cmp        r0, #0x30
+40018a10: lsrs       r2, r0, #0x12
+40018a12: cmp        r0, #0x40
+40018a14: lsrs       r2, r0, #0x12
+40018a16: cmp        r0, #0x50
+40018a18: lsrs       r2, r0, #0x12
+40018a1a: cmp        r0, #0x60
+40018a1c: lsrs       r2, r0, #0x12
+40018a1e: cmp        r0, #0x70
+40018a20: lsrs       r2, r0, #0x12
+40018a22: cmp        r0, #0x80
+40018a24: lsrs       r2, r0, #0x12
+40018a26: cmp        r0, #0x90
+40018a28: lsrs       r2, r0, #0x12
+40018a2a: cmp        r0, #0xa0
+40018a2c: lsrs       r2, r0, #0x12
+40018a2e: cmp        r0, #0xb0
+40018a30: lsrs       r2, r0, #0x12
+40018a32: cmp        r0, #0xc0
+40018a34: lsrs       r2, r0, #0x12
+40018a36: cmp        r0, #0xd0
+40018a38: lsrs       r2, r0, #0x12
+40018a3a: cmp        r0, #0xe0
+40018a3c: lsrs       r2, r0, #0x12
+40018a3e: cmp        r0, #0xf0
+40018a40: lsrs       r2, r0, #0x12
+40018a42: cmp        r1, #0
+40018a44: lsrs       r2, r0, #0x12
+40018a46: cmp        r1, #0x10
+40018a48: lsrs       r2, r0, #0x12
+40018a4a: cmp        r1, #0x20
+40018a4c: lsrs       r2, r0, #0x12
+40018a4e: cmp        r1, #0x30
+40018a50: lsrs       r2, r0, #0x12
+40018a52: cmp        r1, #0x40
+40018a54: lsrs       r2, r0, #0x12
+40018a56: cmp        r1, #0x50
+40018a58: lsrs       r2, r0, #0x12
+40018a5a: cmp        r1, #0x60
+40018a5c: lsrs       r2, r0, #0x12
+40018a5e: cmp        r1, #0x70
+40018a60: lsrs       r2, r0, #0x12
+40018a62: cmp        r1, #0x80
+40018a64: lsrs       r2, r0, #0x12
+40018a66: cmp        r1, #0x90
+40018a68: lsrs       r2, r0, #0x12
+40018a6a: cmp        r1, #0xa0
+40018a6c: lsrs       r2, r0, #0x12
+40018a6e: cmp        r1, #0xb0
+40018a70: lsrs       r2, r0, #0x12
+40018a72: cmp        r1, #0xc0
+40018a74: lsrs       r2, r0, #0x12
+40018a76: cmp        r1, #0xd0
+40018a78: lsrs       r2, r0, #0x12
+40018a7a: cmp        r1, #0xe0
+40018a7c: lsrs       r2, r0, #0x12
+40018a7e: cmp        r1, #0xf0
+40018a80: lsrs       r2, r0, #0x12
+40018a82: cmp        r2, #0
+40018a84: lsrs       r2, r0, #0x12
+40018a86: cmp        r2, #0x10
+40018a88: lsrs       r2, r0, #0x12
+40018a8a: cmp        r2, #0x20
+40018a8c: lsrs       r2, r0, #0x12
+40018a8e: cmp        r2, #0x30
+40018a90: lsrs       r2, r0, #0x12
+40018a92: cmp        r2, #0x40
+40018a94: lsrs       r2, r0, #0x12
+40018a96: cmp        r2, #0x50
+40018a98: lsrs       r2, r0, #0x12
+40018a9a: cmp        r2, #0x60
+40018a9c: lsrs       r2, r0, #0x12
+40018a9e: cmp        r2, #0x70
+40018aa0: lsrs       r2, r0, #0x12
+40018aa2: cmp        r2, #0x80
+40018aa4: lsrs       r2, r0, #0x12
+40018aa6: cmp        r2, #0x90
+40018aa8: lsrs       r2, r0, #0x12
+40018aaa: cmp        r2, #0xa0
+40018aac: lsrs       r2, r0, #0x12
+40018aae: cmp        r2, #0xb0
+40018ab0: lsrs       r2, r0, #0x12
+40018ab2: cmp        r2, #0xc0
+40018ab4: lsrs       r2, r0, #0x12
+40018ab6: cmp        r2, #0xd0
+40018ab8: lsrs       r2, r0, #0x12
+40018aba: cmp        r2, #0xe0
+40018abc: lsrs       r2, r0, #0x12
+40018abe: cmp        r2, #0xf0
+40018ac0: lsrs       r2, r0, #0x12
+40018ac2: cmp        r3, #0
+40018ac4: lsrs       r2, r0, #0x12
+40018ac6: cmp        r3, #0x10
+40018ac8: lsrs       r2, r0, #0x12
+40018aca: cmp        r3, #0x20
+40018acc: lsrs       r2, r0, #0x12
+40018ace: cmp        r3, #0x30
+40018ad0: lsrs       r2, r0, #0x12
+40018ad2: cmp        r3, #0x40
+40018ad4: lsrs       r2, r0, #0x12
+40018ad6: cmp        r3, #0x50
+40018ad8: lsrs       r2, r0, #0x12
+40018ada: cmp        r3, #0x60
+40018adc: lsrs       r2, r0, #0x12
+40018ade: cmp        r3, #0x70
+40018ae0: lsrs       r2, r0, #0x12
+40018ae2: cmp        r3, #0x80
+40018ae4: lsrs       r2, r0, #0x12
+40018ae6: cmp        r3, #0x90
+40018ae8: lsrs       r2, r0, #0x12
+40018aea: cmp        r3, #0xa0
+40018aec: lsrs       r2, r0, #0x12
+40018aee: cmp        r3, #0xb0
+40018af0: lsrs       r2, r0, #0x12
+40018af2: cmp        r3, #0xc0
+40018af4: lsrs       r2, r0, #0x12
+40018af6: cmp        r3, #0xd0
+40018af8: lsrs       r2, r0, #0x12
+40018afa: cmp        r3, #0xe0
+40018afc: lsrs       r2, r0, #0x12
+40018afe: cmp        r3, #0xf0
+40018b00: lsrs       r2, r0, #0x12
+40018b02: cmp        r4, #0
+40018b04: lsrs       r2, r0, #0x12
+40018b06: cmp        r4, #0x10
+40018b08: lsrs       r2, r0, #0x12
+40018b0a: cmp        r4, #0x20
+40018b0c: lsrs       r2, r0, #0x12
+40018b0e: cmp        r4, #0x30
+40018b10: lsrs       r2, r0, #0x12
+40018b12: cmp        r4, #0x40
+40018b14: lsrs       r2, r0, #0x12
+40018b16: cmp        r4, #0x50
+40018b18: lsrs       r2, r0, #0x12
+40018b1a: cmp        r4, #0x60
+40018b1c: lsrs       r2, r0, #0x12
+40018b1e: cmp        r4, #0x70
+40018b20: lsrs       r2, r0, #0x12
+40018b22: cmp        r4, #0x80
+40018b24: lsrs       r2, r0, #0x12
+40018b26: cmp        r4, #0x90
+40018b28: lsrs       r2, r0, #0x12
+40018b2a: cmp        r4, #0xa0
+40018b2c: lsrs       r2, r0, #0x12
+40018b2e: cmp        r4, #0xb0
+40018b30: lsrs       r2, r0, #0x12
+-- THUMB cmp40 0x40018a52 --
+400189d2: movs       r7, #0x40
+400189d4: lsrs       r2, r0, #0x12
+400189d6: movs       r7, #0x50
+400189d8: lsrs       r2, r0, #0x12
+400189da: movs       r7, #0x60
+400189dc: lsrs       r2, r0, #0x12
+400189de: movs       r7, #0x70
+400189e0: lsrs       r2, r0, #0x12
+400189e2: movs       r7, #0x80
+400189e4: lsrs       r2, r0, #0x12
+400189e6: movs       r7, #0x90
+400189e8: lsrs       r2, r0, #0x12
+400189ea: movs       r7, #0xa0
+400189ec: lsrs       r2, r0, #0x12
+400189ee: movs       r7, #0xb0
+400189f0: lsrs       r2, r0, #0x12
+400189f2: movs       r7, #0xc0
+400189f4: lsrs       r2, r0, #0x12
+400189f6: movs       r7, #0xd0
+400189f8: lsrs       r2, r0, #0x12
+400189fa: movs       r7, #0xe0
+400189fc: lsrs       r2, r0, #0x12
+400189fe: movs       r7, #0xf0
+40018a00: lsrs       r2, r0, #0x12
+40018a02: cmp        r0, #0
+40018a04: lsrs       r2, r0, #0x12
+40018a06: cmp        r0, #0x10
+40018a08: lsrs       r2, r0, #0x12
+40018a0a: cmp        r0, #0x20
+40018a0c: lsrs       r2, r0, #0x12
+40018a0e: cmp        r0, #0x30
+40018a10: lsrs       r2, r0, #0x12
+40018a12: cmp        r0, #0x40
+40018a14: lsrs       r2, r0, #0x12
+40018a16: cmp        r0, #0x50
+40018a18: lsrs       r2, r0, #0x12
+40018a1a: cmp        r0, #0x60
+40018a1c: lsrs       r2, r0, #0x12
+40018a1e: cmp        r0, #0x70
+40018a20: lsrs       r2, r0, #0x12
+40018a22: cmp        r0, #0x80
+40018a24: lsrs       r2, r0, #0x12
+40018a26: cmp        r0, #0x90
+40018a28: lsrs       r2, r0, #0x12
+40018a2a: cmp        r0, #0xa0
+40018a2c: lsrs       r2, r0, #0x12
+40018a2e: cmp        r0, #0xb0
+40018a30: lsrs       r2, r0, #0x12
+40018a32: cmp        r0, #0xc0
+40018a34: lsrs       r2, r0, #0x12
+40018a36: cmp        r0, #0xd0
+40018a38: lsrs       r2, r0, #0x12
+40018a3a: cmp        r0, #0xe0
+40018a3c: lsrs       r2, r0, #0x12
+40018a3e: cmp        r0, #0xf0
+40018a40: lsrs       r2, r0, #0x12
+40018a42: cmp        r1, #0
+40018a44: lsrs       r2, r0, #0x12
+40018a46: cmp        r1, #0x10
+40018a48: lsrs       r2, r0, #0x12
+40018a4a: cmp        r1, #0x20
+40018a4c: lsrs       r2, r0, #0x12
+40018a4e: cmp        r1, #0x30
+40018a50: lsrs       r2, r0, #0x12
+40018a52: cmp        r1, #0x40
+40018a54: lsrs       r2, r0, #0x12
+40018a56: cmp        r1, #0x50
+40018a58: lsrs       r2, r0, #0x12
+40018a5a: cmp        r1, #0x60
+40018a5c: lsrs       r2, r0, #0x12
+40018a5e: cmp        r1, #0x70
+40018a60: lsrs       r2, r0, #0x12
+40018a62: cmp        r1, #0x80
+40018a64: lsrs       r2, r0, #0x12
+40018a66: cmp        r1, #0x90
+40018a68: lsrs       r2, r0, #0x12
+40018a6a: cmp        r1, #0xa0
+40018a6c: lsrs       r2, r0, #0x12
+40018a6e: cmp        r1, #0xb0
+40018a70: lsrs       r2, r0, #0x12
+40018a72: cmp        r1, #0xc0
+40018a74: lsrs       r2, r0, #0x12
+40018a76: cmp        r1, #0xd0
+40018a78: lsrs       r2, r0, #0x12
+40018a7a: cmp        r1, #0xe0
+40018a7c: lsrs       r2, r0, #0x12
+40018a7e: cmp        r1, #0xf0
+40018a80: lsrs       r2, r0, #0x12
+40018a82: cmp        r2, #0
+40018a84: lsrs       r2, r0, #0x12
+40018a86: cmp        r2, #0x10
+40018a88: lsrs       r2, r0, #0x12
+40018a8a: cmp        r2, #0x20
+40018a8c: lsrs       r2, r0, #0x12
+40018a8e: cmp        r2, #0x30
+40018a90: lsrs       r2, r0, #0x12
+40018a92: cmp        r2, #0x40
+40018a94: lsrs       r2, r0, #0x12
+40018a96: cmp        r2, #0x50
+40018a98: lsrs       r2, r0, #0x12
+40018a9a: cmp        r2, #0x60
+40018a9c: lsrs       r2, r0, #0x12
+40018a9e: cmp        r2, #0x70
+40018aa0: lsrs       r2, r0, #0x12
+40018aa2: cmp        r2, #0x80
+40018aa4: lsrs       r2, r0, #0x12
+40018aa6: cmp        r2, #0x90
+40018aa8: lsrs       r2, r0, #0x12
+40018aaa: cmp        r2, #0xa0
+40018aac: lsrs       r2, r0, #0x12
+40018aae: cmp        r2, #0xb0
+40018ab0: lsrs       r2, r0, #0x12
+40018ab2: cmp        r2, #0xc0
+40018ab4: lsrs       r2, r0, #0x12
+40018ab6: cmp        r2, #0xd0
+40018ab8: lsrs       r2, r0, #0x12
+40018aba: cmp        r2, #0xe0
+40018abc: lsrs       r2, r0, #0x12
+40018abe: cmp        r2, #0xf0
+40018ac0: lsrs       r2, r0, #0x12
+40018ac2: cmp        r3, #0
+40018ac4: lsrs       r2, r0, #0x12
+40018ac6: cmp        r3, #0x10
+40018ac8: lsrs       r2, r0, #0x12
+40018aca: cmp        r3, #0x20
+40018acc: lsrs       r2, r0, #0x12
+40018ace: cmp        r3, #0x30
+40018ad0: lsrs       r2, r0, #0x12
+40018ad2: cmp        r3, #0x40
+40018ad4: lsrs       r2, r0, #0x12
+40018ad6: cmp        r3, #0x50
+40018ad8: lsrs       r2, r0, #0x12
+40018ada: cmp        r3, #0x60
+40018adc: lsrs       r2, r0, #0x12
+40018ade: cmp        r3, #0x70
+40018ae0: lsrs       r2, r0, #0x12
+40018ae2: cmp        r3, #0x80
+40018ae4: lsrs       r2, r0, #0x12
+40018ae6: cmp        r3, #0x90
+40018ae8: lsrs       r2, r0, #0x12
+40018aea: cmp        r3, #0xa0
+40018aec: lsrs       r2, r0, #0x12
+40018aee: cmp        r3, #0xb0
+40018af0: lsrs       r2, r0, #0x12
+40018af2: cmp        r3, #0xc0
+40018af4: lsrs       r2, r0, #0x12
+40018af6: cmp        r3, #0xd0
+40018af8: lsrs       r2, r0, #0x12
+40018afa: cmp        r3, #0xe0
+40018afc: lsrs       r2, r0, #0x12
+40018afe: cmp        r3, #0xf0
+40018b00: lsrs       r2, r0, #0x12
+40018b02: cmp        r4, #0
+40018b04: lsrs       r2, r0, #0x12
+40018b06: cmp        r4, #0x10
+40018b08: lsrs       r2, r0, #0x12
+40018b0a: cmp        r4, #0x20
+40018b0c: lsrs       r2, r0, #0x12
+40018b0e: cmp        r4, #0x30
+40018b10: lsrs       r2, r0, #0x12
+40018b12: cmp        r4, #0x40
+40018b14: lsrs       r2, r0, #0x12
+40018b16: cmp        r4, #0x50
+40018b18: lsrs       r2, r0, #0x12
+40018b1a: cmp        r4, #0x60
+40018b1c: lsrs       r2, r0, #0x12
+40018b1e: cmp        r4, #0x70
+40018b20: lsrs       r2, r0, #0x12
+40018b22: cmp        r4, #0x80
+40018b24: lsrs       r2, r0, #0x12
+40018b26: cmp        r4, #0x90
+40018b28: lsrs       r2, r0, #0x12
+40018b2a: cmp        r4, #0xa0
+40018b2c: lsrs       r2, r0, #0x12
+40018b2e: cmp        r4, #0xb0
+40018b30: lsrs       r2, r0, #0x12
+40018b32: cmp        r4, #0xc0
+40018b34: lsrs       r2, r0, #0x12
+40018b36: cmp        r4, #0xd0
+40018b38: lsrs       r2, r0, #0x12
+40018b3a: cmp        r4, #0xe0
+40018b3c: lsrs       r2, r0, #0x12
+40018b3e: cmp        r4, #0xf0
+40018b40: lsrs       r2, r0, #0x12
+40018b42: cmp        r5, #0
+40018b44: lsrs       r2, r0, #0x12
+40018b46: cmp        r5, #0x10
+40018b48: lsrs       r2, r0, #0x12
+40018b4a: cmp        r5, #0x20
+40018b4c: lsrs       r2, r0, #0x12
+40018b4e: cmp        r5, #0x30
+40018b50: lsrs       r2, r0, #0x12
+40018b52: cmp        r5, #0x40
+40018b54: lsrs       r2, r0, #0x12
+40018b56: cmp        r5, #0x50
+40018b58: lsrs       r2, r0, #0x12
+40018b5a: cmp        r5, #0x60
+40018b5c: lsrs       r2, r0, #0x12
+40018b5e: cmp        r5, #0x70
+40018b60: lsrs       r2, r0, #0x12
+40018b62: cmp        r5, #0x80
+40018b64: lsrs       r2, r0, #0x12
+40018b66: cmp        r5, #0x90
+40018b68: lsrs       r2, r0, #0x12
+40018b6a: cmp        r5, #0xa0
+40018b6c: lsrs       r2, r0, #0x12
+40018b6e: cmp        r5, #0xb0
+40018b70: lsrs       r2, r0, #0x12
+-- THUMB cmp40 0x40018a92 --
+40018a12: cmp        r0, #0x40
+40018a14: lsrs       r2, r0, #0x12
+40018a16: cmp        r0, #0x50
+40018a18: lsrs       r2, r0, #0x12
+40018a1a: cmp        r0, #0x60
+40018a1c: lsrs       r2, r0, #0x12
+40018a1e: cmp        r0, #0x70
+40018a20: lsrs       r2, r0, #0x12
+40018a22: cmp        r0, #0x80
+40018a24: lsrs       r2, r0, #0x12
+40018a26: cmp        r0, #0x90
+40018a28: lsrs       r2, r0, #0x12
+40018a2a: cmp        r0, #0xa0
+40018a2c: lsrs       r2, r0, #0x12
+40018a2e: cmp        r0, #0xb0
+40018a30: lsrs       r2, r0, #0x12
+40018a32: cmp        r0, #0xc0
+40018a34: lsrs       r2, r0, #0x12
+40018a36: cmp        r0, #0xd0
+40018a38: lsrs       r2, r0, #0x12
+40018a3a: cmp        r0, #0xe0
+40018a3c: lsrs       r2, r0, #0x12
+40018a3e: cmp        r0, #0xf0
+40018a40: lsrs       r2, r0, #0x12
+40018a42: cmp        r1, #0
+40018a44: lsrs       r2, r0, #0x12
+40018a46: cmp        r1, #0x10
+40018a48: lsrs       r2, r0, #0x12
+40018a4a: cmp        r1, #0x20
+40018a4c: lsrs       r2, r0, #0x12
+40018a4e: cmp        r1, #0x30
+40018a50: lsrs       r2, r0, #0x12
+40018a52: cmp        r1, #0x40
+40018a54: lsrs       r2, r0, #0x12
+40018a56: cmp        r1, #0x50
+40018a58: lsrs       r2, r0, #0x12
+40018a5a: cmp        r1, #0x60
+40018a5c: lsrs       r2, r0, #0x12
+40018a5e: cmp        r1, #0x70
+40018a60: lsrs       r2, r0, #0x12
+40018a62: cmp        r1, #0x80
+40018a64: lsrs       r2, r0, #0x12
+40018a66: cmp        r1, #0x90
+40018a68: lsrs       r2, r0, #0x12
+40018a6a: cmp        r1, #0xa0
+40018a6c: lsrs       r2, r0, #0x12
+40018a6e: cmp        r1, #0xb0
+40018a70: lsrs       r2, r0, #0x12
+40018a72: cmp        r1, #0xc0
+40018a74: lsrs       r2, r0, #0x12
+40018a76: cmp        r1, #0xd0
+40018a78: lsrs       r2, r0, #0x12
+40018a7a: cmp        r1, #0xe0
+40018a7c: lsrs       r2, r0, #0x12
+40018a7e: cmp        r1, #0xf0
+40018a80: lsrs       r2, r0, #0x12
+40018a82: cmp        r2, #0
+40018a84: lsrs       r2, r0, #0x12
+40018a86: cmp        r2, #0x10
+40018a88: lsrs       r2, r0, #0x12
+40018a8a: cmp        r2, #0x20
+40018a8c: lsrs       r2, r0, #0x12
+40018a8e: cmp        r2, #0x30
+40018a90: lsrs       r2, r0, #0x12
+40018a92: cmp        r2, #0x40
+40018a94: lsrs       r2, r0, #0x12
+40018a96: cmp        r2, #0x50
+40018a98: lsrs       r2, r0, #0x12
+40018a9a: cmp        r2, #0x60
+40018a9c: lsrs       r2, r0, #0x12
+40018a9e: cmp        r2, #0x70
+40018aa0: lsrs       r2, r0, #0x12
+40018aa2: cmp        r2, #0x80
+40018aa4: lsrs       r2, r0, #0x12
+40018aa6: cmp        r2, #0x90
+40018aa8: lsrs       r2, r0, #0x12
+40018aaa: cmp        r2, #0xa0
+40018aac: lsrs       r2, r0, #0x12
+40018aae: cmp        r2, #0xb0
+40018ab0: lsrs       r2, r0, #0x12
+40018ab2: cmp        r2, #0xc0
+40018ab4: lsrs       r2, r0, #0x12
+40018ab6: cmp        r2, #0xd0
+40018ab8: lsrs       r2, r0, #0x12
+40018aba: cmp        r2, #0xe0
+40018abc: lsrs       r2, r0, #0x12
+40018abe: cmp        r2, #0xf0
+40018ac0: lsrs       r2, r0, #0x12
+40018ac2: cmp        r3, #0
+40018ac4: lsrs       r2, r0, #0x12
+40018ac6: cmp        r3, #0x10
+40018ac8: lsrs       r2, r0, #0x12
+40018aca: cmp        r3, #0x20
+40018acc: lsrs       r2, r0, #0x12
+40018ace: cmp        r3, #0x30
+40018ad0: lsrs       r2, r0, #0x12
+40018ad2: cmp        r3, #0x40
+40018ad4: lsrs       r2, r0, #0x12
+40018ad6: cmp        r3, #0x50
+40018ad8: lsrs       r2, r0, #0x12
+40018ada: cmp        r3, #0x60
+40018adc: lsrs       r2, r0, #0x12
+40018ade: cmp        r3, #0x70
+40018ae0: lsrs       r2, r0, #0x12
+40018ae2: cmp        r3, #0x80
+40018ae4: lsrs       r2, r0, #0x12
+40018ae6: cmp        r3, #0x90
+40018ae8: lsrs       r2, r0, #0x12
+40018aea: cmp        r3, #0xa0
+40018aec: lsrs       r2, r0, #0x12
+40018aee: cmp        r3, #0xb0
+40018af0: lsrs       r2, r0, #0x12
+40018af2: cmp        r3, #0xc0
+40018af4: lsrs       r2, r0, #0x12
+40018af6: cmp        r3, #0xd0
+40018af8: lsrs       r2, r0, #0x12
+40018afa: cmp        r3, #0xe0
+40018afc: lsrs       r2, r0, #0x12
+40018afe: cmp        r3, #0xf0
+40018b00: lsrs       r2, r0, #0x12
+40018b02: cmp        r4, #0
+40018b04: lsrs       r2, r0, #0x12
+40018b06: cmp        r4, #0x10
+40018b08: lsrs       r2, r0, #0x12
+40018b0a: cmp        r4, #0x20
+40018b0c: lsrs       r2, r0, #0x12
+40018b0e: cmp        r4, #0x30
+40018b10: lsrs       r2, r0, #0x12
+40018b12: cmp        r4, #0x40
+40018b14: lsrs       r2, r0, #0x12
+40018b16: cmp        r4, #0x50
+40018b18: lsrs       r2, r0, #0x12
+40018b1a: cmp        r4, #0x60
+40018b1c: lsrs       r2, r0, #0x12
+40018b1e: cmp        r4, #0x70
+40018b20: lsrs       r2, r0, #0x12
+40018b22: cmp        r4, #0x80
+40018b24: lsrs       r2, r0, #0x12
+40018b26: cmp        r4, #0x90
+40018b28: lsrs       r2, r0, #0x12
+40018b2a: cmp        r4, #0xa0
+40018b2c: lsrs       r2, r0, #0x12
+40018b2e: cmp        r4, #0xb0
+40018b30: lsrs       r2, r0, #0x12
+40018b32: cmp        r4, #0xc0
+40018b34: lsrs       r2, r0, #0x12
+40018b36: cmp        r4, #0xd0
+40018b38: lsrs       r2, r0, #0x12
+40018b3a: cmp        r4, #0xe0
+40018b3c: lsrs       r2, r0, #0x12
+40018b3e: cmp        r4, #0xf0
+40018b40: lsrs       r2, r0, #0x12
+40018b42: cmp        r5, #0
+40018b44: lsrs       r2, r0, #0x12
+40018b46: cmp        r5, #0x10
+40018b48: lsrs       r2, r0, #0x12
+40018b4a: cmp        r5, #0x20
+40018b4c: lsrs       r2, r0, #0x12
+40018b4e: cmp        r5, #0x30
+40018b50: lsrs       r2, r0, #0x12
+40018b52: cmp        r5, #0x40
+40018b54: lsrs       r2, r0, #0x12
+40018b56: cmp        r5, #0x50
+40018b58: lsrs       r2, r0, #0x12
+40018b5a: cmp        r5, #0x60
+40018b5c: lsrs       r2, r0, #0x12
+40018b5e: cmp        r5, #0x70
+40018b60: lsrs       r2, r0, #0x12
+40018b62: cmp        r5, #0x80
+40018b64: lsrs       r2, r0, #0x12
+40018b66: cmp        r5, #0x90
+40018b68: lsrs       r2, r0, #0x12
+40018b6a: cmp        r5, #0xa0
+40018b6c: lsrs       r2, r0, #0x12
+40018b6e: cmp        r5, #0xb0
+40018b70: lsrs       r2, r0, #0x12
+40018b72: cmp        r5, #0xc0
+40018b74: lsrs       r2, r0, #0x12
+40018b76: cmp        r5, #0xd0
+40018b78: lsrs       r2, r0, #0x12
+40018b7a: cmp        r5, #0xe0
+40018b7c: lsrs       r2, r0, #0x12
+40018b7e: cmp        r5, #0xf0
+40018b80: lsrs       r2, r0, #0x12
+40018b82: cmp        r6, #0
+40018b84: lsrs       r2, r0, #0x12
+40018b86: cmp        r6, #0x10
+40018b88: lsrs       r2, r0, #0x12
+40018b8a: cmp        r6, #0x20
+40018b8c: lsrs       r2, r0, #0x12
+40018b8e: cmp        r6, #0x30
+40018b90: lsrs       r2, r0, #0x12
+40018b92: cmp        r6, #0x40
+40018b94: lsrs       r2, r0, #0x12
+40018b96: cmp        r6, #0x50
+40018b98: lsrs       r2, r0, #0x12
+40018b9a: cmp        r6, #0x60
+40018b9c: lsrs       r2, r0, #0x12
+40018b9e: cmp        r6, #0x70
+40018ba0: lsrs       r2, r0, #0x12
+40018ba2: cmp        r6, #0x80
+40018ba4: lsrs       r2, r0, #0x12
+40018ba6: cmp        r6, #0x90
+40018ba8: lsrs       r2, r0, #0x12
+40018baa: cmp        r6, #0xa0
+40018bac: lsrs       r2, r0, #0x12
+40018bae: cmp        r6, #0xb0
+40018bb0: lsrs       r2, r0, #0x12
+-- THUMB cmp40 0x40018ad2 --
+40018a52: cmp        r1, #0x40
+40018a54: lsrs       r2, r0, #0x12
+40018a56: cmp        r1, #0x50
+40018a58: lsrs       r2, r0, #0x12
+40018a5a: cmp        r1, #0x60
+40018a5c: lsrs       r2, r0, #0x12
+40018a5e: cmp        r1, #0x70
+40018a60: lsrs       r2, r0, #0x12
+40018a62: cmp        r1, #0x80
+40018a64: lsrs       r2, r0, #0x12
+40018a66: cmp        r1, #0x90
+40018a68: lsrs       r2, r0, #0x12
+40018a6a: cmp        r1, #0xa0
+40018a6c: lsrs       r2, r0, #0x12
+40018a6e: cmp        r1, #0xb0
+40018a70: lsrs       r2, r0, #0x12
+40018a72: cmp        r1, #0xc0
+40018a74: lsrs       r2, r0, #0x12
+40018a76: cmp        r1, #0xd0
+40018a78: lsrs       r2, r0, #0x12
+40018a7a: cmp        r1, #0xe0
+40018a7c: lsrs       r2, r0, #0x12
+40018a7e: cmp        r1, #0xf0
+40018a80: lsrs       r2, r0, #0x12
+40018a82: cmp        r2, #0
+40018a84: lsrs       r2, r0, #0x12
+40018a86: cmp        r2, #0x10
+40018a88: lsrs       r2, r0, #0x12
+40018a8a: cmp        r2, #0x20
+40018a8c: lsrs       r2, r0, #0x12
+40018a8e: cmp        r2, #0x30
+40018a90: lsrs       r2, r0, #0x12
+40018a92: cmp        r2, #0x40
+40018a94: lsrs       r2, r0, #0x12
+40018a96: cmp        r2, #0x50
+40018a98: lsrs       r2, r0, #0x12
+40018a9a: cmp        r2, #0x60
+40018a9c: lsrs       r2, r0, #0x12
+40018a9e: cmp        r2, #0x70
+40018aa0: lsrs       r2, r0, #0x12
+40018aa2: cmp        r2, #0x80
+40018aa4: lsrs       r2, r0, #0x12
+40018aa6: cmp        r2, #0x90
+40018aa8: lsrs       r2, r0, #0x12
+40018aaa: cmp        r2, #0xa0
+40018aac: lsrs       r2, r0, #0x12
+40018aae: cmp        r2, #0xb0
+40018ab0: lsrs       r2, r0, #0x12
+40018ab2: cmp        r2, #0xc0
+40018ab4: lsrs       r2, r0, #0x12
+40018ab6: cmp        r2, #0xd0
+40018ab8: lsrs       r2, r0, #0x12
+40018aba: cmp        r2, #0xe0
+40018abc: lsrs       r2, r0, #0x12
+40018abe: cmp        r2, #0xf0
+40018ac0: lsrs       r2, r0, #0x12
+40018ac2: cmp        r3, #0
+40018ac4: lsrs       r2, r0, #0x12
+40018ac6: cmp        r3, #0x10
+40018ac8: lsrs       r2, r0, #0x12
+40018aca: cmp        r3, #0x20
+40018acc: lsrs       r2, r0, #0x12
+40018ace: cmp        r3, #0x30
+40018ad0: lsrs       r2, r0, #0x12
+40018ad2: cmp        r3, #0x40
+40018ad4: lsrs       r2, r0, #0x12
+40018ad6: cmp        r3, #0x50
+40018ad8: lsrs       r2, r0, #0x12
+40018ada: cmp        r3, #0x60
+40018adc: lsrs       r2, r0, #0x12
+40018ade: cmp        r3, #0x70
+40018ae0: lsrs       r2, r0, #0x12
+40018ae2: cmp        r3, #0x80
+40018ae4: lsrs       r2, r0, #0x12
+40018ae6: cmp        r3, #0x90
+40018ae8: lsrs       r2, r0, #0x12
+40018aea: cmp        r3, #0xa0
+40018aec: lsrs       r2, r0, #0x12
+40018aee: cmp        r3, #0xb0
+40018af0: lsrs       r2, r0, #0x12
+40018af2: cmp        r3, #0xc0
+40018af4: lsrs       r2, r0, #0x12
+40018af6: cmp        r3, #0xd0
+40018af8: lsrs       r2, r0, #0x12
+40018afa: cmp        r3, #0xe0
+40018afc: lsrs       r2, r0, #0x12
+40018afe: cmp        r3, #0xf0
+40018b00: lsrs       r2, r0, #0x12
+40018b02: cmp        r4, #0
+40018b04: lsrs       r2, r0, #0x12
+40018b06: cmp        r4, #0x10
+40018b08: lsrs       r2, r0, #0x12
+40018b0a: cmp        r4, #0x20
+40018b0c: lsrs       r2, r0, #0x12
+40018b0e: cmp        r4, #0x30
+40018b10: lsrs       r2, r0, #0x12
+40018b12: cmp        r4, #0x40
+40018b14: lsrs       r2, r0, #0x12
+40018b16: cmp        r4, #0x50
+40018b18: lsrs       r2, r0, #0x12
+40018b1a: cmp        r4, #0x60
+40018b1c: lsrs       r2, r0, #0x12
+40018b1e: cmp        r4, #0x70
+40018b20: lsrs       r2, r0, #0x12
+40018b22: cmp        r4, #0x80
+40018b24: lsrs       r2, r0, #0x12
+40018b26: cmp        r4, #0x90
+40018b28: lsrs       r2, r0, #0x12
+40018b2a: cmp        r4, #0xa0
+40018b2c: lsrs       r2, r0, #0x12
+40018b2e: cmp        r4, #0xb0
+40018b30: lsrs       r2, r0, #0x12
+40018b32: cmp        r4, #0xc0
+40018b34: lsrs       r2, r0, #0x12
+40018b36: cmp        r4, #0xd0
+40018b38: lsrs       r2, r0, #0x12
+40018b3a: cmp        r4, #0xe0
+40018b3c: lsrs       r2, r0, #0x12
+40018b3e: cmp        r4, #0xf0
+40018b40: lsrs       r2, r0, #0x12
+40018b42: cmp        r5, #0
+40018b44: lsrs       r2, r0, #0x12
+40018b46: cmp        r5, #0x10
+40018b48: lsrs       r2, r0, #0x12
+40018b4a: cmp        r5, #0x20
+40018b4c: lsrs       r2, r0, #0x12
+40018b4e: cmp        r5, #0x30
+40018b50: lsrs       r2, r0, #0x12
+40018b52: cmp        r5, #0x40
+40018b54: lsrs       r2, r0, #0x12
+40018b56: cmp        r5, #0x50
+40018b58: lsrs       r2, r0, #0x12
+40018b5a: cmp        r5, #0x60
+40018b5c: lsrs       r2, r0, #0x12
+40018b5e: cmp        r5, #0x70
+40018b60: lsrs       r2, r0, #0x12
+40018b62: cmp        r5, #0x80
+40018b64: lsrs       r2, r0, #0x12
+40018b66: cmp        r5, #0x90
+40018b68: lsrs       r2, r0, #0x12
+40018b6a: cmp        r5, #0xa0
+40018b6c: lsrs       r2, r0, #0x12
+40018b6e: cmp        r5, #0xb0
+40018b70: lsrs       r2, r0, #0x12
+40018b72: cmp        r5, #0xc0
+40018b74: lsrs       r2, r0, #0x12
+40018b76: cmp        r5, #0xd0
+40018b78: lsrs       r2, r0, #0x12
+40018b7a: cmp        r5, #0xe0
+40018b7c: lsrs       r2, r0, #0x12
+40018b7e: cmp        r5, #0xf0
+40018b80: lsrs       r2, r0, #0x12
+40018b82: cmp        r6, #0
+40018b84: lsrs       r2, r0, #0x12
+40018b86: cmp        r6, #0x10
+40018b88: lsrs       r2, r0, #0x12
+40018b8a: cmp        r6, #0x20
+40018b8c: lsrs       r2, r0, #0x12
+40018b8e: cmp        r6, #0x30
+40018b90: lsrs       r2, r0, #0x12
+40018b92: cmp        r6, #0x40
+40018b94: lsrs       r2, r0, #0x12
+40018b96: cmp        r6, #0x50
+40018b98: lsrs       r2, r0, #0x12
+40018b9a: cmp        r6, #0x60
+40018b9c: lsrs       r2, r0, #0x12
+40018b9e: cmp        r6, #0x70
+40018ba0: lsrs       r2, r0, #0x12
+40018ba2: cmp        r6, #0x80
+40018ba4: lsrs       r2, r0, #0x12
+40018ba6: cmp        r6, #0x90
+40018ba8: lsrs       r2, r0, #0x12
+40018baa: cmp        r6, #0xa0
+40018bac: lsrs       r2, r0, #0x12
+40018bae: cmp        r6, #0xb0
+40018bb0: lsrs       r2, r0, #0x12
+40018bb2: cmp        r6, #0xc0
+40018bb4: lsrs       r2, r0, #0x12
+40018bb6: cmp        r6, #0xd0
+40018bb8: lsrs       r2, r0, #0x12
+40018bba: cmp        r6, #0xe0
+40018bbc: lsrs       r2, r0, #0x12
+40018bbe: cmp        r6, #0xf0
+40018bc0: lsrs       r2, r0, #0x12
+40018bc2: cmp        r7, #0
+40018bc4: lsrs       r2, r0, #0x12
+40018bc6: cmp        r7, #0x10
+40018bc8: lsrs       r2, r0, #0x12
+40018bca: cmp        r7, #0x20
+40018bcc: lsrs       r2, r0, #0x12
+40018bce: cmp        r7, #0x30
+40018bd0: lsrs       r2, r0, #0x12
+40018bd2: cmp        r7, #0x40
+40018bd4: lsrs       r2, r0, #0x12
+40018bd6: cmp        r7, #0x50
+40018bd8: lsrs       r2, r0, #0x12
+40018bda: cmp        r7, #0x60
+40018bdc: lsrs       r2, r0, #0x12
+40018bde: cmp        r7, #0x70
+40018be0: lsrs       r2, r0, #0x12
+40018be2: cmp        r7, #0x80
+40018be4: lsrs       r2, r0, #0x12
+40018be6: cmp        r7, #0x90
+40018be8: lsrs       r2, r0, #0x12
+40018bea: cmp        r7, #0xa0
+40018bec: lsrs       r2, r0, #0x12
+40018bee: cmp        r7, #0xb0
+40018bf0: lsrs       r2, r0, #0x12
+-- THUMB cmp40 0x40018b12 --
+40018a92: cmp        r2, #0x40
+40018a94: lsrs       r2, r0, #0x12
+40018a96: cmp        r2, #0x50
+40018a98: lsrs       r2, r0, #0x12
+40018a9a: cmp        r2, #0x60
+40018a9c: lsrs       r2, r0, #0x12
+40018a9e: cmp        r2, #0x70
+40018aa0: lsrs       r2, r0, #0x12
+40018aa2: cmp        r2, #0x80
+40018aa4: lsrs       r2, r0, #0x12
+40018aa6: cmp        r2, #0x90
+40018aa8: lsrs       r2, r0, #0x12
+40018aaa: cmp        r2, #0xa0
+40018aac: lsrs       r2, r0, #0x12
+40018aae: cmp        r2, #0xb0
+40018ab0: lsrs       r2, r0, #0x12
+40018ab2: cmp        r2, #0xc0
+40018ab4: lsrs       r2, r0, #0x12
+40018ab6: cmp        r2, #0xd0
+40018ab8: lsrs       r2, r0, #0x12
+40018aba: cmp        r2, #0xe0
+40018abc: lsrs       r2, r0, #0x12
+40018abe: cmp        r2, #0xf0
+40018ac0: lsrs       r2, r0, #0x12
+40018ac2: cmp        r3, #0
+40018ac4: lsrs       r2, r0, #0x12
+40018ac6: cmp        r3, #0x10
+40018ac8: lsrs       r2, r0, #0x12
+40018aca: cmp        r3, #0x20
+40018acc: lsrs       r2, r0, #0x12
+40018ace: cmp        r3, #0x30
+40018ad0: lsrs       r2, r0, #0x12
+40018ad2: cmp        r3, #0x40
+40018ad4: lsrs       r2, r0, #0x12
+40018ad6: cmp        r3, #0x50
+40018ad8: lsrs       r2, r0, #0x12
+40018ada: cmp        r3, #0x60
+40018adc: lsrs       r2, r0, #0x12
+40018ade: cmp        r3, #0x70
+40018ae0: lsrs       r2, r0, #0x12
+40018ae2: cmp        r3, #0x80
+40018ae4: lsrs       r2, r0, #0x12
+40018ae6: cmp        r3, #0x90
+40018ae8: lsrs       r2, r0, #0x12
+40018aea: cmp        r3, #0xa0
+40018aec: lsrs       r2, r0, #0x12
+40018aee: cmp        r3, #0xb0
+40018af0: lsrs       r2, r0, #0x12
+40018af2: cmp        r3, #0xc0
+40018af4: lsrs       r2, r0, #0x12
+40018af6: cmp        r3, #0xd0
+40018af8: lsrs       r2, r0, #0x12
+40018afa: cmp        r3, #0xe0
+40018afc: lsrs       r2, r0, #0x12
+40018afe: cmp        r3, #0xf0
+40018b00: lsrs       r2, r0, #0x12
+40018b02: cmp        r4, #0
+40018b04: lsrs       r2, r0, #0x12
+40018b06: cmp        r4, #0x10
+40018b08: lsrs       r2, r0, #0x12
+40018b0a: cmp        r4, #0x20
+40018b0c: lsrs       r2, r0, #0x12
+40018b0e: cmp        r4, #0x30
+40018b10: lsrs       r2, r0, #0x12
+40018b12: cmp        r4, #0x40
+40018b14: lsrs       r2, r0, #0x12
+40018b16: cmp        r4, #0x50
+40018b18: lsrs       r2, r0, #0x12
+40018b1a: cmp        r4, #0x60
+40018b1c: lsrs       r2, r0, #0x12
+40018b1e: cmp        r4, #0x70
+40018b20: lsrs       r2, r0, #0x12
+40018b22: cmp        r4, #0x80
+40018b24: lsrs       r2, r0, #0x12
+40018b26: cmp        r4, #0x90
+40018b28: lsrs       r2, r0, #0x12
+40018b2a: cmp        r4, #0xa0
+40018b2c: lsrs       r2, r0, #0x12
+40018b2e: cmp        r4, #0xb0
+40018b30: lsrs       r2, r0, #0x12
+40018b32: cmp        r4, #0xc0
+40018b34: lsrs       r2, r0, #0x12
+40018b36: cmp        r4, #0xd0
+40018b38: lsrs       r2, r0, #0x12
+40018b3a: cmp        r4, #0xe0
+40018b3c: lsrs       r2, r0, #0x12
+40018b3e: cmp        r4, #0xf0
+40018b40: lsrs       r2, r0, #0x12
+40018b42: cmp        r5, #0
+40018b44: lsrs       r2, r0, #0x12
+40018b46: cmp        r5, #0x10
+40018b48: lsrs       r2, r0, #0x12
+40018b4a: cmp        r5, #0x20
+40018b4c: lsrs       r2, r0, #0x12
+40018b4e: cmp        r5, #0x30
+40018b50: lsrs       r2, r0, #0x12
+40018b52: cmp        r5, #0x40
+40018b54: lsrs       r2, r0, #0x12
+40018b56: cmp        r5, #0x50
+40018b58: lsrs       r2, r0, #0x12
+40018b5a: cmp        r5, #0x60
+40018b5c: lsrs       r2, r0, #0x12
+40018b5e: cmp        r5, #0x70
+40018b60: lsrs       r2, r0, #0x12
+40018b62: cmp        r5, #0x80
+40018b64: lsrs       r2, r0, #0x12
+40018b66: cmp        r5, #0x90
+40018b68: lsrs       r2, r0, #0x12
+40018b6a: cmp        r5, #0xa0
+40018b6c: lsrs       r2, r0, #0x12
+40018b6e: cmp        r5, #0xb0
+40018b70: lsrs       r2, r0, #0x12
+40018b72: cmp        r5, #0xc0
+40018b74: lsrs       r2, r0, #0x12
+40018b76: cmp        r5, #0xd0
+40018b78: lsrs       r2, r0, #0x12
+40018b7a: cmp        r5, #0xe0
+40018b7c: lsrs       r2, r0, #0x12
+40018b7e: cmp        r5, #0xf0
+40018b80: lsrs       r2, r0, #0x12
+40018b82: cmp        r6, #0
+40018b84: lsrs       r2, r0, #0x12
+40018b86: cmp        r6, #0x10
+40018b88: lsrs       r2, r0, #0x12
+40018b8a: cmp        r6, #0x20
+40018b8c: lsrs       r2, r0, #0x12
+40018b8e: cmp        r6, #0x30
+40018b90: lsrs       r2, r0, #0x12
+40018b92: cmp        r6, #0x40
+40018b94: lsrs       r2, r0, #0x12
+40018b96: cmp        r6, #0x50
+40018b98: lsrs       r2, r0, #0x12
+40018b9a: cmp        r6, #0x60
+40018b9c: lsrs       r2, r0, #0x12
+40018b9e: cmp        r6, #0x70
+40018ba0: lsrs       r2, r0, #0x12
+40018ba2: cmp        r6, #0x80
+40018ba4: lsrs       r2, r0, #0x12
+40018ba6: cmp        r6, #0x90
+40018ba8: lsrs       r2, r0, #0x12
+40018baa: cmp        r6, #0xa0
+40018bac: lsrs       r2, r0, #0x12
+40018bae: cmp        r6, #0xb0
+40018bb0: lsrs       r2, r0, #0x12
+40018bb2: cmp        r6, #0xc0
+40018bb4: lsrs       r2, r0, #0x12
+40018bb6: cmp        r6, #0xd0
+40018bb8: lsrs       r2, r0, #0x12
+40018bba: cmp        r6, #0xe0
+40018bbc: lsrs       r2, r0, #0x12
+40018bbe: cmp        r6, #0xf0
+40018bc0: lsrs       r2, r0, #0x12
+40018bc2: cmp        r7, #0
+40018bc4: lsrs       r2, r0, #0x12
+40018bc6: cmp        r7, #0x10
+40018bc8: lsrs       r2, r0, #0x12
+40018bca: cmp        r7, #0x20
+40018bcc: lsrs       r2, r0, #0x12
+40018bce: cmp        r7, #0x30
+40018bd0: lsrs       r2, r0, #0x12
+40018bd2: cmp        r7, #0x40
+40018bd4: lsrs       r2, r0, #0x12
+40018bd6: cmp        r7, #0x50
+40018bd8: lsrs       r2, r0, #0x12
+40018bda: cmp        r7, #0x60
+40018bdc: lsrs       r2, r0, #0x12
+40018bde: cmp        r7, #0x70
+40018be0: lsrs       r2, r0, #0x12
+40018be2: cmp        r7, #0x80
+40018be4: lsrs       r2, r0, #0x12
+40018be6: cmp        r7, #0x90
+40018be8: lsrs       r2, r0, #0x12
+40018bea: cmp        r7, #0xa0
+40018bec: lsrs       r2, r0, #0x12
+40018bee: cmp        r7, #0xb0
+40018bf0: lsrs       r2, r0, #0x12
+40018bf2: cmp        r7, #0xc0
+40018bf4: lsrs       r2, r0, #0x12
+40018bf6: cmp        r7, #0xd0
+40018bf8: lsrs       r2, r0, #0x12
+40018bfa: cmp        r7, #0xe0
+40018bfc: lsrs       r2, r0, #0x12
+40018bfe: cmp        r7, #0xf0
+40018c00: lsrs       r2, r0, #0x12
+40018c02: adds       r0, #0
+40018c04: lsrs       r2, r0, #0x12
+40018c06: adds       r0, #0x10
+40018c08: lsrs       r2, r0, #0x12
+40018c0a: adds       r0, #0x20
+40018c0c: lsrs       r2, r0, #0x12
+40018c0e: adds       r0, #0x30
+40018c10: lsrs       r2, r0, #0x12
+40018c12: adds       r0, #0x40
+40018c14: lsrs       r2, r0, #0x12
+40018c16: adds       r0, #0x50
+40018c18: lsrs       r2, r0, #0x12
+40018c1a: adds       r0, #0x60
+40018c1c: lsrs       r2, r0, #0x12
+40018c1e: adds       r0, #0x70
+40018c20: lsrs       r2, r0, #0x12
+40018c22: adds       r0, #0x80
+40018c24: lsrs       r2, r0, #0x12
+40018c26: adds       r0, #0x90
+40018c28: lsrs       r2, r0, #0x12
+40018c2a: adds       r0, #0xa0
+40018c2c: lsrs       r2, r0, #0x12
+40018c2e: adds       r0, #0xb0
+40018c30: lsrs       r2, r0, #0x12
+-- THUMB cmp40 0x40018b52 --
+40018ad2: cmp        r3, #0x40
+40018ad4: lsrs       r2, r0, #0x12
+40018ad6: cmp        r3, #0x50
+40018ad8: lsrs       r2, r0, #0x12
+40018ada: cmp        r3, #0x60
+40018adc: lsrs       r2, r0, #0x12
+40018ade: cmp        r3, #0x70
+40018ae0: lsrs       r2, r0, #0x12
+40018ae2: cmp        r3, #0x80
+40018ae4: lsrs       r2, r0, #0x12
+40018ae6: cmp        r3, #0x90
+40018ae8: lsrs       r2, r0, #0x12
+40018aea: cmp        r3, #0xa0
+40018aec: lsrs       r2, r0, #0x12
+40018aee: cmp        r3, #0xb0
+40018af0: lsrs       r2, r0, #0x12
+40018af2: cmp        r3, #0xc0
+40018af4: lsrs       r2, r0, #0x12
+40018af6: cmp        r3, #0xd0
+40018af8: lsrs       r2, r0, #0x12
+40018afa: cmp        r3, #0xe0
+40018afc: lsrs       r2, r0, #0x12
+40018afe: cmp        r3, #0xf0
+40018b00: lsrs       r2, r0, #0x12
+40018b02: cmp        r4, #0
+40018b04: lsrs       r2, r0, #0x12
+40018b06: cmp        r4, #0x10
+40018b08: lsrs       r2, r0, #0x12
+40018b0a: cmp        r4, #0x20
+40018b0c: lsrs       r2, r0, #0x12
+40018b0e: cmp        r4, #0x30
+40018b10: lsrs       r2, r0, #0x12
+40018b12: cmp        r4, #0x40
+40018b14: lsrs       r2, r0, #0x12
+40018b16: cmp        r4, #0x50
+40018b18: lsrs       r2, r0, #0x12
+40018b1a: cmp        r4, #0x60
+40018b1c: lsrs       r2, r0, #0x12
+40018b1e: cmp        r4, #0x70
+40018b20: lsrs       r2, r0, #0x12
+40018b22: cmp        r4, #0x80
+40018b24: lsrs       r2, r0, #0x12
+40018b26: cmp        r4, #0x90
+40018b28: lsrs       r2, r0, #0x12
+40018b2a: cmp        r4, #0xa0
+40018b2c: lsrs       r2, r0, #0x12
+40018b2e: cmp        r4, #0xb0
+40018b30: lsrs       r2, r0, #0x12
+40018b32: cmp        r4, #0xc0
+40018b34: lsrs       r2, r0, #0x12
+40018b36: cmp        r4, #0xd0
+40018b38: lsrs       r2, r0, #0x12
+40018b3a: cmp        r4, #0xe0
+40018b3c: lsrs       r2, r0, #0x12
+40018b3e: cmp        r4, #0xf0
+40018b40: lsrs       r2, r0, #0x12
+40018b42: cmp        r5, #0
+40018b44: lsrs       r2, r0, #0x12
+40018b46: cmp        r5, #0x10
+40018b48: lsrs       r2, r0, #0x12
+40018b4a: cmp        r5, #0x20
+40018b4c: lsrs       r2, r0, #0x12
+40018b4e: cmp        r5, #0x30
+40018b50: lsrs       r2, r0, #0x12
+40018b52: cmp        r5, #0x40
+40018b54: lsrs       r2, r0, #0x12
+40018b56: cmp        r5, #0x50
+40018b58: lsrs       r2, r0, #0x12
+40018b5a: cmp        r5, #0x60
+40018b5c: lsrs       r2, r0, #0x12
+40018b5e: cmp        r5, #0x70
+40018b60: lsrs       r2, r0, #0x12
+40018b62: cmp        r5, #0x80
+40018b64: lsrs       r2, r0, #0x12
+40018b66: cmp        r5, #0x90
+40018b68: lsrs       r2, r0, #0x12
+40018b6a: cmp        r5, #0xa0
+40018b6c: lsrs       r2, r0, #0x12
+40018b6e: cmp        r5, #0xb0
+40018b70: lsrs       r2, r0, #0x12
+40018b72: cmp        r5, #0xc0
+40018b74: lsrs       r2, r0, #0x12
+40018b76: cmp        r5, #0xd0
+40018b78: lsrs       r2, r0, #0x12
+40018b7a: cmp        r5, #0xe0
+40018b7c: lsrs       r2, r0, #0x12
+40018b7e: cmp        r5, #0xf0
+40018b80: lsrs       r2, r0, #0x12
+40018b82: cmp        r6, #0
+40018b84: lsrs       r2, r0, #0x12
+40018b86: cmp        r6, #0x10
+40018b88: lsrs       r2, r0, #0x12
+40018b8a: cmp        r6, #0x20
+40018b8c: lsrs       r2, r0, #0x12
+40018b8e: cmp        r6, #0x30
+40018b90: lsrs       r2, r0, #0x12
+40018b92: cmp        r6, #0x40
+40018b94: lsrs       r2, r0, #0x12
+40018b96: cmp        r6, #0x50
+40018b98: lsrs       r2, r0, #0x12
+40018b9a: cmp        r6, #0x60
+40018b9c: lsrs       r2, r0, #0x12
+40018b9e: cmp        r6, #0x70
+40018ba0: lsrs       r2, r0, #0x12
+40018ba2: cmp        r6, #0x80
+40018ba4: lsrs       r2, r0, #0x12
+40018ba6: cmp        r6, #0x90
+40018ba8: lsrs       r2, r0, #0x12
+40018baa: cmp        r6, #0xa0
+40018bac: lsrs       r2, r0, #0x12
+40018bae: cmp        r6, #0xb0
+40018bb0: lsrs       r2, r0, #0x12
+40018bb2: cmp        r6, #0xc0
+40018bb4: lsrs       r2, r0, #0x12
+40018bb6: cmp        r6, #0xd0
+40018bb8: lsrs       r2, r0, #0x12
+40018bba: cmp        r6, #0xe0
+40018bbc: lsrs       r2, r0, #0x12
+40018bbe: cmp        r6, #0xf0
+40018bc0: lsrs       r2, r0, #0x12
+40018bc2: cmp        r7, #0
+40018bc4: lsrs       r2, r0, #0x12
+40018bc6: cmp        r7, #0x10
+40018bc8: lsrs       r2, r0, #0x12
+40018bca: cmp        r7, #0x20
+40018bcc: lsrs       r2, r0, #0x12
+40018bce: cmp        r7, #0x30
+40018bd0: lsrs       r2, r0, #0x12
+40018bd2: cmp        r7, #0x40
+40018bd4: lsrs       r2, r0, #0x12
+40018bd6: cmp        r7, #0x50
+40018bd8: lsrs       r2, r0, #0x12
+40018bda: cmp        r7, #0x60
+40018bdc: lsrs       r2, r0, #0x12
+40018bde: cmp        r7, #0x70
+40018be0: lsrs       r2, r0, #0x12
+40018be2: cmp        r7, #0x80
+40018be4: lsrs       r2, r0, #0x12
+40018be6: cmp        r7, #0x90
+40018be8: lsrs       r2, r0, #0x12
+40018bea: cmp        r7, #0xa0
+40018bec: lsrs       r2, r0, #0x12
+40018bee: cmp        r7, #0xb0
+40018bf0: lsrs       r2, r0, #0x12
+40018bf2: cmp        r7, #0xc0
+40018bf4: lsrs       r2, r0, #0x12
+40018bf6: cmp        r7, #0xd0
+40018bf8: lsrs       r2, r0, #0x12
+40018bfa: cmp        r7, #0xe0
+40018bfc: lsrs       r2, r0, #0x12
+40018bfe: cmp        r7, #0xf0
+40018c00: lsrs       r2, r0, #0x12
+40018c02: adds       r0, #0
+40018c04: lsrs       r2, r0, #0x12
+40018c06: adds       r0, #0x10
+40018c08: lsrs       r2, r0, #0x12
+40018c0a: adds       r0, #0x20
+40018c0c: lsrs       r2, r0, #0x12
+40018c0e: adds       r0, #0x30
+40018c10: lsrs       r2, r0, #0x12
+40018c12: adds       r0, #0x40
+40018c14: lsrs       r2, r0, #0x12
+40018c16: adds       r0, #0x50
+40018c18: lsrs       r2, r0, #0x12
+40018c1a: adds       r0, #0x60
+40018c1c: lsrs       r2, r0, #0x12
+40018c1e: adds       r0, #0x70
+40018c20: lsrs       r2, r0, #0x12
+40018c22: adds       r0, #0x80
+40018c24: lsrs       r2, r0, #0x12
+40018c26: adds       r0, #0x90
+40018c28: lsrs       r2, r0, #0x12
+40018c2a: adds       r0, #0xa0
+40018c2c: lsrs       r2, r0, #0x12
+40018c2e: adds       r0, #0xb0
+40018c30: lsrs       r2, r0, #0x12
+40018c32: adds       r0, #0xc0
+40018c34: lsrs       r2, r0, #0x12
+40018c36: adds       r0, #0xd0
+40018c38: lsrs       r2, r0, #0x12
+40018c3a: adds       r0, #0xe0
+40018c3c: lsrs       r2, r0, #0x12
+40018c3e: adds       r0, #0xf0
+40018c40: lsrs       r2, r0, #0x12
+40018c42: adds       r1, #0
+40018c44: lsrs       r2, r0, #0x12
+40018c46: adds       r1, #0x10
+40018c48: lsrs       r2, r0, #0x12
+40018c4a: adds       r1, #0x20
+40018c4c: lsrs       r2, r0, #0x12
+40018c4e: adds       r1, #0x30
+40018c50: lsrs       r2, r0, #0x12
+40018c52: adds       r1, #0x40
+40018c54: lsrs       r2, r0, #0x12
+40018c56: adds       r1, #0x50
+40018c58: lsrs       r2, r0, #0x12
+40018c5a: adds       r1, #0x60
+40018c5c: lsrs       r2, r0, #0x12
+40018c5e: adds       r1, #0x70
+40018c60: lsrs       r2, r0, #0x12
+40018c62: adds       r1, #0x80
+40018c64: lsrs       r2, r0, #0x12
+40018c66: adds       r1, #0x90
+40018c68: lsrs       r2, r0, #0x12
+40018c6a: adds       r1, #0xa0
+40018c6c: lsrs       r2, r0, #0x12
+40018c6e: adds       r1, #0xb0
+40018c70: lsrs       r2, r0, #0x12
+-- THUMB cmp40 0x40018b92 --
+40018b12: cmp        r4, #0x40
+40018b14: lsrs       r2, r0, #0x12
+40018b16: cmp        r4, #0x50
+40018b18: lsrs       r2, r0, #0x12
+40018b1a: cmp        r4, #0x60
+40018b1c: lsrs       r2, r0, #0x12
+40018b1e: cmp        r4, #0x70
+40018b20: lsrs       r2, r0, #0x12
+40018b22: cmp        r4, #0x80
+40018b24: lsrs       r2, r0, #0x12
+40018b26: cmp        r4, #0x90
+40018b28: lsrs       r2, r0, #0x12
+40018b2a: cmp        r4, #0xa0
+40018b2c: lsrs       r2, r0, #0x12
+40018b2e: cmp        r4, #0xb0
+40018b30: lsrs       r2, r0, #0x12
+40018b32: cmp        r4, #0xc0
+40018b34: lsrs       r2, r0, #0x12
+40018b36: cmp        r4, #0xd0
+40018b38: lsrs       r2, r0, #0x12
+40018b3a: cmp        r4, #0xe0
+40018b3c: lsrs       r2, r0, #0x12
+40018b3e: cmp        r4, #0xf0
+40018b40: lsrs       r2, r0, #0x12
+40018b42: cmp        r5, #0
+40018b44: lsrs       r2, r0, #0x12
+40018b46: cmp        r5, #0x10
+40018b48: lsrs       r2, r0, #0x12
+40018b4a: cmp        r5, #0x20
+40018b4c: lsrs       r2, r0, #0x12
+40018b4e: cmp        r5, #0x30
+40018b50: lsrs       r2, r0, #0x12
+40018b52: cmp        r5, #0x40
+40018b54: lsrs       r2, r0, #0x12
+40018b56: cmp        r5, #0x50
+40018b58: lsrs       r2, r0, #0x12
+40018b5a: cmp        r5, #0x60
+40018b5c: lsrs       r2, r0, #0x12
+40018b5e: cmp        r5, #0x70
+40018b60: lsrs       r2, r0, #0x12
+40018b62: cmp        r5, #0x80
+40018b64: lsrs       r2, r0, #0x12
+40018b66: cmp        r5, #0x90
+40018b68: lsrs       r2, r0, #0x12
+40018b6a: cmp        r5, #0xa0
+40018b6c: lsrs       r2, r0, #0x12
+40018b6e: cmp        r5, #0xb0
+40018b70: lsrs       r2, r0, #0x12
+40018b72: cmp        r5, #0xc0
+40018b74: lsrs       r2, r0, #0x12
+40018b76: cmp        r5, #0xd0
+40018b78: lsrs       r2, r0, #0x12
+40018b7a: cmp        r5, #0xe0
+40018b7c: lsrs       r2, r0, #0x12
+40018b7e: cmp        r5, #0xf0
+40018b80: lsrs       r2, r0, #0x12
+40018b82: cmp        r6, #0
+40018b84: lsrs       r2, r0, #0x12
+40018b86: cmp        r6, #0x10
+40018b88: lsrs       r2, r0, #0x12
+40018b8a: cmp        r6, #0x20
+40018b8c: lsrs       r2, r0, #0x12
+40018b8e: cmp        r6, #0x30
+40018b90: lsrs       r2, r0, #0x12
+40018b92: cmp        r6, #0x40
+40018b94: lsrs       r2, r0, #0x12
+40018b96: cmp        r6, #0x50
+40018b98: lsrs       r2, r0, #0x12
+40018b9a: cmp        r6, #0x60
+40018b9c: lsrs       r2, r0, #0x12
+40018b9e: cmp        r6, #0x70
+40018ba0: lsrs       r2, r0, #0x12
+40018ba2: cmp        r6, #0x80
+40018ba4: lsrs       r2, r0, #0x12
+40018ba6: cmp        r6, #0x90
+40018ba8: lsrs       r2, r0, #0x12
+40018baa: cmp        r6, #0xa0
+40018bac: lsrs       r2, r0, #0x12
+40018bae: cmp        r6, #0xb0
+40018bb0: lsrs       r2, r0, #0x12
+40018bb2: cmp        r6, #0xc0
+40018bb4: lsrs       r2, r0, #0x12
+40018bb6: cmp        r6, #0xd0
+40018bb8: lsrs       r2, r0, #0x12
+40018bba: cmp        r6, #0xe0
+40018bbc: lsrs       r2, r0, #0x12
+40018bbe: cmp        r6, #0xf0
+40018bc0: lsrs       r2, r0, #0x12
+40018bc2: cmp        r7, #0
+40018bc4: lsrs       r2, r0, #0x12
+40018bc6: cmp        r7, #0x10
+40018bc8: lsrs       r2, r0, #0x12
+40018bca: cmp        r7, #0x20
+40018bcc: lsrs       r2, r0, #0x12
+40018bce: cmp        r7, #0x30
+40018bd0: lsrs       r2, r0, #0x12
+40018bd2: cmp        r7, #0x40
+40018bd4: lsrs       r2, r0, #0x12
+40018bd6: cmp        r7, #0x50
+40018bd8: lsrs       r2, r0, #0x12
+40018bda: cmp        r7, #0x60
+40018bdc: lsrs       r2, r0, #0x12
+40018bde: cmp        r7, #0x70
+40018be0: lsrs       r2, r0, #0x12
+40018be2: cmp        r7, #0x80
+40018be4: lsrs       r2, r0, #0x12
+40018be6: cmp        r7, #0x90
+40018be8: lsrs       r2, r0, #0x12
+40018bea: cmp        r7, #0xa0
+40018bec: lsrs       r2, r0, #0x12
+40018bee: cmp        r7, #0xb0
+40018bf0: lsrs       r2, r0, #0x12
+40018bf2: cmp        r7, #0xc0
+40018bf4: lsrs       r2, r0, #0x12
+40018bf6: cmp        r7, #0xd0
+40018bf8: lsrs       r2, r0, #0x12
+40018bfa: cmp        r7, #0xe0
+40018bfc: lsrs       r2, r0, #0x12
+40018bfe: cmp        r7, #0xf0
+40018c00: lsrs       r2, r0, #0x12
+40018c02: adds       r0, #0
+40018c04: lsrs       r2, r0, #0x12
+40018c06: adds       r0, #0x10
+40018c08: lsrs       r2, r0, #0x12
+40018c0a: adds       r0, #0x20
+40018c0c: lsrs       r2, r0, #0x12
+40018c0e: adds       r0, #0x30
+40018c10: lsrs       r2, r0, #0x12
+40018c12: adds       r0, #0x40
+40018c14: lsrs       r2, r0, #0x12
+40018c16: adds       r0, #0x50
+40018c18: lsrs       r2, r0, #0x12
+40018c1a: adds       r0, #0x60
+40018c1c: lsrs       r2, r0, #0x12
+40018c1e: adds       r0, #0x70
+40018c20: lsrs       r2, r0, #0x12
+40018c22: adds       r0, #0x80
+40018c24: lsrs       r2, r0, #0x12
+40018c26: adds       r0, #0x90
+40018c28: lsrs       r2, r0, #0x12
+40018c2a: adds       r0, #0xa0
+40018c2c: lsrs       r2, r0, #0x12
+40018c2e: adds       r0, #0xb0
+40018c30: lsrs       r2, r0, #0x12
+40018c32: adds       r0, #0xc0
+40018c34: lsrs       r2, r0, #0x12
+40018c36: adds       r0, #0xd0
+40018c38: lsrs       r2, r0, #0x12
+40018c3a: adds       r0, #0xe0
+40018c3c: lsrs       r2, r0, #0x12
+40018c3e: adds       r0, #0xf0
+40018c40: lsrs       r2, r0, #0x12
+40018c42: adds       r1, #0
+40018c44: lsrs       r2, r0, #0x12
+40018c46: adds       r1, #0x10
+40018c48: lsrs       r2, r0, #0x12
+40018c4a: adds       r1, #0x20
+40018c4c: lsrs       r2, r0, #0x12
+40018c4e: adds       r1, #0x30
+40018c50: lsrs       r2, r0, #0x12
+40018c52: adds       r1, #0x40
+40018c54: lsrs       r2, r0, #0x12
+40018c56: adds       r1, #0x50
+40018c58: lsrs       r2, r0, #0x12
+40018c5a: adds       r1, #0x60
+40018c5c: lsrs       r2, r0, #0x12
+40018c5e: adds       r1, #0x70
+40018c60: lsrs       r2, r0, #0x12
+40018c62: adds       r1, #0x80
+40018c64: lsrs       r2, r0, #0x12
+40018c66: adds       r1, #0x90
+40018c68: lsrs       r2, r0, #0x12
+40018c6a: adds       r1, #0xa0
+40018c6c: lsrs       r2, r0, #0x12
+40018c6e: adds       r1, #0xb0
+40018c70: lsrs       r2, r0, #0x12
+40018c72: adds       r1, #0xc0
+40018c74: lsrs       r2, r0, #0x12
+40018c76: adds       r1, #0xd0
+40018c78: lsrs       r2, r0, #0x12
+40018c7a: adds       r1, #0xe0
+40018c7c: lsrs       r2, r0, #0x12
+40018c7e: adds       r1, #0xf0
+40018c80: lsrs       r2, r0, #0x12
+40018c82: adds       r2, #0
+40018c84: lsrs       r2, r0, #0x12
+40018c86: adds       r2, #0x10
+40018c88: lsrs       r2, r0, #0x12
+40018c8a: adds       r2, #0x20
+40018c8c: lsrs       r2, r0, #0x12
+40018c8e: adds       r2, #0x30
+40018c90: lsrs       r2, r0, #0x12
+40018c92: adds       r2, #0x40
+40018c94: lsrs       r2, r0, #0x12
+40018c96: adds       r2, #0x50
+40018c98: lsrs       r2, r0, #0x12
+40018c9a: adds       r2, #0x60
+40018c9c: lsrs       r2, r0, #0x12
+40018c9e: adds       r2, #0x70
+40018ca0: lsrs       r2, r0, #0x12
+40018ca2: adds       r2, #0x80
+40018ca4: lsrs       r2, r0, #0x12
+40018ca6: adds       r2, #0x90
+40018ca8: lsrs       r2, r0, #0x12
+40018caa: adds       r2, #0xa0
+40018cac: lsrs       r2, r0, #0x12
+40018cae: adds       r2, #0xb0
+40018cb0: lsrs       r2, r0, #0x12
+-- THUMB cmp40 0x40018bd2 --
+40018b52: cmp        r5, #0x40
+40018b54: lsrs       r2, r0, #0x12
+40018b56: cmp        r5, #0x50
+40018b58: lsrs       r2, r0, #0x12
+40018b5a: cmp        r5, #0x60
+40018b5c: lsrs       r2, r0, #0x12
+40018b5e: cmp        r5, #0x70
+40018b60: lsrs       r2, r0, #0x12
+40018b62: cmp        r5, #0x80
+40018b64: lsrs       r2, r0, #0x12
+40018b66: cmp        r5, #0x90
+40018b68: lsrs       r2, r0, #0x12
+40018b6a: cmp        r5, #0xa0
+40018b6c: lsrs       r2, r0, #0x12
+40018b6e: cmp        r5, #0xb0
+40018b70: lsrs       r2, r0, #0x12
+40018b72: cmp        r5, #0xc0
+40018b74: lsrs       r2, r0, #0x12
+40018b76: cmp        r5, #0xd0
+40018b78: lsrs       r2, r0, #0x12
+40018b7a: cmp        r5, #0xe0
+40018b7c: lsrs       r2, r0, #0x12
+40018b7e: cmp        r5, #0xf0
+40018b80: lsrs       r2, r0, #0x12
+40018b82: cmp        r6, #0
+40018b84: lsrs       r2, r0, #0x12
+40018b86: cmp        r6, #0x10
+40018b88: lsrs       r2, r0, #0x12
+40018b8a: cmp        r6, #0x20
+40018b8c: lsrs       r2, r0, #0x12
+40018b8e: cmp        r6, #0x30
+40018b90: lsrs       r2, r0, #0x12
+40018b92: cmp        r6, #0x40
+40018b94: lsrs       r2, r0, #0x12
+40018b96: cmp        r6, #0x50
+40018b98: lsrs       r2, r0, #0x12
+40018b9a: cmp        r6, #0x60
+40018b9c: lsrs       r2, r0, #0x12
+40018b9e: cmp        r6, #0x70
+40018ba0: lsrs       r2, r0, #0x12
+40018ba2: cmp        r6, #0x80
+40018ba4: lsrs       r2, r0, #0x12
+40018ba6: cmp        r6, #0x90
+40018ba8: lsrs       r2, r0, #0x12
+40018baa: cmp        r6, #0xa0
+40018bac: lsrs       r2, r0, #0x12
+40018bae: cmp        r6, #0xb0
+40018bb0: lsrs       r2, r0, #0x12
+40018bb2: cmp        r6, #0xc0
+40018bb4: lsrs       r2, r0, #0x12
+40018bb6: cmp        r6, #0xd0
+40018bb8: lsrs       r2, r0, #0x12
+40018bba: cmp        r6, #0xe0
+40018bbc: lsrs       r2, r0, #0x12
+40018bbe: cmp        r6, #0xf0
+40018bc0: lsrs       r2, r0, #0x12
+40018bc2: cmp        r7, #0
+40018bc4: lsrs       r2, r0, #0x12
+40018bc6: cmp        r7, #0x10
+40018bc8: lsrs       r2, r0, #0x12
+40018bca: cmp        r7, #0x20
+40018bcc: lsrs       r2, r0, #0x12
+40018bce: cmp        r7, #0x30
+40018bd0: lsrs       r2, r0, #0x12
+40018bd2: cmp        r7, #0x40
+40018bd4: lsrs       r2, r0, #0x12
+40018bd6: cmp        r7, #0x50
+40018bd8: lsrs       r2, r0, #0x12
+40018bda: cmp        r7, #0x60
+40018bdc: lsrs       r2, r0, #0x12
+40018bde: cmp        r7, #0x70
+40018be0: lsrs       r2, r0, #0x12
+40018be2: cmp        r7, #0x80
+40018be4: lsrs       r2, r0, #0x12
+40018be6: cmp        r7, #0x90
+40018be8: lsrs       r2, r0, #0x12
+40018bea: cmp        r7, #0xa0
+40018bec: lsrs       r2, r0, #0x12
+40018bee: cmp        r7, #0xb0
+40018bf0: lsrs       r2, r0, #0x12
+40018bf2: cmp        r7, #0xc0
+40018bf4: lsrs       r2, r0, #0x12
+40018bf6: cmp        r7, #0xd0
+40018bf8: lsrs       r2, r0, #0x12
+40018bfa: cmp        r7, #0xe0
+40018bfc: lsrs       r2, r0, #0x12
+40018bfe: cmp        r7, #0xf0
+40018c00: lsrs       r2, r0, #0x12
+40018c02: adds       r0, #0
+40018c04: lsrs       r2, r0, #0x12
+40018c06: adds       r0, #0x10
+40018c08: lsrs       r2, r0, #0x12
+40018c0a: adds       r0, #0x20
+40018c0c: lsrs       r2, r0, #0x12
+40018c0e: adds       r0, #0x30
+40018c10: lsrs       r2, r0, #0x12
+40018c12: adds       r0, #0x40
+40018c14: lsrs       r2, r0, #0x12
+40018c16: adds       r0, #0x50
+40018c18: lsrs       r2, r0, #0x12
+40018c1a: adds       r0, #0x60
+40018c1c: lsrs       r2, r0, #0x12
+40018c1e: adds       r0, #0x70
+40018c20: lsrs       r2, r0, #0x12
+40018c22: adds       r0, #0x80
+40018c24: lsrs       r2, r0, #0x12
+40018c26: adds       r0, #0x90
+40018c28: lsrs       r2, r0, #0x12
+40018c2a: adds       r0, #0xa0
+40018c2c: lsrs       r2, r0, #0x12
+40018c2e: adds       r0, #0xb0
+40018c30: lsrs       r2, r0, #0x12
+40018c32: adds       r0, #0xc0
+40018c34: lsrs       r2, r0, #0x12
+40018c36: adds       r0, #0xd0
+40018c38: lsrs       r2, r0, #0x12
+40018c3a: adds       r0, #0xe0
+40018c3c: lsrs       r2, r0, #0x12
+40018c3e: adds       r0, #0xf0
+40018c40: lsrs       r2, r0, #0x12
+40018c42: adds       r1, #0
+40018c44: lsrs       r2, r0, #0x12
+40018c46: adds       r1, #0x10
+40018c48: lsrs       r2, r0, #0x12
+40018c4a: adds       r1, #0x20
+40018c4c: lsrs       r2, r0, #0x12
+40018c4e: adds       r1, #0x30
+40018c50: lsrs       r2, r0, #0x12
+40018c52: adds       r1, #0x40
+40018c54: lsrs       r2, r0, #0x12
+40018c56: adds       r1, #0x50
+40018c58: lsrs       r2, r0, #0x12
+40018c5a: adds       r1, #0x60
+40018c5c: lsrs       r2, r0, #0x12
+40018c5e: adds       r1, #0x70
+40018c60: lsrs       r2, r0, #0x12
+40018c62: adds       r1, #0x80
+40018c64: lsrs       r2, r0, #0x12
+40018c66: adds       r1, #0x90
+40018c68: lsrs       r2, r0, #0x12
+40018c6a: adds       r1, #0xa0
+40018c6c: lsrs       r2, r0, #0x12
+40018c6e: adds       r1, #0xb0
+40018c70: lsrs       r2, r0, #0x12
+40018c72: adds       r1, #0xc0
+40018c74: lsrs       r2, r0, #0x12
+40018c76: adds       r1, #0xd0
+40018c78: lsrs       r2, r0, #0x12
+40018c7a: adds       r1, #0xe0
+40018c7c: lsrs       r2, r0, #0x12
+40018c7e: adds       r1, #0xf0
+40018c80: lsrs       r2, r0, #0x12
+40018c82: adds       r2, #0
+40018c84: lsrs       r2, r0, #0x12
+40018c86: adds       r2, #0x10
+40018c88: lsrs       r2, r0, #0x12
+40018c8a: adds       r2, #0x20
+40018c8c: lsrs       r2, r0, #0x12
+40018c8e: adds       r2, #0x30
+40018c90: lsrs       r2, r0, #0x12
+40018c92: adds       r2, #0x40
+40018c94: lsrs       r2, r0, #0x12
+40018c96: adds       r2, #0x50
+40018c98: lsrs       r2, r0, #0x12
+40018c9a: adds       r2, #0x60
+40018c9c: lsrs       r2, r0, #0x12
+40018c9e: adds       r2, #0x70
+40018ca0: lsrs       r2, r0, #0x12
+40018ca2: adds       r2, #0x80
+40018ca4: lsrs       r2, r0, #0x12
+40018ca6: adds       r2, #0x90
+40018ca8: lsrs       r2, r0, #0x12
+40018caa: adds       r2, #0xa0
+40018cac: lsrs       r2, r0, #0x12
+40018cae: adds       r2, #0xb0
+40018cb0: lsrs       r2, r0, #0x12
+40018cb2: adds       r2, #0xc0
+40018cb4: lsrs       r2, r0, #0x12
+40018cb6: adds       r2, #0xd0
+40018cb8: lsrs       r2, r0, #0x12
+40018cba: adds       r2, #0xe0
+40018cbc: lsrs       r2, r0, #0x12
+40018cbe: adds       r2, #0xf0
+40018cc0: lsrs       r2, r0, #0x12
+40018cc2: adds       r3, #0
+40018cc4: lsrs       r2, r0, #0x12
+40018cc6: adds       r3, #0x10
+40018cc8: lsrs       r2, r0, #0x12
+40018cca: adds       r3, #0x20
+40018ccc: lsrs       r2, r0, #0x12
+40018cce: adds       r3, #0x30
+40018cd0: lsrs       r2, r0, #0x12
+40018cd2: adds       r3, #0x40
+40018cd4: lsrs       r2, r0, #0x12
+40018cd6: adds       r3, #0x50
+40018cd8: lsrs       r2, r0, #0x12
+40018cda: adds       r3, #0x60
+40018cdc: lsrs       r2, r0, #0x12
+40018cde: adds       r3, #0x70
+40018ce0: lsrs       r2, r0, #0x12
+40018ce2: adds       r3, #0x80
+40018ce4: lsrs       r2, r0, #0x12
+40018ce6: adds       r3, #0x90
+40018ce8: lsrs       r2, r0, #0x12
+40018cea: adds       r3, #0xa0
+40018cec: lsrs       r2, r0, #0x12
+40018cee: adds       r3, #0xb0
+40018cf0: lsrs       r2, r0, #0x12
+
+=== candidate functions whose early code tests opcode 0x40 ===
+['0x40006320']
+-- func 0x40006320 --
+40006320: push       {r4, r5, r6, r7, r8, sb, lr}
+40006324: ldr        r5, [pc, #0x138] ; LIT 0x40006464->0x4001c844
+40006328: sub        sp, sp, #0x14
+4000632c: ldr        r4, [pc, #0x134] ; LIT 0x40006468->0x40026aec
+40006330: ldrb       r0, [r5, #1]
+40006334: add        r1, r0, r0, lsl #3
+40006338: ldr        r0, [r4, r1, lsl #2]
+4000633c: cmn        r0, #0x80000001
+40006340: beq        #0x4000645c
+40006344: cmp        r0, #0x2000000
+40006348: beq        #0x40006388
+4000634c: cmp        r0, #1
+40006350: beq        #0x40006398
+40006354: cmp        r0, #0x10
+40006358: beq        #0x400063dc
+4000635c: cmp        r0, #0x20
+40006360: beq        #0x400063a4
+40006364: cmp        r0, #0x40
+40006368: beq        #0x400063b0
+4000636c: cmp        r0, #0x30
+40006370: beq        #0x400063bc
+40006374: cmp        r0, #0x50
+40006378: beq        #0x400063c8
+4000637c: cmp        r0, #0x70
+40006380: beq        #0x400063d4
+40006384: b          #0x400063dc
+40006388: add        r1, pc, #0xdc
+4000638c: mov        r0, #4
+40006390: bl         #0x4000ded4 ; CALL 0x4000ded4
+40006394: b          #0x400063dc
+40006398: add        r0, r4, r1, lsl #2
+4000639c: bl         #0x4000df6c ; CALL 0x4000df6c
+400063a0: b          #0x400063dc
+400063a4: add        r0, r4, r1, lsl #2
+400063a8: bl         #0x4000b59c ; CALL 0x4000b59c
+400063ac: b          #0x400063dc
+400063b0: add        r0, r4, r1, lsl #2
+400063b4: bl         #0x40004050 ; CALL 0x40004050
+400063b8: b          #0x400063dc
+400063bc: add        r0, r4, r1, lsl #2
+400063c0: bl         #0x40000790 ; CALL 0x40000790
+400063c4: b          #0x400063dc
+400063c8: add        r0, r4, r1, lsl #2
+400063cc: bl         #0x4000dc74 ; CALL 0x4000dc74
+400063d0: b          #0x400063dc
+400063d4: add        r0, r4, r1, lsl #2
+400063d8: bl         #0x40007618 ; CALL 0x40007618
+400063dc: ldrb       r0, [r5, #1]
+400063e0: add        r0, r0, r0, lsl #3
+400063e4: add        ip, r4, r0, lsl #2
+400063e8: ldr        r1, [ip, #4]
+400063ec: cmp        r1, #0
+400063f0: beq        #0x40006410
+400063f4: ldr        r0, [r4, r0, lsl #2]
+400063f8: ldrd       r2, r3, [ip, #8]
+400063fc: add        ip, ip, #0x10
+40006400: ldm        ip, {r6, r7, r8, sb, ip}
+40006404: str        ip, [sp, #0x10]
+40006408: stm        sp, {r6, r7, r8, sb}
+4000640c: bl         #0x4000de1c ; CALL 0x4000de1c
+40006410: ldrb       r1, [r5, #1]
+40006414: mov        r0, #0
+40006418: mvn        ip, #0x80000000
+4000641c: add        r3, r1, #1
+40006420: add        r2, r1, r1, lsl #3
+40006424: and        r3, r3, #0xff
+40006428: cmp        r3, #0x1e
+4000642c: add        r1, r4, r2, lsl #2
+40006430: str        r0, [r1, #4]
+40006434: str        r0, [r1, #8]
+40006438: str        r0, [r1, #0xc]
+4000643c: str        r0, [r1, #0x10]
+40006440: str        r0, [r1, #0x14]
+40006444: str        r0, [r1, #0x18]
+40006448: str        r0, [r1, #0x1c]
+4000644c: str        r0, [r1, #0x20]
+40006450: str        ip, [r4, r2, lsl #2]
+40006454: strb       r3, [r5, #1]
+40006458: strbeq     r0, [r5, #1]
+4000645c: add        sp, sp, #0x14
+40006460: pop        {r4, r5, r6, r7, r8, sb, pc}
+40006464: andmi      ip, r1, r4, asr #16
+40006468: andmi      r6, r2, ip, ror #21
+4000646c: svcpl      #0x396163
+40006470: strbtvc    r6, [lr], #-0xf63
+40006474: svcpl      #0x6c6f72
+40006478: .byte      0x4d, 0x61, 0x6e, 0x61
+4000647c: ldmdahs    r2!, {r0, r1, r2, r5, r6, r8, sl, sp, lr} ^
+40006480: eorhs      r2, sp, sb, lsr #32
+40006484: eorshs     r4, sb, r3, asr #2
+40006488: strbtvs    r6, [r1], #-0x572
+4000648c: andeq      r0, r0, sb, ror r0
+40006490: push       {r4, lr}
+40006494: mov        r4, #0
+40006498: bl         #0x40007af0 ; CALL 0x40007af0
+4000649c: sub        r0, pc, #0x184
+400064a0: bl         #0x4000c154 ; CALL 0x4000c154
+400064a4: ldr        r0, [pc, #0x50] ; LIT 0x400064fc->0x400062d8
+400064a8: bl         #0x4000dd70 ; CALL 0x4000dd70
+400064ac: ldr        r0, [pc, #-0x4c] ; LIT 0x40006468->0x40026aec
+400064b0: mov        r2, #0
+400064b4: mvn        ip, #0x80000000
+400064b8: add        r1, r4, r4, lsl #3
+400064bc: add        r4, r4, #1
+400064c0: add        r3, r0, r1, lsl #2
+400064c4: and        r4, r4, #0xff
+400064c8: cmp        r4, #0x1e
+400064cc: str        r2, [r3]
+400064d0: str        r2, [r3, #4]
+400064d4: str        r2, [r3, #8]
+400064d8: str        r2, [r3, #0xc]
+400064dc: str        r2, [r3, #0x10]
+400064e0: str        r2, [r3, #0x14]
+400064e4: str        r2, [r3, #0x18]
+400064e8: str        r2, [r3, #0x1c]
+400064ec: str        r2, [r3, #0x20]
+400064f0: str        ip, [r0, r1, lsl #2]
+400064f4: blo        #0x400064b8
+400064f8: pop        {r4, pc}
+400064fc: ldrdmi     r6, r7, [r0], -r8
+40006500: push       {r4, r5, r6, r7, r8, sb, sl}
+40006504: mov        r3, #0
+40006508: vmov.f32   s9, #3.000000e+00
+4000650c: vmov.f32   s8, #7.000000e+00
+40006510: vpush      {d8, d9, d10, d11, d12, d13, d14, d15}
+40006514: sub        sp, sp, #0x5c
+40006518: add        r5, r1, r1, lsl #1
+4000651c: vmov.f32   s4, #4.000000e+00
+40006520: vmov.f32   s1, #1.000000e+00
+40006524: vmov.f32   s5, #5.000000e+00
+40006528: vmov.f32   s2, #2.000000e+00
+4000652c: vmov.f32   s6, #6.000000e+00
+40006530: vmov.f32   s3, s9
+40006534: vmov.f32   s7, s8
+40006538: mov        ip, r0
+4000653c: str        r3, [sp]
+40006540: vldr       s0, [pc, #0x380]
+40006544: add        ip, ip, r5, lsl #1
+40006548: str        r3, [sp, #4]
+4000654c: str        r3, [sp, #8]
+40006550: cmp        r2, #8
+40006554: str        r3, [sp, #0xc]
+40006558: mov        r0, r3
+4000655c: mov        r4, r3
+40006560: add        r5, ip, #6
+40006564: str        r3, [sp, #0x10]
+40006568: str        r3, [sp, #0x14]
+4000656c: str        r3, [sp, #0x18]
+40006570: str        r3, [sp, #0x1c]
+40006574: str        r3, [sp, #0x20]
+40006578: beq        #0x400068b8
+4000657c: mov        r3, sp
+
+=== pointers to candidate op40 functions in data ===
+
+=== TARGET ===
+Resolve indirect registration path and exact opcode 0x40 callback. Do not accept #0x400 false positives.
