@@ -1,0 +1,89 @@
+name: M10-R v1.25 DNG copy direction
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v125-dng-copy-direction.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Resolve copy helper and DNG record tail
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v125_dng_copy_direction.txt
+          from pathlib import Path
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM, ARM_OP_IMM
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); BASE=0x42000000; PFX=4
+          def off(a): return PFX+a-BASE
+          def raw(a,z): return b[off(a):off(z)]
+          mdT=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); mdT.detail=True; mdT.skipdata=True
+          mdA=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN); mdA.detail=True; mdA.skipdata=True
+          def dis(md,a,z): return list(md.disasm(raw(a,z),a))
+          def fmt(i): return f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+          print('M10-R v1.25 DNG COPY DIRECTION / RECORD TAIL')
+          print('Primary question: resolve 0x4204F2EC calling convention and ColorManagementFinished CM1/CM2 ownership.')
+          print('\n=== RAW BYTES 0x4204F1F0..0x4204F380 ===')
+          q=raw(0x4204f1f0,0x4204f380)
+          for n in range(0,len(q),16): print(f'{0x4204f1f0+n:08x}:',q[n:n+16].hex(' '))
+          print('\n=== 0x4204F218 AS ARM ===')
+          for i in dis(mdA,0x4204f1f0,0x4204f2ec): print(fmt(i))
+          print('\n=== 0x4204F2EC AS ARM ===')
+          for i in dis(mdA,0x4204f2ec,0x4204f3a0): print(fmt(i))
+          print('\n=== 0x4204F2EC AS THUMB (CONTROL) ===')
+          for i in dis(mdT,0x4204f2ec,0x4204f360): print(fmt(i))
+          print('\n=== KNOWN ColorManagementFinished CALL SLICES ===')
+          for a in (0x420a365c,0x420a3672,0x420a3680,0x420a3692,0x420a36b0,0x420a36be):
+            print(f'\n-- call @{a:#x} --')
+            for i in dis(mdT,a-24,a+8): print(fmt(i))
+          print('\n=== DIRECT CALLS TO 0x4204F2EC IN COLOR-MANAGEMENT WINDOW ===')
+          ins=dis(mdT,0x420a3000,0x420a7000)
+          hits=[]
+          for idx,i in enumerate(ins):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm==0x4204f2ec:
+              hits.append(idx)
+          for idx in hits:
+            print(f'\n-- hit @{ins[idx].address:#x} --')
+            for j in ins[max(0,idx-10):min(len(ins),idx+4)]: print(fmt(j))
+          print('call_count',len(hits))
+          print('\n=== +0x24/+0x26/+0x28 ACCESSES IN COLOR-MANAGEMENT WINDOW ===')
+          for idx,i in enumerate(ins):
+            interesting=False
+            try:
+              for op in i.operands:
+                if op.type==ARM_OP_MEM and op.mem.disp in (0x24,0x26,0x28): interesting=True
+            except Exception: pass
+            if interesting:
+              print(f'\n-- access @{i.address:#x} --')
+              for j in ins[max(0,idx-6):min(len(ins),idx+7)]: print(fmt(j))
+          print('\n=== INTERPRETATION TARGET ===')
+          print('If helper body preserves r0 as destination and consumes bytes from r1 while decrementing r2, freeze 0x4204F2EC as memcpy(dest=r0,src=r1,size=r2).')
+          print('Then v1.23 calls serialize existing result/workflow matrix records outward to callback/output buffers and globals, rather than importing returned matrices into result state.')
+          print('Use +0x24/+0x26/+0x28 access slices to determine whether the 0x2C matrix tail is exponent/flags/metadata and avoid naming +0x28 without direct evidence.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v125_dng_copy_direction.txt
+          git commit -m 'research: record v1.25 DNG copy direction' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
