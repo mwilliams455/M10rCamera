@@ -1,0 +1,110 @@
+name: M10-R v0.15 BvCMOS packet owner and live-view state
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v015-bvcmos-packet-owner-mode-state.yml']
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Recover CTRL
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+      - name: Trace packet owner mode liveview state
+        shell: bash
+        run: |
+          python3 - <<'PY' | tee /tmp/m10r-v015-bvcmos-packet-owner-mode-state.txt
+          from pathlib import Path
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_REG_PC
+          import struct
+          b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes(); base=0x08000000; pfx=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+          def off(v): return pfx+v-base
+          def r32(v):
+            o=off(v); return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+          def dis(s,e): return [i for i in md.disasm(b[off(s):off(e)],s) if i.mnemonic!='.byte']
+          ins=[i for i in md.disasm(b[pfx:],base) if i.mnemonic!='.byte']
+          def literal(i):
+            if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+              a=((i.address+4)&~3)+i.operands[1].mem.disp; return a,r32(a)
+            return None,None
+          def dump(label,s,e):
+            print(f'\n=== {label} {s:#010x}..{e:#010x} ===')
+            for i in dis(s,e):
+              a,v=literal(i); ex=f' ; literal {a:#010x}->{v:#010x}' if v is not None else ''
+              print(f'{i.address:08x}: {i.mnemonic:9s} {i.op_str}{ex}')
+          def callers(t):
+            return [i.address for i in ins if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and (i.operands[0].imm&~1)==(t&~1)]
+          def ctx(t,pre=0x80,post=0x100):
+            cs=callers(t); print(f'\nCALLERS {t:#010x}: {[hex(x) for x in cs]}')
+            for a in cs: dump('CALL_'+hex(a),max(base,a-pre),min(base+len(b)-pfx,a+post))
+          def xrefs_addr(addr):
+            print(f'\n=== XREFS DATA {addr:#010x} ===')
+            for n,i in enumerate(ins):
+              _,v=literal(i)
+              if v==addr:
+                print(f'\n-- {i.address:#010x}')
+                for j in ins[max(0,n-12):min(len(ins),n+22)]:
+                  _,v2=literal(j); ex=f' ; ->{v2:#010x}' if v2 is not None else ''
+                  print(f'{j.address:08x}: {j.mnemonic:9s} {j.op_str}{ex}')
+          def ascii_at(v,n=160):
+            o=off(v)
+            if not(0<=o<len(b)): return None
+            s=[]
+            for c in b[o:o+n]:
+              if c==0: break
+              if 32<=c<127: s.append(chr(c))
+              else: return None
+            return ''.join(s) if len(s)>=4 else None
+          def strings(s,e):
+            print(f'\n=== STRING LITERALS {s:#x}..{e:#x} ===')
+            for i in dis(s,e):
+              _,v=literal(i)
+              if v is not None:
+                q=ascii_at(v)
+                if q: print(f'{i.address:#010x} -> {v:#010x}: {q}')
+
+          dump('LIVEVIEW_RESPONSE_HANDLER_REGION',0x08003380,0x080038b0)
+          print('\n=== PROLOGUES/CALLERS IN HANDLER REGION ===')
+          for i in dis(0x08003380,0x08003650):
+            if i.mnemonic.startswith('push'):
+              cs=callers(i.address)
+              print(hex(i.address),i.op_str,'callers',[hex(x) for x in cs])
+          strings(0x08003380,0x080038b0)
+
+          # Current 0x24-byte record buffer and its owner/index helper.
+          xrefs_addr(0x200190ac)
+          dump('BUFFER_INDEX_HELPER',0x08007e40,0x08007f40)
+          ctx(0x08007ec0,0x80,0xc0)
+
+          # Metering-mode selector and source-state transition bytes.
+          ctx(0x0800de28,0x80,0xc0)
+          ctx(0x0800e186,0x80,0xc0)
+          for a in [0x20000132,0x2001adae,0x2001adbb]: xrefs_addr(a)
+
+          # Verify the second final-Bv predicate address/value and trace its state writers.
+          dump('STATE_GETTER_146F6',0x080146d0,0x08014710)
+          ctx(0x080146f6,0x60,0x90)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m10r-v015-bvcmos-packet-owner-mode-state
+          path: /tmp/m10r-v015-bvcmos-packet-owner-mode-state.txt
+          if-no-files-found: error
