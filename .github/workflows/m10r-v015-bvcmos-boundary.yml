@@ -1,0 +1,79 @@
+name: M10-R v0.15 BvCMOS boundary and mode transition
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v015-bvcmos-boundary.yml', '.m10r-v015-bvcmos-boundary-trigger']
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Recover firmware and trace boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' >/tmp/m10r-v015-bvcmos-boundary.txt
+          from pathlib import Path
+          import re,struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_REG_PC
+          b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes();base=0x08000000;pfx=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(v):return pfx+v-base
+          def dis(label,s,e):
+            print(f'\n=== {label} {s:08x}-{e:08x} ===')
+            for i in md.disasm(b[off(s):off(e)],s):
+              if i.mnemonic!='.byte':print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
+          def callers(target):
+            out=[]
+            for i in md.disasm(b[pfx:],base):
+              if i.mnemonic.startswith('bl') and i.operands and i.operands[0].type==ARM_OP_IMM and (i.operands[0].imm&~1)==(target&~1):out.append(i.address)
+            return out
+          targets={
+            'CMOS_UPDATE_MAIN':0x0800F228,
+            'CMOS_PACKET_FILL':0x08001A78,
+            'SOURCE_STATE_A':0x080146F6,
+            'SOURCE_STATE_B':0x08001A38,
+            'MEASURE_SELECTOR':0x080184D8,
+            'CMOS_VALUE_PICKER':0x0800F1C0,
+          }
+          for name,t in targets.items():
+            print('\nTARGET',name,hex(t),'CALLERS',[hex(x) for x in callers(t)])
+            dis(name,max(base,t-0x80),min(base+len(b)-pfx,t+0x220))
+            for a in callers(t):dis('CALLER_'+name+'_'+hex(a),max(base,a-180),min(base+len(b)-pfx,a+260))
+
+          # Resolve selected literal loads around state helpers and packet producer.
+          for s,e,label in [(0x08001800,0x08001B20,'LOW_STATE_PACKET'),(0x0800F1C0,0x0800F990,'CMOS_CHAIN'),(0x08014640,0x08014780,'STATE_A')]:
+            print('\nLITERALS',label)
+            for i in md.disasm(b[off(s):off(e)],s):
+              if i.mnemonic=='.byte':continue
+              for op in i.operands:
+                if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC:
+                  a=((i.address+4)&~3)+op.mem.disp;q=off(a)
+                  if 0<=q<=len(b)-4:print(hex(i.address),i.mnemonic,i.op_str,'=>',hex(a),hex(struct.unpack_from('<I',b,q)[0]))
+
+          # Strings close to source-state helpers and packet code.
+          print('\nRELEVANT_CTRL_STRINGS')
+          for m in re.finditer(rb'[ -~]{5,180}\x00',b):
+            va=base+m.start()-pfx;s=m.group()[:-1].decode('ascii','ignore');lo=s.lower()
+            if any(k in lo for k in ('live view','liveview','sensor','cmos','ae ','meter','measure','preview','release','standby','capture')) and (0x08000000<=va<0x08050000):print(hex(va),repr(s))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m10r-v015-bvcmos-boundary
+          path: /tmp/m10r-v015-bvcmos-boundary.txt
+          if-no-files-found: error
