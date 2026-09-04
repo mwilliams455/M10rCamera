@@ -1,0 +1,181 @@
+M10-R v0.99 AEAWB BLOCK STACK DEFINITIONS
+v0.98: debug print uses sp+0x18 = horizontal block number, sp+0x1C = vertical block number.
+
+=== FULL LOCAL FUNCTION REGION ===
+420d9300: str        r4, [r4, #0x54]
+420d9302: movs       r0, r0
+420d9304: push       {r4, r5, r6, lr}
+420d9306: movs       r5, r0
+420d9308: cmp        r5, #5
+420d930a: beq        #0x420d9342
+420d930c: bgt        #0x420d9320
+420d930e: cmp        r5, #1
+420d9310: beq        #0x420d932e
+420d9312: cmp        r5, #2
+420d9314: beq        #0x420d9332
+420d9316: cmp        r5, #3
+420d9318: beq        #0x420d9338
+420d931a: cmp        r5, #4
+420d931c: bne        #0x420d9358
+420d931e: b          #0x420d933e
+420d9320: cmp        r5, #0x11
+420d9322: beq        #0x420d9348
+420d9324: cmp        r5, #0x12
+420d9326: beq        #0x420d934e
+420d9328: cmp        r5, #0x13
+420d932a: bne        #0x420d9358
+420d932c: b          #0x420d9352
+420d932e: ldr        r4, [pc, #0x3c] ; LIT 0x420d936c->0x408ef72c
+420d9330: b          #0x420d9364
+420d9332: ldr        r4, [pc, #0x38] ; LIT 0x420d936c->0x408ef72c
+420d9334: adds       r4, #0x7c
+420d9336: b          #0x420d9364
+420d9338: ldr        r4, [pc, #0x30] ; LIT 0x420d936c->0x408ef72c
+420d933a: adds       r4, #0xf8
+420d933c: b          #0x420d9364
+420d933e: ldr        r4, [pc, #0x30] ; LIT 0x420d9370->0x408ef8a0
+420d9340: b          #0x420d9364
+420d9342: ldr        r4, [pc, #0x2c] ; LIT 0x420d9370->0x408ef8a0
+420d9344: adds       r4, #0x7c
+420d9346: b          #0x420d9364
+420d9348: ldr        r4, [pc, #0x24] ; LIT 0x420d9370->0x408ef8a0
+420d934a: adds       r4, #0xf8
+420d934c: b          #0x420d9364
+420d934e: ldr        r4, [pc, #0x24] ; LIT 0x420d9374->0x408efa14
+420d9350: b          #0x420d9364
+420d9352: ldr        r4, [pc, #0x20] ; LIT 0x420d9374->0x408efa14
+420d9354: adds       r4, #0x7c
+420d9356: b          #0x420d9364
+420d9358: movs       r4, #0
+420d935a: ldr        r1, [pc, #0x1c] ; LIT 0x420d9378->0x42836a8c STRING='Prepro: drv_prepro_if_Get_AFAEAWBMode_Data -unknown AFAEAWB-Mode'
+420d935c: movs       r0, #4
+420d935e: bl         #0x42140150
+420d9362: mov        r8, r8
+420d9364: mov        r8, r8
+420d9366: movs       r0, r4
+420d9368: pop        {r4, r5, r6, pc}
+420d936a: movs       r0, r0
+420d936e: lsls       r6, r1
+420d9370: strh.w     r4, [r0, #0x8e]
+420d9376: lsls       r6, r1
+420d9378: ldr        r4, [r1, #0x28]
+420d937a: cmp        r3, r0
+420d937c: push       {r4, lr}
+420d937e: movs       r1, #0xff
+420d9380: adds       r1, #0x45
+420d9382: ldr        r0, [pc, #0x3c] ; LIT 0x420d93c0->0x408f0310
+420d9384: blx        #0x4204f3bc
+420d9388: movs       r0, #1
+420d938a: ldr        r1, [pc, #0x38] ; LIT 0x420d93c4->0x408ef710
+420d938c: strb       r0, [r1, #0x18]
+420d938e: bl         #0x420d9ad0
+420d9392: movs       r0, #2
+420d9394: bl         #0x420d9ad0
+420d9398: movs       r0, #3
+420d939a: bl         #0x420d9ad0
+420d939e: movs       r0, #4
+420d93a0: bl         #0x420d9ad0
+420d93a4: movs       r0, #5
+420d93a6: bl         #0x420d9ad0
+420d93aa: movs       r0, #0x11
+420d93ac: bl         #0x420d9ad0
+420d93b0: movs       r0, #0x12
+420d93b2: bl         #0x420d9ad0
+420d93b6: movs       r0, #0x13
+420d93b8: bl         #0x420d9ad0
+420d93bc: pop        {r4, pc}
+420d93be: movs       r0, r0
+420d93c0: lsls       r0, r2, #0xc
+420d93c2: lsls       r7, r1
+420d93c6: lsls       r6, r1
+420d93c8: push       {r4, r5, lr}
+420d93ca: sub        sp, #0x7c
+420d93cc: movs       r4, r0
+420d93ce: movs       r0, r4
+420d93d0: bl         #0x420d926c
+420d93d4: movs       r5, r0
+420d93d6: ldr        r0, [pc, #0x10c] ; LIT 0x420d94e4->0x408ef710
+420d93d8: ldr        r0, [r0, #8]
+420d93da: cmp        r0, #0
+420d93dc: bne        #0x420d94da
+420d93de: mov        r1, sp
+420d93e0: movs       r0, r4
+420d93e2: bl         #0x420dae48
+420d93e6: movs       r2, r5
+420d93e8: ldr        r1, [pc, #0xfc] ; LIT 0x420d94e8->0x42836994 STRING='Prepro: AFAEAWB configuration of Mode E_DRV_PREPRO_IF_AFAEAWB_MODE_%02x:'
+420d93ea: movs       r0, #2
+420d93ec: bl         #0x42140150
+420d93f0: ldr        r1, [pc, #0xf8] ; LIT 0x420d94ec->0x428367d8 STRING='Prepro: ### AFAEAWB-mode-configuration: positions referenced to VALID Image NULLPOS!##'
+420d93f2: movs       r0, #2
+420d93f4: bl         #0x42140150
+420d93f8: adr        r1, #0xf4
+420d93fa: movs       r0, #2
+420d93fc: ldr        r2, [sp, #8]
+420d93fe: bl         #0x42140150
+420d9402: adr        r1, #0x118
+420d9404: movs       r0, #2
+420d9406: ldr        r2, [sp, #0xc]
+420d9408: bl         #0x42140150
+420d940c: adr        r1, #0x134
+420d940e: movs       r0, #2
+420d9410: ldr        r2, [sp, #0x10]
+420d9412: bl         #0x42140150
+420d9416: adr        r1, #0x158
+420d9418: movs       r0, #2
+420d941a: ldr        r2, [sp, #0x14]
+420d941c: bl         #0x42140150
+420d9420: adr        r1, #0x174
+420d9422: movs       r0, #2
+420d9424: ldr        r2, [sp, #0x18]
+420d9426: bl         #0x42140150
+420d942a: adr        r1, #0x19c
+420d942c: movs       r0, #2
+420d942e: ldr        r2, [sp, #0x1c]
+420d9430: bl         #0x42140150
+420d9434: adr        r1, #0x1bc
+420d9436: movs       r0, #2
+420d9438: ldr        r2, [sp, #0x24]
+420d943a: bl         #0x42140150
+420d943e: adr        r1, #0x1dc
+420d9440: movs       r0, #2
+420d9442: ldr        r2, [sp, #0x28]
+420d9444: bl         #0x42140150
+420d9448: adr        r1, #0x1f4
+420d944a: movs       r0, #2
+420d944c: ldr        r2, [sp, #0x2c]
+420d944e: bl         #0x42140150
+420d9452: adr        r1, #0x214
+420d9454: movs       r0, #2
+420d9456: ldr        r2, [sp, #0x30]
+420d9458: bl         #0x42140150
+420d945c: adr        r1, #0x230
+420d945e: movs       r0, #2
+420d9460: ldr        r2, [sp, #0x44]
+420d9462: bl         #0x42140150
+420d9466: adr        r1, #0x250
+420d9468: movs       r0, #2
+420d946a: ldr        r2, [sp, #0x48]
+420d946c: bl         #0x42140150
+420d9470: adr        r1, #0x268
+420d9472: movs       r0, #2
+420d9474: ldr        r2, [sp, #0x4c]
+420d9476: bl         #0x42140150
+420d947a: adr        r1, #0x288
+420d947c: movs       r0, #2
+420d947e: ldr        r2, [sp, #0x50]
+420d9480: bl         #0x42140150
+420d9484: ldr        r1, [pc, #0x2a0] ; LIT 0x420d9728->0x428368e0 STRING='Prepro: ### current positions: positions referenced to VALID Image NULLPOS!##########'
+420d9486: movs       r0, #2
+420d9488: bl         #0x42140150
+420d948c: adr        r1, #0x29c
+420d948e: movs       r0, #2
+
+=== WRITES TO TARGET STACK SLOTS ===
+
+=== ALL STACK WRITES +0x08..+0x4C BEFORE PRINTS ===
+
+LIKELY_FUNCTION_START 0x420d93c8
+DIRECT_CALLERS
+
+=== DECISION ===
+If target stack slots are loaded from a true AEAWB config structure, trace those source offsets/writers next. If they are immediate 22/16, freeze producer grid immediately.
