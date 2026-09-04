@@ -74,11 +74,45 @@ Spatial weights are byte values interpreted as percentages and normalized by:
 weight / 100.0
 ```
 
-The evaluator computes a weighted sensor statistic, forms a ratio against its reference quantity, and converts that ratio to an exposure coordinate using:
+### Statistic domain
+
+The per-cell input is an **unsigned 32-bit Y statistic**, not a floating-point statistic.
+
+The evaluator loads each 32-bit value through a VFP register and immediately executes an unsigned-integer conversion to double (`vcvt.f64.u32`). A firmware error diagnostic in the same evaluator explicitly names the quantity:
 
 ```text
-EV256 = 256 * log2(weighted_statistic / reference)
+CA9: AE MODULE: Y data = 0 -> Set EV to %i
 ```
+
+The statistic array is supplied from the incoming AE-data object beginning at:
+
+```text
+AE data +0x80
+```
+
+### Reference quantity
+
+The evaluator reference comes from the single CA9 global at:
+
+```text
+0x40013498
+```
+
+The firmware image initializes this value to:
+
+```text
+0x0000020C = 524
+```
+
+No second CA9 code reference to this global was found in the v0.83b scan. Like the cell statistic, the evaluator treats the value as an unsigned integer and converts it to double numerically; it is not a floating-point bit pattern.
+
+Thus the logarithmic core can be represented as:
+
+```text
+EV256 = 256 * log2(normalized_weighted_Y / 524)
+```
+
+where `normalized_weighted_Y` includes the evaluator's remaining per-cell normalization term described below.
 
 The candidate BV then follows:
 
@@ -86,13 +120,23 @@ The candidate BV then follows:
 BV256 = EV256 + TV + AV - SV + 0x011A
 ```
 
-The scale is therefore exactly:
+The scale is exactly:
 
 ```text
 256 units = 1 EV
 ```
 
 `0x011A` is retained as a fixed CA9 BV offset; its deeper calibration meaning is not yet assigned.
+
+### Remaining normalization term
+
+Before accumulating each weighted Y cell, the evaluator divides the weighted cell statistic by:
+
+```text
+(A * B) >> 2
+```
+
+where `A` and `B` are two unsigned 16-bit fields from the incoming AE-data geometry record. Their exact physical meaning remains to be closed; they appear to describe the preprocessor/statistic sampling geometry rather than the 16x22 mask dimensions themselves.
 
 ## 5. Static spatial masks
 
@@ -325,7 +369,10 @@ Therefore MFM scene adaptation is explicitly bounded to ±2 EV relative to its b
 ## 12. Current implementation-level architecture
 
 ```text
-16 x 22 AE statistic grid
+16 x 22 uint32 Y-statistic grid
+        |
+        +--> normalize Y by AE sampling geometry
+        |        and reference 524
         |
         +--> Spot dynamic ROI mask
         +--> Integral fixed centre-weighted mask
@@ -361,11 +408,17 @@ Therefore MFM scene adaptation is explicitly bounded to ±2 EV relative to its b
 
 ## 13. Next unresolved seam
 
-The highest-value remaining upstream seam is the input to `0x40000178` itself:
+The statistic identity and reference are now closed to:
 
 ```text
-what exact per-cell sensor statistic populates the 16x22 CA9 AE grid,
-and what exact reference quantity forms the denominator of the log2 ratio?
+per-cell input = uint32 Y data
+reference      = 524
 ```
 
-That should be traced before implementing the M10-R metering engine on a phone, because reproducing Leica's spatial masks without matching the statistic domain would only provide structural parity, not numerical parity.
+The next upstream arithmetic seam is the normalization geometry used before the logarithm:
+
+```text
+normalizer = (AE_data_field_A * AE_data_field_B) >> 2
+```
+
+The next trace should identify the producer/physical meaning of those two AE-data geometry fields and determine whether they are source-pixel dimensions, statistic-window dimensions, binning factors, or another preprocessor scale. Once that is closed, the CA9 Spot/Integral/AV candidate path should be implementable numerically rather than only structurally.
