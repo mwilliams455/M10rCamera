@@ -1,0 +1,89 @@
+name: M10-R v1.30 WB gain and helper anchors
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v130-wb-gain-helper-anchors.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Resolve gain remap math and helper-name anchors
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v130_wb_gain_helper_anchors.txt
+          from pathlib import Path
+          import csv,struct
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM, ARM_REG_PC
+          p=Path('/tmp/sections/092_IMG-System.bin'); b=p.read_bytes(); BASE=0x42000000; PFX=4
+          mdT=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); mdT.detail=True; mdT.skipdata=True
+          mdA=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN); mdA.detail=True; mdA.skipdata=True
+          def off(a): return PFX+a-BASE
+          def dis(md,a,z): return list(md.disasm(b[off(a):off(z)],a))
+          def cstr(a,limit=300):
+            o=off(a); e=b.find(b'\0',o,min(len(b),o+limit))
+            return b[o:e].decode('ascii','replace') if 0<=o<len(b) and e>o else None
+          def litval(i):
+            if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+              la=((i.address+4)&~3)+i.operands[1].mem.disp; o=off(la)
+              if 0<=o<=len(b)-4: return la,struct.unpack_from('<I',b,o)[0]
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            q=litval(i)
+            if q: s+=f' ; LIT {q[0]:#x}={q[1]:#010x}'
+            return s
+          print('M10-R v1.30 WB GAIN / HELPER ANCHORS')
+          print('\n=== EXACT LOCAL STRINGS ===')
+          for a in (0x420a40af,0x420a4190,0x420a41b0,0x420a42d4,0x420a42ea):
+            print(hex(a),repr(cstr(a)))
+          print('\n=== GAIN-REMAP CODE WITH LITERALS ===')
+          for i in dis(mdT,0x420a3f78,0x420a406a): print(fmt(i))
+          print('\n=== HELPER 0x421E6050 ARM ===')
+          for i in dis(mdA,0x421e6050,0x421e61d0): print(fmt(i))
+          print('\n=== HELPER 0x421E65A4 ARM ===')
+          for i in dis(mdA,0x421e65a4,0x421e6614): print(fmt(i))
+          print('\n=== STATIC CONSTANT WORDS AROUND 0x420A4088 ===')
+          for a in range(0x420a4088,0x420a40d4,4):
+            o=off(a); v=struct.unpack_from('<I',b,o)[0]
+            print(hex(a),f'{v:#010x}')
+          print('\n=== ALL-SECTIONS RAW STRING SEARCH FOR WHITE-POINT NAMES/KEYWORDS ===')
+          rows=list(csv.DictReader(Path('/tmp/sections/sections.csv').open()))
+          needles=[b'NeutralToXY',b'SetWhiteXY',b'MapWhiteMatrix',b'Temperature_ToXYCoord',b'Temperature_FromXYCoord',b'WhiteMatrix',b'NeutralTo',b'WhiteXY',b'WB gain',b'WB Gain',b'white balance',b'White Balance']
+          for row in rows:
+            q=Path('/tmp/sections')/row['file']; data=q.read_bytes(); image_base=int(row['image_base'],16)
+            for n in needles:
+              pos=0
+              while True:
+                pos=data.find(n,pos)
+                if pos<0: break
+                lo=max(0,pos-80); hi=min(len(data),pos+len(n)+120)
+                snippet=data[lo:hi].replace(b'\0',b'|').decode('latin1','replace')
+                print(f"section={row['index']} name={row['name']!r} base={image_base:#x} off={pos:#x} va={image_base+pos:#x} needle={n.decode()!r} context={snippet!r}")
+                pos+=1
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v130_wb_gain_helper_anchors.txt
+          git commit -m 'research: record v1.30 WB gain/helper anchors' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
