@@ -1,0 +1,83 @@
+name: M10-R v0.15 targeted IMG AE string xrefs
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v015-img-ae-string-xrefs-targeted.yml']
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Recover IMG
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+      - name: Targeted string xrefs
+        shell: bash
+        run: |
+          python3 - <<'PY' | tee /tmp/m10r-v015-img-ae-string-xrefs-targeted.txt
+          from pathlib import Path
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_REG_PC
+          import struct,re
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); base=0x42000000; p=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+          def va(o): return base+o-p
+          def off(v): return p+v-base
+          def r32(v):
+            o=off(v); return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+          # Find only relevant strings without global disassembly.
+          strings=[];o=p
+          rx=re.compile(r'(CA9: AE MODULE|AE algorithm running|LCC AE|live.?view|metering|lightmeter|brightness|BvCMOS|\bBV\b|exposure parameter)',re.I)
+          while o<len(b):
+            if 32<=b[o]<127:
+              e=o
+              while e<len(b) and (32<=b[e]<127 or b[e] in (9,10,13)): e+=1
+              if e-o>=6:
+                s=b[o:e].decode('latin1','ignore')
+                if rx.search(s): strings.append((va(o),s[:300]))
+              o=max(e,o+1)
+            else:o+=1
+          print('strings',len(strings))
+          # For each string, raw-search pointer values. Around each literal-pool pointer, disassemble max 0x1000 before it and select PC-relative ldr that resolves exactly to pointer slot.
+          for sva,s in strings[:250]:
+            pat=struct.pack('<I',sva)
+            pools=[];start=0
+            while True:
+              k=b.find(pat,start)
+              if k<0:break
+              pools.append(va(k));start=k+1
+            if not pools:continue
+            print('\nSTRING',hex(sva),repr(s),'literal_slots',[hex(x) for x in pools[:30]])
+            for lp in pools[:30]:
+              lo=max(base,lp-0x1000); hi=min(lp+4,base+len(b)-p)
+              code=b[off(lo):off(hi)]
+              hits=[]
+              for i in md.disasm(code,lo):
+                if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                  target=((i.address+4)&~3)+i.operands[1].mem.disp
+                  if target==lp:hits.append(i.address)
+              for h in hits:
+                print(' XREF',hex(h),'via literal',hex(lp))
+                cs=max(base,h-0x80);ce=min(base+len(b)-p,h+0x120)
+                for i in md.disasm(b[off(cs):off(ce)],cs):
+                  if i.mnemonic!='.byte':print(f'  {i.address:08x}: {i.mnemonic:9s} {i.op_str}')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m10r-v015-img-ae-string-xrefs-targeted
+          path: /tmp/m10r-v015-img-ae-string-xrefs-targeted.txt
+          if-no-files-found: error
