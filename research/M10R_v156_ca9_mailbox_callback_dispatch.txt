@@ -1,0 +1,862 @@
+M10-R v1.56 CA9 MAILBOX CALLBACK DISPATCH
+
+=== register callback function 0x4000BEB8 ===
+4000beb8: cmp        r0, #0
+4000bebc: mvn        r1, #0xb
+4000bec0: beq        #0x4000bed0
+4000bec4: mov        r1, #0
+4000bec8: ldr        r2, [pc, #0x19c] ; LIT 0x4000c06c->0x40026810
+4000becc: str        r0, [r2]
+4000bed0: mov        r0, #1
+4000bed4: ldr        r2, [pc, #0x194] ; LIT 0x4000c070->0xfff50000
+4000bed8: str        r0, [r2, #0x114]
+4000bedc: mov        r0, r1
+4000bee0: bx         lr
+
+=== direct callers of register function ===
+[]
+
+=== literal refs to callback global 0x40026810 ===
+['0x4000c06c']
+4000bec8: ldr        r2, [pc, #0x19c] ; LIT 0x4000c06c->0x40026810
+4000c024: ldr        r1, [pc, #0x40] ; LIT 0x4000c06c->0x40026810
+
+callback_candidates []
+
+=== all immediate CMP #0x40 in CA9 image and bounded context ===
+['0x4000241c', '0x40002678', '0x40003cd8', '0x40003cf8', '0x40005968', '0x40005a70', '0x40005b04', '0x40005da8', '0x40005fac', '0x40006180', '0x400061bc', '0x40006364']
+-- cmp40 0x4000241c --
+400023bc: cmp        ip, #0x200
+400023c0: ble        #0x400023d0
+400023c4: ldrb       ip, [r7, #0x18d]
+400023c8: cmp        ip, #1
+400023cc: beq        #0x400023ec
+400023d0: add        r1, r1, r3
+400023d4: sub        r1, r2, r1
+400023d8: cmp        r1, #0x200
+400023dc: ble        #0x40002408
+400023e0: ldrb       r1, [r7, #0x18d]
+400023e4: cmp        r1, #2
+400023e8: bne        #0x40002408
+400023ec: vmov       s0, r0
+400023f0: vldr       d1, [pc, #0x3a0]
+400023f4: vcvt.f64.u32 d0, s0
+400023f8: vmul.f64   d0, d0, d1
+400023fc: vcvt.u32.f64 s0, d0
+40002400: vmov       r0, s0
+40002404: strb       r0, [r7, #0x185]
+40002408: ldrsh      r1, [r7]
+4000240c: ldrsh      r0, [r6, #0x4e]
+40002410: sub        r0, r1, r0
+40002414: cmp        r0, #0x200
+40002418: ble        #0x40002448
+4000241c: cmp        r0, #0x400
+40002420: movge      r4, #0x280
+40002424: bge        #0x40002448
+40002428: sxth       r0, r0
+4000242c: mov        r1, #0x280
+40002430: mov        r3, #0x400
+40002434: str        r1, [sp]
+40002438: mov        r2, #0
+4000243c: mov        r1, #0x180
+40002440: bl         #0x40001514 ; CALL 0x40001514
+40002444: mov        r4, r0
+40002448: ldrh       r0, [r6, #0x4e]
+4000244c: sub        r0, r0, r4
+40002450: sxth       r1, r0
+40002454: strh       r1, [r6, #0x5c]
+40002458: ldrsh      r0, [r7]
+4000245c: sub        r0, r0, #0x200
+40002460: cmp        r0, r1
+40002464: strhgt     r0, [r6, #0x5c]
+40002468: ldrb       r0, [r7, #0x178]
+4000246c: add        r0, r0, #1
+40002470: strb       r0, [r7, #0x178]
+40002474: ldrb       r0, [r7, #0x178]
+40002478: add        r0, r0, #1
+4000247c: strb       r0, [r7, #0x178]
+40002480: ldr        r0, [sp, #0x74]
+40002484: ldrb       r0, [r0, #6]
+40002488: cmp        r0, #0
+4000248c: beq        #0x40002574
+40002490: ldrsh      r1, [r6, #0x36]
+40002494: ldrsh      r0, [r6, #0x3a]
+40002498: cmp        r1, r0
+4000249c: bge        #0x40002568
+400024a0: sub        r0, r0, r1
+400024a4: mov        r2, #0x500
+400024a8: mov        r3, #0x400
+400024ac: sxth       r4, r0
+400024b0: str        r2, [sp]
+400024b4: mov        r2, #0x180
+400024b8: mov        r1, #0x80
+400024bc: mov        r0, r4
+400024c0: bl         #0x4000147c ; CALL 0x4000147c
+400024c4: strb       r0, [r7, #0x186]
+400024c8: mov        r2, #0x4b
+-- cmp40 0x40002678 --
+40002618: sxth       r0, r0
+4000261c: bl         #0x4000147c ; CALL 0x4000147c
+40002620: mov        r4, r0
+40002624: mov        r3, #0x400
+40002628: ldrh       r0, [r7]
+4000262c: mov        r2, #0x200
+40002630: str        fp, [sp]
+40002634: ldrh       r1, [r6, #0x36]
+40002638: add        r0, r0, #0x4d
+4000263c: sxth       r8, r0
+40002640: ldrh       r0, [r6, #0x3c]
+40002644: sub        r0, r1, r0
+40002648: mov        r1, #0x80
+4000264c: sxth       r0, r0
+40002650: bl         #0x4000147c ; CALL 0x4000147c
+40002654: adds       r1, r4, r0
+40002658: beq        #0x40002670
+4000265c: smulbb     r2, sb, r4
+40002660: smlabb     r0, r8, r0, r2
+40002664: bl         #0x4000fe30 ; CALL 0x4000fe30
+40002668: strh       r0, [r6, #0x60]
+4000266c: b          #0x40002678
+40002670: ldrh       r1, [r7]
+40002674: strh       r1, [r6, #0x60]
+40002678: cmp        r5, #0x400
+4000267c: ble        #0x4000268c
+40002680: ldrh       r0, [r6, #0x60]
+40002684: add        r0, r0, #0x80
+40002688: strh       r0, [r6, #0x60]
+4000268c: ldrb       r0, [r7, #0x17a]
+40002690: add        r0, r0, #1
+40002694: strb       r0, [r7, #0x17a]
+40002698: ldrb       r0, [r7, #0x17a]
+4000269c: add        r0, r0, #1
+400026a0: strb       r0, [r7, #0x17a]
+400026a4: mov        fp, #0x400
+400026a8: ldr        r0, [sp, #0x74]
+400026ac: ldrb       r0, [r0, #8]
+400026b0: cmp        r0, #0
+400026b4: beq        #0x40002880
+400026b8: mov        sb, #0
+400026bc: strh       sb, [r6, #0x3e]
+400026c0: mov        r4, #2
+400026c4: strh       sb, [r6, #0x40]
+400026c8: mov        r3, #6
+400026cc: ldr        r1, [sp, #8]
+400026d0: mov        r2, sb
+400026d4: add        r0, r7, #2
+400026d8: str        sb, [sp]
+400026dc: str        r4, [sp, #4]
+400026e0: bl         #0x400013e0 ; CALL 0x400013e0
+400026e4: mov        r3, #6
+400026e8: mov        r2, #0
+400026ec: add        r1, r7, #0x140
+400026f0: add        r0, r7, #2
+400026f4: str        r4, [sp]
+400026f8: str        r4, [sp, #4]
+400026fc: bl         #0x400013e0 ; CALL 0x400013e0
+40002700: ldrb       r0, [r7, #0x18d]
+40002704: cmp        r0, #0
+40002708: bne        #0x40002874
+4000270c: ldrsh      r0, [r6, #0x40]
+40002710: ldrsh      r1, [r6, #0x3e]
+40002714: cmp        r0, r1
+40002718: ble        #0x40002874
+4000271c: ldrsh      r2, [r6, #0x38]
+40002720: cmp        r0, r2
+40002724: ble        #0x40002874
+-- cmp40 0x40003cd8 --
+40003c78: str        r7, [sp, #0x264]
+40003c7c: bl         #0x40012ffc ; CALL 0x40012ffc
+40003c80: ldr        r0, [r4, #0x24]
+40003c84: add        sb, sp, #0x1b0
+40003c88: add        r1, sp, #0x1c0
+40003c8c: vldr       d0, [r0, #0x38]
+40003c90: vstr       d0, [sp, #0x1b0]
+40003c94: ldr        r0, [r4, #0x24]
+40003c98: add        r0, r0, #0x98
+40003c9c: bl         #0x40012e24 ; CALL 0x40012e24
+40003ca0: ldr        r0, [r4, #0x24]
+40003ca4: add        r1, sb, #0x58
+40003ca8: vldr       d0, [r0, #0x68]
+40003cac: vstr       d0, [sp, #0x1b8]
+40003cb0: ldr        r0, [r4, #0x24]
+40003cb4: add        r0, r0, #0xe0
+40003cb8: bl         #0x40012e24 ; CALL 0x40012e24
+40003cbc: add        r0, sp, #0x2c8
+40003cc0: add        r3, sp, #8
+40003cc4: str        r0, [sp]
+40003cc8: add        r2, sp, #0x58
+40003ccc: add        r1, sp, #0x250
+40003cd0: add        r0, sp, #0x1b0
+40003cd4: bl         #0x400060f0 ; CALL 0x400060f0
+40003cd8: cmp        r0, #0x400
+40003cdc: bhs        #0x40003e30
+40003ce0: add        r3, sp, #0x250
+40003ce4: add        r2, sp, #0x2c8
+40003ce8: add        r1, sp, #0x58
+40003cec: add        r0, sp, #0x68
+40003cf0: str        r7, [sp]
+40003cf4: bl         #0x40005e94 ; CALL 0x40005e94
+40003cf8: cmp        r0, #0x400
+40003cfc: bhs        #0x40003e30
+40003d00: mov        r1, #0x48
+40003d04: add        r0, sp, #0x268
+40003d08: bl         #0x4000fc6c ; CALL 0x4000fc6c
+40003d0c: mov        r1, #0x48
+40003d10: add        r0, sp, #0x168
+40003d14: bl         #0x4000fc6c ; CALL 0x4000fc6c
+40003d18: vldr       d0, [sp, #0x150]
+40003d1c: vstr       d0, [sp, #0x168]
+40003d20: vldr       d0, [sp, #0x158]
+40003d24: vstr       d0, [sp, #0x188]
+40003d28: vldr       d0, [sp, #0x160]
+40003d2c: vstr       d0, [sp, #0x1a8]
+40003d30: bl         #0x40012fb8 ; CALL 0x40012fb8
+40003d34: add        r2, sp, #0x268
+40003d38: add        r1, sp, #0x90
+40003d3c: bl         #0x40004490 ; CALL 0x40004490
+40003d40: add        r2, sp, #0x268
+40003d44: add        r1, sp, #0x168
+40003d48: mov        r0, r2
+40003d4c: bl         #0x40004490 ; CALL 0x40004490
+40003d50: ldr        r0, [r5, #0xc]
+40003d54: add        sb, sp, #0x268
+40003d58: ldr        r6, [r5, #8]
+40003d5c: cmp        r6, r0
+40003d60: bge        #0x40003de4
+40003d64: mov        r0, sb
+40003d68: bl         #0x400041b8 ; CALL 0x400041b8
+40003d6c: vmov.f64   d10, d0
+40003d70: mov        r0, sb
+40003d74: bl         #0x40004150 ; CALL 0x40004150
+40003d78: rsb        r0, r6, #9
+40003d7c: vmov.f64   d9, d0
+40003d80: lsl        r0, r8, r0
+40003d84: vmov       s0, r0
+-- cmp40 0x40003cf8 --
+40003c98: add        r0, r0, #0x98
+40003c9c: bl         #0x40012e24 ; CALL 0x40012e24
+40003ca0: ldr        r0, [r4, #0x24]
+40003ca4: add        r1, sb, #0x58
+40003ca8: vldr       d0, [r0, #0x68]
+40003cac: vstr       d0, [sp, #0x1b8]
+40003cb0: ldr        r0, [r4, #0x24]
+40003cb4: add        r0, r0, #0xe0
+40003cb8: bl         #0x40012e24 ; CALL 0x40012e24
+40003cbc: add        r0, sp, #0x2c8
+40003cc0: add        r3, sp, #8
+40003cc4: str        r0, [sp]
+40003cc8: add        r2, sp, #0x58
+40003ccc: add        r1, sp, #0x250
+40003cd0: add        r0, sp, #0x1b0
+40003cd4: bl         #0x400060f0 ; CALL 0x400060f0
+40003cd8: cmp        r0, #0x400
+40003cdc: bhs        #0x40003e30
+40003ce0: add        r3, sp, #0x250
+40003ce4: add        r2, sp, #0x2c8
+40003ce8: add        r1, sp, #0x58
+40003cec: add        r0, sp, #0x68
+40003cf0: str        r7, [sp]
+40003cf4: bl         #0x40005e94 ; CALL 0x40005e94
+40003cf8: cmp        r0, #0x400
+40003cfc: bhs        #0x40003e30
+40003d00: mov        r1, #0x48
+40003d04: add        r0, sp, #0x268
+40003d08: bl         #0x4000fc6c ; CALL 0x4000fc6c
+40003d0c: mov        r1, #0x48
+40003d10: add        r0, sp, #0x168
+40003d14: bl         #0x4000fc6c ; CALL 0x4000fc6c
+40003d18: vldr       d0, [sp, #0x150]
+40003d1c: vstr       d0, [sp, #0x168]
+40003d20: vldr       d0, [sp, #0x158]
+40003d24: vstr       d0, [sp, #0x188]
+40003d28: vldr       d0, [sp, #0x160]
+40003d2c: vstr       d0, [sp, #0x1a8]
+40003d30: bl         #0x40012fb8 ; CALL 0x40012fb8
+40003d34: add        r2, sp, #0x268
+40003d38: add        r1, sp, #0x90
+40003d3c: bl         #0x40004490 ; CALL 0x40004490
+40003d40: add        r2, sp, #0x268
+40003d44: add        r1, sp, #0x168
+40003d48: mov        r0, r2
+40003d4c: bl         #0x40004490 ; CALL 0x40004490
+40003d50: ldr        r0, [r5, #0xc]
+40003d54: add        sb, sp, #0x268
+40003d58: ldr        r6, [r5, #8]
+40003d5c: cmp        r6, r0
+40003d60: bge        #0x40003de4
+40003d64: mov        r0, sb
+40003d68: bl         #0x400041b8 ; CALL 0x400041b8
+40003d6c: vmov.f64   d10, d0
+40003d70: mov        r0, sb
+40003d74: bl         #0x40004150 ; CALL 0x40004150
+40003d78: rsb        r0, r6, #9
+40003d7c: vmov.f64   d9, d0
+40003d80: lsl        r0, r8, r0
+40003d84: vmov       s0, r0
+40003d88: vcvt.f64.s32 d8, s0
+40003d8c: vmul.f64   d0, d10, d8
+40003d90: blx        #0x40012940 ; CALL 0x40012940
+40003d94: vcvt.s32.f64 s0, d0
+40003d98: ldr        r1, [r5]
+40003d9c: vmov       r0, s0
+40003da0: vmul.f64   d0, d9, d8
+40003da4: cmp        r0, r1
+-- cmp40 0x40005968 --
+40005908: str        r0, [sp, #0x30]
+4000590c: str        r0, [sp, #0x34]
+40005910: str        r0, [sp, #0x38]
+40005914: str        r0, [sp, #0x3c]
+40005918: str        r0, [sp, #0x40]
+4000591c: str        r0, [sp, #0x44]
+40005920: str        r0, [sp, #0x48]
+40005924: str        r0, [sp, #0x4c]
+40005928: str        r0, [sp, #0x50]
+4000592c: str        r0, [sp, #0x54]
+40005930: str        r0, [sp, #0x58]
+40005934: str        r0, [sp, #0x5c]
+40005938: add        r0, sp, #0x188
+4000593c: bl         #0x4000fc6c ; CALL 0x4000fc6c
+40005940: add        r0, sp, #0x60
+40005944: bl         #0x40012f90 ; CALL 0x40012f90
+40005948: add        r1, sp, #0x18
+4000594c: mov        r0, r4
+40005950: bl         #0x400047e8 ; CALL 0x400047e8
+40005954: mov        r4, r0
+40005958: add        r1, sp, #0x170
+4000595c: mov        r0, r5
+40005960: bl         #0x400047e8 ; CALL 0x400047e8
+40005964: orr        r4, r4, r0
+40005968: cmp        r4, #0x400
+4000596c: bhs        #0x40005b2c
+40005970: add        r2, sp, #0x30
+40005974: ldr        r0, [pc, #0x214] ; LIT 0x40005b90->0x400142b0
+40005978: add        r1, sp, #0x18
+4000597c: bl         #0x40004678 ; CALL 0x40004678
+40005980: ldr        r0, [pc, #0x208] ; LIT 0x40005b90->0x400142b0
+40005984: add        r2, sp, #0x48
+40005988: add        r1, sp, #0x170
+4000598c: bl         #0x40004678 ; CALL 0x40004678
+40005990: vldr       d0, [sp, #0x30]
+40005994: bl         #0x40012fd0 ; CALL 0x40012fd0
+40005998: vldr       d0, [sp, #0x38]
+4000599c: mov        r5, r0
+400059a0: bl         #0x40012fd0 ; CALL 0x40012fd0
+400059a4: vldr       d0, [sp, #0x40]
+400059a8: orr        r5, r5, r0
+400059ac: bl         #0x40012fd0 ; CALL 0x40012fd0
+400059b0: orr        r5, r5, r0
+400059b4: cmp        r5, #1
+400059b8: bne        #0x40005a0c
+400059bc: movw       r4, #0x401
+400059c0: mov        r1, #0xc8
+400059c4: add        r0, sp, #0xa8
+400059c8: bl         #0x4000fc6c ; CALL 0x4000fc6c
+400059cc: vldr       d0, [sp, #0x40]
+400059d0: add        r1, pc, #0x1bc
+400059d4: add        r0, sp, #0xa8
+400059d8: vstr       d0, [sp, #8]
+400059dc: vldr       d0, [sp, #0x38]
+400059e0: vstr       d0, [sp]
+400059e4: vldr       d0, [sp, #0x30]
+400059e8: vmov       r2, r3, d0
+400059ec: blx        #0x4000fa50 ; CALL 0x4000fa50
+400059f0: ldr        r2, [pc, #0x1c8] ; LIT 0x40005bc0->0x40014340 STRING='ca9_cm_ColorSpec_MapWhiteMatrix'
+400059f4: add        r0, sp, #0xa8
+400059f8: str        r0, [sp]
+400059fc: mov        r3, #0xa1
+40005a00: add        r1, pc, #0x1bc
+40005a04: mov        r0, #4
+40005a08: bl         #0x4000ded4 ; CALL 0x4000ded4
+40005a0c: cmp        r5, #1
+40005a10: bne        #0x40005a64
+40005a14: mov        r4, #0x410
+-- cmp40 0x40005a70 --
+40005a10: bne        #0x40005a64
+40005a14: mov        r4, #0x410
+40005a18: mov        r1, #0xc8
+40005a1c: add        r0, sp, #0xa8
+40005a20: bl         #0x4000fc6c ; CALL 0x4000fc6c
+40005a24: vldr       d0, [sp, #0x40]
+40005a28: add        r1, pc, #0x1a4
+40005a2c: add        r0, sp, #0xa8
+40005a30: vstr       d0, [sp, #8]
+40005a34: vldr       d0, [sp, #0x38]
+40005a38: vstr       d0, [sp]
+40005a3c: vldr       d0, [sp, #0x30]
+40005a40: vmov       r2, r3, d0
+40005a44: blx        #0x4000fa50 ; CALL 0x4000fa50
+40005a48: ldr        r2, [pc, #0x170] ; LIT 0x40005bc0->0x40014340 STRING='ca9_cm_ColorSpec_MapWhiteMatrix'
+40005a4c: add        r0, sp, #0xa8
+40005a50: str        r0, [sp]
+40005a54: mov        r3, #0xb0
+40005a58: add        r1, pc, #0x164
+40005a5c: mov        r0, #4
+40005a60: bl         #0x4000ded4 ; CALL 0x4000ded4
+40005a64: vldr       d0, [sp, #0x48]
+40005a68: cmp        r5, #1
+40005a6c: beq        #0x40005b3c
+40005a70: cmp        r4, #0x400
+40005a74: bhs        #0x40005b2c
+40005a78: vldr       d1, [sp, #0x30]
+40005a7c: vldr       d8, [pc, #0x184]
+40005a80: vdiv.f64   d2, d0, d1
+40005a84: vstr       d2, [sp, #0x60]
+40005a88: vldr       d0, [sp, #0x50]
+40005a8c: vldr       d1, [sp, #0x38]
+40005a90: vdiv.f64   d3, d0, d1
+40005a94: vstr       d3, [sp, #0x80]
+40005a98: vldr       d0, [sp, #0x58]
+40005a9c: vldr       d1, [sp, #0x40]
+40005aa0: vdiv.f64   d3, d0, d1
+40005aa4: vmov.f64   d1, #1.000000e+01
+40005aa8: vmov.f64   d0, d8
+40005aac: vstr       d3, [sp, #0xa0]
+40005ab0: bl         #0x40012cc8 ; CALL 0x40012cc8
+40005ab4: vmov.f64   d1, #1.000000e+01
+40005ab8: vldr       d2, [sp, #0x80]
+40005abc: vmov.f64   d0, d8
+40005ac0: mov        r5, r0
+40005ac4: bl         #0x40012cc8 ; CALL 0x40012cc8
+40005ac8: vmov.f64   d1, #1.000000e+01
+40005acc: vldr       d2, [sp, #0xa0]
+40005ad0: vmov.f64   d0, d8
+40005ad4: and        r5, r5, r0
+40005ad8: bl         #0x40012cc8 ; CALL 0x40012cc8
+40005adc: tst        r0, r5
+40005ae0: bne        #0x40005b0c
+40005ae4: mov        r3, #0xd4
+40005ae8: ldr        r2, [pc, #0xd0] ; LIT 0x40005bc0->0x40014340 STRING='ca9_cm_ColorSpec_MapWhiteMatrix'
+40005aec: add        r0, pc, #0x11c
+40005af0: str        r0, [sp]
+40005af4: add        r1, pc, #0xc8
+40005af8: mov        r0, #4
+40005afc: bl         #0x4000ded4 ; CALL 0x4000ded4
+40005b00: orr        r4, r4, #0x410
+40005b04: cmp        r4, #0x400
+40005b08: bhs        #0x40005b2c
+40005b0c: add        r2, sp, #0x188
+40005b10: ldr        r1, [pc, #0x78] ; LIT 0x40005b90->0x400142b0
+40005b14: add        r0, sp, #0x60
+40005b18: bl         #0x40004490 ; CALL 0x40004490
+40005b1c: ldr        r0, [pc, #0x100] ; LIT 0x40005c24->0x400142f8
+-- cmp40 0x40005b04 --
+40005aa4: vmov.f64   d1, #1.000000e+01
+40005aa8: vmov.f64   d0, d8
+40005aac: vstr       d3, [sp, #0xa0]
+40005ab0: bl         #0x40012cc8 ; CALL 0x40012cc8
+40005ab4: vmov.f64   d1, #1.000000e+01
+40005ab8: vldr       d2, [sp, #0x80]
+40005abc: vmov.f64   d0, d8
+40005ac0: mov        r5, r0
+40005ac4: bl         #0x40012cc8 ; CALL 0x40012cc8
+40005ac8: vmov.f64   d1, #1.000000e+01
+40005acc: vldr       d2, [sp, #0xa0]
+40005ad0: vmov.f64   d0, d8
+40005ad4: and        r5, r5, r0
+40005ad8: bl         #0x40012cc8 ; CALL 0x40012cc8
+40005adc: tst        r0, r5
+40005ae0: bne        #0x40005b0c
+40005ae4: mov        r3, #0xd4
+40005ae8: ldr        r2, [pc, #0xd0] ; LIT 0x40005bc0->0x40014340 STRING='ca9_cm_ColorSpec_MapWhiteMatrix'
+40005aec: add        r0, pc, #0x11c
+40005af0: str        r0, [sp]
+40005af4: add        r1, pc, #0xc8
+40005af8: mov        r0, #4
+40005afc: bl         #0x4000ded4 ; CALL 0x4000ded4
+40005b00: orr        r4, r4, #0x410
+40005b04: cmp        r4, #0x400
+40005b08: bhs        #0x40005b2c
+40005b0c: add        r2, sp, #0x188
+40005b10: ldr        r1, [pc, #0x78] ; LIT 0x40005b90->0x400142b0
+40005b14: add        r0, sp, #0x60
+40005b18: bl         #0x40004490 ; CALL 0x40004490
+40005b1c: ldr        r0, [pc, #0x100] ; LIT 0x40005c24->0x400142f8
+40005b20: mov        r2, r6
+40005b24: add        r1, sp, #0x188
+40005b28: bl         #0x40004490 ; CALL 0x40004490
+40005b2c: add        sp, sp, #0x1d0
+40005b30: mov        r0, r4
+40005b34: vpop       {d8}
+40005b38: pop        {r4, r5, r6, pc}
+40005b3c: mov        r4, #0x410
+40005b40: mov        r1, #0xc8
+40005b44: add        r0, sp, #0xa8
+40005b48: bl         #0x4000fc6c ; CALL 0x4000fc6c
+40005b4c: vldr       d0, [sp, #0x58]
+40005b50: add        r1, pc, #0xd0
+40005b54: add        r0, sp, #0xa8
+40005b58: vstr       d0, [sp, #8]
+40005b5c: vldr       d0, [sp, #0x50]
+40005b60: vstr       d0, [sp]
+40005b64: vldr       d0, [sp, #0x48]
+40005b68: vmov       r2, r3, d0
+40005b6c: blx        #0x4000fa50 ; CALL 0x4000fa50
+40005b70: ldr        r2, [pc, #0x48] ; LIT 0x40005bc0->0x40014340 STRING='ca9_cm_ColorSpec_MapWhiteMatrix'
+40005b74: add        r0, sp, #0xa8
+40005b78: str        r0, [sp]
+40005b7c: mov        r3, #0xbf
+40005b80: add        r1, pc, #0x3c
+40005b84: mov        r0, #4
+40005b88: bl         #0x4000ded4 ; CALL 0x4000ded4
+40005b8c: b          #0x40005b2c
+40005b90: strhmi     r4, [r1], -r0
+40005b94: rsbshs     r7, sl, r8, ror sb
+40005b98: strbtvc    r6, [sb], #-0x877
+40005b9c: svcvs      #0x732065
+40005ba0: strbvs     r7, [r3, #-0x275]!
+40005ba4: .byte      0x20, 0x6e, 0x65, 0x61
+40005ba8: ldrbvs     r2, [sl, #-0x72]
+40005bac: eorshs     r6, sl, r2, ror pc
+40005bb0: ldrtvs     r2, [r5], -r5, lsr #28
+-- cmp40 0x40005da8 --
+40005d48: add        sp, sp, #0x94
+40005d4c: mov        r0, r5
+40005d50: vpop       {d8, d9}
+40005d54: pop        {r4, r5, r6, r7, pc}
+40005d58: ldmdbvs    r6!, {r2, r5, r6, r8, fp, sp, lr} ^
+40005d5c: mcrvs      p9, #3, r6, c15, c3, #3
+40005d60: rsbshs     r6, sb, r0, lsr #4
+40005d64: svcvs      #0x72657a
+40005d68: andeq      r0, r0, r0
+40005d6c: mulmi      r1, sb, r3
+40005d70: blo        #0x40e56284
+40005d74: ldmdahs    r3!, {r5, r8, sl, sp} ^
+40005d78: stclhs     p5, c2, [r4], #-0xa4
+40005d7c: rsbseq     r2, r3, r0, lsr #10
+40005d80: push       {r4, r5, r6, r7, lr}
+40005d84: mov        r5, r2
+40005d88: mov        r2, r1
+40005d8c: mov        r4, r0
+40005d90: mov        r7, r3
+40005d94: mov        r1, r3
+40005d98: vpush      {d8, d9}
+40005d9c: sub        sp, sp, #0x94
+40005da0: mov        r0, r2
+40005da4: bl         #0x40004d00 ; CALL 0x40004d00
+40005da8: cmp        r0, #0x400
+40005dac: bhs        #0x40005e88
+40005db0: mov        r6, #0
+40005db4: vldr       d0, [r4]
+40005db8: bl         #0x40012fd0 ; CALL 0x40012fd0
+40005dbc: cmp        r0, #1
+40005dc0: beq        #0x40005df4
+40005dc4: vldr       d0, [r4, #8]
+40005dc8: bl         #0x40012fd0 ; CALL 0x40012fd0
+40005dcc: cmp        r0, #1
+40005dd0: beq        #0x40005df4
+40005dd4: vldr       d0, [r7]
+40005dd8: vldr       d2, [r4]
+40005ddc: vcmpe.f64  d0, d2
+40005de0: vmrs       apsr_nzcv, fpscr
+40005de4: bhi        #0x40005e18
+40005de8: mov        r1, r5
+40005dec: add        r0, r4, #0x10
+40005df0: b          #0x40005e30
+40005df4: ldr        r2, [pc, #-0x90] ; LIT 0x40005d6c->0x40014399 STRING='ca9_cm_ColorSpec_MatrixInterpolate'
+40005df8: sub        r0, pc, #0xa8
+40005dfc: str        r0, [sp]
+40005e00: mov        r3, #0x208
+40005e04: sub        r1, pc, #0x9c
+40005e08: mov        r0, #4
+40005e0c: bl         #0x4000ded4 ; CALL 0x4000ded4
+40005e10: movw       r6, #0x401
+40005e14: b          #0x40005e84
+40005e18: vldr       d1, [r4, #8]
+40005e1c: vcmpe.f64  d0, d1
+40005e20: vmrs       apsr_nzcv, fpscr
+40005e24: blt        #0x40005e38
+40005e28: mov        r1, r5
+40005e2c: add        r0, r4, #0x58
+40005e30: bl         #0x40012cf0 ; CALL 0x40012cf0
+40005e34: b          #0x40005e84
+40005e38: vmov.f64   d8, #1.000000e+00
+40005e3c: mov        r1, sp
+40005e40: add        r0, r4, #0x10
+40005e44: vdiv.f64   d3, d8, d2
+40005e48: vdiv.f64   d2, d8, d0
+40005e4c: vdiv.f64   d0, d8, d1
+40005e50: vsub.f64   d1, d2, d0
+40005e54: vsub.f64   d0, d3, d0
+-- cmp40 0x40005fac --
+40005f4c: vmul.f64   d0, d0, d1
+40005f50: vmov.f64   d1, #1.000000e+00
+40005f54: vstr       d0, [r4, #0x20]
+40005f58: vmov.f64   d0, d9
+40005f5c: bl         #0x40012cc8 ; CALL 0x40012cc8
+40005f60: vmov.f64   d1, #1.000000e+00
+40005f64: vldr       d2, [r4, #0x18]
+40005f68: vmov.f64   d0, d9
+40005f6c: mov        r5, r0
+40005f70: bl         #0x40012cc8 ; CALL 0x40012cc8
+40005f74: vmov.f64   d1, #1.000000e+00
+40005f78: vldr       d2, [r4, #0x20]
+40005f7c: vmov.f64   d0, d9
+40005f80: and        r5, r5, r0
+40005f84: bl         #0x40012cc8 ; CALL 0x40012cc8
+40005f88: and        r0, r0, r5
+40005f8c: cmp        r0, #0
+40005f90: beq        #0x40006070
+40005f94: add        r0, sp, #0x28
+40005f98: bl         #0x400130f0 ; CALL 0x400130f0
+40005f9c: add        r2, sp, #0x38
+40005fa0: mov        r1, r4
+40005fa4: add        r0, sp, #0x28
+40005fa8: bl         #0x400058b8 ; CALL 0x400058b8
+40005fac: cmp        r0, #0x400
+40005fb0: mov        r5, r0
+40005fb4: bhs        #0x400060b4
+40005fb8: add        r2, r4, #0x70
+40005fbc: add        r1, sp, #0x38
+40005fc0: mov        r0, sb
+40005fc4: bl         #0x40004490 ; CALL 0x40004490
+40005fc8: cmp        r8, #0
+40005fcc: beq        #0x40006004
+40005fd0: add        r0, sp, #0x10
+40005fd4: bl         #0x40013118 ; CALL 0x40013118
+40005fd8: add        r2, sp, #0x80
+40005fdc: add        r1, sp, #0x10
+40005fe0: add        r0, r4, #0x70
+40005fe4: bl         #0x40004678 ; CALL 0x40004678
+40005fe8: add        r0, sp, #0x80
+40005fec: bl         #0x40013024 ; CALL 0x40013024
+40005ff0: vmov.f64   d1, d0
+40005ff4: add        r1, r4, #0x70
+40005ff8: mov        r0, r1
+40005ffc: vdiv.f64   d0, d8, d1
+40006000: bl         #0x40004370 ; CALL 0x40004370
+40006004: add        r1, r4, #0x28
+40006008: add        r0, r4, #0x70
+4000600c: bl         #0x400043e0 ; CALL 0x400043e0
+40006010: cmp        r0, #1
+40006014: bne        #0x400060b4
+40006018: b          #0x40006094
+4000601c: add        r1, r4, #0x10
+40006020: mov        r0, r5
+40006024: bl         #0x40012ffc ; CALL 0x40012ffc
+40006028: vldr       d0, [r4, #0x10]
+4000602c: vcmpe.f64  d0, #0
+40006030: vmrs       apsr_nzcv, fpscr
+40006034: vldr       d0, [r4, #0x18]
+40006038: movgt      r0, #1
+4000603c: movle      r0, #0
+40006040: vcmpe.f64  d0, #0
+40006044: vmrs       apsr_nzcv, fpscr
+40006048: vldr       d0, [r4, #0x20]
+4000604c: movgt      r1, #1
+40006050: movle      r1, #0
+40006054: vcmpe.f64  d0, #0
+40006058: and        r0, r0, r1
+-- cmp40 0x40006180 --
+40006120: str        r5, [sp, #0x28]
+40006124: str        r5, [sp, #0x2c]
+40006128: str        r5, [sp, #0x20]
+4000612c: str        r5, [sp, #0x10]
+40006130: str        r5, [sp, #0x14]
+40006134: str        r5, [sp, #0x18]
+40006138: str        r5, [sp, #0x1c]
+4000613c: bl         #0x4000fc6c ; CALL 0x4000fc6c
+40006140: add        r7, sp, #0x20
+40006144: mov        r0, r7
+40006148: bl         #0x400130c8 ; CALL 0x400130c8
+4000614c: vmov.f64   d8, #5.000000e-01
+40006150: vldr       d9, [pc, #0x170]
+40006154: str        r5, [sp, #0x84]
+40006158: mov        r3, sl
+4000615c: ldr        r0, [sp, #0xac]
+40006160: mov        r2, sb
+40006164: str        r5, [sp, #0x78]
+40006168: add        r1, sp, #0x20
+4000616c: str        r5, [sp, #0x7c]
+40006170: str        r5, [sp, #0x80]
+40006174: str        r5, [sp, #0x88]
+40006178: str        r5, [sp, #0x8c]
+4000617c: bl         #0x40005d80 ; CALL 0x40005d80
+40006180: cmp        r0, #0x400
+40006184: mov        r4, r0
+40006188: bhs        #0x400062a4
+4000618c: add        r1, sp, #0x30
+40006190: mov        r0, sb
+40006194: bl         #0x400043e0 ; CALL 0x400043e0
+40006198: cmp        r0, #1
+4000619c: beq        #0x4000621c
+400061a0: add        r2, sp, #0x78
+400061a4: mov        r1, fp
+400061a8: add        r0, sp, #0x30
+400061ac: bl         #0x40004678 ; CALL 0x40004678
+400061b0: add        r1, sp, #0x10
+400061b4: add        r0, sp, #0x78
+400061b8: bl         #0x4000492c ; CALL 0x4000492c
+400061bc: cmp        r0, #0x400
+400061c0: mov        r4, r0
+400061c4: bhs        #0x400062a4
+400061c8: vldr       d0, [sp, #0x10]
+400061cc: vldr       d1, [sp, #0x20]
+400061d0: vsub.f64   d0, d0, d1
+400061d4: bl         #0x40012b18 ; CALL 0x40012b18
+400061d8: vmov.f64   d10, d0
+400061dc: vldr       d0, [sp, #0x18]
+400061e0: vldr       d1, [sp, #0x28]
+400061e4: vsub.f64   d0, d0, d1
+400061e8: bl         #0x40012b18 ; CALL 0x40012b18
+400061ec: vadd.f64   d0, d10, d0
+400061f0: vcmpe.f64  d9, d0
+400061f4: vmrs       apsr_nzcv, fpscr
+400061f8: ble        #0x40006240
+400061fc: ldr        r0, [sp, #0xac]
+40006200: add        r7, sp, #0x10
+40006204: mov        r3, sl
+40006208: mov        r2, sb
+4000620c: mov        r1, r7
+40006210: bl         #0x40005d80 ; CALL 0x40005d80
+40006214: mov        r4, r0
+40006218: b          #0x400062a4
+4000621c: ldr        r2, [pc, #0xac] ; LIT 0x400062d0->0x4001437c STRING='ca9_cm_ColorSpec_NeutralToXY'
+40006220: sub        r0, pc, #0x150
+40006224: ldr        r1, [pc, #0xa8] ; LIT 0x400062d4->0x40005d70 STRING='CA9: %s()%d, %s'
+40006228: movw       r3, #0x192
+4000622c: str        r0, [sp]
+-- cmp40 0x400061bc --
+4000615c: ldr        r0, [sp, #0xac]
+40006160: mov        r2, sb
+40006164: str        r5, [sp, #0x78]
+40006168: add        r1, sp, #0x20
+4000616c: str        r5, [sp, #0x7c]
+40006170: str        r5, [sp, #0x80]
+40006174: str        r5, [sp, #0x88]
+40006178: str        r5, [sp, #0x8c]
+4000617c: bl         #0x40005d80 ; CALL 0x40005d80
+40006180: cmp        r0, #0x400
+40006184: mov        r4, r0
+40006188: bhs        #0x400062a4
+4000618c: add        r1, sp, #0x30
+40006190: mov        r0, sb
+40006194: bl         #0x400043e0 ; CALL 0x400043e0
+40006198: cmp        r0, #1
+4000619c: beq        #0x4000621c
+400061a0: add        r2, sp, #0x78
+400061a4: mov        r1, fp
+400061a8: add        r0, sp, #0x30
+400061ac: bl         #0x40004678 ; CALL 0x40004678
+400061b0: add        r1, sp, #0x10
+400061b4: add        r0, sp, #0x78
+400061b8: bl         #0x4000492c ; CALL 0x4000492c
+400061bc: cmp        r0, #0x400
+400061c0: mov        r4, r0
+400061c4: bhs        #0x400062a4
+400061c8: vldr       d0, [sp, #0x10]
+400061cc: vldr       d1, [sp, #0x20]
+400061d0: vsub.f64   d0, d0, d1
+400061d4: bl         #0x40012b18 ; CALL 0x40012b18
+400061d8: vmov.f64   d10, d0
+400061dc: vldr       d0, [sp, #0x18]
+400061e0: vldr       d1, [sp, #0x28]
+400061e4: vsub.f64   d0, d0, d1
+400061e8: bl         #0x40012b18 ; CALL 0x40012b18
+400061ec: vadd.f64   d0, d10, d0
+400061f0: vcmpe.f64  d9, d0
+400061f4: vmrs       apsr_nzcv, fpscr
+400061f8: ble        #0x40006240
+400061fc: ldr        r0, [sp, #0xac]
+40006200: add        r7, sp, #0x10
+40006204: mov        r3, sl
+40006208: mov        r2, sb
+4000620c: mov        r1, r7
+40006210: bl         #0x40005d80 ; CALL 0x40005d80
+40006214: mov        r4, r0
+40006218: b          #0x400062a4
+4000621c: ldr        r2, [pc, #0xac] ; LIT 0x400062d0->0x4001437c STRING='ca9_cm_ColorSpec_NeutralToXY'
+40006220: sub        r0, pc, #0x150
+40006224: ldr        r1, [pc, #0xa8] ; LIT 0x400062d4->0x40005d70 STRING='CA9: %s()%d, %s'
+40006228: movw       r3, #0x192
+4000622c: str        r0, [sp]
+40006230: mov        r0, #4
+40006234: bl         #0x4000ded4 ; CALL 0x4000ded4
+40006238: movw       r4, #0x402
+4000623c: b          #0x400062a4
+40006240: cmp        r6, #0xe
+40006244: bne        #0x40006288
+40006248: mov        r3, sl
+4000624c: vldr       d0, [sp, #0x20]
+40006250: vldr       d1, [sp, #0x10]
+40006254: mov        r2, sb
+40006258: add        r1, sp, #0x10
+4000625c: vadd.f64   d0, d0, d1
+40006260: vmul.f64   d0, d0, d8
+40006264: vstr       d0, [sp, #0x10]
+40006268: vldr       d0, [sp, #0x28]
+-- cmp40 0x40006364 --
+40006304: strb       r0, [r4]
+40006308: cmp        r0, #0x1e
+4000630c: bne        #0x40006318
+40006310: mov        r0, #0
+40006314: strb       r0, [r4]
+40006318: pop        {r4, r5, r6, r7, r8, sb, sl, fp}
+4000631c: bx         lr
+40006320: push       {r4, r5, r6, r7, r8, sb, lr}
+40006324: ldr        r5, [pc, #0x138] ; LIT 0x40006464->0x4001c844
+40006328: sub        sp, sp, #0x14
+4000632c: ldr        r4, [pc, #0x134] ; LIT 0x40006468->0x40026aec
+40006330: ldrb       r0, [r5, #1]
+40006334: add        r1, r0, r0, lsl #3
+40006338: ldr        r0, [r4, r1, lsl #2]
+4000633c: cmn        r0, #0x80000001
+40006340: beq        #0x4000645c
+40006344: cmp        r0, #0x2000000
+40006348: beq        #0x40006388
+4000634c: cmp        r0, #1
+40006350: beq        #0x40006398
+40006354: cmp        r0, #0x10
+40006358: beq        #0x400063dc
+4000635c: cmp        r0, #0x20
+40006360: beq        #0x400063a4
+40006364: cmp        r0, #0x40
+40006368: beq        #0x400063b0
+4000636c: cmp        r0, #0x30
+40006370: beq        #0x400063bc
+40006374: cmp        r0, #0x50
+40006378: beq        #0x400063c8
+4000637c: cmp        r0, #0x70
+40006380: beq        #0x400063d4
+40006384: b          #0x400063dc
+40006388: add        r1, pc, #0xdc
+4000638c: mov        r0, #4
+40006390: bl         #0x4000ded4 ; CALL 0x4000ded4
+40006394: b          #0x400063dc
+40006398: add        r0, r4, r1, lsl #2
+4000639c: bl         #0x4000df6c ; CALL 0x4000df6c
+400063a0: b          #0x400063dc
+400063a4: add        r0, r4, r1, lsl #2
+400063a8: bl         #0x4000b59c ; CALL 0x4000b59c
+400063ac: b          #0x400063dc
+400063b0: add        r0, r4, r1, lsl #2
+400063b4: bl         #0x40004050 ; CALL 0x40004050
+400063b8: b          #0x400063dc
+400063bc: add        r0, r4, r1, lsl #2
+400063c0: bl         #0x40000790 ; CALL 0x40000790
+400063c4: b          #0x400063dc
+400063c8: add        r0, r4, r1, lsl #2
+400063cc: bl         #0x4000dc74 ; CALL 0x4000dc74
+400063d0: b          #0x400063dc
+400063d4: add        r0, r4, r1, lsl #2
+400063d8: bl         #0x40007618 ; CALL 0x40007618
+400063dc: ldrb       r0, [r5, #1]
+400063e0: add        r0, r0, r0, lsl #3
+400063e4: add        ip, r4, r0, lsl #2
+400063e8: ldr        r1, [ip, #4]
+400063ec: cmp        r1, #0
+400063f0: beq        #0x40006410
+400063f4: ldr        r0, [r4, r0, lsl #2]
+400063f8: ldrd       r2, r3, [ip, #8]
+400063fc: add        ip, ip, #0x10
+40006400: ldm        ip, {r6, r7, r8, sb, ip}
+40006404: str        ip, [sp, #0x10]
+40006408: stm        sp, {r6, r7, r8, sb}
+4000640c: bl         #0x4000de1c ; CALL 0x4000de1c
+40006410: ldrb       r1, [r5, #1]
+
+=== mailbox receive ABI ===
+0x4000BF84 reads 9 words from FFF50000-selected bank +0x140..+0x160 and calls *(0x40026810) with those words as C arguments.
+IMG request word0 is 0x40, so callback arg0/opcode must resolve to 0x40 unless an intermediate wrapper changes it.
+
+=== TARGET ===
+Resolve registered callback and its opcode 0x40 branch to the CA9 color-management handler. Use that handler to trace ASN remapping and TF table directly.
