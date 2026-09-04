@@ -1,0 +1,141 @@
+name: M10-R v0.73 CA9 BV candidate producers
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v073-ca9-bv-candidate-producers.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m10r-metering-latch-trace
+          fetch-depth: 0
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace named CA9 BV candidate producers
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v073_ca9_bv_candidate_producers.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_ARM,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_OP_REG,ARM_REG_PC
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes();base=0x40000000;pfx=4;code=b[pfx:];end=base+len(code)
+          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);md.detail=True
+          def off(a): return pfx+a-base
+          def u32(a):
+              o=off(a); return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+          def astr(a,n=280):
+              o=off(a)
+              if not 0<=o<len(b): return None
+              z=b.find(b'\0',o,min(len(b),o+n));z=z if z>=0 else min(len(b),o+n)
+              try:s=b[o:z].decode('ascii')
+              except:return None
+              return s if len(s)>3 and all(c in '\r\n\t' or ' '<=c<='~' for c in s) else None
+          def ins(a):
+              o=off(a)
+              if not 0<=o<=len(b)-4:return None
+              x=list(md.disasm(b[o:o+4],a,1));return x[0] if x else None
+          def fmt(i):
+              ex=''
+              try:
+                  if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                      la=i.address+8+i.operands[1].mem.disp;v=u32(la)
+                      if v is not None:
+                          s=astr(v);ex=f' ; LIT {la:#x}->{v:#x}'+(f' STRING={s!r}' if s else '')
+                  if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:ex+=f' ; CALL {i.operands[0].imm:#x}'
+                  if i.mnemonic in ('add','sub') and len(i.operands)>=3 and i.operands[1].type==ARM_OP_REG and i.operands[1].reg==ARM_REG_PC and i.operands[2].type==ARM_OP_IMM:
+                      t=i.address+8+(i.operands[2].imm if i.mnemonic=='add' else -i.operands[2].imm);s=astr(t)
+                      if s:ex+=f' ; ADR {t:#x} STRING={s!r}'
+              except:pass
+              return f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}{ex}'
+          def dump(a,z,title):
+              a=max(base,a)&~3;z=min(end,z)&~3;print(f'\n=== {title} {a:#x}..{z:#x} ===')
+              for aa in range(a,z,4):
+                  i=ins(aa)
+                  if i:print(fmt(i))
+          names=[
+              ('Integral',b'AE integral ready'),('Spot',b'AE spot ready'),
+              ('MFM',b'AE MFM ready'),('AV-field',b'AE AV field ready'),
+              ('Running',b'AE algorithm running'),('Param',b'AE param: AV:')]
+          strings=[]
+          for name,p in names:
+              q=b.find(p)
+              if q>=0:strings.append((name,base+q-pfx))
+          print('M10-R v0.73 CA9 BV CANDIDATE PRODUCER TRACE')
+          print('SECTION 099 IMG-CA9_System base',hex(base),'size',hex(len(code)))
+          print('STRINGS',[(n,hex(v)) for n,v in strings])
+          # Find code refs to the named strings by LDR literal pointer or ADR-like PC arithmetic.
+          refs=[]
+          targets={v:n for n,v in strings}
+          for a in range(base,end-4,4):
+              i=ins(a)
+              if not i:continue
+              vals=[]
+              try:
+                  if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                      la=a+8+i.operands[1].mem.disp;v=u32(la)
+                      if v is not None:vals.append(('LDRLIT',v&~1))
+                  if i.mnemonic in ('add','sub') and len(i.operands)>=3 and i.operands[1].type==ARM_OP_REG and i.operands[1].reg==ARM_REG_PC and i.operands[2].type==ARM_OP_IMM:
+                      vals.append(('ADR',a+8+(i.operands[2].imm if i.mnemonic=='add' else -i.operands[2].imm)))
+              except:pass
+              for kind,v in vals:
+                  for sv,name in targets.items():
+                      if sv-24<=v<=sv+4:refs.append((a,kind,name,v))
+          print('NAMED_STRING_CODE_REFS',[(hex(a),k,n,hex(v)) for a,k,n,v in refs])
+          for a,k,n,v in refs:dump(a-0x100,a+0x180,f'{n} READY OWNER REF {a:#x}')
+          # All writes to the canonical CA9 result candidate offsets.
+          print('\nCANONICAL_RESULT_FIELD_STORES')
+          stores=[]
+          for a in range(base,end-4,4):
+              i=ins(a)
+              if not i or not i.mnemonic.startswith('str'):continue
+              try:
+                  for op in i.operands:
+                      if op.type==ARM_OP_MEM and op.mem.disp in (0x30,0x32,0x34,0x36):
+                          stores.append((a,op.mem.disp,fmt(i)));break
+              except:pass
+          print('STORE_COUNT',len(stores))
+          for a,d,line in stores:
+              print('\nSTORE',hex(a),'offset',hex(d),line)
+              dump(a-0x70,a+0x90,'STORE CONTEXT')
+          # AE main/starter and direct callees, constrained to code addresses in this section.
+          ae=0x40000790
+          dump(ae,ae+0x900,'AE MAIN 0x40000790')
+          callees=[]
+          for a in range(ae,min(end,ae+0x900),4):
+              i=ins(a)
+              try:
+                  if i and i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:
+                      t=i.operands[0].imm&~3
+                      if base<=t<end:callees.append((a,t))
+              except:pass
+          print('\nAE_MAIN_CALLEES',[(hex(a),hex(t)) for a,t in callees])
+          for _,t in sorted(set(callees),key=lambda x:x[1]):dump(t,t+0x180,f'AE MAIN CALLEE {t:#x}')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v073_ca9_bv_candidate_producers.txt
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: record v0.73 CA9 BV candidate producers'
+          git pull --rebase origin m10r-metering-latch-trace
+          git push origin HEAD:m10r-metering-latch-trace
