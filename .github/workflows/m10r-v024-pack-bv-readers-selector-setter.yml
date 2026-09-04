@@ -1,0 +1,107 @@
+name: M10-R v0.24 packed BV readers and selector setter
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v024-pack-bv-readers-selector-setter.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m10r-metering-latch-trace
+          fetch-depth: 0
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace packed BV readers and selector setter callers
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          mkdir -p research
+          python3 - <<'PY' > research/M10R_v024_pack_bv_readers_selector_setter.txt
+          from pathlib import Path
+          import struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_OP_REG,ARM_REG_PC
+
+          def sec(path,base,pfx=4):
+              b=Path(path).read_bytes(); md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+              ins=[i for i in md.disasm(b[pfx:],base) if i.mnemonic!='.byte']; idx={i.address:n for n,i in enumerate(ins)}
+              def off(a): return pfx+a-base
+              def r32(a):
+                  o=off(a); return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+              def lit(i):
+                  if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                      la=((i.address+4)&~3)+i.operands[1].mem.disp; return la,r32(la)
+                  return None,None
+              def fmt(i):
+                  la,v=lit(i); ex=f' ; LIT {la:#x}->{v:#x}' if v is not None else ''
+                  if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM: ex+=f' ; CALL {i.operands[0].imm:#x}'
+                  return f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}{ex}'
+              def dump_index(n,pre=18,post=34,title='CTX'):
+                  print(f'\n--- {title} @ {ins[n].address:#x} ---')
+                  for j in ins[max(0,n-pre):min(len(ins),n+post+1)]: print(fmt(j))
+              return b,ins,idx,lit,fmt,dump_index
+
+          b,ins,idx,lit,fmt,dump=sec('/tmp/sections/092_IMG-System.bin',0x42000000)
+          print('=== IMG PACK_BLOCK +0x2A..0x39 ACCESS CANDIDATES ===')
+          hits=[]
+          for n,i in enumerate(ins):
+              la,v=lit(i)
+              if v!=0x408f0ec0 or not i.operands or i.operands[0].type!=ARM_OP_REG: continue
+              reg=i.operands[0].reg; delta=0
+              for k in range(n+1,min(len(ins),n+45)):
+                  j=ins[k]
+                  if j.address-i.address>0x90: break
+                  # track simple add/sub immediate on the literal destination register
+                  if len(j.operands)>=2 and j.operands[0].type==ARM_OP_REG and j.operands[0].reg==reg:
+                      if j.mnemonic.startswith('adds') and j.operands[-1].type==ARM_OP_IMM: delta += j.operands[-1].imm
+                      elif j.mnemonic.startswith('subs') and j.operands[-1].type==ARM_OP_IMM: delta -= j.operands[-1].imm
+                  for op in j.operands:
+                      if op.type==ARM_OP_MEM and op.mem.base==reg:
+                          eff=delta+op.mem.disp
+                          if 0x2a<=eff<=0x39:
+                              hits.append((n,k,eff,j.address)); break
+                  if hits and hits[-1][0]==n: break
+          seen=set()
+          for n,k,eff,a in hits:
+              key=ins[n].address
+              if key in seen: continue
+              seen.add(key); print(f'\nPACK_XREF {key:#x} FIRST_BV_ACCESS {a:#x} EFFECTIVE_OFF {eff:#x}'); dump(n,12,46,'PACK BV READER')
+          print('\nPACK_READER_XREFS',[hex(x) for x in sorted(seen)])
+
+          cb,cins,cidx,clit,cfmt,cdump=sec('/tmp/sections/090_CTRL-System.bin',0x08000000)
+          print('\n=== CTRL SELECTOR SETTER 0x0800DE28 CALLERS ===')
+          callers=[]
+          for n,i in enumerate(cins):
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and (i.operands[0].imm&~1)==0x0800de28:
+                  callers.append((n,i.address))
+          print('CALLERS',[hex(a) for _,a in callers])
+          for n,a in callers: cdump(n,22,24,'SELECTOR SETTER CALLER')
+          print('\n=== SELECTOR SETTER ===')
+          if 0x0800de28 in cidx: cdump(cidx[0x0800de28],8,10,'SETTER')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v024_pack_bv_readers_selector_setter.txt
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: record v0.24 packed BV readers and selector setter callers'
+          git pull --rebase origin m10r-metering-latch-trace
+          git push origin HEAD:m10r-metering-latch-trace
