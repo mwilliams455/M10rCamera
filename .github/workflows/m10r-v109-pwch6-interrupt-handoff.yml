@@ -1,0 +1,139 @@
+name: M10-R v1.09 PWCH6 interrupt handoff
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v109-pwch6-interrupt-handoff.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace PW channel 6 interrupt handoff
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int bb=r.get();if(!bb)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v109_pwch6_interrupt_handoff.txt
+          from pathlib import Path
+          import re,struct
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); BASE=0x42000000; PFX=4
+          th=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); th.detail=True; th.skipdata=True
+          ar=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN); ar.detail=True; ar.skipdata=True
+          def off(a): return PFX+a-BASE
+          def raw(a,n):
+            o=off(a); return b[o:o+n] if 0<=o<len(b) else b''
+          def u32a(a):
+            x=raw(a,4); return struct.unpack('<I',x)[0] if len(x)==4 else None
+          def dump(md,lo,hi,title=''):
+            if title: print(f'\n=== {title} {lo:#x}..{hi:#x} ===')
+            for i in md.disasm(raw(lo,hi-lo),lo):
+              if not i.id: continue
+              extra=''
+              # resolve common Thumb PC-relative literal loads
+              try:
+                if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                  lit=((i.address+4)&~3)+i.operands[1].mem.disp
+                  val=u32a(lit)
+                  if val is not None: extra=f' ; LIT {lit:#x}->{val:#x}'
+              except Exception: pass
+              print(f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}{extra}')
+          target=b'Prepro: drv_prepro_manager_PWChannelInterrupt -channel: %d -Error: %d'
+          idx=b.find(target)
+          print('M10-R v1.09 PW CHANNEL-6 INTERRUPT HANDOFF')
+          print('target_string_file_offset',hex(idx) if idx>=0 else idx)
+          saddr=BASE+(idx-PFX) if idx>=0 else None
+          print('target_string_address',hex(saddr) if saddr else None)
+          # Broad Thumb disassembly and xrefs: ADR, literal loads whose value is target, or immediate references.
+          ins=list(th.disasm(b[PFX:],BASE))
+          xrefs=[]
+          for i in ins:
+            try:
+              # ADR usually capstone yields immediate target
+              if i.mnemonic.startswith('adr') and i.operands and i.operands[-1].type==ARM_OP_IMM:
+                if saddr is not None and abs(i.operands[-1].imm-saddr)<=2: xrefs.append(i.address)
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                lit=((i.address+4)&~3)+i.operands[1].mem.disp
+                if u32a(lit)==saddr: xrefs.append(i.address)
+            except Exception: pass
+          print('xrefs',*[hex(x) for x in sorted(set(xrefs))])
+          # Also find raw little-endian pointer literals to target.
+          if saddr:
+            pat=struct.pack('<I',saddr)
+            pos=0; pools=[]
+            while True:
+              q=b.find(pat,pos)
+              if q<0: break
+              pools.append(BASE+(q-PFX)); pos=q+1
+            print('literal_pools',*[hex(x) for x in pools])
+          # For every xref dump generous local context and locate nearest PUSH in previous 0x180 bytes.
+          starts=[]
+          for x in sorted(set(xrefs)):
+            prev=[i for i in ins if x-0x200<=i.address<=x and i.mnemonic=='push']
+            st=prev[-1].address if prev else max(BASE,x-0x100)
+            starts.append(st)
+            dump(th,st,min(st+0x500,BASE+len(b)-PFX),f'INTERRUPT FUNCTION CANDIDATE xref={x:#x} start={st:#x}')
+          # Scan candidate function ranges for switch helper and inline jump table around BLX 0x4209F988.
+          for st in sorted(set(starts)):
+            region=[i for i in ins if st<=i.address<st+0x500]
+            print(f'\n=== SWITCH/CALL ANALYSIS start={st:#x} ===')
+            for i in region:
+              if i.mnemonic in ('bl','blx'):
+                try:
+                  if i.operands and i.operands[0].type==ARM_OP_IMM:
+                    tgt=i.operands[0].imm & ~1
+                    print(f'CALL {i.address:#x} {i.mnemonic} -> {tgt:#x}')
+                    if tgt==0x4209f988:
+                      lr=(i.address+4)|1
+                      table_addr=i.address+4
+                      tb=list(raw(table_addr,24))
+                      print('SWITCH_HELPER',hex(i.address),'LR',hex(lr),'table_addr',hex(table_addr),'bytes',tb)
+                      for ch in range(min(12,len(tb))):
+                        print(f' SWITCH ch={ch} entry={tb[ch]:#x} target={((i.address+4)+2*tb[ch]):#x}')
+                except Exception: pass
+            # Highlight literals/globals/calls in candidate region.
+            print('GLOBAL/LITERAL REFS')
+            for i in region:
+              try:
+                if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                  lit=((i.address+4)&~3)+i.operands[1].mem.disp; val=u32a(lit)
+                  if val is not None and (0x40000000<=val<0x41000000 or 0x20000000<=val<0x21000000 or 0x42000000<=val<0x43000000):
+                    print(f' {i.address:#x}: {i.mnemonic} {i.op_str} LIT {lit:#x}->{val:#x}')
+              except Exception: pass
+          # Search direct references to known AFAEAWB owner and key offsets around interrupt region.
+          keys=[0x408efe10,0x408f0410,0x408f03f0,0x20004d00,0x14080,0x14230,0x14240]
+          print('\n=== KNOWN KEY CONSTANT/LITERAL OCCURRENCES ===')
+          for k in keys:
+            pat=struct.pack('<I',k); pos=0; hits=[]
+            while True:
+              q=b.find(pat,pos)
+              if q<0: break
+              hits.append(BASE+(q-PFX)); pos=q+1
+            print(hex(k),*[hex(h) for h in hits[:40]])
+          print('\n=== DECISION ===')
+          print('Resolve the exact channel-6 interrupt branch. Follow every callback/message/queue call from that branch, prioritizing code that reads channel-6 PWSA/base+0x80 or writes a statistics-object pointer into higher-level workflow/lifecycle state.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v109_pwch6_interrupt_handoff.txt
+          git commit -m 'research: record v1.09 PW channel6 interrupt handoff' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
