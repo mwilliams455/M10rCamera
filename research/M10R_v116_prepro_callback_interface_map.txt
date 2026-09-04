@@ -1,0 +1,427 @@
+M10-R v1.16 PREPRO CALLBACK INTERFACE MAP
+Low-level init 0x420E4E78 builds IRQ table on stack and passes it to 0x420DC52C. Manager completion table base is 0x408F0254 (also addressed as 0x408F0270-0x1C).
+
+=== LOW-LEVEL DRIVER CALLBACK INSTALLER 0x420DC52C 0x420dc4c0..0x420dc620 ===
+420dc4c0: ldr        r4, [r4, #0x14]
+420dc4c2: strb       r3, [r6, #0x11]
+420dc4c4: strb       r7, [r5, #9]
+420dc4c6: ldr        r4, [r6, #0x14]
+420dc4c8: ldr        r7, [r5, #0x64]
+420dc4ca: subs       r2, #0x29
+420dc4cc: str        r0, [r4, #0x40]
+420dc4ce: strb       r1, [r5, #0xd]
+420dc4d0: str        r1, [r4, #0x24]
+420dc4d2: str        r4, [r5, #0x54]
+420dc4d4: add        r0, r4
+420dc4d6: strb       r1, [r5, #0xd]
+420dc4d8: ldr        r4, [r6, #0x74]
+420dc4da: strb       r2, [r6, #0x11]
+420dc4dc: ldr        r1, [r5, #0x74]
+420dc4de: lsls       r6, r5, #1
+420dc4e0: push       {r4, lr}
+420dc4e2: ldr        r0, [pc, #0x10] ; LIT 0x420dc4f4->0x408ef710
+420dc4e4: ldr        r0, [r0, #8]
+420dc4e6: cmp        r0, #2
+420dc4e8: bhi        #0x420dc4f2
+420dc4ea: adr        r1, #0xc
+420dc4ec: movs       r0, #2
+420dc4ee: bl         #0x42140150
+420dc4f2: pop        {r4, pc}
+420dc4f6: lsls       r6, r1
+420dc4f8: strb       r0, [r2, #9]
+420dc4fa: str        r5, [r4, r1]
+420dc4fc: ldr        r2, [r6, #0x74]
+420dc4fe: cmp        r0, #0x20
+420dc500: ldr        r4, [r4, #0x14]
+420dc502: strb       r3, [r6, #0x11]
+420dc504: strb       r7, [r5, #9]
+420dc506: ldr        r4, [r6, #0x14]
+420dc508: ldr        r7, [r5, #0x64]
+420dc50a: subs       r2, #0x29
+420dc50c: str        r0, [r4, #0x50]
+420dc50e: str        r6, [r5, #0x14]
+420dc510: ldr        r2, [r4, #0x44]
+420dc512: movs       r0, #0x65
+420dc514: ldr        r4, [r0, #0x14]
+420dc516: strb       r3, [r6, #0x11]
+420dc518: strb       r7, [r5, #9]
+420dc51a: ldr        r4, [r6, #0x14]
+420dc51c: ldr        r7, [r5, #0x64]
+420dc51e: movs       r0, r0
+420dc520: ldr        r0, [pc, #4] ; LIT 0x420dc528->0x409aa1c4
+420dc522: ldr        r0, [r0]
+420dc524: bx         lr
+420dc526: movs       r0, r0
+420dc528: adr        r1, #0x310
+420dc52a: lsls       r2, r3
+420dc52c: push       {r4, lr}
+420dc52e: movs       r4, r0
+420dc530: movs       r2, #0x38
+420dc532: movs       r1, r4
+420dc534: ldr        r0, [pc, #8] ; LIT 0x420dc540->0x409aa1c4
+420dc536: blx        #0x4204f2ec
+420dc53a: bl         #0x420e225c
+420dc53e: pop        {r4, pc}
+420dc540: adr        r1, #0x310
+420dc542: lsls       r2, r3
+420dc544: push       {r4, lr}
+420dc546: movs       r4, r0
+420dc548: movs       r2, r4
+420dc54a: adr        r1, #0xc
+420dc54c: movs       r0, #2
+420dc54e: bl         #0x42140150
+420dc552: ldr        r0, [pc, #0x20] ; LIT 0x420dc574->0x409aa1c4
+420dc554: str        r4, [r0]
+420dc556: pop        {r4, pc}
+420dc558: strb       r0, [r2, #9]
+420dc55a: strb       r5, [r4, #1]
+420dc55c: ldr        r2, [r6, #0x74]
+420dc55e: movs       r0, #0x3a
+420dc560: str        r3, [r6, #0x54]
+420dc562: movs       r0, #0x74
+420dc564: str        r4, [r4, #0x54]
+420dc566: strb       r2, [r4, #0x15]
+420dc568: movs       r0, #0x67
+420dc56a: str        r4, [r5, #0x54]
+420dc56c: str        r6, [r6, #0x54]
+420dc56e: movs       r0, #0x6c
+420dc570: str        r5, [r4, #0x40]
+420dc572: movs       r0, r0
+420dc574: adr        r1, #0x310
+420dc576: lsls       r2, r3
+420dc578: ldr        r1, [pc, #4] ; LIT 0x420dc580->0x409aa1c4
+420dc57a: str        r0, [r1, #8]
+420dc57c: bx         lr
+420dc57e: movs       r0, r0
+420dc580: adr        r1, #0x310
+420dc582: lsls       r2, r3
+420dc584: eors       r0, r6
+420dc586: stmdb      sp!, {lr}
+420dc58a: b          #0x420dc8ce
+420dc58c: lsls       r0, r1, #0xe
+420dc58e: b          #0x420dc0d0
+420dc590: movs       r0, r0
+420dc592: b          #0x420dc0b6
+420dc594: movs       r1, r0
+420dc596: b          #0x420dcc3a
+420dc598: movs       r2, r0
+420dc59a: ldrh       r0, [r0, #0x10]
+420dc59c: subs       r7, r3, #7
+420dc59e: b          #0x420dcac0
+420dc5a0: movs       r2, r0
+420dc5a2: b          #0x420dcce6
+420dc5a4: ldrh       r1, [r5, #0x36]
+420dc5a8: lsls       r4, r1, #0xe
+420dc5aa: b          #0x420dc0ec
+420dc5ac: movs       r4, r0
+420dc5ae: b          #0x420dc0d2
+420dc5b0: movs       r7, r0
+420dc5b2: b          #0x420dcd36
+420dc5b4: asrs       r0, r0, #0x20
+420dc5b6: b          #0x420dc162
+420dc5b8: asrs       r7, r0, #0x20
+420dc5ba: b          #0x420dc9c0
+420dc5bc: movs       r1, r0
+420dc5be: b          #0x420dc8c2
+420dc5c0: asrs       r4, r6, #0xd
+420dc5c2: b          #0x420dc104
+420dc5c4: movs       r4, r0
+420dc5c6: b          #0x420dc0cc
+420dc5c8: movs       r0, r0
+420dc5ca: b          #0x420dcad0
+420dc5cc: movs       r4, r0
+420dc5ce: b          #0x420dc0f2
+420dc5d0: movs       r0, r2
+420dc5d2: b          #0x420dcd56
+420dc5d4: asrs       r1, r0, #0x20
+420dc5d6: b          #0x420dc182
+420dc5d8: movs       r0, #0x10
+420dc5da: b          #0x420dcd1e
+420dc5dc: asrs       r1, r0, #8
+420dc5de: b          #0x420dc5e6
+420dc5e0: movs       r1, r0
+420dc5e2: b          #0x420dc8e6
+420dc5e4: asrs       r0, r2, #0xd
+420dc5e6: b          #0x420dc128
+420dc5e8: movs       r4, r0
+420dc5ea: b          #0x420dc0f0
+420dc5ec: movs       r0, r0
+420dc5ee: b          #0x420dcaf4
+420dc5f0: movs       r0, r5
+420dc5f2: b          #0x420dc116
+420dc5f4: lsls       r0, r4, #0x12
+420dc5f6: b          #0x420dc93a
+420dc5f8: lsls       r0, r0, #0x12
+420dc5fa: b          #0x420dc93e
+420dc5fc: asrs       r2, r6, #2
+420dc5fe: b          #0x420dc9aa
+420dc600: adds       r6, r7, #3
+420dc602: b          #0x420dcd88
+420dc604: movs       r1, r0
+420dc606: b          #0x420dc90a
+420dc608: asrs       r4, r5, #0xc
+420dc60a: b          #0x420dc14c
+420dc60c: movs       r0, r5
+420dc60e: b          #0x420dc114
+420dc610: movs       r0, r0
+420dc612: b          #0x420dcb18
+420dc614: movs       r0, r6
+420dc616: b          #0x420dc13a
+420dc618: lsls       r0, r4, #0x12
+420dc61a: b          #0x420dc95e
+420dc61c: lsls       r0, r0, #0x12
+420dc61e: b          #0x420dc962
+
+=== MANAGER ACCESSOR BEFORE MODULE INIT 0x420e4e20..0x420e4e78 ===
+420e4e20: ldr        r2, [r6, #0x74]
+420e4e22: movs       r0, #0x3a
+420e4e24: strb       r5, [r4, #0xc]
+420e4e26: cmp        r5, #0x20
+420e4e28: ldr        r5, [r6, #0x64]
+420e4e2a: ldr        r3, [r5, #0x64]
+420e4e2c: strb       r7, [r5, #0x1d]
+420e4e2e: movs       r0, #0x6e
+420e4e30: strb       r0, [r2, #9]
+420e4e32: strb       r5, [r4, #1]
+420e4e34: ldr        r2, [r6, #0x74]
+420e4e36: ldr        r5, [r5, #0x50]
+420e4e38: str        r7, [r5, #0x44]
+420e4e3a: movs       r1, #0x65
+420e4e3c: movs       r1, r4
+420e4e3e: movs       r0, r0
+420e4e40: ldr        r0, [pc, #4] ; LIT 0x420e4e48->0x408ef710
+420e4e42: ldrb       r0, [r0, #5]
+420e4e44: bx         lr
+420e4e46: movs       r0, r0
+420e4e4a: lsls       r6, r1
+420e4e4c: push       {r4, lr}
+420e4e4e: bl         #0x420dd608
+420e4e52: pop        {r4, pc}
+420e4e54: push       {r4, lr}
+420e4e56: ldr        r0, [pc, #0x1c] ; LIT 0x420e4e74->0x408f0270
+420e4e58: ldrb       r0, [r0, #1]
+420e4e5a: cmp        r0, #0
+420e4e5c: bne        #0x420e4e6e
+420e4e5e: ldr        r0, [pc, #0x14] ; LIT 0x420e4e74->0x408f0270
+420e4e60: subs       r0, #0x68
+420e4e62: ldrb       r0, [r0, #0x14]
+420e4e64: cmp        r0, #1
+420e4e66: bne        #0x420e4e6e
+420e4e68: bl         #0x420dde80
+420e4e6c: b          #0x420e4e72
+420e4e6e: bl         #0x420dd914
+420e4e72: pop        {r4, pc}
+420e4e74: lsls       r0, r6, #9
+420e4e76: lsls       r7, r1
+
+=== MANAGER SLOT +0x04 USER 0x420e5b80..0x420e5c60 ===
+420e5b82: movs       r1, #1
+420e5b84: lsls       r1, r1, #0x1d
+420e5b86: movs       r0, #1
+420e5b88: bl         #0x4205f454
+420e5b8c: movs       r1, #1
+420e5b8e: lsls       r1, r1, #0x1d
+420e5b90: movs       r0, r4
+420e5b92: bl         #0x420e5d50
+420e5b96: pop        {r4, r5, r6, pc}
+420e5b9a: lsls       r6, r1
+420e5b9c: strb       r0, [r2, #9]
+420e5b9e: strb       r5, [r4, #1]
+420e5ba0: ldr        r2, [r6, #0x74]
+420e5ba2: movs       r0, #0x3a
+420e5ba4: strb       r4, [r4, #9]
+420e5ba6: ldrsh      r6, [r6, r5]
+420e5ba8: strb       r0, [r6, #9]
+420e5baa: strb       r5, [r4, #1]
+420e5bac: ldr        r2, [r6, #0x74]
+420e5bae: ldr        r7, [r3, #0x54]
+420e5bb0: ldr        r1, [r4, #0x64]
+420e5bb2: str        r1, [r4, #0x74]
+420e5bb4: strb       r5, [r4, #9]
+420e5bb6: adcs       r7, r3
+420e5bb8: ldr        r1, [pc, #0x118] ; LIT 0x420e5cd4->0x481dfdbd
+420e5bba: strb       r6, [r5, #0x11]
+420e5bbc: strb       r5, [r4, #9]
+420e5bbe: strb       r2, [r6, #0x15]
+420e5bc0: strb       r0, [r6, #0x11]
+420e5bc2: cmp        r5, #0x20
+420e5bc4: strb       r5, [r0, #9]
+420e5bc6: ldr        r2, [r6, #0x74]
+420e5bc8: subs       r2, #0x72
+420e5bca: movs       r5, #0x20
+420e5bcc: lsls       r4, r4, #1
+420e5bce: movs       r0, r0
+420e5bd0: push       {r4, lr}
+420e5bd2: ldr        r0, [pc, #0x80] ; LIT 0x420e5c54->0x408f0270
+420e5bd4: ldrb       r0, [r0, #1]
+420e5bd6: cmp        r0, #0
+420e5bd8: bne        #0x420e5bdc
+420e5bda: pop        {r4, pc}
+420e5bdc: ldr        r0, [pc, #0x78] ; LIT 0x420e5c58->0x408efe90
+420e5bde: ldr        r0, [r0]
+420e5be0: ldr        r1, [pc, #0x70] ; LIT 0x420e5c54->0x408f0270
+420e5be2: ldrh       r1, [r1, #4]
+420e5be4: cmp        r0, r1
+420e5be6: blo        #0x420e5c4e
+420e5be8: ldr        r0, [pc, #0x6c] ; LIT 0x420e5c58->0x408efe90
+420e5bea: ldr        r0, [r0, #4]
+420e5bec: adds       r0, r0, #1
+420e5bee: ldr        r1, [pc, #0x68] ; LIT 0x420e5c58->0x408efe90
+420e5bf0: str        r0, [r1, #4]
+420e5bf2: ldr        r0, [pc, #0x68] ; LIT 0x420e5c5c->0x408ef710
+420e5bf4: ldr        r0, [r0, #8]
+420e5bf6: cmp        r0, #2
+420e5bf8: bhi        #0x420e5c06
+420e5bfa: movs       r0, r1
+420e5bfc: adr        r1, #0x60
+420e5bfe: ldr        r2, [r0, #4]
+420e5c00: movs       r0, #2
+420e5c02: bl         #0x42140150
+420e5c06: ldr        r0, [pc, #0x50] ; LIT 0x420e5c58->0x408efe90
+420e5c08: ldr        r0, [r0, #4]
+420e5c0a: ldr        r1, [pc, #0x48] ; LIT 0x420e5c54->0x408f0270
+420e5c0c: ldrh       r1, [r1, #6]
+420e5c0e: cmp        r0, r1
+420e5c10: blo        #0x420e5c4e
+420e5c12: bl         #0x420e6f18
+420e5c16: movs       r0, #0
+420e5c18: ldr        r1, [pc, #0x38] ; LIT 0x420e5c54->0x408f0270
+420e5c1a: strb       r0, [r1, #1]
+420e5c1c: ldr        r0, [pc, #0x3c] ; LIT 0x420e5c5c->0x408ef710
+420e5c1e: ldr        r0, [r0, #8]
+420e5c20: cmp        r0, #2
+420e5c22: bhi        #0x420e5c2c
+420e5c24: adr        r1, #0x5c
+420e5c26: movs       r0, #2
+420e5c28: bl         #0x42140150
+420e5c2c: ldr        r0, [pc, #0x24] ; LIT 0x420e5c54->0x408f0270
+420e5c2e: ldrb       r0, [r0, #2]
+420e5c30: cmp        r0, #0
+420e5c32: bne        #0x420e5c3c
+420e5c34: movs       r0, #1
+420e5c36: ldr        r1, [pc, #0x1c] ; LIT 0x420e5c54->0x408f0270
+420e5c38: subs       r1, #0x68
+420e5c3a: strb       r0, [r1, #0x15]
+420e5c3c: ldr        r0, [pc, #0x14] ; LIT 0x420e5c54->0x408f0270
+420e5c3e: subs       r0, #0x1c
+420e5c40: ldr        r0, [r0, #4]
+420e5c42: cmp        r0, #0
+420e5c44: beq        #0x420e5c4e
+420e5c46: ldr        r1, [pc, #0xc] ; LIT 0x420e5c54->0x408f0270
+420e5c48: subs       r1, #0x1c
+420e5c4a: ldr        r0, [r1, #4]
+420e5c4c: blx        r0
+420e5c4e: mov        r8, r8
+420e5c50: b          #0x420e5bda
+420e5c52: movs       r0, r0
+420e5c54: lsls       r0, r6, #9
+420e5c56: lsls       r7, r1
+420e5c58: cdp2       p0, #9, c4, c0, c14, #4
+420e5c5e: lsls       r6, r1
+
+=== MANAGER SLOT +0x10/+0x14 USER 0x420e6d70..0x420e6e30 ===
+420e6d70: ldr        r2, [r6, #0x74]
+420e6d72: movs       r0, #0x3a
+420e6d74: strb       r3, [r2, r1]
+420e6d76: str        r7, [r1, r1]
+420e6d78: str        r0, [r4, #0x10]
+420e6d7a: ldr        r4, [r5, #0x44]
+420e6d7c: ldr        r0, [r4, #0x50]
+420e6d7e: str        r1, [r4, #0x34]
+420e6d80: ldr        r2, [r6, #0x74]
+420e6d82: movs       r1, #0x73
+420e6d84: movs       r0, r0
+420e6d86: movs       r0, r0
+420e6d88: push       {r4, lr}
+420e6d8a: movs       r4, r0
+420e6d8c: ldr        r0, [pc, #0x54] ; LIT 0x420e6de4->0x408ef710
+420e6d8e: ldr        r0, [r0, #8]
+420e6d90: cmp        r0, #1
+420e6d92: bhi        #0x420e6d9e
+420e6d94: movs       r2, r4
+420e6d96: adr        r1, #0x50
+420e6d98: movs       r0, #2
+420e6d9a: bl         #0x42140150
+420e6d9e: ldr        r0, [pc, #0x58] ; LIT 0x420e6df8->0x408f0270
+420e6da0: ldrb       r0, [r0, #1]
+420e6da2: cmp        r0, #0
+420e6da4: bne        #0x420e6db0
+420e6da6: ldr        r0, [pc, #0x50] ; LIT 0x420e6df8->0x408f0270
+420e6da8: subs       r0, #0x68
+420e6daa: ldrb       r0, [r0, #0x14]
+420e6dac: cmp        r0, #1
+420e6dae: beq        #0x420e6dbc
+420e6db0: ldr        r0, [pc, #0x44] ; LIT 0x420e6df8->0x408f0270
+420e6db2: ldrb       r0, [r0, #1]
+420e6db4: cmp        r0, #1
+420e6db6: bne        #0x420e6dbc
+420e6db8: bl         #0x420e5ca4
+420e6dbc: ldr        r0, [pc, #0x38] ; LIT 0x420e6df8->0x408f0270
+420e6dbe: subs       r0, #0x1c
+420e6dc0: ldr        r0, [r0, #0x10]
+420e6dc2: cmp        r0, #0
+420e6dc4: beq        #0x420e6dd0
+420e6dc6: ldr        r0, [pc, #0x30] ; LIT 0x420e6df8->0x408f0270
+420e6dc8: subs       r0, #0x1c
+420e6dca: ldr        r1, [r0, #0x10]
+420e6dcc: movs       r0, r4
+420e6dce: blx        r1
+420e6dd0: ldr        r0, [pc, #0x28] ; LIT 0x420e6dfc->0x408004c0
+420e6dd2: ldr        r0, [r0, #4]
+420e6dd4: cmp        r0, #0
+420e6dd6: beq        #0x420e6de0
+420e6dd8: ldr        r1, [pc, #0x20] ; LIT 0x420e6dfc->0x408004c0
+420e6dda: ldr        r0, [r1, #4]
+420e6ddc: blx        #0x420deaf4
+420e6de0: pop        {r4, pc}
+420e6de2: movs       r0, r0
+420e6de6: lsls       r6, r1
+420e6de8: strb       r0, [r2, #9]
+420e6dea: strb       r5, [r4, #1]
+420e6dec: ldr        r2, [r6, #0x74]
+420e6dee: movs       r0, #0x3a
+420e6df0: add        r6, sl
+420e6df2: movs       r0, #0x3a
+420e6df4: str        r5, [r4, #0x40]
+420e6df6: movs       r0, r0
+420e6df8: lsls       r0, r6, #9
+420e6dfa: lsls       r7, r1
+420e6dfc: lsls       r0, r0, #0x13
+420e6dfe: lsls       r0, r0
+420e6e00: push       {r4, lr}
+420e6e02: movs       r4, r0
+420e6e04: ldr        r0, [pc, #0x20] ; LIT 0x420e6e28->0x408ef710
+420e6e06: ldr        r0, [r0, #8]
+420e6e08: cmp        r0, #1
+420e6e0a: bhi        #0x420e6e16
+420e6e0c: movs       r2, r4
+420e6e0e: adr        r1, #0x1c
+420e6e10: movs       r0, #2
+420e6e12: bl         #0x42140150
+420e6e16: ldr        r0, [pc, #0x2c] ; LIT 0x420e6e44->0x408f0254
+420e6e18: ldr        r0, [r0, #0x14]
+420e6e1a: cmp        r0, #0
+420e6e1c: beq        #0x420e6e26
+420e6e1e: ldr        r0, [pc, #0x24] ; LIT 0x420e6e44->0x408f0254
+420e6e20: ldr        r1, [r0, #0x14]
+420e6e22: movs       r0, r4
+420e6e24: blx        r1
+420e6e26: pop        {r4, pc}
+420e6e2a: lsls       r6, r1
+420e6e2c: strb       r0, [r2, #9]
+420e6e2e: strb       r5, [r4, #1]
+
+=== DIRECT CALLERS OF ACCESSOR RANGE / INSTALLER ===
+0x420dc52c 0x420e4eaa
+0x420e4e40 0x420bbccc 0x420d8fce 0x420dac10 0x420dae02 0x420e5912 0x420e6498
+
+=== MANAGER TABLE SLOT SEMANTICS ===
++0x04 invoked with no explicit argument at 0x420E5C4C after frame-count threshold path.
++0x08 invoked with current frame/index at 0x420E5E2A after aggregate PW completion.
++0x0C invoked as error callback from 0x420E5D6A with error and channel mask.
++0x10 invoked with r4 at 0x420E6DCE in auxiliary manager path.
++0x14 invoked with r4 at 0x420E6E24.
++0x18 invoked with r4 in 0x420E5EF6 family (HD-related callback).
+
+=== DECISION ===
+Determine whether a public manager init/config API copies a caller-provided six-callback struct into 0x408F0254. Resolve +0x08 source. If table is intentionally zero in production, stop chasing callback identity and pivot to synchronous completed-buffer consumers.
