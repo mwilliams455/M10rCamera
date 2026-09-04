@@ -1,0 +1,77 @@
+M10-R v0.87 WORKFLOW+0x480 / AFAEAWB POINTER IDENTITY
+Known consumer: 0x420A3116..20 computes workflow+0x480, loads pointer, stores to CA9 block 0x43705A60+0.
+Known AFAEAWB helper: 0x420DADB6 stores [0x408EFE10+0x7C] + 0x14080 through caller-supplied output pointer.
+
+=== CA9/workflow module: candidate workflow+0x480 WRITES ===
+count 0
+
+=== CA9/workflow module: direct callers of 0x420DADB6 ===
+count 0
+
+=== CA9/workflow module: direct callers of 0x420A3104 ===
+count 1
+
+--- CA9 builder caller 1/1 @0x420a2fde ---
+420a2fb0: ldrsb      r0, [r4, r5]
+420a2fb2: muls       r0, r6, r0
+420a2fb4: push       {r4, r5, r6, lr}
+420a2fb6: movs       r4, r0
+420a2fb8: movs       r5, r1
+420a2fba: movs       r6, #0
+420a2fbc: ldr        r0, [pc, #0x28] ; LIT 0x420a2fe8->0x408187e4
+420a2fbe: ldrb       r0, [r0]
+420a2fc0: cmp        r0, #1
+420a2fc2: beq        #0x420a2fd2
+420a2fc4: ldr        r1, [pc, #0x24] ; LIT 0x420a2fec->0x4283722c
+420a2fc6: movs       r0, #4
+420a2fc8: bl         #0x42140150 ; CALL 0x42140150
+420a2fcc: movs       r0, #0xd
+420a2fce: mvns       r0, r0
+420a2fd0: pop        {r4, r5, r6, pc}
+420a2fd2: ldr        r0, [pc, #0x1c] ; LIT 0x420a2ff0->0x408187ec
+420a2fd4: str        r4, [r0]
+420a2fd6: ldr        r0, [pc, #0x1c] ; LIT 0x420a2ff4->0x408187f0
+420a2fd8: str        r5, [r0]
+420a2fda: ldr        r1, [pc, #0x1c] ; LIT 0x420a2ff8->0x420a789d
+420a2fdc: movs       r0, r4
+420a2fde: bl         #0x420a3104 ; CALL 0x420a3104
+420a2fe2: movs       r6, r0
+420a2fe4: movs       r0, r6
+420a2fe6: b          #0x420a2fd0
+420a2fe8: strh       r4, [r4, #0x3e]
+420a2fea: lsls       r1, r0
+420a2fec: strb       r4, [r5, #8]
+420a2fee: cmp        r3, r0
+420a2ff0: strh       r4, [r5, #0x3e]
+420a2ff2: lsls       r1, r0
+420a2ff4: strh       r0, [r6, #0x3e]
+420a2ff6: lsls       r1, r0
+420a2ff8: ldrb       r5, [r3, #2]
+420a2ffa: tst        r2, r1
+420a2ffc: push       {r4, r5, r6, lr}
+420a2ffe: sub        sp, #0x38
+420a3000: movs       r4, r0
+420a3002: movs       r5, r1
+420a3004: movs       r6, #0
+420a3006: ldr        r0, [pc, #0x50] ; LIT 0x420a3058->0x40818818
+420a3008: ldrb       r0, [r0]
+420a300a: cmp        r0, #1
+420a300c: beq        #0x420a301e
+420a300e: adr        r1, #0x4c
+420a3010: movs       r0, #4
+420a3012: bl         #0x42140150 ; CALL 0x42140150
+420a3016: movs       r0, #0xd
+420a3018: mvns       r0, r0
+420a301a: add        sp, #0x38
+
+=== AFAEAWB/prepro module: candidate workflow+0x480 WRITES ===
+count 0
+
+=== AFAEAWB/prepro module: direct callers of 0x420DADB6 ===
+count 0
+
+=== AFAEAWB/prepro module: direct callers of 0x420A3104 ===
+count 0
+
+=== DECISION RULE ===
+Identity is closed only if a workflow+0x480 writer receives the exact AFAEAWB-derived pointer (base+0x80 or base+0x14080), directly or through a traceable copy chain. If the writer source is different, reject identity and trace that source instead.
