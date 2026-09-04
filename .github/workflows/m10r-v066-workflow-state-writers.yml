@@ -1,0 +1,131 @@
+name: M10-R v0.66 workflow state-field writers
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v066-workflow-state-writers.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m10r-metering-latch-trace
+          fetch-depth: 0
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace writes to workflow object +0x20C
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v066_workflow_state_writers.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_OP_REG,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();base=0x42000000;pfx=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(a): return pfx+a-base
+          def u32(a):
+              o=off(a); return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+          def astr(a,n=260):
+              o=off(a)
+              if not 0<=o<len(b): return None
+              z=b.find(b'\0',o,min(len(b),o+n));z=z if z>=0 else min(len(b),o+n)
+              try:s=b[o:z].decode('ascii')
+              except:return None
+              return s if len(s)>3 and all(c in '\r\n\t' or ' '<=c<='~' for c in s) else None
+          def fmt(i):
+              if i.id==0:return f'{i.address:08x}: .byte {i.op_str}'
+              ex=''
+              try:
+                  if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                      la=((i.address+4)&~3)+i.operands[1].mem.disp;v=u32(la)
+                      if v is not None:
+                          s=astr(v);ex=f' ; LIT {la:#x}->{v:#x}'+(f' STRING={s!r}' if s else '')
+              except: pass
+              return f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}{ex}'
+          start,end=0x42161000,0x42164000
+          ins=list(md.disasm(b[off(start):off(end)],start)); idx={i.address:n for n,i in enumerate(ins)}
+          print('M10-R v0.66 WORKFLOW OBJECT +0x20C WRITER TRACE')
+          print('Owner read sequence: object pointer -> +8 +0xFF +0xFF +2 = +0x208 -> [reg,#4] = object +0x20C.')
+          # Detect exact +0x208 construction sequence, then inspect following accesses.
+          hits=[]
+          for n in range(len(ins)-5):
+              seq=ins[n:n+5]
+              # same dest register across adds #8,#ff,#ff,#2
+              try:
+                  regs=[];imms=[]
+                  ok=True
+                  for j in range(4):
+                      x=seq[j]
+                      if not x.mnemonic.startswith('add') or len(x.operands)<2 or x.operands[0].type!=ARM_OP_REG:
+                          ok=False;break
+                      reg=x.reg_name(x.operands[0].reg);regs.append(reg)
+                      imm=None
+                      for op in x.operands[1:]:
+                          if op.type==ARM_OP_IMM: imm=op.imm
+                      imms.append(imm)
+                  if ok and len(set(regs))==1 and imms==[8,0xff,0xff,2]:
+                      hits.append((n,regs[0]))
+              except:pass
+          print('PLUS208_HITS',[(hex(ins[n].address),r) for n,r in hits])
+          for n,reg in hits:
+              print(f'\n=== +0x208 SEQUENCE at {ins[n].address:#x} reg={reg} ===')
+              for x in ins[max(0,n-35):min(len(ins),n+35)]: print(fmt(x))
+              # classify [reg,#4] accesses next few instructions
+              for x in ins[n+4:min(len(ins),n+18)]:
+                  try:
+                      for op in x.operands:
+                          if op.type==ARM_OP_MEM and x.reg_name(op.mem.base)==reg and op.mem.disp==4:
+                              print('FIELD20C_ACCESS',fmt(x))
+                  except:pass
+          # Also locate direct wide +/-0x20c address arithmetic or memory operands.
+          print('\nDIRECT_20C_OPERAND_HITS')
+          for n,x in enumerate(ins):
+              if '0x20c' in x.op_str.lower():
+                  for y in ins[max(0,n-20):min(len(ins),n+24)]:print(fmt(y))
+                  print('--')
+          # Find stores to [reg,#4] near any table root literal refs, in case construction differs.
+          print('\nTABLE-ROOT-LOCAL STORES')
+          for n,x in enumerate(ins):
+              line=fmt(x).lower()
+              if '->0x408cecf0' not in line: continue
+              for y in ins[n:min(len(ins),n+65)]:
+                  if y.mnemonic.startswith('str') and '[',']': pass
+                  ly=fmt(y)
+                  if y.mnemonic.startswith('str') and '#4]' in ly:
+                      print('ROOTREF',fmt(x));print('STORE',ly)
+          # Relevant literal strings in this code range.
+          print('\nNEARBY SEMANTIC STRINGS')
+          seen=set()
+          for x in ins:
+              line=fmt(x)
+              if ' STRING=' in line:
+                  s=line.split(' STRING=',1)[1]
+                  if s not in seen:
+                      print(line);seen.add(s)
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v066_workflow_state_writers.txt
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: record v0.66 workflow state-field writers'
+          git pull --rebase origin m10r-metering-latch-trace
+          git push origin HEAD:m10r-metering-latch-trace
