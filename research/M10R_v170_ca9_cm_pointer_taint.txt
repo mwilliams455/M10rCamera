@@ -1,0 +1,62 @@
+M10-R v1.70 CA9 CM POINTER TAINT
+Seed r0=REQ at entry 0x40003af4. CFG is the pointer loaded from REQ+0x24.
+40003bcc: ldrb       r0, [r4, #0x20]  ACCESS REQ+0x20
+40003bf0: ldrb       r0, [r4, #0x20]  ACCESS REQ+0x20
+40003c14: ldr        r0, [r4, #0x24]  ACCESS REQ+0x24
+  -> r0=CFG at 0x40003c14
+40003c18: vldr       s0, [r0, #0x28]  ACCESS CFG+0x28
+  CALL_TAGGED 0x40003c34 #0x4001308c: r0=REQ+0x8
+40003c38: ldr        sb, [r4, #0x24]  ACCESS REQ+0x24
+  -> sb=CFG at 0x40003c38
+40003c40: strb       r8, [r4, #0x80]  ACCESS REQ+0x80
+40003c48: strb       r8, [r4, #0x81]  ACCESS REQ+0x81
+40003c50: ldrb       r0, [r4]  ACCESS REQ+0x0
+40003c80: ldr        r0, [r4, #0x24]  ACCESS REQ+0x24
+  -> r0=CFG at 0x40003c80
+40003c8c: vldr       d0, [r0, #0x38]  ACCESS CFG+0x38
+40003c94: ldr        r0, [r4, #0x24]  ACCESS REQ+0x24
+  -> r0=CFG at 0x40003c94
+  CALL_TAGGED 0x40003c9c #0x40012e24: r0=CFG+0x98
+40003ca0: ldr        r0, [r4, #0x24]  ACCESS REQ+0x24
+  -> r0=CFG at 0x40003ca0
+40003ca8: vldr       d0, [r0, #0x68]  ACCESS CFG+0x68
+40003cb0: ldr        r0, [r4, #0x24]  ACCESS REQ+0x24
+  -> r0=CFG at 0x40003cb0
+  CALL_TAGGED 0x40003cb8 #0x40012e24: r0=CFG+0xe0
+40003e00: strb       r7, [r4, #0x80]  ACCESS REQ+0x80
+40003e3c: strb       r8, [r4, #0x80]  ACCESS REQ+0x80
+40003e40: ldr        sb, [r4, #0x24]  ACCESS REQ+0x24
+  -> sb=CFG at 0x40003e40
+40003e74: ldr        r2, [sb, #0x28]  ACCESS CFG+0x28
+40003e78: ldrd       r0, r1, [sb, #0x20]  ACCESS CFG+0x20
+40003e7c: str        r2, [r4, #0x50]  ACCESS REQ+0x50
+40003e80: strd       r0, r1, [r4, #0x48]  ACCESS REQ+0x48
+40003e9c: str        r2, [r4, #0x7c]  ACCESS REQ+0x7c
+40003ea0: strd       r0, r1, [r4, #0x74]  ACCESS REQ+0x74
+40003ec0: strh       r0, [r4, #0x82]  ACCESS REQ+0x82
+40003ed8: strh       r0, [r4, #0x84]  ACCESS REQ+0x84
+40003ef4: strh       r0, [r4, #0x86]  ACCESS REQ+0x86
+40003ef8: strh       r6, [r4, #0x88]  ACCESS REQ+0x88
+40003f18: strh       r0, [r4, #0x8a]  ACCESS REQ+0x8a
+40003f1c: strh       r6, [r4, #0x8c]  ACCESS REQ+0x8c
+40003f20: strh       r5, [r4, #0x8e]  ACCESS REQ+0x8e
+40003f38: strh       r0, [r4, #0x90]  ACCESS REQ+0x90
+40003f3c: strh       r5, [r4, #0x92]  ACCESS REQ+0x92
+40003f54: strh       r0, [r4, #0x94]  ACCESS REQ+0x94
+40003f58: strh       r5, [r4, #0x96]  ACCESS REQ+0x96
+40003f70: strh       r0, [r4, #0x98]  ACCESS REQ+0x98
+40003f84: strh       r0, [r4, #0x9a]  ACCESS REQ+0x9a
+40003f98: strh       r0, [r4, #0x9c]  ACCESS REQ+0x9c
+40003fb0: strh       r0, [r4, #0x9e]  ACCESS REQ+0x9e
+40003fb4: strh       r6, [r4, #0xa0]  ACCESS REQ+0xa0
+40003fcc: strh       r0, [r4, #0xa2]  ACCESS REQ+0xa2
+40003fd0: strh       r6, [r4, #0xa4]  ACCESS REQ+0xa4
+40003fd4: strh       r5, [r4, #0xa6]  ACCESS REQ+0xa6
+40003fec: strh       r0, [r4, #0xa8]  ACCESS REQ+0xa8
+40003ff0: strh       r5, [r4, #0xaa]  ACCESS REQ+0xaa
+40004008: strh       r0, [r4, #0xac]  ACCESS REQ+0xac
+4000400c: strh       r5, [r4, #0xae]  ACCESS REQ+0xae
+40004024: strh       r0, [r4, #0xb0]  ACCESS REQ+0xb0
+
+=== FINAL CLAIM CHECK ===
+Look for REQ+0x1, CFG+0x128, CFG+0x12c, CFG+0x130, CFG+0x134, or a callee receiving raw CFG. Absence means op40 CM core cannot consume TF table/remap gate directly or via tagged CFG argument.
