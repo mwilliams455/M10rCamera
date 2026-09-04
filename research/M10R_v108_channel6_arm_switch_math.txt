@@ -1,0 +1,405 @@
+M10-R v1.08 CHANNEL-6 ARM SWITCH / PWLSIZE MATH
+Correction: BLX targets 0x4209F988 / 0x421E6648 / 0x421E61D0 / 0x421E6050 / 0x421E65A4 are ARM-state targets; v1.07 Thumb decode was invalid.
+
+=== PW_INIT THUMB, treating 0x420e05e4.. table bytes separately 0x420e05d0..0x420e0660 ===
+420e05d0: ldrh       r1, [r6]
+420e05d2: lsls       r1, r1, #8
+420e05d4: ldr        r2, [pc, #0x204]
+420e05d6: adds       r1, r1, r2
+420e05d8: ldr        r0, [r6, #4]
+420e05da: str        r0, [r1, #0x1c]
+420e05dc: ldrh       r0, [r6]
+420e05de: movs       r3, r0
+420e05e0: blx        #0x4209f988
+420e05e4: lsls       r1, r1, #0x18
+420e05e6: lsrs       r7, r0, #0x20
+420e05e8: lsrs       r1, r1, #8
+420e05ea: adds       r4, #0xb
+420e05ec: subs       r4, #0x3b
+420e05ee: lsls       r3, r0, #1
+420e05f0: mov        r8, r8
+420e05f2: mov        r8, r8
+420e05f4: mov        r8, r8
+420e05f6: mov        r8, r8
+420e05f8: mov        r8, r8
+420e05fa: cmp        r7, #1
+420e05fc: bne        #0x420e062c
+420e05fe: movs       r2, #0xc
+420e0600: ldr        r1, [r6, #8]
+420e0602: muls       r1, r2, r1
+420e0604: movs       r0, r1
+420e0606: blx        #0x421e6648
+420e060a: movs       r2, #0
+420e060c: ldr        r3, [pc, #0x1d0]
+420e060e: str        r1, [sp, #4]
+420e0610: str        r0, [sp]
+420e0612: blx        #0x421e61d0
+420e0616: movs       r4, r0
+420e0618: movs       r5, r1
+420e061a: movs       r2, #0
+420e061c: ldr        r3, [pc, #0x1c4]
+420e061e: movs       r0, r4
+420e0620: movs       r1, r5
+420e0622: blx        #0x421e6050
+420e0626: movs       r4, r0
+420e0628: movs       r5, r1
+420e062a: b          #0x420e0638
+420e062c: ldr        r1, [r6, #8]
+420e062e: lsls       r0, r1, #1
+420e0630: blx        #0x421e6648
+420e0634: movs       r4, r0
+420e0636: movs       r5, r1
+420e0638: movs       r0, r4
+420e063a: movs       r1, r5
+420e063c: blx        #0x421e65a4
+420e0640: ldrh       r1, [r6]
+420e0642: lsls       r1, r1, #8
+420e0644: ldr        r2, [pc, #0x194]
+420e0646: adds       r1, r1, r2
+420e0648: str        r0, [r1, #0x20]
+420e064a: b          #0x420e066c
+420e064c: movs       r0, #0
+420e064e: ldrh       r1, [r6]
+420e0650: lsls       r1, r1, #8
+420e0652: ldr        r2, [pc, #0x188]
+420e0654: adds       r1, r1, r2
+420e0656: str        r0, [r1, #0x20]
+420e0658: b          #0x420e066c
+420e065a: mov        r8, r8
+420e065c: movs       r0, #0
+420e065e: ldrh       r1, [r6]
+
+=== ARM switch helper 4209F988 0x4209f988..0x4209fa48 ===
+4209f988: ldrb       ip, [lr, #-1]
+4209f98c: cmp        r3, ip
+4209f990: ldrbhs     r3, [lr, ip]
+4209f994: ldrblo     r3, [lr, r3]
+4209f998: add        ip, lr, r3, lsl #1
+4209f99c: bx         ip
+4209f9a0: lsl        r1, r1, #1
+4209f9a4: orrs       r0, r0, r1, lsl #11
+4209f9a8: movne      r0, #4
+4209f9ac: lsrs       r2, r1, #0x15
+4209f9b0: ldr        r2, [pc, #0x14]
+4209f9b4: orrne      r0, r0, #1
+4209f9b8: cmp        r2, r1, lsr #21
+4209f9bc: orreq      r0, r0, #2
+4209f9c0: cmp        r0, #1
+4209f9c4: moveq      r0, #5
+4209f9c8: bx         lr
+4209f9cc: strdeq     r0, r1, [r0], -pc
+4209f9d0: subeq      r2, sb, r1, lsl #4
+4209f9d4: sbcsmi     r0, r1, #0x14800000
+4209f9d8: stmdahs    r0, {r0, r8, ip, lr, pc}
+4209f9dc: andhs      sp, r0, r1
+4209f9e0: andhs      r4, r1, r0, ror r7
+4209f9e4: andeq      r4, r0, r0, ror r7
+4209f9e8: andle      r2, r0, r0, lsl #16
+4209f9ec: movwmi     r2, #0x1001
+4209f9f0: stmdbmi    r2, {r3, r6}
+4209f9f4: bne        #0x422a1afc
+4209f9f8: ldrbmi     r0, [r0, -r0, asr #31]!
+4209f9fc: svcvc      #0xf00000
+4209fa00: push       {r0, r1, r2, r4, r5, r6, r7, r8, sb, sl, fp, lr}
+4209fa04: mov        r4, r2
+4209fa08: mov        r1, #0
+4209fa0c: sub        sp, sp, #0x50
+4209fa10: str        r1, [r4, #8]
+4209fa14: str        r1, [r2, #0xc]
+4209fa18: ldr        r1, [sp, #0x54]
+4209fa1c: bic        sl, r1, #0x80000000
+4209fa20: str        r1, [sp, #0x2c]
+4209fa24: ldr        r1, [pc, #0x49c]
+4209fa28: cmn        sl, r1
+4209fa2c: bgt        #0x4209fa44
+4209fa30: ldr        r1, [sp, #0x54]
+4209fa34: stm        r4, {r0, r1}
+4209fa38: mov        r0, #0
+4209fa3c: add        sp, sp, #0x5c
+4209fa40: pop        {r4, r5, r6, r7, r8, sb, sl, fp, pc}
+4209fa44: ldr        r1, [pc, #0x480]
+RAW 0x4209f988 01 c0 5e e5 0c 00 53 e1 0c 30 de 27 03 30 de 37 83 c0 8e e0 1c ff 2f e1 81 10 a0 e1 81 05 90 e1 04 00 a0 13 a1 2a b0 e1 14 20 9f e5 01 00 80 13 a1 0a 52 e1 02 00 80 03 01 00 50 e3 05 00 a0 03
+
+=== ARM helper 421E6648 0x421e6648..0x421e6708 ===
+421e6648: clz        r3, r0
+421e664c: lsls       r1, r0, r3
+421e6650: beq        #0x421e666c
+421e6654: rsb        r3, r3, #0x1d
+421e6658: add        r3, r3, #0x400
+421e665c: lsl        r0, r1, #0x15
+421e6660: lsl        r2, r3, #0x14
+421e6664: add        r1, r2, r1, lsr #11
+421e6668: bx         lr
+421e666c: mov        r0, #0
+421e6670: bx         lr
+421e6674: clz        r3, r1
+421e6678: subs       r3, r3, #0xb
+421e667c: blo        #0x421e66c8
+421e6680: lsls       r1, r1, r3
+421e6684: bne        #0x421e66ac
+421e6688: clz        r3, r0
+421e668c: lsls       r1, r0, r3
+421e6690: bxeq       lr
+421e6694: rsb        r3, r3, #0x1d
+421e6698: add        r3, r3, #0x400
+421e669c: lsr        r2, r1, #0xb
+421e66a0: lsl        r0, r1, #0x15
+421e66a4: add        r1, r2, r3, lsl #20
+421e66a8: bx         lr
+421e66ac: rsb        ip, r3, #0x20
+421e66b0: orr        r1, r1, r0, lsr ip
+421e66b4: lsls       r0, r0, r3
+421e66b8: rsb        r3, r3, #0x32
+421e66bc: add        r3, r3, #0x400
+421e66c0: add        r1, r1, r3, lsl #20
+421e66c4: bx         lr
+421e66c8: push       {r4, lr}
+421e66cc: rsb        r4, r3, #0
+421e66d0: rsb        ip, r3, #0x32
+421e66d4: rsb        lr, r4, #0x20
+421e66d8: add        r2, ip, #0x400
+421e66dc: lsl        ip, r1, lr
+421e66e0: lsr        r1, r1, r4
+421e66e4: lsl        r3, r0, lr
+421e66e8: orrs       r0, ip, r0, lsr r4
+421e66ec: pop        {r4, lr}
+421e66f0: add        r1, r1, r2, lsl #20
+421e66f4: bxlo       lr
+421e66f8: adds       r0, r0, #1
+421e66fc: adc        r1, r1, #0
+421e6700: lsls       r3, r3, #1
+421e6704: biceq      r0, r0, #1
+RAW 0x421e6648 10 3f 6f e1 10 13 b0 e1 05 00 00 0a 1d 30 63 e2 01 3b 83 e2 81 0a a0 e1 03 2a a0 e1 a1 15 82 e0 1e ff 2f e1 00 00 a0 e3 1e ff 2f e1 11 3f 6f e1 0b 30 53 e2 11 00 00 3a 11 13 b0 e1 08 00 00 1a
+
+=== ARM helper 421E61D0 0x421e61d0..0x421e6290 ===
+421e61d0: push       {r6, r7, r8, lr}
+421e61d4: push       {r4, r5}
+421e61d8: ldr        ip, [pc, #0x2b8]
+421e61dc: bics       r4, ip, r1, lsr #4
+421e61e0: bicsne     r4, ip, r3, lsr #4
+421e61e4: beq        #0x421e63d4
+421e61e8: eor        r5, r1, r3
+421e61ec: ands       r4, ip, r1, lsr #4
+421e61f0: orr        r4, r4, r5, lsr #31
+421e61f4: andsne     r5, ip, r3, lsr #4
+421e61f8: beq        #0x421e6398
+421e61fc: sub        r4, r4, r5
+421e6200: mov        r5, #0x80000000
+421e6204: orr        r1, r5, r1, lsl #11
+421e6208: orr        r3, r5, r3, lsl #11
+421e620c: orr        r1, r1, r0, lsr #21
+421e6210: orr        r3, r3, r2, lsr #21
+421e6214: cmp        r1, r3
+421e6218: add        r4, r4, #0x3fc0000
+421e621c: lsl        r0, r0, #0xb
+421e6220: lsl        r2, r2, #0xb
+421e6224: cmpeq      r0, r2
+421e6228: add        r4, r4, #0x20000
+421e622c: beq        #0x421e6370
+421e6230: lsr        r5, r3, #0x18
+421e6234: add        r6, pc, #0x15c
+421e6238: ldrb       r6, [r6, r5]
+421e623c: lsr        r5, r3, #0x10
+421e6240: mul        r7, r6, r5
+421e6244: rsb        r7, r7, #0x1000000
+421e6248: mul        r7, r6, r7
+421e624c: lsr        r7, r7, #0xf
+421e6250: umull      r6, r8, r7, r3
+421e6254: rsbs       r6, r6, #0
+421e6258: rsc        r8, r8, #0x10000
+421e625c: umull      ip, lr, r7, r6
+421e6260: mla        r6, r7, r8, lr
+421e6264: mov        lr, #0
+421e6268: mov        r7, #0
+421e626c: umull      r8, ip, r6, r2
+421e6270: umlal      ip, lr, r6, r3
+421e6274: rsbs       ip, ip, #0
+421e6278: rsc        lr, lr, #0x80000000
+421e627c: umull      r5, r8, r6, ip
+421e6280: mov        r5, #0
+421e6284: umlal      r8, r7, r6, lr
+421e6288: umull      ip, r6, r1, r8
+421e628c: umull      ip, lr, r0, r7
+RAW 0x421e61d0 c0 41 2d e9 30 00 2d e9 b8 c2 9f e5 21 42 dc e1 23 42 dc 11 7a 00 00 0a 03 50 21 e0 21 42 1c e0 a5 4f 84 e1 23 52 1c 10 66 00 00 0a 05 40 44 e0 02 51 a0 e3 81 15 85 e1 83 35 85 e1 a0 1a 81 e1
+
+=== ARM helper 421E6050 0x421e6050..0x421e6110 ===
+421e6050: teq        r1, r3
+421e6054: push       {r4, lr}
+421e6058: eormi      r3, r3, #0x80000000
+421e605c: bmi        #0x421e6d54
+421e6060: subs       r4, r0, r2
+421e6064: sbcs       ip, r1, r3
+421e6068: bhs        #0x421e607c
+421e606c: adds       r2, r2, r4
+421e6070: adc        r3, r3, ip
+421e6074: subs       r0, r0, r4
+421e6078: sbc        r1, r1, ip
+421e607c: ldr        lr, [pc, #0x11c]
+421e6080: lsr        r4, r1, #0x14
+421e6084: sub        ip, r4, r3, lsr #20
+421e6088: tst        lr, r3, lsl #1
+421e608c: teqne      lr, r4, lsl #21
+421e6090: beq        #0x421e6174
+421e6094: bic        r3, r3, lr
+421e6098: rsbs       lr, ip, #0x20
+421e609c: bic        r1, r1, r4, lsl #20
+421e60a0: orr        r3, r3, #0x100000
+421e60a4: blo        #0x421e60fc
+421e60a8: adds       r0, r0, r2, lsr ip
+421e60ac: adc        r1, r1, r3, lsr ip
+421e60b0: adds       r0, r0, r3, lsl lr
+421e60b4: adcs       r1, r1, #0
+421e60b8: cmp        r1, #0x100000
+421e60bc: bhs        #0x421e6124
+421e60c0: add        r1, r1, r4, lsl #20
+421e60c4: lsls       r2, r2, lr
+421e60c8: pop        {r4, lr}
+421e60cc: bxpl       lr
+421e60d0: adds       r0, r0, #1
+421e60d4: lslslo     r2, r2, #1
+421e60d8: bxne       lr
+421e60dc: cmp        r0, #0
+421e60e0: bicne      r0, r0, #1
+421e60e4: adceq      r1, r1, #0
+421e60e8: lsl        r3, r1, #1
+421e60ec: cmn        r3, #0x200000
+421e60f0: bxlo       lr
+421e60f4: sub        r1, r1, #0x60000000
+421e60f8: b          #0x421e69d0
+421e60fc: cmp        r2, #1
+421e6100: adc        r2, r3, r3
+421e6104: sub        ip, ip, #0x20
+421e6108: rsbs       lr, ip, #0x1f
+421e610c: movlo      lr, #0
+RAW 0x421e6050 03 00 31 e1 10 40 2d e9 02 31 23 42 3c 03 00 4a 02 40 50 e0 03 c0 d1 e0 03 00 00 2a 04 20 92 e0 0c 30 a3 e0 04 00 50 e0 0c 10 c1 e0 1c e1 9f e5 21 4a a0 e1 23 ca 44 e0 83 00 1e e1 84 0a 3e 11
+
+=== ARM helper 421E65A4 0x421e65a4..0x421e6664 ===
+421e65a4: lsr        r3, r1, #0x14
+421e65a8: sub        r3, r3, #0x400
+421e65ac: rsbs       r3, r3, #0x1e
+421e65b0: rsbsge     ip, r3, #0x20
+421e65b4: blt        #0x421e65cc
+421e65b8: mov        r2, #0x80000000
+421e65bc: orr        r2, r2, r1, lsl #11
+421e65c0: orrs       r2, r2, r0, lsr #21
+421e65c4: lsrs       r0, r2, r3
+421e65c8: bx         lr
+421e65cc: tst        r1, r1
+421e65d0: bmi        #0x421e65f4
+421e65d4: cmp        r3, #0x10
+421e65d8: movgt      r0, #0
+421e65dc: bxgt       lr
+421e65e0: add        ip, r3, #0x3e0
+421e65e4: cmn        ip, #1
+421e65e8: beq        #0x421e65fc
+421e65ec: mvn        r0, #0
+421e65f0: bx         lr
+421e65f4: mov        r0, #0
+421e65f8: bx         lr
+421e65fc: push       {r4, r5, r6, lr}
+421e6600: bl         #0x421e6918
+421e6604: umaalhi    r2, sb, r2, r4
+421e6608: mov        r0, #0
+421e660c: bx         lr
+421e6610: b          #0x421e65ec
+421e6614: ands       r2, r0, #0x80000000
+421e6618: rsbmi      r0, r0, #0
+421e661c: clz        r3, r0
+421e6620: lsls       r1, r0, r3
+421e6624: beq        #0x421e6640
+421e6628: rsb        r3, r3, #0x1d
+421e662c: add        r3, r3, #0x400
+421e6630: lsl        r0, r1, #0x15
+421e6634: add        r2, r2, r3, lsl #20
+421e6638: add        r1, r2, r1, lsr #11
+421e663c: bx         lr
+421e6640: mov        r0, #0
+421e6644: bx         lr
+421e6648: clz        r3, r0
+421e664c: lsls       r1, r0, r3
+421e6650: beq        #0x421e666c
+421e6654: rsb        r3, r3, #0x1d
+421e6658: add        r3, r3, #0x400
+421e665c: lsl        r0, r1, #0x15
+421e6660: lsl        r2, r3, #0x14
+RAW 0x421e65a4 21 3a a0 e1 01 3b 43 e2 1e 30 73 e2 20 c0 73 a2 04 00 00 ba 02 21 a0 e3 81 25 82 e1 a0 2a 92 e1 32 03 b0 e1 1e ff 2f e1 01 00 11 e1 07 00 00 4a 10 00 53 e3 00 00 a0 c3 1e ff 2f c1 3e ce 83 e2
+
+=== INLINE SWITCH TABLE RAW ===
+table_base 0x420e05e4 bytes [9, 6, 7, 8, 9, 10, 11, 52, 59, 60, 67, 0, 192, 70, 192, 70]
+ch=0 entry=0x9 candidate_lr_plus_2entry=0x420e05f6 candidate_aligned_after_table_plus_2entry=0x420e0602
+ch=1 entry=0x6 candidate_lr_plus_2entry=0x420e05f0 candidate_aligned_after_table_plus_2entry=0x420e05fc
+ch=2 entry=0x7 candidate_lr_plus_2entry=0x420e05f2 candidate_aligned_after_table_plus_2entry=0x420e05fe
+ch=3 entry=0x8 candidate_lr_plus_2entry=0x420e05f4 candidate_aligned_after_table_plus_2entry=0x420e0600
+ch=4 entry=0x9 candidate_lr_plus_2entry=0x420e05f6 candidate_aligned_after_table_plus_2entry=0x420e0602
+ch=5 entry=0xa candidate_lr_plus_2entry=0x420e05f8 candidate_aligned_after_table_plus_2entry=0x420e0604
+ch=6 entry=0xb candidate_lr_plus_2entry=0x420e05fa candidate_aligned_after_table_plus_2entry=0x420e0606
+ch=7 entry=0x34 candidate_lr_plus_2entry=0x420e064c candidate_aligned_after_table_plus_2entry=0x420e0658
+ch=8 entry=0x3b candidate_lr_plus_2entry=0x420e065a candidate_aligned_after_table_plus_2entry=0x420e0666
+ch=9 entry=0x3c candidate_lr_plus_2entry=0x420e065c candidate_aligned_after_table_plus_2entry=0x420e0668
+ch=10 entry=0x43 candidate_lr_plus_2entry=0x420e066a candidate_aligned_after_table_plus_2entry=0x420e0676
+
+=== LANDING ZONES AFTER INLINE TABLE 0x420e05f0..0x420e0660 ===
+420e05f0: mov        r8, r8
+420e05f2: mov        r8, r8
+420e05f4: mov        r8, r8
+420e05f6: mov        r8, r8
+420e05f8: mov        r8, r8
+420e05fa: cmp        r7, #1
+420e05fc: bne        #0x420e062c
+420e05fe: movs       r2, #0xc
+420e0600: ldr        r1, [r6, #8]
+420e0602: muls       r1, r2, r1
+420e0604: movs       r0, r1
+420e0606: blx        #0x421e6648
+420e060a: movs       r2, #0
+420e060c: ldr        r3, [pc, #0x1d0]
+420e060e: str        r1, [sp, #4]
+420e0610: str        r0, [sp]
+420e0612: blx        #0x421e61d0
+420e0616: movs       r4, r0
+420e0618: movs       r5, r1
+420e061a: movs       r2, #0
+420e061c: ldr        r3, [pc, #0x1c4]
+420e061e: movs       r0, r4
+420e0620: movs       r1, r5
+420e0622: blx        #0x421e6050
+420e0626: movs       r4, r0
+420e0628: movs       r5, r1
+420e062a: b          #0x420e0638
+420e062c: ldr        r1, [r6, #8]
+420e062e: lsls       r0, r1, #1
+420e0630: blx        #0x421e6648
+420e0634: movs       r4, r0
+420e0636: movs       r5, r1
+420e0638: movs       r0, r4
+420e063a: movs       r1, r5
+420e063c: blx        #0x421e65a4
+420e0640: ldrh       r1, [r6]
+420e0642: lsls       r1, r1, #8
+420e0644: ldr        r2, [pc, #0x194]
+420e0646: adds       r1, r1, r2
+420e0648: str        r0, [r1, #0x20]
+420e064a: b          #0x420e066c
+420e064c: movs       r0, #0
+420e064e: ldrh       r1, [r6]
+420e0650: lsls       r1, r1, #8
+420e0652: ldr        r2, [pc, #0x188]
+420e0654: adds       r1, r1, r2
+420e0656: str        r0, [r1, #0x20]
+420e0658: b          #0x420e066c
+420e065a: mov        r8, r8
+420e065c: movs       r0, #0
+420e065e: ldrh       r1, [r6]
+
+=== ARM HELPER FIRST INSTRUCTIONS SUMMARY ===
+0x4209f988 ldrb ip, [lr, #-1] | cmp r3, ip | ldrbhs r3, [lr, ip] | ldrblo r3, [lr, r3] | add ip, lr, r3, lsl #1 | bx ip | lsl r1, r1, #1 | orrs r0, r0, r1, lsl #11
+0x421e6648 clz r3, r0 | lsls r1, r0, r3 | beq #0x421e666c | rsb r3, r3, #0x1d | add r3, r3, #0x400 | lsl r0, r1, #0x15 | lsl r2, r3, #0x14 | add r1, r2, r1, lsr #11
+0x421e61d0 push {r6, r7, r8, lr} | push {r4, r5} | ldr ip, [pc, #0x2b8] | bics r4, ip, r1, lsr #4 | bicsne r4, ip, r3, lsr #4 | beq #0x421e63d4 | eor r5, r1, r3 | ands r4, ip, r1, lsr #4
+0x421e6050 teq r1, r3 | push {r4, lr} | eormi r3, r3, #0x80000000 | bmi #0x421e6d54 | subs r4, r0, r2 | sbcs ip, r1, r3 | bhs #0x421e607c | adds r2, r2, r4
+0x421e65a4 lsr r3, r1, #0x14 | sub r3, r3, #0x400 | rsbs r3, r3, #0x1e | rsbsge ip, r3, #0x20 | blt #0x421e65cc | mov r2, #0x80000000 | orr r2, r2, r1, lsl #11 | orrs r2, r2, r0, lsr #21
+
+=== CHANNEL6 SOURCE NUMBERS ===
+descriptor_plus8 7040 grid_cells 352 ratio 20 remainder 0
+
+=== DECISION ===
+Use ARM helper semantics plus inline table to identify the exact channel-6 landing PC and PWLSIZE transform. Freeze 20-byte cell stride only if 7040 itself is proven to be the emitted line/payload byte count for all 352 AEAWB cells.
