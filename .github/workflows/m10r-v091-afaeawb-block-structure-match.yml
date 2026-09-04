@@ -1,0 +1,105 @@
+name: M10-R v0.91 AFAEAWB block structure match
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v091-afaeawb-block-structure-match.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Match Prepro AFAEAWB block header to CA9 WB consumer
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v091_afaeawb_block_structure_match.txt
+          from pathlib import Path
+          import struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); BASE=0x42000000; PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+          def off(a): return PFX+a-BASE
+          def u16(p): return struct.unpack_from('<H',b,p)[0]
+          def u32(p): return struct.unpack_from('<I',b,p)[0]
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp; lo=off(la)
+                if 0<=lo<=len(b)-4:return la,u32(lo)
+            except: pass
+          def tgt(i):
+            try:
+              if i.mnemonic.startswith('bl') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm&~1
+            except: pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'; q=lit(i); t=tgt(i)
+            if q:s+=f' ; LIT {hex(q[0])}->{hex(q[1])}'
+            if t is not None:s+=f' ; CALL {hex(t)}'
+            return s
+          def dump(a,z,title):
+            a=max(BASE,a); z=min(BASE+len(b)-PFX,z); print('\n===',title,hex(a),'..',hex(z),'===')
+            for i in md.disasm(b[off(a):off(z)],a):
+              if i.id: print(fmt(i))
+          def sx(x,bits): return x-(1<<bits) if x&(1<<(bits-1)) else x
+          def bl_target(p):
+            if p+4>len(b):return None
+            h1=u16(p);h2=u16(p+2)
+            if (h1&0xf800)!=0xf000 or (h2&0xd000)!=0xd000:return None
+            S=(h1>>10)&1;J1=(h2>>13)&1;J2=(h2>>11)&1;I1=1-(J1^S);I2=1-(J2^S)
+            imm=(S<<24)|(I1<<23)|(I2<<22)|((h1&0x3ff)<<12)|((h2&0x7ff)<<1)
+            a=BASE+p-PFX; return (a+4+sx(imm,25))&0xffffffff
+          def callers(t):
+            out=[]
+            for p in range(PFX,len(b)-3,2):
+              if bl_target(p)==t:out.append(BASE+p-PFX)
+            return out
+          print('M10-R v0.91 AFAEAWB BLOCK STRUCTURE MATCH')
+          print('Known CA9 WB consumer: selected block pointer is workflow+0x45C for types 1/7 and workflow+0x480 for types 2/10; it reads block+0x1C and block+0x20 and multiplies them.')
+          dump(0x420a83bc,0x420a8484,'CA9 WB BLOCK POINTER SELECTION AND HEADER CONSUMER')
+          dump(0x420dab00,0x420dac08,'PREPRO AFAEAWB BLOCK INITIALIZER / FALLBACK PATH')
+          dump(0x420d8f60,0x420d9060,'HELPER 0x420D8FC8 BODY')
+          xs=callers(0x420d8fc8)
+          print('\n=== DIRECT CALLERS OF 0x420D8FC8 count',len(xs),'===',*[hex(x) for x in xs])
+          for x in xs:dump(x-0x58,x+0x70,f'0x420D8FC8 CALLER {hex(x)}')
+          # Also inspect all direct callers of the AFAEAWB initializer itself to identify its input structure fields.
+          xs=callers(0x420dab00)
+          print('\n=== DIRECT CALLERS OF 0x420DAB00 count',len(xs),'===',*[hex(x) for x in xs])
+          for x in xs:dump(x-0x70,x+0x90,f'0x420DAB00 CALLER {hex(x)}')
+          # Narrow state-slot users established in v0.86b.
+          dump(0x420e53e0,0x420e56a0,'PREPRO STATE +0x78/+0x7C READERS')
+          # Search local Prepro span for immediate references to 0x10,0x16,0x1c,0x20 around calls to helper / state root.
+          print('\n=== CANDIDATE GRID-DIMENSION CONSTANTS NEAR PREPRO AFAEAWB CODE ===')
+          for a,z in [(0x420d8f00,0x420d9100),(0x420daa80,0x420dad00),(0x420e5300,0x420e5700)]:
+            for i in md.disasm(b[off(a):off(z)],a):
+              try:
+                imms=[op.imm for op in i.operands if op.type==ARM_OP_IMM]
+              except: imms=[]
+              if any(v in (0x10,0x16,0x1c,0x20,0x160,0x580) for v in imms):print(fmt(i))
+          print('\n=== MATCH TEST ===')
+          print('If 0x420D8FC8 initializes two adjacent 32-bit fields at its argument +0/+4, then because Prepro passes AFAEAWB_pointer+0x1C and CA9 consumes selected_block+0x1C/+0x20 as Block_Cnt dimensions, the producer/consumer header layout is structurally identical. Pointer equality still requires provenance or an unambiguous type/layout match.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v091_afaeawb_block_structure_match.txt
+          git commit -m 'research: record v0.91 AFAEAWB block structure match' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
