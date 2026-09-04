@@ -1,0 +1,232 @@
+################ DIRECT FIELD POINTER LITERALS ACROSS ALL SECTIONS ################
+
+TARGET Integral_lo 0x408f0eea
+NO_DIRECT_LITERAL
+
+TARGET Spot_lo 0x408f0eec
+NO_DIRECT_LITERAL
+
+TARGET MFM_lo 0x408f0eee
+NO_DIRECT_LITERAL
+
+TARGET AVfield_lo 0x408f0ef0
+NO_DIRECT_LITERAL
+
+################ ANY INTERIOR POINTER 0x408F0EE0..0x408F0F00 ################
+92 IMG-System base 0x00000000 [('0x40', '0xb6b60')]
+
+=== SELECTOR STRUCT APPLY PATH A 0x8001b80..0x8001c70 ===
+08001b80: sxtab16    r8, fp, pc, ror #8
+08001b84: adds       r4, r7, #4
+08001b86: movs       r0, #0
+08001b88: bl         #0x8008ee0 ; CALL 0x8008ee0
+08001b8c: pop        {r0, pc}
+08001b8e: movs       r0, r0
+08001b90: add        r5, sp, #0x284
+08001b92: movs       r0, #1
+08001b94: add        r2, sp, #0x1e0
+08001b96: movs       r0, #1
+08001b98: ldm        r0!, {r2, r6, r7}
+08001b9a: lsrs       r3, r0, #0x20
+08001b9c: stm        r1!, {r2, r4, r7}
+08001b9e: lsrs       r4, r0, #0x20
+08001ba0: stm        r1!, {r3, r4, r7}
+08001ba2: lsrs       r4, r0, #0x20
+08001ba4: add        r5, sp, #0x278
+08001ba6: movs       r0, #1
+08001ba8: add        r5, sp, #0x294
+08001baa: movs       r0, #1
+08001bac: stm        r1!, {r2, r3, r4, r7}
+08001bae: lsrs       r4, r0, #0x20
+08001bb0: push       {r4, lr}
+08001bb2: sub        sp, #8
+08001bb4: movs       r4, r0
+08001bb6: ldr.w      r0, [pc, #0xbe4] ; LIT 0x800279c->0x804c0e0
+08001bba: ldr        r0, [r0]
+08001bbc: str        r0, [sp]
+08001bbe: ldrb.w     r0, [r4, #0x23]
+08001bc2: strb.w     r0, [sp, #3]
+08001bc6: ldrb.w     r0, [r4, #0x20]
+08001bca: strb.w     r0, [sp]
+08001bce: ldrb.w     r0, [r4, #0x21]
+08001bd2: strb.w     r0, [sp, #1]
+08001bd6: ldrb.w     r0, [r4, #0x22]
+08001bda: strb.w     r0, [sp, #2]
+08001bde: mov        r0, sp
+08001be0: bl         #0x8011440 ; CALL 0x8011440
+08001be4: ldrsh.w    r0, [r4, #0x16]
+08001be8: bl         #0x8011c42 ; CALL 0x8011c42
+08001bec: ldrsh.w    r0, [r4, #0x40]
+08001bf0: bl         #0x800e034 ; CALL 0x800e034
+08001bf4: ldrsh.w    r0, [r4, #0x48]
+08001bf8: bl         #0x8011c6a ; CALL 0x8011c6a
+08001bfc: ldrsh.w    r0, [r4, #0x18]
+08001c00: bl         #0x8011dcc ; CALL 0x8011dcc
+08001c04: ldrsb.w    r0, [r4, #0x2d]
+08001c08: bl         #0x8001afc ; CALL 0x8001afc
+08001c0c: sxtb       r0, r0
+08001c0e: bl         #0x800de30 ; CALL 0x800de30
+08001c12: ldrsb.w    r0, [r4, #0x1a]
+08001c16: bl         #0x8007c20 ; CALL 0x8007c20
+08001c1a: sxtb       r0, r0
+08001c1c: bl         #0x800de28 ; CALL 0x800de28
+08001c20: ldr.w      r0, [r4, #0x4e]
+08001c24: bl         #0x801c898 ; CALL 0x801c898
+08001c28: sxth       r0, r0
+08001c2a: bl         #0x800e0a6 ; CALL 0x800e0a6
+08001c2e: ldr.w      r0, [r4, #0x52]
+08001c32: bl         #0x801c898 ; CALL 0x801c898
+08001c36: sxth       r0, r0
+08001c38: bl         #0x800e0c2 ; CALL 0x800e0c2
+08001c3c: ldr        r0, [r4, #0x38]
+08001c3e: ldr.w      r1, [r4, #0x4e]
+08001c42: cmp        r0, r1
+08001c44: bhs        #0x8001c56
+08001c46: ldr.w      r0, [r4, #0x4e]
+08001c4a: bl         #0x801c898 ; CALL 0x801c898
+08001c4e: sxth       r0, r0
+08001c50: bl         #0x801148e ; CALL 0x801148e
+08001c54: b          #0x8001c62
+08001c56: ldr        r0, [r4, #0x38]
+08001c58: bl         #0x801c898 ; CALL 0x801c898
+08001c5c: sxth       r0, r0
+08001c5e: bl         #0x801148e ; CALL 0x801148e
+08001c62: bl         #0x8011496 ; CALL 0x8011496
+08001c66: sxth       r0, r0
+08001c68: bl         #0x8011462 ; CALL 0x8011462
+08001c6c: bl         #0x8011c62 ; CALL 0x8011c62
+
+=== SELECTOR STRUCT APPLY PATH B 0x8002070..0x8002110 ===
+08002070: movs       r0, #0
+08002072: ldr.w      r1, [pc, #0xd28] ; LIT 0x8002d9c->0x80435dc STRING='Exposure compensation received (0x%04X (%i))\r\n'
+08002076: movs       r0, #0
+08002078: bl         #0x8008ee0 ; CALL 0x8008ee0
+0800207c: bl         #0x801bc9e ; CALL 0x801bc9e
+08002080: bl         #0x8011dd2 ; CALL 0x8011dd2
+08002084: ldrsh.w    r1, [r4]
+08002088: sxth       r0, r0
+0800208a: cmp        r1, r0
+0800208c: beq        #0x800209c
+0800208e: ldrsh.w    r0, [r4]
+08002092: bl         #0x8011dcc ; CALL 0x8011dcc
+08002096: movs       r0, #2
+08002098: bl         #0x800dc4a ; CALL 0x800dc4a
+0800209c: pop        {r4, pc}
+0800209e: push       {r4, lr}
+080020a0: movs       r4, r0
+080020a2: ldrb       r3, [r4, #1]
+080020a4: ldrb       r2, [r4]
+080020a6: ldr.w      r1, [pc, #0xc60] ; LIT 0x8002d08->0x804360c STRING='USB activity received (type %i, active %i)\r\n'
+080020aa: movs       r0, #0
+080020ac: bl         #0x8008ee0 ; CALL 0x8008ee0
+080020b0: ldrh       r0, [r4]
+080020b2: ldr.w      r1, [pc, #0x450] ; LIT 0x8002504->0x2001ac0c
+080020b6: str        r0, [r1]
+080020b8: pop        {r4, pc}
+080020ba: push       {r4, lr}
+080020bc: movs       r4, r0
+080020be: ldrsb.w    r2, [r4]
+080020c2: ldr.w      r1, [pc, #0xd3c] ; LIT 0x8002e00->0x8045804 STRING='Exposure metering mode received (%i)\r\n'
+080020c6: movs       r0, #0
+080020c8: bl         #0x8008ee0 ; CALL 0x8008ee0
+080020cc: ldrsb.w    r0, [r4]
+080020d0: bl         #0x8007c20 ; CALL 0x8007c20
+080020d4: sxtb       r0, r0
+080020d6: bl         #0x800de28 ; CALL 0x800de28
+080020da: movs       r0, #1
+080020dc: bl         #0x800dc4a ; CALL 0x800dc4a
+080020e0: pop        {r4, pc}
+080020e2: movs       r0, r0
+080020e4: add        r1, sp, #0x3f0
+080020e6: lsrs       r4, r0, #0x20
+080020e8: push       {r4, lr}
+080020ea: movs       r4, r0
+080020ec: ldr.w      r1, [pc, #0xc1c] ; LIT 0x8002d0c->0x8047dd8 STRING='Bracketing settings received\r\n'
+080020f0: movs       r0, #0
+080020f2: bl         #0x8008ee0 ; CALL 0x8008ee0
+080020f6: ldr        r0, [pc, #0x2c8] ; LIT 0x80023c0->0x2001ab48
+080020f8: movs       r1, r4
+080020fa: movs       r2, #5
+080020fc: bl         #0x801d024 ; CALL 0x801d024
+08002100: ldr        r0, [pc, #0x2bc] ; LIT 0x80023c0->0x2001ab48
+08002102: ldrd       r2, r3, [r0]
+08002106: ldr.w      r0, [pc, #0x3cc] ; LIT 0x80024d4->0x2001ab50
+0800210a: strd       r2, r3, [r0]
+0800210e: movs       r0, #0
+
+CALLERS 0x80020ba ['0x8009642']
+
+=== CALLER OF 0x80020ba 0x80095f2..0x80096a2 ===
+080095f2: mov        r0, sp
+080095f4: bl         #0x80094a8 ; CALL 0x80094a8
+080095f8: b          #0x8009600
+080095fa: add        r0, sp, #4
+080095fc: bl         #0x80094bc ; CALL 0x80094bc
+08009600: b          #0x8009974
+08009602: uxtb       r5, r5
+08009604: cmp        r5, #0x12
+08009606: bne        #0x8009616
+08009608: adds       r0, r4, #2
+0800960a: bl         #0x8002066 ; CALL 0x8002066
+0800960e: mov        r0, sp
+08009610: bl         #0x80094a8 ; CALL 0x80094a8
+08009614: b          #0x800961c
+08009616: add        r0, sp, #4
+08009618: bl         #0x80094bc ; CALL 0x80094bc
+0800961c: b          #0x8009974
+0800961e: uxtb       r5, r5
+08009620: cmp        r5, #0x12
+08009622: bne        #0x8009632
+08009624: adds       r0, r4, #2
+08009626: bl         #0x800209e ; CALL 0x800209e
+0800962a: mov        r0, sp
+0800962c: bl         #0x80094a8 ; CALL 0x80094a8
+08009630: b          #0x8009638
+08009632: add        r0, sp, #4
+08009634: bl         #0x80094bc ; CALL 0x80094bc
+08009638: b          #0x8009974
+0800963a: uxtb       r5, r5
+0800963c: cmp        r5, #0x12
+0800963e: bne        #0x800964e
+08009640: adds       r0, r4, #2
+08009642: bl         #0x80020ba ; CALL 0x80020ba
+08009646: mov        r0, sp
+08009648: bl         #0x80094a8 ; CALL 0x80094a8
+0800964c: b          #0x8009654
+0800964e: add        r0, sp, #4
+08009650: bl         #0x80094bc ; CALL 0x80094bc
+08009654: b          #0x8009974
+08009656: uxtb       r5, r5
+08009658: cmp        r5, #0x12
+0800965a: bne        #0x800966a
+0800965c: adds       r0, r4, #2
+0800965e: bl         #0x80020e8 ; CALL 0x80020e8
+08009662: mov        r0, sp
+08009664: bl         #0x80094a8 ; CALL 0x80094a8
+08009668: b          #0x8009670
+0800966a: add        r0, sp, #4
+0800966c: bl         #0x80094bc ; CALL 0x80094bc
+08009670: b          #0x8009974
+08009672: uxtb       r5, r5
+08009674: cmp        r5, #0x12
+08009676: bne        #0x8009686
+08009678: adds       r0, r4, #2
+0800967a: bl         #0x800213e ; CALL 0x800213e
+0800967e: mov        r0, sp
+08009680: bl         #0x80094a8 ; CALL 0x80094a8
+08009684: b          #0x800968c
+08009686: add        r0, sp, #4
+08009688: bl         #0x80094bc ; CALL 0x80094bc
+0800968c: b          #0x8009974
+0800968e: uxtb       r5, r5
+08009690: cmp        r5, #0x12
+08009692: bne        #0x80096a4
+08009694: movs       r1, #0
+08009696: adds       r0, r4, #2
+08009698: bl         #0x80021a8 ; CALL 0x80021a8
+0800969c: mov        r0, sp
+0800969e: bl         #0x80094a8 ; CALL 0x80094a8
+
+STRING_PROBE 0x804360c 'USB activity received (type %i, active %i)\r\n'
+
+STRING_PROBE 0x80426d8 'Interval exposure (%i, delay %i s (timer %i ms))\r\n'
