@@ -1,0 +1,921 @@
+M10-R v1.40 GAIN PRODUCER / B2Y CORE
+
+=== CA9 candidate gain producer 0x40009720..0x40009C40 ===
+40009720: bl         #0x4000fe30 ; CALL 0x4000fe30
+40009724: add        r1, r4, r5, lsl #1
+40009728: add        r1, r1, #0x200
+4000972c: strh       r0, [r1, #0x2e]
+40009730: b          #0x40009740
+40009734: add        r0, r4, r5, lsl #1
+40009738: add        r0, r0, #0x200
+4000973c: strh       r7, [r0, #0x2e]
+40009740: subs       r6, r6, #1
+40009744: add        r5, r5, #1
+40009748: bne        #0x40009704
+4000974c: pop        {r4, r5, r6, r7, r8, pc}
+40009750: push       {r4, r5, r6, r7, r8, sb, sl, fp, lr}
+40009754: mov        r7, r1
+40009758: mov        r1, #0
+4000975c: sub        sp, sp, #0x14
+40009760: str        r1, [r2, #0x9c]
+40009764: mov        r4, r2
+40009768: str        r1, [r2, #0xa0]
+4000976c: str        r1, [r2, #0xa4]
+40009770: str        r1, [r2, #0xa8]
+40009774: str        r1, [r2, #0xac]
+40009778: str        r1, [r2, #0xb0]
+4000977c: str        r1, [r2, #0xb4]
+40009780: str        r1, [r2, #0xb8]
+40009784: str        r1, [r2, #0xbc]
+40009788: str        r1, [r2, #0xc0]
+4000978c: str        r1, [r2, #0xc4]
+40009790: str        r1, [r2, #0xc8]
+40009794: str        r1, [r2, #0xcc]
+40009798: str        r1, [r2, #0xd0]
+4000979c: mov        r2, #0
+400097a0: str        r1, [r4, #0xd4]
+400097a4: str        r1, [r4, #0xd8]
+400097a8: str        r1, [r4, #0xec]
+400097ac: str        r1, [r4, #0xf0]
+400097b0: str        r1, [r4, #0xf4]
+400097b4: str        r1, [r4, #0xf8]
+400097b8: str        r1, [r4, #0xfc]
+400097bc: str        r1, [r4, #0x100]
+400097c0: str        r1, [r4, #0x104]
+400097c4: str        r1, [r4, #0x108]
+400097c8: str        r1, [r4, #0x10c]
+400097cc: str        r1, [r4, #0x110]
+400097d0: str        r1, [r4, #0x114]
+400097d4: str        r1, [r4, #0x118]
+400097d8: str        r1, [r4, #0x11c]
+400097dc: str        r1, [r4, #0x120]
+400097e0: str        r1, [r4, #0x124]
+400097e4: str        r1, [r4, #0x128]
+400097e8: str        r1, [r4, #0x1dc]
+400097ec: str        r1, [r4, #0x1e0]
+400097f0: str        r1, [r4, #0x1e4]
+400097f4: str        r1, [r4, #0x1e8]
+400097f8: str        r1, [r4, #0x1ec]
+400097fc: str        r1, [r4, #0x1f0]
+40009800: str        r1, [r4, #0x1f4]
+40009804: str        r1, [r4, #0x1f8]
+40009808: str        r1, [r4, #0x1fc]
+4000980c: str        r1, [r4, #0x200]
+40009810: str        r1, [r4, #0x204]
+40009814: str        r1, [r4, #0x208]
+40009818: str        r1, [r4, #0x20c]
+4000981c: str        r1, [r4, #0x210]
+40009820: str        r1, [r4, #0x214]
+40009824: str        r1, [r4, #0x218]
+40009828: ldr        r1, [r0]
+4000982c: cmp        r1, #0
+40009830: ble        #0x40009c2c
+40009834: rsb        r1, r2, r2, lsl #3
+40009838: add        r1, r3, r1, lsl #2
+4000983c: ldr        r1, [r1, #0x18]
+40009840: sub        r1, r1, #2
+40009844: cmp        r1, #0x13
+40009848: ldrlo      pc, [pc, r1, lsl #2] ; LIT 0x40009850->0x4000989c
+4000984c: b          #0x40009be4
+40009850: mulmi      r0, ip, r8
+40009854: ldrdmi     sb, sl, [r0], -r4
+40009858: andmi      sb, r0, ip, lsl #18
+4000985c: andmi      sb, r0, r4, asr #18
+40009860: andmi      sb, r0, ip, ror sb
+40009864: strhmi     sb, [r0], -r4
+40009868: andmi      sb, r0, ip, ror #19
+4000986c: andmi      sb, r0, r4, lsr #20
+40009870: andmi      sb, r0, ip, asr sl
+40009874: mulmi      r0, r4, sl
+40009878: andmi      sb, r0, ip, asr #21
+4000987c: andmi      sb, r0, r4, lsl #22
+40009880: andmi      sb, r0, ip, lsr fp
+40009884: andmi      sb, r0, r4, ror fp
+40009888: andmi      sb, r0, ip, lsr #23
+4000988c: andmi      sb, r0, r4, ror #23
+40009890: andmi      sb, r0, r4, ror #23
+40009894: andmi      sb, r0, r4, ror #23
+40009898: andmi      sb, r0, r8, lsl ip
+4000989c: rsb        r1, r2, r2, lsl #3
+400098a0: ldr        ip, [r4, #0xa0]
+400098a4: add        r1, r3, r1, lsl #2
+400098a8: ldr        r5, [r1, #0x10]
+400098ac: add        ip, ip, r5
+400098b0: str        ip, [r4, #0xa0]
+400098b4: ldr        ip, [r4, #0xf0]
+400098b8: ldr        r1, [r1, #0x14]
+400098bc: add        r1, r1, ip
+400098c0: str        r1, [r4, #0xf0]
+400098c4: ldr        r1, [r4, #0x1e0]
+400098c8: add        r1, r1, #1
+400098cc: str        r1, [r4, #0x1e0]
+400098d0: b          #0x40009c18
+400098d4: rsb        r1, r2, r2, lsl #3
+400098d8: ldr        ip, [r4, #0xa4]
+400098dc: add        r1, r3, r1, lsl #2
+400098e0: ldr        r5, [r1, #0x10]
+400098e4: add        ip, ip, r5
+400098e8: str        ip, [r4, #0xa4]
+400098ec: ldr        ip, [r4, #0xf4]
+400098f0: ldr        r1, [r1, #0x14]
+400098f4: add        r1, r1, ip
+400098f8: str        r1, [r4, #0xf4]
+400098fc: ldr        r1, [r4, #0x1e4]
+40009900: add        r1, r1, #1
+40009904: str        r1, [r4, #0x1e4]
+40009908: b          #0x40009c18
+4000990c: rsb        r1, r2, r2, lsl #3
+40009910: ldr        ip, [r4, #0xa8]
+40009914: add        r1, r3, r1, lsl #2
+40009918: ldr        r5, [r1, #0x10]
+4000991c: add        ip, ip, r5
+40009920: str        ip, [r4, #0xa8]
+40009924: ldr        ip, [r4, #0xf8]
+40009928: ldr        r1, [r1, #0x14]
+4000992c: add        r1, r1, ip
+40009930: str        r1, [r4, #0xf8]
+40009934: ldr        r1, [r4, #0x1e8]
+40009938: add        r1, r1, #1
+4000993c: str        r1, [r4, #0x1e8]
+40009940: b          #0x40009c18
+40009944: rsb        r1, r2, r2, lsl #3
+40009948: ldr        ip, [r4, #0xac]
+4000994c: add        r1, r3, r1, lsl #2
+40009950: ldr        r5, [r1, #0x10]
+40009954: add        ip, ip, r5
+40009958: str        ip, [r4, #0xac]
+4000995c: ldr        ip, [r4, #0xfc]
+40009960: ldr        r1, [r1, #0x14]
+40009964: add        r1, r1, ip
+40009968: str        r1, [r4, #0xfc]
+4000996c: ldr        r1, [r4, #0x1ec]
+40009970: add        r1, r1, #1
+40009974: str        r1, [r4, #0x1ec]
+40009978: b          #0x40009c18
+4000997c: rsb        r1, r2, r2, lsl #3
+40009980: ldr        ip, [r4, #0xb0]
+40009984: add        r1, r3, r1, lsl #2
+40009988: ldr        r5, [r1, #0x10]
+4000998c: add        ip, ip, r5
+40009990: str        ip, [r4, #0xb0]
+40009994: ldr        ip, [r4, #0x100]
+40009998: ldr        r1, [r1, #0x14]
+4000999c: add        r1, r1, ip
+400099a0: str        r1, [r4, #0x100]
+400099a4: ldr        r1, [r4, #0x1f0]
+400099a8: add        r1, r1, #1
+400099ac: str        r1, [r4, #0x1f0]
+400099b0: b          #0x40009c18
+400099b4: rsb        r1, r2, r2, lsl #3
+400099b8: ldr        ip, [r4, #0xb4]
+400099bc: add        r1, r3, r1, lsl #2
+400099c0: ldr        r5, [r1, #0x10]
+400099c4: add        ip, ip, r5
+400099c8: str        ip, [r4, #0xb4]
+400099cc: ldr        ip, [r4, #0x104]
+400099d0: ldr        r1, [r1, #0x14]
+400099d4: add        r1, r1, ip
+400099d8: str        r1, [r4, #0x104]
+400099dc: ldr        r1, [r4, #0x1f4]
+400099e0: add        r1, r1, #1
+400099e4: str        r1, [r4, #0x1f4]
+400099e8: b          #0x40009c18
+400099ec: rsb        r1, r2, r2, lsl #3
+400099f0: ldr        ip, [r4, #0xb8]
+400099f4: add        r1, r3, r1, lsl #2
+400099f8: ldr        r5, [r1, #0x10]
+400099fc: add        ip, ip, r5
+40009a00: str        ip, [r4, #0xb8]
+40009a04: ldr        ip, [r4, #0x108]
+40009a08: ldr        r1, [r1, #0x14]
+40009a0c: add        r1, r1, ip
+40009a10: str        r1, [r4, #0x108]
+40009a14: ldr        r1, [r4, #0x1f8]
+40009a18: add        r1, r1, #1
+40009a1c: str        r1, [r4, #0x1f8]
+40009a20: b          #0x40009c18
+40009a24: rsb        r1, r2, r2, lsl #3
+40009a28: ldr        ip, [r4, #0xbc]
+40009a2c: add        r1, r3, r1, lsl #2
+40009a30: ldr        r5, [r1, #0x10]
+40009a34: add        ip, ip, r5
+40009a38: str        ip, [r4, #0xbc]
+40009a3c: ldr        ip, [r4, #0x10c]
+40009a40: ldr        r1, [r1, #0x14]
+40009a44: add        r1, r1, ip
+40009a48: str        r1, [r4, #0x10c]
+40009a4c: ldr        r1, [r4, #0x1fc]
+40009a50: add        r1, r1, #1
+40009a54: str        r1, [r4, #0x1fc]
+40009a58: b          #0x40009c18
+40009a5c: rsb        r1, r2, r2, lsl #3
+40009a60: ldr        ip, [r4, #0xc0]
+40009a64: add        r1, r3, r1, lsl #2
+40009a68: ldr        r5, [r1, #0x10]
+40009a6c: add        ip, ip, r5
+40009a70: str        ip, [r4, #0xc0]
+40009a74: ldr        ip, [r4, #0x110]
+40009a78: ldr        r1, [r1, #0x14]
+40009a7c: add        r1, r1, ip
+40009a80: str        r1, [r4, #0x110]
+40009a84: ldr        r1, [r4, #0x200]
+40009a88: add        r1, r1, #1
+40009a8c: str        r1, [r4, #0x200]
+40009a90: b          #0x40009c18
+40009a94: rsb        r1, r2, r2, lsl #3
+40009a98: ldr        ip, [r4, #0xc4]
+40009a9c: add        r1, r3, r1, lsl #2
+40009aa0: ldr        r5, [r1, #0x10]
+40009aa4: add        ip, ip, r5
+40009aa8: str        ip, [r4, #0xc4]
+40009aac: ldr        ip, [r4, #0x114]
+40009ab0: ldr        r1, [r1, #0x14]
+40009ab4: add        r1, r1, ip
+40009ab8: str        r1, [r4, #0x114]
+40009abc: ldr        r1, [r4, #0x204]
+40009ac0: add        r1, r1, #1
+40009ac4: str        r1, [r4, #0x204]
+40009ac8: b          #0x40009c18
+40009acc: rsb        r1, r2, r2, lsl #3
+40009ad0: ldr        ip, [r4, #0xc8]
+40009ad4: add        r1, r3, r1, lsl #2
+40009ad8: ldr        r5, [r1, #0x10]
+40009adc: add        ip, ip, r5
+40009ae0: str        ip, [r4, #0xc8]
+40009ae4: ldr        ip, [r4, #0x118]
+40009ae8: ldr        r1, [r1, #0x14]
+40009aec: add        r1, r1, ip
+40009af0: str        r1, [r4, #0x118]
+40009af4: ldr        r1, [r4, #0x208]
+40009af8: add        r1, r1, #1
+40009afc: str        r1, [r4, #0x208]
+40009b00: b          #0x40009c18
+40009b04: rsb        r1, r2, r2, lsl #3
+40009b08: ldr        ip, [r4, #0xcc]
+40009b0c: add        r1, r3, r1, lsl #2
+40009b10: ldr        r5, [r1, #0x10]
+40009b14: add        ip, ip, r5
+40009b18: str        ip, [r4, #0xcc]
+40009b1c: ldr        ip, [r4, #0x11c]
+40009b20: ldr        r1, [r1, #0x14]
+40009b24: add        r1, r1, ip
+40009b28: str        r1, [r4, #0x11c]
+40009b2c: ldr        r1, [r4, #0x20c]
+40009b30: add        r1, r1, #1
+40009b34: str        r1, [r4, #0x20c]
+40009b38: b          #0x40009c18
+40009b3c: rsb        r1, r2, r2, lsl #3
+40009b40: ldr        ip, [r4, #0xd0]
+40009b44: add        r1, r3, r1, lsl #2
+40009b48: ldr        r5, [r1, #0x10]
+40009b4c: add        ip, ip, r5
+40009b50: str        ip, [r4, #0xd0]
+40009b54: ldr        ip, [r4, #0x120]
+40009b58: ldr        r1, [r1, #0x14]
+40009b5c: add        r1, r1, ip
+40009b60: str        r1, [r4, #0x120]
+40009b64: ldr        r1, [r4, #0x210]
+40009b68: add        r1, r1, #1
+40009b6c: str        r1, [r4, #0x210]
+40009b70: b          #0x40009c18
+40009b74: rsb        r1, r2, r2, lsl #3
+40009b78: ldr        ip, [r4, #0xd4]
+40009b7c: add        r1, r3, r1, lsl #2
+40009b80: ldr        r5, [r1, #0x10]
+40009b84: add        ip, ip, r5
+40009b88: str        ip, [r4, #0xd4]
+40009b8c: ldr        ip, [r4, #0x124]
+40009b90: ldr        r1, [r1, #0x14]
+40009b94: add        r1, r1, ip
+40009b98: str        r1, [r4, #0x124]
+40009b9c: ldr        r1, [r4, #0x214]
+40009ba0: add        r1, r1, #1
+40009ba4: str        r1, [r4, #0x214]
+40009ba8: b          #0x40009c18
+40009bac: rsb        r1, r2, r2, lsl #3
+40009bb0: ldr        ip, [r4, #0xd8]
+40009bb4: add        r1, r3, r1, lsl #2
+40009bb8: ldr        r5, [r1, #0x10]
+40009bbc: add        ip, ip, r5
+40009bc0: str        ip, [r4, #0xd8]
+40009bc4: ldr        ip, [r4, #0x128]
+40009bc8: ldr        r1, [r1, #0x14]
+40009bcc: add        r1, r1, ip
+40009bd0: str        r1, [r4, #0x128]
+40009bd4: ldr        r1, [r4, #0x218]
+40009bd8: add        r1, r1, #1
+40009bdc: str        r1, [r4, #0x218]
+40009be0: b          #0x40009c18
+40009be4: rsb        r1, r2, r2, lsl #3
+40009be8: ldr        ip, [r4, #0x9c]
+40009bec: add        r1, r3, r1, lsl #2
+40009bf0: ldr        r5, [r1, #0x10]
+40009bf4: add        ip, ip, r5
+40009bf8: str        ip, [r4, #0x9c]
+40009bfc: ldr        ip, [r4, #0xec]
+40009c00: ldr        r1, [r1, #0x14]
+40009c04: add        r1, r1, ip
+40009c08: str        r1, [r4, #0xec]
+40009c0c: ldr        r1, [r4, #0x1dc]
+40009c10: add        r1, r1, #1
+40009c14: str        r1, [r4, #0x1dc]
+40009c18: add        r2, r2, #1
+40009c1c: ldr        r1, [r0]
+40009c20: sxth       r2, r2
+40009c24: cmp        r1, r2
+40009c28: bgt        #0x40009834
+40009c2c: add        r0, r7, #0xc
+40009c30: str        r0, [sp, #0xc]
+40009c34: add        r0, r7, #8
+40009c38: str        r0, [sp, #8]
+40009c3c: add        r0, r4, #0xc
+
+=== CA9 candidate prologues 0x40009600..0x40009D00 ===
+0x40009678 {r4, r5, r6, r7, r8, lr}
+0x40009750 {r4, r5, r6, r7, r8, sb, sl, fp, lr}
+
+=== DIRECT CALLERS OF CANDIDATE PROLOGUES ===
+0x40009678 ['0x4000a808']
+0x40009750 ['0x4000a800']
+
+=== CA9 STRING/LITERAL REFERENCES IN PRODUCER WINDOW ===
+
+=== IMG B2Y neighborhood 0x420A4680..0x420A4B00 ===
+420a4680: lsls       r0, r0, #3
+420a4682: ldr        r0, [r0, r4]
+420a4684: ldr        r0, [r0, #8]
+420a4686: str        r0, [r5, #8]
+420a4688: movs       r0, #0x41
+420a468a: lsls       r0, r0, #3
+420a468c: ldr        r0, [r0, r4]
+420a468e: ldr        r0, [r0, #0xc]
+420a4690: str        r0, [r5, #0xc]
+420a4692: movs       r0, #0x41
+420a4694: lsls       r0, r0, #3
+420a4696: ldr        r0, [r0, r4]
+420a4698: ldr        r0, [r0, #0x10]
+420a469a: str        r0, [r5, #0x10]
+420a469c: movs       r0, #0x41
+420a469e: lsls       r0, r0, #3
+420a46a0: ldr        r0, [r0, r4]
+420a46a2: ldr        r0, [r0, #0x14]
+420a46a4: str        r0, [r5, #0x14]
+420a46a6: movs       r0, #0x41
+420a46a8: lsls       r0, r0, #3
+420a46aa: ldr        r0, [r0, r4]
+420a46ac: ldr        r0, [r0, #0x18]
+420a46ae: str        r0, [r5, #0x18]
+420a46b0: movs       r0, #0x41
+420a46b2: lsls       r0, r0, #3
+420a46b4: ldr        r0, [r0, r4]
+420a46b6: ldr        r0, [r0, #0x1c]
+420a46b8: str        r0, [r5, #0x1c]
+420a46ba: movs       r0, #0x41
+420a46bc: lsls       r0, r0, #3
+420a46be: ldr        r0, [r0, r4]
+420a46c0: ldr        r0, [r0, #0x20]
+420a46c2: str        r0, [r5, #0x20]
+420a46c4: movs       r0, #0x41
+420a46c6: lsls       r0, r0, #3
+420a46c8: ldr        r0, [r0, r4]
+420a46ca: ldr        r0, [r0, #0x24]
+420a46cc: str        r0, [r5, #0x24]
+420a46ce: movs       r0, #0x41
+420a46d0: lsls       r0, r0, #3
+420a46d2: ldr        r0, [r0, r4]
+420a46d4: ldr        r0, [r0, #0x28]
+420a46d6: str        r0, [r5, #0x28]
+420a46d8: movs       r0, #0x41
+420a46da: lsls       r0, r0, #3
+420a46dc: ldr        r0, [r0, r4]
+420a46de: ldr        r0, [r0, #0x2c]
+420a46e0: str        r0, [r5, #0x2c]
+420a46e2: movs       r0, #0x41
+420a46e4: lsls       r0, r0, #3
+420a46e6: ldr        r0, [r0, r4]
+420a46e8: ldr        r0, [r0, #0x30]
+420a46ea: str        r0, [r5, #0x30]
+420a46ec: movs       r0, #0x41
+420a46ee: lsls       r0, r0, #3
+420a46f0: ldr        r0, [r0, r4]
+420a46f2: ldr        r0, [r0, #0x34]
+420a46f4: str        r0, [r5, #0x34]
+420a46f6: movs       r0, #0x41
+420a46f8: lsls       r0, r0, #3
+420a46fa: ldr        r0, [r0, r4]
+420a46fc: ldr        r0, [r0, #0x38]
+420a46fe: str        r0, [r5, #0x38]
+420a4700: movs       r0, #0x41
+420a4702: lsls       r0, r0, #3
+420a4704: ldr        r0, [r0, r4]
+420a4706: ldr        r0, [r0, #0x3c]
+420a4708: str        r0, [r5, #0x3c]
+420a470a: movs       r0, #0x41
+420a470c: lsls       r0, r0, #3
+420a470e: ldr        r0, [r0, r4]
+420a4710: ldr        r0, [r0, #0x40]
+420a4712: str        r0, [r5, #0x40]
+420a4714: movs       r0, #0x41
+420a4716: lsls       r0, r0, #3
+420a4718: ldr        r0, [r0, r4]
+420a471a: ldr        r0, [r0, #0x44]
+420a471c: str        r0, [r5, #0x44]
+420a471e: movs       r0, #0x41
+420a4720: lsls       r0, r0, #3
+420a4722: ldr        r0, [r0, r4]
+420a4724: ldr        r0, [r0, #0x48]
+420a4726: str        r0, [r5, #0x48]
+420a4728: movs       r0, #0x41
+420a472a: lsls       r0, r0, #3
+420a472c: ldr        r0, [r0, r4]
+420a472e: ldr        r0, [r0, #0x4c]
+420a4730: str        r0, [r5, #0x4c]
+420a4732: movs       r0, #0x41
+420a4734: lsls       r0, r0, #3
+420a4736: ldr        r0, [r0, r4]
+420a4738: ldr        r0, [r0, #0x50]
+420a473a: str        r0, [r5, #0x50]
+420a473c: movs       r0, #0x41
+420a473e: lsls       r0, r0, #3
+420a4740: ldr        r0, [r0, r4]
+420a4742: ldr        r0, [r0, #0x54]
+420a4744: str        r0, [r5, #0x54]
+420a4746: movs       r0, #0x41
+420a4748: lsls       r0, r0, #3
+420a474a: ldr        r0, [r0, r4]
+420a474c: ldr        r0, [r0, #0x58]
+420a474e: str        r0, [r5, #0x58]
+420a4750: movs       r0, #0x41
+420a4752: lsls       r0, r0, #3
+420a4754: ldr        r0, [r0, r4]
+420a4756: ldr        r0, [r0, #0x5c]
+420a4758: str        r0, [r5, #0x5c]
+420a475a: movs       r0, #0x41
+420a475c: lsls       r0, r0, #3
+420a475e: ldr        r0, [r0, r4]
+420a4760: ldr        r0, [r0, #0x60]
+420a4762: str        r0, [r5, #0x60]
+420a4764: movs       r0, #0x41
+420a4766: b          #0x420a476a
+420a4768: b          #0x420a47ce
+420a476a: lsls       r0, r0, #3
+420a476c: ldr        r0, [r0, r4]
+420a476e: ldr        r0, [r0, #0x64]
+420a4770: str        r0, [r5, #0x64]
+420a4772: movs       r0, #0x41
+420a4774: lsls       r0, r0, #3
+420a4776: ldr        r0, [r0, r4]
+420a4778: ldr        r0, [r0, #0x68]
+420a477a: str        r0, [r5, #0x68]
+420a477c: movs       r0, #0x41
+420a477e: lsls       r0, r0, #3
+420a4780: ldr        r0, [r0, r4]
+420a4782: ldr        r0, [r0, #0x6c]
+420a4784: str        r0, [r5, #0x6c]
+420a4786: movs       r0, #0x41
+420a4788: lsls       r0, r0, #3
+420a478a: ldr        r0, [r0, r4]
+420a478c: ldr        r0, [r0, #0x70]
+420a478e: str        r0, [r5, #0x70]
+420a4790: movs       r0, #0x41
+420a4792: lsls       r0, r0, #3
+420a4794: ldr        r0, [r0, r4]
+420a4796: ldr        r0, [r0, #0x74]
+420a4798: str        r0, [r5, #0x74]
+420a479a: movs       r0, #0x41
+420a479c: lsls       r0, r0, #3
+420a479e: ldr        r0, [r0, r4]
+420a47a0: ldr        r0, [r0, #0x78]
+420a47a2: str        r0, [r5, #0x78]
+420a47a4: movs       r0, #0x41
+420a47a6: lsls       r0, r0, #3
+420a47a8: ldr        r0, [r0, r4]
+420a47aa: ldr        r0, [r0, #0x7c]
+420a47ac: str        r0, [r5, #0x7c]
+420a47ae: movs       r0, #0x41
+420a47b0: lsls       r0, r0, #3
+420a47b2: ldr        r0, [r0, r4]
+420a47b4: adds       r0, #0x80
+420a47b6: ldr        r1, [r0]
+420a47b8: movs       r0, #0x80
+420a47ba: str        r1, [r0, r5]
+420a47bc: add        r0, sp, #0xc
+420a47be: movs       r3, #0x5c
+420a47c0: ldr        r2, [pc, #0x50] ; LIT 0x420a4814->0x421e9c58 STRING='ca9_cm_Get_BinFileData'
+420a47c2: adr        r1, #0x58
+420a47c4: str        r0, [sp]
+420a47c6: movs       r0, #2
+420a47c8: bl         #0x42140150 ; CALL 0x42140150
+420a47cc: b          #0x420a47f8
+420a47ce: movs       r2, #0x84
+420a47d0: movs       r3, #0
+420a47d2: ldr        r1, [r4, #4]
+420a47d4: ldr        r0, [r4]
+420a47d6: subs       r0, r2, r0
+420a47d8: sbcs       r3, r1
+420a47da: blt        #0x420a47e0
+420a47dc: adr        r0, #0x64
+420a47de: b          #0x420a47e2
+420a47e0: adr        r0, #0x68
+420a47e2: add        r1, sp, #0xc
+420a47e4: movs       r3, #0x60
+420a47e6: ldr        r2, [pc, #0x2c] ; LIT 0x420a4814->0x421e9c58 STRING='ca9_cm_Get_BinFileData'
+420a47e8: str        r1, [sp]
+420a47ea: str        r0, [sp, #4]
+420a47ec: adr        r1, #0x64
+420a47ee: movs       r0, #4
+420a47f0: bl         #0x42140150 ; CALL 0x42140150
+420a47f4: movs       r6, #0
+420a47f6: mvns       r6, r6
+420a47f8: movs       r0, r6
+420a47fa: add        sp, #0x20
+420a47fc: pop        {r4, r5, r6, pc}
+420a47fe: movs       r0, r0
+420a4800: adds       r2, #0x42
+420a4802: ldrsh      r1, [r3, r5]
+420a4804: muls       r3, r0, r3
+420a4806: ldrsh      r0, [r6, r4]
+420a4808: adcs       r3, r0
+420a480a: ldrsh      r1, [r7, r4]
+420a480c: ldr        r5, [pc, #0x10c] ; LIT 0x420a491c->0x20415081
+420a480e: str        r6, [r5, #0x20]
+420a4810: ldr        r1, [r5, #0x64]
+420a4812: movs       r0, r0
+420a4814: ldr        r4, [sp, #0x160]
+420a4816: tst        r6, r3
+420a4818: strb       r4, [r4, #6]
+420a481a: cmp        r3, r0
+420a481c: adcs       r3, r0
+420a481e: subs       r2, #0x39
+420a4820: movs       r5, #0x20
+420a4822: cmp        r0, #0x73
+420a4824: cmp        r4, #0x29
+420a4826: movs       r5, #0x20
+420a4828: movs       r0, #0x64
+420a482a: movs       r0, #0x2d
+420a482c: str        r2, [r6, #0x54]
+420a482e: str        r1, [r4, #0x44]
+420a4830: strb       r0, [r4, #0xc]
+420a4832: str        r5, [r6, #0x34]
+420a4834: str        r3, [r4, #0x54]
+420a4836: strb       r3, [r6, #0xd]
+420a4838: strb       r6, [r4, #0x15]
+420a483a: ldr        r4, [r5, #0x44]
+420a483c: movs       r0, #0x79
+420a483e: strb       r5, [r4, #0xc]
+420a4840: movs       r0, r0
+420a4842: movs       r0, r0
+420a4844: ldr        r3, [r6, #0x54]
+420a4846: ldr        r1, [r4, #0x44]
+420a4848: lsls       r4, r5, #1
+420a484a: movs       r0, r0
+420a484c: str        r4, [r5, #0x14]
+420a484e: str        r2, [r6, #0x74]
+420a4850: lsls       r5, r4, #1
+420a4852: movs       r0, r0
+420a4854: adcs       r3, r0
+420a4856: subs       r2, #0x39
+420a4858: movs       r5, #0x20
+420a485a: cmp        r0, #0x73
+420a485c: cmp        r4, #0x29
+420a485e: movs       r5, #0x20
+420a4860: movs       r0, #0x64
+420a4862: movs       r0, #0x2d
+420a4864: str        r2, [r6, #0x54]
+420a4866: str        r1, [r4, #0x44]
+420a4868: str        r0, [r4, #0x50]
+420a486a: strb       r2, [r6, #9]
+420a486c: strb       r7, [r5, #9]
+420a486e: movs       r5, #0x20
+420a4870: cmp        r4, #0x73
+420a4872: str        r0, [r4, #0x60]
+420a4874: ldr        r1, [r5, #0x44]
+420a4876: movs       r0, #0x65
+420a4878: ldr        r3, [r6, #0x14]
+420a487a: str        r2, [r7, #0x54]
+420a487c: strb       r0, [r4, #0x10]
+420a487e: movs       r0, #0x6f
+420a4880: strb       r5, [r4, #0xc]
+420a4882: movs       r0, r0
+420a4884: push       {r4, r5, r6, r7, lr}
+420a4886: sub        sp, #0x24
+420a4888: movs       r4, r0
+420a488a: movs       r7, #0
+420a488c: movs       r5, #0
+420a488e: mov        r8, r8
+420a4890: movs       r2, #0x1c
+420a4892: adr        r1, #0xf0
+420a4894: add        r0, sp, #8
+420a4896: blx        #0x4204f2ec ; CALL 0x4204f2ec
+420a489a: adr        r0, #0xe8
+420a489c: bl         #0x421a0c7c ; CALL 0x421a0c7c
+420a48a0: movs       r5, r0
+420a48a2: cmp        r5, #0
+420a48a4: bne        #0x420a48c8
+420a48a6: add        r0, sp, #8
+420a48a8: movs       r3, #0x7a
+420a48aa: ldr        r2, [pc, #0xf4] ; LIT 0x420a49a0->0x421e9c6f STRING='ca9_cm_Get_BinFileTfRemappingData'
+420a48ac: adr        r1, #0xf4
+420a48ae: str        r0, [sp]
+420a48b0: movs       r0, #3
+420a48b2: bl         #0x42140150 ; CALL 0x42140150
+420a48b6: add        r0, sp, #8
+420a48b8: movs       r3, #0x7b
+420a48ba: ldr        r2, [pc, #0xe4] ; LIT 0x420a49a0->0x421e9c6f STRING='ca9_cm_Get_BinFileTfRemappingData'
+420a48bc: adr        r1, #0x114
+420a48be: str        r0, [sp]
+420a48c0: movs       r0, #3
+420a48c2: bl         #0x42140150 ; CALL 0x42140150
+420a48c6: b          #0x420a497c
+420a48c8: movs       r3, #0xff
+420a48ca: adds       r3, #1
+420a48cc: ldr        r1, [r5]
+420a48ce: eors       r1, r3
+420a48d0: ldr        r0, [r5, #4]
+420a48d2: orrs       r1, r0
+420a48d4: bne        #0x420a4950
+420a48d6: movs       r6, #0
+420a48d8: movs       r0, #0x41
+420a48da: lsls       r0, r0, #3
+420a48dc: ldr        r0, [r0, r5]
+420a48de: ldr        r0, [r0]
+420a48e0: str        r0, [r4]
+420a48e2: movs       r0, #0x41
+420a48e4: lsls       r0, r0, #3
+420a48e6: ldr        r0, [r0, r5]
+420a48e8: ldr        r0, [r0, #4]
+420a48ea: str        r0, [r4, #4]
+420a48ec: ldr        r0, [r4, #4]
+420a48ee: cmp        r0, #0x1f
+420a48f0: bls        #0x420a4906
+420a48f2: add        r0, sp, #8
+420a48f4: movs       r3, #0x87
+420a48f6: ldr        r2, [pc, #0xa8] ; LIT 0x420a49a0->0x421e9c6f STRING='ca9_cm_Get_BinFileTfRemappingData'
+420a48f8: adr        r1, #0x10c
+420a48fa: str        r0, [sp]
+420a48fc: movs       r0, #4
+420a48fe: bl         #0x42140150 ; CALL 0x42140150
+420a4902: subs       r7, r6, #1
+420a4904: b          #0x420a494e
+420a4906: movs       r6, #0
+420a4908: b          #0x420a4938
+420a490a: movs       r0, #0x41
+420a490c: lsls       r0, r0, #3
+420a490e: ldr        r0, [r0, r5]
+420a4910: adds       r0, #8
+420a4912: lsls       r1, r6, #3
+420a4914: ldr        r1, [r0, r1]
+420a4916: lsls       r2, r6, #3
+420a4918: movs       r0, r4
+420a491a: adds       r0, #8
+420a491c: str        r1, [r0, r2]
+420a491e: movs       r0, #0x41
+420a4920: lsls       r0, r0, #3
+420a4922: ldr        r0, [r0, r5]
+420a4924: adds       r0, #8
+420a4926: lsls       r1, r6, #3
+420a4928: adds       r0, r0, r1
+420a492a: lsls       r2, r6, #3
+420a492c: ldr        r1, [r0, #4]
+420a492e: movs       r0, r4
+420a4930: adds       r0, #8
+420a4932: adds       r0, r2, r0
+420a4934: str        r1, [r0, #4]
+420a4936: adds       r6, r6, #1
+420a4938: ldr        r0, [r4, #4]
+420a493a: cmp        r0, r6
+420a493c: bhi        #0x420a490a
+420a493e: add        r0, sp, #8
+420a4940: movs       r3, #0x92
+420a4942: ldr        r2, [pc, #0x5c] ; LIT 0x420a49a0->0x421e9c6f STRING='ca9_cm_Get_BinFileTfRemappingData'
+420a4944: adr        r1, #0xfc
+420a4946: str        r0, [sp]
+420a4948: movs       r0, #2
+420a494a: bl         #0x42140150 ; CALL 0x42140150
+420a494e: b          #0x420a497c
+420a4950: movs       r2, #0xff
+420a4952: adds       r2, #1
+420a4954: movs       r3, #0
+420a4956: ldr        r1, [r5, #4]
+420a4958: ldr        r0, [r5]
+420a495a: subs       r0, r2, r0
+420a495c: sbcs       r3, r1
+420a495e: blt        #0x420a4964
+420a4960: adr        r0, #0x108
+420a4962: b          #0x420a4966
+420a4964: adr        r0, #0x10c
+420a4966: add        r1, sp, #8
+420a4968: movs       r3, #0x98
+420a496a: ldr        r2, [pc, #0x34] ; LIT 0x420a49a0->0x421e9c6f STRING='ca9_cm_Get_BinFileTfRemappingData'
+420a496c: str        r1, [sp]
+420a496e: str        r0, [sp, #4]
+420a4970: adr        r1, #0x108
+420a4972: movs       r0, #4
+420a4974: bl         #0x42140150 ; CALL 0x42140150
+420a4978: movs       r7, #0
+420a497a: mvns       r7, r7
+420a497c: movs       r0, r7
+420a497e: add        sp, #0x24
+420a4980: pop        {r4, r5, r6, r7, pc}
+420a4982: movs       r0, r0
+420a4984: adds       r2, #0x42
+420a4986: ldrsh      r1, [r3, r5]
+420a4988: mov        r4, sl
+420a498a: strh       r7, [r3, r1]
+420a498c: ldr        r5, [pc, #0x114] ; LIT 0x420a4aa4->0x206f7420
+420a498e: str        r1, [r0, r1]
+420a4990: ldr        r1, [pc, #0x140] ; LIT 0x420a4ad4->0x20011a09
+420a4992: bxns       sb
+420a4994: muls       r7, r3, r7
+420a4996: subs       r1, #0x41
+420a4998: muls       r7, r3, r7
+420a499a: cmp        r6, #0x4d
+420a499c: ldr        r2, [r4, #0x14]
+420a499e: lsls       r6, r5, #1
+420a49a0: ldr        r4, [sp, #0x1bc]
+420a49a2: tst        r6, r3
+420a49a4: adcs       r3, r0
+420a49a6: subs       r2, #0x39
+420a49a8: movs       r5, #0x20
+420a49aa: cmp        r0, #0x73
+420a49ac: cmp        r4, #0x29
+420a49ae: movs       r5, #0x20
+420a49b0: movs       r0, #0x64
+420a49b2: movs       r0, #0x2d
+420a49b4: str        r2, [r6, #0x54]
+420a49b6: str        r1, [r4, #0x44]
+420a49b8: str        r0, [r4, #0x50]
+420a49ba: strb       r2, [r6, #9]
+420a49bc: strb       r7, [r5, #9]
+420a49be: movs       r5, #0x20
+420a49c0: cmp        r4, #0x73
+420a49c2: str        r0, [r4, #0x60]
+420a49c4: ldr        r1, [r5, #0x44]
+420a49c6: movs       r0, #0x65
+420a49c8: ldr        r6, [r5, #0x74]
+420a49ca: movs       r0, #0x74
+420a49cc: ldr        r6, [r4, #0x74]
+420a49ce: ldr        r5, [r6, #0x64]
+420a49d0: lsls       r4, r4, #1
+420a49d2: movs       r0, r0
+420a49d4: adcs       r3, r0
+420a49d6: subs       r2, #0x39
+420a49d8: movs       r5, #0x20
+420a49da: cmp        r0, #0x73
+420a49dc: cmp        r4, #0x29
+420a49de: movs       r5, #0x20
+420a49e0: movs       r0, #0x64
+420a49e2: movs       r0, #0x2d
+420a49e4: str        r2, [r6, #0x54]
+420a49e6: str        r1, [r4, #0x44]
+420a49e8: str        r0, [r4, #0x50]
+420a49ea: strb       r2, [r6, #9]
+420a49ec: strb       r7, [r5, #9]
+420a49ee: movs       r5, #0x20
+420a49f0: cmp        r4, #0x73
+420a49f2: strb       r0, [r4, #0x14]
+420a49f4: ldr        r3, [r6, #0x14]
+420a49f6: str        r6, [r5, #0x74]
+420a49f8: str        r0, [r4, #0x40]
+420a49fa: str        r5, [r4, #0x64]
+420a49fc: strb       r1, [r4, #0x15]
+420a49fe: movs       r0, #0x74
+420a4a00: str        r6, [r6, #0x14]
+420a4a02: strb       r4, [r5, #0x15]
+420a4a04: strb       r5, [r4, #0xd]
+420a4a06: movs       r0, r0
+420a4a08: adcs       r3, r0
+420a4a0a: subs       r2, #0x39
+420a4a0c: movs       r5, #0x20
+420a4a0e: cmp        r0, #0x73
+420a4a10: cmp        r4, #0x29
+420a4a12: movs       r5, #0x20
+420a4a14: movs       r0, #0x64
+420a4a16: movs       r0, #0x2d
+420a4a18: str        r2, [r6, #0x54]
+420a4a1a: str        r1, [r4, #0x44]
+420a4a1c: str        r0, [r4, #0x50]
+420a4a1e: strb       r2, [r6, #9]
+420a4a20: strb       r7, [r5, #9]
+420a4a22: movs       r5, #0x20
+420a4a24: cmp        r4, #0x73
+420a4a26: strb       r0, [r4, #0x10]
+420a4a28: movs       r0, #0x6f
+420a4a2a: str        r5, [r5, #0x14]
+420a4a2c: ldrb       r6, [r5, #5]
+420a4a2e: strb       r0, [r4, #8]
+420a4a30: ldr        r5, [r4, #0x54]
+420a4a32: strb       r1, [r4, #1]
+420a4a34: ldr        r0, [r6, #0x14]
+420a4a36: str        r6, [r5, #0x74]
+420a4a38: str        r0, [r4, #0x50]
+420a4a3a: strb       r6, [r5, #0x11]
+420a4a3c: ldr        r2, [r6, #0x14]
+420a4a3e: strb       r5, [r4, #0xd]
+420a4a40: movs       r0, r0
+420a4a42: movs       r0, r0
+420a4a44: adcs       r3, r0
+420a4a46: subs       r2, #0x39
+420a4a48: movs       r5, #0x20
+420a4a4a: cmp        r0, #0x73
+420a4a4c: cmp        r4, #0x29
+420a4a4e: movs       r5, #0x20
+420a4a50: movs       r0, #0x64
+420a4a52: movs       r0, #0x2d
+420a4a54: str        r2, [r6, #0x54]
+420a4a56: str        r1, [r4, #0x44]
+420a4a58: strb       r0, [r4, #0xc]
+420a4a5a: str        r5, [r6, #0x34]
+420a4a5c: str        r3, [r4, #0x54]
+420a4a5e: strb       r3, [r6, #0xd]
+420a4a60: strb       r6, [r4, #0x15]
+420a4a62: ldr        r4, [r5, #0x44]
+420a4a64: movs       r0, #0x79
+420a4a66: strb       r5, [r4, #0xc]
+420a4a68: movs       r0, r0
+420a4a6a: movs       r0, r0
+420a4a6c: ldr        r3, [r6, #0x54]
+420a4a6e: ldr        r1, [r4, #0x44]
+420a4a70: lsls       r4, r5, #1
+420a4a72: movs       r0, r0
+420a4a74: str        r4, [r5, #0x14]
+420a4a76: str        r2, [r6, #0x74]
+420a4a78: lsls       r5, r4, #1
+420a4a7a: movs       r0, r0
+420a4a7c: adcs       r3, r0
+420a4a7e: subs       r2, #0x39
+420a4a80: movs       r5, #0x20
+420a4a82: cmp        r0, #0x73
+420a4a84: cmp        r4, #0x29
+420a4a86: movs       r5, #0x20
+420a4a88: movs       r0, #0x64
+420a4a8a: movs       r0, #0x2d
+420a4a8c: str        r2, [r6, #0x54]
+420a4a8e: str        r1, [r4, #0x44]
+420a4a90: str        r0, [r4, #0x50]
+420a4a92: strb       r2, [r6, #9]
+420a4a94: strb       r7, [r5, #9]
+420a4a96: movs       r5, #0x20
+420a4a98: cmp        r4, #0x73
+420a4a9a: str        r0, [r4, #0x60]
+420a4a9c: ldr        r1, [r5, #0x44]
+420a4a9e: movs       r0, #0x65
+420a4aa0: ldr        r3, [r6, #0x14]
+420a4aa2: str        r2, [r7, #0x54]
+420a4aa4: strb       r0, [r4, #0x10]
+420a4aa6: movs       r0, #0x6f
+420a4aa8: strb       r5, [r4, #0xc]
+420a4aaa: movs       r0, r0
+420a4aac: push       {r0, lr}
+420a4aae: sub        sp, #0x1b8
+420a4ab0: movs       r0, #0
+420a4ab2: str        r0, [sp, #0x1b4]
+420a4ab4: movs       r1, #0x84
+420a4ab6: add        r0, sp, #0x130
+420a4ab8: blx        #0x4204f3bc ; CALL 0x4204f3bc
+420a4abc: mov        r8, r8
+420a4abe: movs       r1, #0xff
+420a4ac0: adds       r1, #1
+420a4ac2: add        r0, sp, #0x28
+420a4ac4: blx        #0x4204f3bc ; CALL 0x4204f3bc
+420a4ac8: movs       r1, #0
+420a4aca: ldr        r0, [sp, #0x1b8]
+420a4acc: str        r1, [r0, #0x2c]
+420a4ace: ldr        r0, [sp, #0x1b8]
+420a4ad0: ldrh       r0, [r0, #0x2c]
+420a4ad2: movs       r1, #9
+420a4ad4: subs       r1, r1, r0
+420a4ad6: movs       r0, #1
+420a4ad8: lsls       r0, r1
+420a4ada: str        r0, [sp, #0x24]
+420a4adc: blx        #0x421e6614 ; CALL 0x421e6614
+420a4ae0: ldr        r2, [sp, #0x1b8]
+420a4ae2: str        r1, [r2, #0x34]
+420a4ae4: str        r0, [r2, #0x30]
+420a4ae6: add        r0, sp, #0x130
+420a4ae8: bl         #0x420a4628 ; CALL 0x420a4628
+420a4aec: str        r0, [sp, #0x1b4]
+420a4aee: ldr        r0, [sp, #0x1b4]
+420a4af0: cmp        r0, #0
+420a4af2: bne        #0x420a4bf0
+420a4af4: ldr        r1, [sp, #0x188]
+420a4af6: ldr        r0, [sp, #0x1b8]
+420a4af8: str        r1, [r0]
+420a4afa: ldr        r1, [sp, #0x18c]
+420a4afc: ldr        r0, [sp, #0x1b8]
+420a4afe: str        r1, [r0, #4]
+
+=== EXACT REFERENCES TO B2Y IDENTIFIERS ===
+B2Y_CC0_CA9_CM.bin 0x420a4800
+B2Y_TF_REMAPPING_CA9_CM.bin 0x420a4984
+target 0x420a4800 word_pools []
+target 0x420a4984 word_pools []
+
+=== CALLERS OF FUNCTIONS CONTAINING B2Y IDENTIFIERS (LOCAL PROLOGUE HEURISTIC) ===
+prologues ['0x420a4628', '0x420a4884', '0x420a4aac']
+0x420a4628 ['0x420a4ae8']
+0x420a4884 ['0x420a583a']
+0x420a4aac ['0x420a5de8']
+
+=== TARGET ===
+Determine whether CA9 0x400097xx producer owns WB gain doubles and identify the IMG routine that serializes/programs CC0 and tone-function remapping into B2Y.
