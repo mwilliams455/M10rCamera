@@ -1,0 +1,487 @@
+M10-R v1.37 WB JUMP TABLES / PRESETS
+
+=== wb_startWhiteBalance prologue + first dispatch 0x4000B13C..0x4000B240 ===
+4000b13c: push       {r4, r5, r6, r7, r8, lr}
+4000b140: mov        r4, r0
+4000b144: ldr        r2, [pc, #0x2f8] ; LIT 0x4000b444->0x4001c000 STRING='ca9_wb_start'
+4000b148: sub        sp, sp, #0x20
+4000b14c: add        r1, pc, #0x2f4
+4000b150: mov        r0, #4
+4000b154: bl         #0x4000ded4 ; CALL 0x4000ded4
+4000b158: ldr        r0, [r4, #0x14]
+4000b15c: add        r5, r4, #0x5c
+4000b160: ldr        r7, [pc, #0x304] ; LIT 0x4000b46c->0x4004324c
+4000b164: add        r8, r4, #0x2e0
+4000b168: mov        r6, r5
+4000b16c: cmp        r0, #0xe
+4000b170: ldrlo      pc, [pc, r0, lsl #2] ; LIT 0x4000b178->0x4000b58c
+4000b174: b          #0x4000b58c
+4000b178: andmi      fp, r0, ip, lsl #11
+4000b17c: strhmi     fp, [r0], -r0
+4000b180: andmi      fp, r0, r8, asr #3
+4000b184: andmi      fp, r0, r8, lsl #4
+4000b188: andmi      fp, r0, r0, asr r3
+4000b18c: andmi      fp, r0, ip, lsl #11
+4000b190: andmi      fp, r0, ip, ror r3
+4000b194: andmi      fp, r0, r0, lsr #7
+4000b198: strdmi     fp, ip, [r0], -r4
+4000b19c: andmi      fp, r0, ip, asr #9
+4000b1a0: strdmi     fp, ip, [r0], -r4
+4000b1a4: andmi      fp, r0, r8, ror #10
+4000b1a8: andmi      fp, r0, ip, asr #9
+4000b1ac: andmi      fp, r0, r0, asr #6
+4000b1b0: mov        r3, r6
+4000b1b4: mov        r2, r7
+4000b1b8: mov        r1, r5
+4000b1bc: mov        r0, r4
+4000b1c0: bl         #0x4000a688 ; CALL 0x4000a688
+4000b1c4: b          #0x4000b310
+4000b1c8: mov        r3, r6
+4000b1cc: mov        r2, r7
+4000b1d0: mov        r1, r5
+4000b1d4: mov        r0, r4
+4000b1d8: bl         #0x4000a688 ; CALL 0x4000a688
+4000b1dc: mov        r3, r6
+4000b1e0: mov        r2, r7
+4000b1e4: mov        r1, r5
+4000b1e8: mov        r0, r4
+4000b1ec: bl         #0x40007b08 ; CALL 0x40007b08
+4000b1f0: add        sp, sp, #0x20
+4000b1f4: mov        r2, r7
+4000b1f8: mov        r1, r8
+4000b1fc: mov        r0, r5
+4000b200: pop        {r4, r5, r6, r7, r8, lr}
+4000b204: b          #0x4000aea4
+4000b208: ldr        r0, [r4, #0x18]
+4000b20c: cmp        r0, #0xa
+4000b210: ldrlo      pc, [pc, r0, lsl #2] ; LIT 0x4000b218->0x4000b32c
+4000b214: b          #0x4000b32c
+
+=== PRESET JUMP TABLE @0x4000B218 (10 words) ===
+preset_case 0: 0x4000b32c
+preset_case 1: 0x4000b240
+preset_case 2: 0x4000b254
+preset_case 3: 0x4000b268
+preset_case 4: 0x4000b27c
+preset_case 5: 0x4000b290
+preset_case 6: 0x4000b2a4
+preset_case 7: 0x4000b2b8
+preset_case 8: 0x4000b2cc
+preset_case 9: 0x4000b2e0
+
+=== TARGET BLOCKS ===
+
+-- target 0x4000b240 --
+4000b240: add        r0, r7, #0x100
+4000b244: ldrh       r1, [r0, #0xc8]
+4000b248: strh       r1, [r6]
+4000b24c: ldrh       r0, [r0, #0xd8]
+4000b250: b          #0x4000b30c
+4000b254: add        r0, r7, #0x100
+4000b258: ldrh       r1, [r0, #0xce]
+4000b25c: strh       r1, [r6]
+4000b260: ldrh       r0, [r0, #0xde]
+4000b264: b          #0x4000b30c
+4000b268: add        r0, r7, #0x100
+4000b26c: ldrh       r1, [r0, #0xcc]
+4000b270: strh       r1, [r6]
+4000b274: ldrh       r0, [r0, #0xdc]
+4000b278: b          #0x4000b30c
+4000b27c: add        r0, r7, #0x100
+4000b280: ldrh       r1, [r0, #0xc2]
+4000b284: strh       r1, [r6]
+4000b288: ldrh       r0, [r0, #0xd2]
+4000b28c: b          #0x4000b30c
+
+-- target 0x4000b254 --
+4000b254: add        r0, r7, #0x100
+4000b258: ldrh       r1, [r0, #0xce]
+4000b25c: strh       r1, [r6]
+4000b260: ldrh       r0, [r0, #0xde]
+4000b264: b          #0x4000b30c
+4000b268: add        r0, r7, #0x100
+4000b26c: ldrh       r1, [r0, #0xcc]
+4000b270: strh       r1, [r6]
+4000b274: ldrh       r0, [r0, #0xdc]
+4000b278: b          #0x4000b30c
+4000b27c: add        r0, r7, #0x100
+4000b280: ldrh       r1, [r0, #0xc2]
+4000b284: strh       r1, [r6]
+4000b288: ldrh       r0, [r0, #0xd2]
+4000b28c: b          #0x4000b30c
+4000b290: add        r0, r7, #0x100
+4000b294: ldrh       r1, [r0, #0xc4]
+4000b298: strh       r1, [r6]
+4000b29c: ldrh       r0, [r0, #0xd4]
+4000b2a0: b          #0x4000b30c
+
+-- target 0x4000b268 --
+4000b268: add        r0, r7, #0x100
+4000b26c: ldrh       r1, [r0, #0xcc]
+4000b270: strh       r1, [r6]
+4000b274: ldrh       r0, [r0, #0xdc]
+4000b278: b          #0x4000b30c
+4000b27c: add        r0, r7, #0x100
+4000b280: ldrh       r1, [r0, #0xc2]
+4000b284: strh       r1, [r6]
+4000b288: ldrh       r0, [r0, #0xd2]
+4000b28c: b          #0x4000b30c
+4000b290: add        r0, r7, #0x100
+4000b294: ldrh       r1, [r0, #0xc4]
+4000b298: strh       r1, [r6]
+4000b29c: ldrh       r0, [r0, #0xd4]
+4000b2a0: b          #0x4000b30c
+4000b2a4: add        r0, r7, #0x100
+4000b2a8: ldrh       r1, [r0, #0xc6]
+4000b2ac: strh       r1, [r6]
+4000b2b0: ldrh       r0, [r0, #0xd6]
+4000b2b4: b          #0x4000b30c
+
+-- target 0x4000b27c --
+4000b27c: add        r0, r7, #0x100
+4000b280: ldrh       r1, [r0, #0xc2]
+4000b284: strh       r1, [r6]
+4000b288: ldrh       r0, [r0, #0xd2]
+4000b28c: b          #0x4000b30c
+4000b290: add        r0, r7, #0x100
+4000b294: ldrh       r1, [r0, #0xc4]
+4000b298: strh       r1, [r6]
+4000b29c: ldrh       r0, [r0, #0xd4]
+4000b2a0: b          #0x4000b30c
+4000b2a4: add        r0, r7, #0x100
+4000b2a8: ldrh       r1, [r0, #0xc6]
+4000b2ac: strh       r1, [r6]
+4000b2b0: ldrh       r0, [r0, #0xd6]
+4000b2b4: b          #0x4000b30c
+4000b2b8: add        r0, r7, #0x100
+4000b2bc: ldrh       r1, [r0, #0xca]
+4000b2c0: strh       r1, [r6]
+4000b2c4: ldrh       r0, [r0, #0xda]
+4000b2c8: b          #0x4000b30c
+
+-- target 0x4000b290 --
+4000b290: add        r0, r7, #0x100
+4000b294: ldrh       r1, [r0, #0xc4]
+4000b298: strh       r1, [r6]
+4000b29c: ldrh       r0, [r0, #0xd4]
+4000b2a0: b          #0x4000b30c
+4000b2a4: add        r0, r7, #0x100
+4000b2a8: ldrh       r1, [r0, #0xc6]
+4000b2ac: strh       r1, [r6]
+4000b2b0: ldrh       r0, [r0, #0xd6]
+4000b2b4: b          #0x4000b30c
+4000b2b8: add        r0, r7, #0x100
+4000b2bc: ldrh       r1, [r0, #0xca]
+4000b2c0: strh       r1, [r6]
+4000b2c4: ldrh       r0, [r0, #0xda]
+4000b2c8: b          #0x4000b30c
+4000b2cc: add        r0, r7, #0x100
+4000b2d0: ldrh       r1, [r0, #0xd0]
+4000b2d4: strh       r1, [r6]
+4000b2d8: ldrh       r0, [r0, #0xe0]
+4000b2dc: b          #0x4000b30c
+
+-- target 0x4000b2a4 --
+4000b2a4: add        r0, r7, #0x100
+4000b2a8: ldrh       r1, [r0, #0xc6]
+4000b2ac: strh       r1, [r6]
+4000b2b0: ldrh       r0, [r0, #0xd6]
+4000b2b4: b          #0x4000b30c
+4000b2b8: add        r0, r7, #0x100
+4000b2bc: ldrh       r1, [r0, #0xca]
+4000b2c0: strh       r1, [r6]
+4000b2c4: ldrh       r0, [r0, #0xda]
+4000b2c8: b          #0x4000b30c
+4000b2cc: add        r0, r7, #0x100
+4000b2d0: ldrh       r1, [r0, #0xd0]
+4000b2d4: strh       r1, [r6]
+4000b2d8: ldrh       r0, [r0, #0xe0]
+4000b2dc: b          #0x4000b30c
+4000b2e0: ldr        r0, [r4, #0x1c]
+4000b2e4: bl         #0x4000aa34 ; CALL 0x4000aa34
+4000b2e8: add        r0, r7, r0, lsl #1
+4000b2ec: add        r0, r0, #0x100
+4000b2f0: ldrh       r0, [r0, #0xe2]
+
+-- target 0x4000b2b8 --
+4000b2b8: add        r0, r7, #0x100
+4000b2bc: ldrh       r1, [r0, #0xca]
+4000b2c0: strh       r1, [r6]
+4000b2c4: ldrh       r0, [r0, #0xda]
+4000b2c8: b          #0x4000b30c
+4000b2cc: add        r0, r7, #0x100
+4000b2d0: ldrh       r1, [r0, #0xd0]
+4000b2d4: strh       r1, [r6]
+4000b2d8: ldrh       r0, [r0, #0xe0]
+4000b2dc: b          #0x4000b30c
+4000b2e0: ldr        r0, [r4, #0x1c]
+4000b2e4: bl         #0x4000aa34 ; CALL 0x4000aa34
+4000b2e8: add        r0, r7, r0, lsl #1
+4000b2ec: add        r0, r0, #0x100
+4000b2f0: ldrh       r0, [r0, #0xe2]
+4000b2f4: strh       r0, [r6]
+4000b2f8: ldr        r0, [r4, #0x1c]
+4000b2fc: bl         #0x4000aa34 ; CALL 0x4000aa34
+4000b300: add        r0, r7, r0, lsl #1
+4000b304: add        r0, r0, #0x200
+
+-- target 0x4000b2cc --
+4000b2cc: add        r0, r7, #0x100
+4000b2d0: ldrh       r1, [r0, #0xd0]
+4000b2d4: strh       r1, [r6]
+4000b2d8: ldrh       r0, [r0, #0xe0]
+4000b2dc: b          #0x4000b30c
+4000b2e0: ldr        r0, [r4, #0x1c]
+4000b2e4: bl         #0x4000aa34 ; CALL 0x4000aa34
+4000b2e8: add        r0, r7, r0, lsl #1
+4000b2ec: add        r0, r0, #0x100
+4000b2f0: ldrh       r0, [r0, #0xe2]
+4000b2f4: strh       r0, [r6]
+4000b2f8: ldr        r0, [r4, #0x1c]
+4000b2fc: bl         #0x4000aa34 ; CALL 0x4000aa34
+4000b300: add        r0, r7, r0, lsl #1
+4000b304: add        r0, r0, #0x200
+4000b308: ldrh       r0, [r0, #0x62]
+4000b30c: strh       r0, [r6, #2]
+4000b310: add        sp, sp, #0x20
+4000b314: mov        r3, r6
+4000b318: mov        r2, r7
+
+-- target 0x4000b2e0 --
+4000b2e0: ldr        r0, [r4, #0x1c]
+4000b2e4: bl         #0x4000aa34 ; CALL 0x4000aa34
+4000b2e8: add        r0, r7, r0, lsl #1
+4000b2ec: add        r0, r0, #0x100
+4000b2f0: ldrh       r0, [r0, #0xe2]
+4000b2f4: strh       r0, [r6]
+4000b2f8: ldr        r0, [r4, #0x1c]
+4000b2fc: bl         #0x4000aa34 ; CALL 0x4000aa34
+4000b300: add        r0, r7, r0, lsl #1
+4000b304: add        r0, r0, #0x200
+4000b308: ldrh       r0, [r0, #0x62]
+4000b30c: strh       r0, [r6, #2]
+4000b310: add        sp, sp, #0x20
+4000b314: mov        r3, r6
+4000b318: mov        r2, r7
+4000b31c: mov        r1, r5
+4000b320: mov        r0, r4
+4000b324: pop        {r4, r5, r6, r7, r8, lr}
+4000b328: b          #0x40007b08
+4000b32c: ldr        r2, [pc, #0x110] ; LIT 0x4000b444->0x4001c000 STRING='ca9_wb_start'
+
+-- target 0x4000b32c --
+4000b32c: ldr        r2, [pc, #0x110] ; LIT 0x4000b444->0x4001c000 STRING='ca9_wb_start'
+4000b330: mov        r0, #4
+4000b334: ldr        r1, [pc, #0x134] ; LIT 0x4000b470->0x4001c550 STRING='CA9: %s() - WB Preset not implemented! WB set to Preset DAYLIGHT'
+4000b338: bl         #0x4000ded4 ; CALL 0x4000ded4
+4000b33c: b          #0x4000b240
+
+=== WB/PRESET STRINGS ACROSS EXTRACTED FIRMWARE ===
+sec=88 name='GEO-SHP file' off=0x2b3e28c va=0x2b3e28c needle='HMI' context='\x12Pá\x08RMI@ûXÁoCaW@\x12\x84+\xa0PMI@r£ÈZCaW@2\x05k\x9cMMI@Z-°ÇDaW@-°ÇDJMI@j0\rÃGaW@cñ\x9bÂJMI@Ã-\x1fIIaW@ìÀ9#JMI@iÈx\x94JaW@\x8dìJËHMI@\x02g)YNaW@\x97\xadõEBMI@[éµÙXaW@µÆ\xa0\x13BMI@lì\x12Õ[aW@=bôÜBMI@²Jé\x99^aW@ï\x90b\x80DMI@?o*RaaW@«\x05ö\x98HMI@\x1a1³ÏcaW@?\x1b¹nJMI@\neáëkaW@©i\x17ÓLMI@\x9d,µÞoaW@f\x12õ\x82OMI@\n\x82Ç·waW@ÁâpæWMI@gî!á{aW@û¬2SZMI@ÔC4º\x83aW@uÊ£\x1baMI@,\rü'
+sec=88 name='GEO-SHP file' off=0x2b3e2dc va=0x2b3e2dc needle='HMI' context='ìÀ9#JMI@iÈx\x94JaW@\x8dìJËHMI@\x02g)YNaW@\x97\xadõEBMI@[éµÙXaW@µÆ\xa0\x13BMI@lì\x12Õ[aW@=bôÜBMI@²Jé\x99^aW@ï\x90b\x80DMI@?o*RaaW@«\x05ö\x98HMI@\x1a1³ÏcaW@?\x1b¹nJMI@\neáëkaW@©i\x17ÓLMI@\x9d,µÞoaW@f\x12õ\x82OMI@\n\x82Ç·waW@ÁâpæWMI@gî!á{aW@û¬2SZMI@ÔC4º\x83aW@uÊ£\x1baMI@,\rü¨\x86aW@ÀË\x0c\x1beMI@\x11Çº¸\x8daW@\x8fßÛôgMI@9\x0cæ¯\x90aW@§\x07\x05¥hMI@´\x91ë¦\x94aW@d°âTkMI@ÿx¯Z\x99aW@¼\x93O\x8fmMI@¦d9'
+sec=88 name='GEO-SHP file' off=0x2b3ec2c va=0x2b3ec2c needle='HMI' context='\x9fÌ?ú&MI@æ\x1f}\x93¦bW@Ä[çß.MI@\x0f\x99ò!¨bW@ü\x89Ê\x865MI@bóqm¨bW@rR\x98÷8MI@-ÌB;§bW@m\x1aÛkAMI@FB[Î¥bW@w,¶IEMI@·Ï*3¥bW@|\x81Y¡HMI@e©õ~£bW@Ù!þaKMI@©h¬ý\x9dbW@\x83÷U¹PMI@»íBs\x9dbW@#»Ò2RMI@ÍX4\x9d\x9dbW@\n÷Ê¼UMI@ÙìHõ\x9dbW@-\x99cyWMI@\x89³"j¢bW@ã\x1cut\\MI@¬;\x16Û¤bW@\x93ãNé`MI@ÚW\x1e¤§bW@µn\x83ÚoMI@iäó\x8a§bW@±6ÆNxMI@ÈÒ\x87.¨bW@ÂmmáyMI@®ôÚl¬bW@\x07~TÃ~MI@\x1e4»'
+sec=88 name='GEO-SHP file' off=0x2b3ee7c va=0x2b3ee7c needle='HMI' context="%t\x97ÄYMI@m\x8d\x08ÆÁbW@\x7f¿\x98-YMI@ $\x0b\x98ÀbW@\x03Òþ\x07XMI@K\x1fº\xa0¾bW@¾Á\x17&SMI@\x1cµÂô½bW@¼\x08S\x94KMI@F|'f½bW@ÈêVÏIMI@Ûù~j¼bW@:\x92Ë\x7fHMI@)\x97Æ/¼bW@¡ó\x1a»DMI@à\x82lY¾bW@¬\x1cZd;MI@µ\x87½PÀbW@¯ì\x82Á5MI@Ò8ÔïÂbW@òC¥\x113MI@\x01£Ë\x9bÃbW@p\x99Óe1MI@\x01£Ë\x9bÃbW@Ü\x83\x10\x90/MI@C¬þ\x08ÃbW@ZÙ>ä-MI@%\x93S;ÃbW@ÆÃ{\x0e,MI@\x9a[!¬ÆbW@ý\xa0.R(MI@G8-xÑbW@\x1fò\x96«\x1fMI@J\x0b\x97UØbW@è÷ý\x9b\x17MI@\x0cW\x07"
+sec=88 name='GEO-SHP file' off=0x317e0c0 va=0x317e0c0 needle='HMI' context="Ü\x83\x10\x90/MI@\x01£Ë\x9bÃbW@p\x99Óe1MI@Ò8ÔïÂbW@òC¥\x113MI@µ\x87½PÀbW@¯ì\x82Á5MI@à\x82lY¾bW@¬\x1cZd;MI@)\x97Æ/¼bW@¡ó\x1a»DMI@Ûù~j¼bW@:\x92Ë\x7fHMI@F|'f½bW@ÈêVÏIMI@\x1cµÂô½bW@¼\x08S\x94KMI@K\x1fº\xa0¾bW@¾Á\x17&SMI@ $\x0b\x98ÀbW@\x03Òþ\x07XMI@m\x8d\x08ÆÁbW@\x7f¿\x98-YMI@\x9cÝZ&ÃbW@%t\x97ÄYMI@Gçü\x14ÇbW@a¦í_YMI@KVE¸ÉbW@rÝ\x94òZMI@D\x17Ô·ÌbW@\x8eZaú^MI@¾h\x8f\x17ÒbW@ïç\x14ägMI@X;\x8asÔbW@)²ÖPjMI@\x7fLk"
+sec=88 name='GEO-SHP file' off=0x317e310 va=0x317e310 needle='HMI' context='ã\x1cut\\MI@ÙìHõ\x9dbW@-\x99cyWMI@ÍX4\x9d\x9dbW@\n÷Ê¼UMI@»íBs\x9dbW@#»Ò2RMI@©h¬ý\x9dbW@\x83÷U¹PMI@e©õ~£bW@Ù!þaKMI@·Ï*3¥bW@|\x81Y¡HMI@FB[Î¥bW@w,¶IEMI@-ÌB;§bW@m\x1aÛkAMI@bóqm¨bW@rR\x98÷8MI@\x0f\x99ò!¨bW@ü\x89Ê\x865MI@æ\x1f}\x93¦bW@Ä[çß.MI@\x06¡¼\x8f£bW@\x9fÌ?ú&MI@Gªïü¢bW@)\x04r\x89#MI@\x9cl\x03w\xa0bW@bI¹û\x1cMI@£\x91Ï+\x9ebW@:êè¸\x1aMI@3l\x94õ\x9bbW@Ã¹\x86\x19\x1aMI@¬\x1e0\x0f\x99bW@v\x1c?T\x1aMI@ô\x18å'
+sec=88 name='GEO-SHP file' off=0x317ec60 va=0x317ec60 needle='HMI' context='uÊ£\x1baMI@gî!á{aW@û¬2SZMI@\n\x82Ç·waW@ÁâpæWMI@\x9d,µÞoaW@f\x12õ\x82OMI@\neáëkaW@©i\x17ÓLMI@\x1a1³ÏcaW@?\x1b¹nJMI@?o*RaaW@«\x05ö\x98HMI@²Jé\x99^aW@ï\x90b\x80DMI@lì\x12Õ[aW@=bôÜBMI@[éµÙXaW@µÆ\xa0\x13BMI@\x02g)YNaW@\x97\xadõEBMI@iÈx\x94JaW@\x8dìJËHMI@Ã-\x1fIIaW@ìÀ9#JMI@j0\rÃGaW@cñ\x9bÂJMI@Z-°ÇDaW@-°ÇDJMI@r£ÈZCaW@2\x05k\x9cMMI@ûXÁoCaW@\x12\x84+\xa0PMI@Ø\x9c\x83gBaW@\x12Pá\x08RMI@°WX'
+sec=88 name='GEO-SHP file' off=0x317ecb0 va=0x317ecb0 needle='HMI' context='?\x1b¹nJMI@?o*RaaW@«\x05ö\x98HMI@²Jé\x99^aW@ï\x90b\x80DMI@lì\x12Õ[aW@=bôÜBMI@[éµÙXaW@µÆ\xa0\x13BMI@\x02g)YNaW@\x97\xadõEBMI@iÈx\x94JaW@\x8dìJËHMI@Ã-\x1fIIaW@ìÀ9#JMI@j0\rÃGaW@cñ\x9bÂJMI@Z-°ÇDaW@-°ÇDJMI@r£ÈZCaW@2\x05k\x9cMMI@ûXÁoCaW@\x12\x84+\xa0PMI@Ø\x9c\x83gBaW@\x12Pá\x08RMI@°WXp?aW@}\x06Ô\x9bQMI@SëýF;aW@Ë×eøOMI@+¦ÒO8aW@¡\x10\x01\x87PMI@:$µP2aW@@\xa03iSMI@ú\x9c»]/aW@ ë©ÕWMI@VÒ\x8a'
+sec=88 name='GEO-SHP file' off=0x41c4afc va=0x41c4afc needle='HMI' context="oö\x07ÊmMI@\x829züÞ¦*@x·²DgMI@²Ôz¿Ñ¦*@÷tuÇbMI@c'¼\x04§¦*@ô\x87f\x9e\\MI@\x80Ó»x?¦*@·Ð\x95\x08TMI@(¶\x82¦%¦*@Zd;ßOMI@Ëø÷\x19\x17¦*@oÓ\x9fýHMI@··[\x92\x03¦*@î\\\x18éEMI@k,am\x8c¥*@¹þ]\x9f9MI@¡¹N#-¥*@D\x19ªb*MI@à\x9eçO\x1b¥*@ÚÊKþ'MI@\x1fó\x01\x81Î¤*@`\xadÚ5!MI@ä/-ê\x93¤*@ª)É:\x1cMI@p³x±0¤*@¤l\x91´\x1bMI@W\x98¾×\x10¤*@8N\nó\x1eMI@º»Î\x86ü£*@Ov3£\x1fMI@keÂ/õ£*@\x90eÁÄ\x1fMI@$\x9c\x16¼è£*@aá$Í\x1fMI@¤SW"
+sec=88 name='GEO-SHP file' off=0x4c7b9e4 va=0x4c7b9e4 needle='HMI' context='M¾ÙæÆLI@\x11¬ª\x97ß\x050@òí]\x83¾LI@¬pËGR\x060@\x1e\x17Õ"¢LI@\x1eR\x0c\x90h\x060@Ñy\x8d]¢LI@Òþ\x07X«\x060@\x82ÿ\xaddÇLI@\x87Þâá=\x070@\x99\x0f\x08t&MI@8\x9eÏ\x80z\x070@.ä\x11ÜHMI@\x9c¢#¹ü\x070@XSY\x14vMI@ \tûv\x12\t0@\x85@.qäMI@OÍå\x06C\t0@á\x95$ÏõMI@°u©\x11ú\t0@\x7fk\'JBNI@\x03²×»?\n0@KÌ³\x92VNI@\x92Z(\x99\x9c\n0@B\x96\x05\x13\x7fNI@x\n¹RÏ\n0@\x10\x93p!\x8fNI@MIÖáè\n0@ \x7fiQ\x9fNI@\x14x\'\x9f\x1e\x0b0@ç\x1c<\x13\x9aNI@LÂ\x85<\x82\x0b0@Pý\x83H\x86NI@DP5z5\x0c0@pD÷¬kNI@\x86ÉT'
+sec=88 name='GEO-SHP file' off=0x4d9f5d4 va=0x4d9f5d4 needle='HMI' context="ª)É:\x1cMI@\x1fó\x01\x81Î¤*@`\xadÚ5!MI@à\x9eçO\x1b¥*@ÚÊKþ'MI@¡¹N#-¥*@D\x19ªb*MI@k,am\x8c¥*@¹þ]\x9f9MI@··[\x92\x03¦*@î\\\x18éEMI@Ëø÷\x19\x17¦*@oÓ\x9fýHMI@(¶\x82¦%¦*@Zd;ßOMI@\x80Ó»x?¦*@·Ð\x95\x08TMI@c'¼\x04§¦*@ô\x87f\x9e\\MI@²Ôz¿Ñ¦*@÷tuÇbMI@\x829züÞ¦*@x·²DgMI@\x02eS®ð¦*@oö\x07ÊmMI@\n\x0f\x9a]÷¦*@\x8asÔÑqMI@\x99J?áì¦*@\x07\x9b:\x8f\x8aMI@OZ¸¬Â¦*@\x01L\x198\xa0MI@éòæp\xad¦*@\x8blçû©MI@Þ>«Ì\x94¦*@qt\x95î®MI@\x0bÐ¶"
+sec=88 name='GEO-SHP file' off=0x5433bfc va=0x5433bfc needle='HMI' context='B\x96\x05\x13\x7fNI@\x03²×»?\n0@KÌ³\x92VNI@°u©\x11ú\t0@\x7fk\'JBNI@OÍå\x06C\t0@á\x95$ÏõMI@ \tûv\x12\t0@\x85@.qäMI@\x9c¢#¹ü\x070@XSY\x14vMI@8\x9eÏ\x80z\x070@.ä\x11ÜHMI@\x87Þâá=\x070@\x99\x0f\x08t&MI@Òþ\x07X«\x060@\x82ÿ\xaddÇLI@\x1eR\x0c\x90h\x060@Ñy\x8d]¢LI@¬pËGR\x060@\x1e\x17Õ"¢LI@\x11¬ª\x97ß\x050@òí]\x83¾LI@þ\x98Ö¦±\x050@M¾ÙæÆLI@³ðõµ.\x050@Ò\x89\x04SÍLI@:Í\x02í\x0e\x050@MÛ¿²ÒLI@3Q\x84Ôí\x040@·F\x04ãàLI@\x11ÆOãÞ\x040@¸Ë~ÝéLI@(\x9dH0Õ\x040@\x97âª²ïLI@\tÿ"'
+sec=88 name='GEO-SHP file' off=0x405ed1c va=0x405ed1c needle='AWB' context="Fë¨j\x82ZB@\x9cj-ÌB\x0b6@2YÜ\x7fdZB@î\x08§\x05/\n6@¸=Ab»YB@Z\r\x89{,\t6@ÃÖlå%YB@èLÚTÝ\x076@µ¥\x0eòzXB@0\x0e.\x1ds\x066@[\\ã3ÙWB@\x85w¹\x88ï\x046@ü¦°RAWB@µ\x88(&o\x046@~©\x9f7\x15WB@éóQF\\\x046@h\x92XRîVB@f¡\x9dÓ,\x046@í\x82Á5wVB@\xa0áÍ\x1a¼\x036@×Pj/¢UB@åD»\n)\x036@6çà\x99ÐTB@}w+Kt\x026@4Ù?O\x03TB@\x02-]Á6\x026@ú}ÿæÅSB@\x9dõ)Çd\x016@Yý\x11\x86\x01SB@V\x80ï6o|6@!Ë\x82\x89?RB@\x1f\x83\x15§Zÿ5@\x04®+f\x84QB@\x86V'g(þ5@Z½ÃíÐPB@y[é"
+sec=88 name='GEO-SHP file' off=0x5971630 va=0x5971630 needle='AWB' context='4Ù?O\x03TB@åD»\n)\x036@6çà\x99ÐTB@\xa0áÍ\x1a¼\x036@×Pj/¢UB@f¡\x9dÓ,\x046@í\x82Á5wVB@éóQF\\\x046@h\x92XRîVB@µ\x88(&o\x046@~©\x9f7\x15WB@\x85w¹\x88ï\x046@ü¦°RAWB@0\x0e.\x1ds\x066@[\\ã3ÙWB@èLÚTÝ\x076@µ¥\x0eòzXB@Z\r\x89{,\t6@ÃÖlå%YB@î\x08§\x05/\n6@¸=Ab»YB@\x9cj-ÌB\x0b6@2YÜ\x7fdZB@§X5\x08s\x0b6@Fë¨j\x82ZB@C\x1b\x80\r\x88\x0c6@Ã\x109}=[B@ó\x03Wy\x02\r6@zä\x0f\x06\x9e[B@ß2§Ëb\x0e6@\x18\x96?ß\x16\\B@N\x97ÅÄæ\x0f6@§Ï\x0e¸®\\B@*¬TPQ\x116@0\x9dÖmP]B@`:\xad'
+sec=90 name='CTRL-System' off=0x3c8ae va=0x803c8ae needle='Flash' context='t available (TskDisplays event 0x%08X)!\r\n|RTOS system not initialized yet, events not available (TskFlash event 0x%08X)!\r\n||||RTOS system not initialized yet, events not available (TskImage event 0x%08X)!\r\n||||Set diagnostics info (shutter actions %i, op. counter %i s, camera on count'
+sec=90 name='CTRL-System' off=0x3d197 va=0x803d197 needle='Flash' context="|of lightmeter -> already in LV sync available, don't transmit! (%i, on - %i)\r\n||IMG Simulator: \t - Flash (advanced) : mounted %i, ready %i, EV = 0x%02X (%i)\r\n|||ù\x80ù|ú\x80ú|û\x80û|ü\x80ü|ý\x80ý|þ\x80þ|ÿ\x80ÿ||\x80||\x01\x80\x01|\x02\x80\x02|\x03\x80\x03|\x04\x80\x04|\x05\x80\x05|\x06\x80\x06|\x07\x80\x07|\x08\x80\x08|\t\x80\t|\n\x80\n|\x0b\x80\x0b|\x0c||RTOS system not initialized yet, events not "
+sec=90 name='CTRL-System' off=0x3d807 va=0x803d807 needle='Flash' context=")\r\n||of BV -> status unchanged, don't transmit! (BV (0x%04X), BV IR  (0x%04X))\r\n|IMG Simulator: \t - Flash (prime) : mounted %i, ready %i, EV = 0x%02X (%i)\r\n|Run shutter motor CCW with PWM (running time %i us, duty cycle %i %%).\r\n||||Guard: IMG_FCT_BLOCKED_OLD_VERY_COLD (Batt. old & ba"
+sec=90 name='CTRL-System' off=0x3e316 va=0x803e316 needle='Flash' context='V-ACC: Store calibration values in EEPROM successful. (save:OK) \r\n||||TC: Write to Update register (Flash area %i, HW ID %i, Version %i.%i)\r\n|No acknowledge from device, abort communication!!! (address 0x%02X)\r\n|||Test - Ltp_RHS (AS5510 (hall sensor), S-5851A (temperature sensor)):\r\n|'
+sec=90 name='CTRL-System' off=0x40adc va=0x8040adc needle='Flash' context='lcc_mcu_SCA_ReceiveData() -> Undefined SCA channel %i!\r\n||||TC: Write to Erase flash area register (Flash area %i)\r\n||||AE library:\tLCC AEAlgorithm V%i.%i (HW_ID %i, Rev. %s)\r\n||||Br. EV; Br. EV; Pshift EV; Pshift EV; Override; Override; ||Bracketing EV value for calculation (0x%04X |'
+sec=90 name='CTRL-System' off=0x4328d va=0x804328d needle='Flash' context='ms] Relase 1st stage transmission\r\n||||\t- [%09i ms] Relase 2nd stage transmission\r\n||||\t- [%09i ms] Flash task ready for exposure\r\n||||\t- [%09i ms] Shutter task ready for exposure\r\n||\t- [%09i ms] Received run exposure from image\r\n|\r\n-------------> Run exposure delay : %i ms\r\n|||Time: '
+sec=90 name='CTRL-System' off=0x436a0 va=0x80436a0 needle='Flash' context='||||Set UTC time (%02i.%02i.%04i %02i:%02i:%02i)\r\n||Drive mode received (%i, frm. %i, delay %i s)\r\n|Flash compensation received (0x%04X, (%i))\r\n||||\t- Move lens small steps (%i) to the right\r\n||||Get lens data received (data %i, pkt nr %i)\r\n|||Nothing to do in this camera mode (mode %'
+sec=90 name='CTRL-System' off=0x44a7f va=0x8044a7f needle='Flash' context='grip wheel ok button (cause %i)\r\n||||IMG Simulator: Prepare for still capture\r\n||IMG Simulator: \t - Flash sync time : %i\r\n|||IMG Simulator: \t - Lens connected : %i\r\n||||IMG Simulator: SV wheel auto ISO selected\r\n|IMG Simulator: Release 1st stage button ||||IMG Simulator: Release 2nd s'
+sec=90 name='CTRL-System' off=0x44e10 va=0x8044e10 needle='Flash' context='\r\n||Shutter: Undefined HW trigger point (%i)!\r\n|Central shutter exposure not available!\r\n|||Xmodem: Flash packet %i (address 0x%08X)\r\n||Initialize AE algorithm module (0x%08X).\r\n||\t- SV step value (0x%04X | %i | %f |).\r\n||||\t- AV step value (0x%04X | %i | %f |).\r\n||||Calculate exposur'
+sec=90 name='CTRL-System' off=0x457b8 va=0x80457b8 needle='Flash' context='s disconnected\r\n||||IMG Simulator: Start image simulation\r\n|IMG Simulator: Stop image simulation\r\n||Flash sync on end exposure received\r\n|||Flash sync on start exposure received\r\n|Exposure metering mode received (%i)\r\n||Picture buffer capacity (%i) received\r\n|Undefined GUI state (%i) '
+sec=90 name='CTRL-System' off=0x457e0 va=0x80457e0 needle='Flash' context=' image simulation\r\n|IMG Simulator: Stop image simulation\r\n||Flash sync on end exposure received\r\n|||Flash sync on start exposure received\r\n|Exposure metering mode received (%i)\r\n||Picture buffer capacity (%i) received\r\n|Undefined GUI state (%i) received!\r\n||||Update control received ('
+sec=90 name='CTRL-System' off=0x462bb va=0x80462bb needle='Flash' context='|\t- AV max value (0x%04X | %i | %f |).\r\n|\t- AV min value (0x%04X | %i | %f |).\r\n|AISO; AElock; Br.; Flash rdy; Strobo; ||Auto ISO (%i) <- (0 - off, 1 - on).\r\n|||Override value (0x%04X | %i | %f |).\r\n||\t- Bracketing EV value ( %i | %f |).\r\n||0x%08X \t - \t EE_ADDRESS_CFGDATA_END\r\n|||0x%0'
+sec=90 name='CTRL-System' off=0x4795c va=0x804795c needle='Flash' context='TILT_LEFT)||Nö\x88QÎò|\x01\x08h@ôp|\x08`¿óO\x8f¿óo\x8fOð|páî\x10\npG||u\x87ÿÿ$\x8c\x01|\x08"| ||||¹¦ÿÿðJ||0\x02||||| ©¦ÿÿøK||\x10|||p\x01| %\x11||Flash niveau is set to %d.\r\n||||Adjust GNC-Flash done. [%i]\r\n|||Adjust Shutter 1000 to %d.\r\n||||Adjust Shutter 2000 to %d.\r\n||||Adjust Shutter 4000 to %d.\r\n||||Clear Shutter adjust done'
+sec=90 name='CTRL-System' off=0x47987 va=0x8047987 needle='Flash' context='\npG||u\x87ÿÿ$\x8c\x01|\x08"| ||||¹¦ÿÿðJ||0\x02||||| ©¦ÿÿøK||\x10|||p\x01| %\x11||Flash niveau is set to %d.\r\n||||Adjust GNC-Flash done. [%i]\r\n|||Adjust Shutter 1000 to %d.\r\n||||Adjust Shutter 2000 to %d.\r\n||||Adjust Shutter 4000 to %d.\r\n||||Clear Shutter adjust done.\r\n||||Adjust Shutter X delay to %d.\r\n|Clos'
+sec=90 name='CTRL-System' off=0x48b24 va=0x8048b24 needle='Flash' context='done. [%i/%i]\r\n|Adjust BV0 done. [%i/%i]\r\n||Adjust BV3 done. [%i/%i]\r\n||Adjust BV10 done. [%i/%i]\r\n|Flash niveau is now %d.\r\n|||Adjust Shutter 30 to %d.\r\n||Adjust Shutter 60 to %d.\r\n||Adjust Shutter 125 to %d.\r\n|Adjust Shutter 250 to %d.\r\n|Adjust Shutter 500 to %d.\r\n|Open shutter for '
+sec=90 name='CTRL-System' off=0x4b175 va=0x804b175 needle='Flash' context='|||\tRel. camera||||simulateflags|||WriteOffsetTime|\tAdjust - %i\r\n||\tControl - %i\r\n|\tDebug - %i\r\n|||\tFlash - %i\r\n|||\tImage - %i\r\n|||\tLens - %i\r\n||||Task %i ready\r\n|||||||||||||||||Error store:\r\n||Index:%03i\r\n||||LZ Bild:%05i\r\n||LZ mess:%05i\r\n||LZ adj:%05i\r\n|||Preflash 1:\r\n|||Preflash 2'
+sec=90 name='CTRL-System' off=0x4bae3 va=0x804bae3 needle='Flash' context='|15:38:37||||Start OS\r\n||%s %s %s\r\n||not ok!\r\n|||Test end.\r\n|Count: %i\r\n|not ok!\r\n|||\t- TTL:\r\n|||\t- Flash:\r\n|not ok!\r\n|||timeout!\r\n||not ok!\r\n|||not ok!\r\n|||\t--- ok!\r\n||not ok\r\n||||DRV-ACC:||||Landscape|||PicRight||||ÀFÀFû÷Òþý÷¤ÿ||||||||%i\r\n||||||||||||||||||||||||||||||||||||||||||||'
+sec=92 name='IMG-System' off=0xa86f2 va=0xa86f2 needle='Daylight' context='9: %s() - white balance module not active|¤ZpCCA9: %s(FrameStatus: %i) invalid for AWB -> set WB to Daylight||du\x83BÌ]pC\x19\x88\x81@\x1ct\x83B\x1c\x88\x81@`\x0e\x8f@CA9: pInfo    - Frame Status:%i ImgID:%i||||pµ\x04||%&|\x9c60\x88\x10(.Ñà\x8c\x01(\x14Ñ jÿ÷Ðû\x05||-\x06Ð\x17Hôð°ý`hôð»ý\x1dà\x13H@\x1eôð¨ý`hôð³ý\x15àà\x8c|(\x12Ñ jÿ÷^ü\x05|\rJ\r¡\x04 #j\x97ðÝü\tH@\x1eôð\x93ý|"\x18!`hõð@ú\x05à'
+sec=92 name='IMG-System' off=0x12f0b4 va=0x12f0b4 needle='Daylight' context='Synchronisation TAN|Pairing|Unpairing|||WLAN Version||||GPS|Date Time|||GPS Auto Time|||Time Zone|||Daylight Saving Time||||Date Setting||||Date Format|Date Setting Year|||Date Setting Month||Date Setting Day||||Time Setting||||Time Format|Time Setting Hour|||Time Setting Minute|Time Set'
+sec=92 name='IMG-System' off=0x8375b3 va=0x8375b3 needle='Daylight' context='Av:%i | Sv:%i | Ev:%i||||CA9: %s(Block_Pointer: 0x%08X | Block_Cnt: %i) WB Block ERROR!!! set WB to Daylight|CA9: WB IntRes  C1 |%4i|%4i|%4i|%4i|%4i|%4i|%4i|%4i|%4i|%4i|%4i|%4i|%4i|%4i|%4i|    ||||CA9: WB IntRes  C2 |%4i|%4i|%4i|%4i|%4i|%4i|%4i|%4i|%4i|%4i|%4i|%4i|%4i|%4i|%4i|    ||||CA9'
+sec=92 name='IMG-System' off=0x1c724f va=0x1c724f needle='HMI' context='`aHXIè1\x88`7HH`| \x08w^¡bH\x87öêþ\x0f!`HH0\x01w\x05 ^Id1\x88a\x14 {÷\x99ù[Id1HaZHIi\x08`\x900WId1IiH`\x900UId1Ii\x88`\x900RId1IiÈ`\x900PId1Ii\x08aOHMId1\x88`\x1fHH`| \x08wL¡IH\x840\x87ö¸þ\x10!GHè0\x01p\x02 EIè1\x88a\x08 {÷gùBIè1HaGHIi\x08`\x900>Iè1IiH`<Iè1\x88`\x0eHH`| \x08w\x81àsys_evf_connection||èÛ\x98@<\x13\x99@sys_evf_status||\x9c\x16\x99@\\ù\x98@USB_CONNECTION||ðÜ\x98@Ü\x18\x99@\x9c(\x99@sys_wifi||||ü\x19\x99@Ì\x1c'
+sec=92 name='IMG-System' off=0xb9fcb va=0xb9fcb needle='FLASH' context='\x1cé¡\x02 \x86ðòøèx©x|\x91\x01\x90kx*xí¡\x02 \x86ðèøIç¥\x1cðá||CtrlCPU: MR- IMG_CMD_SET_SLAVE_PARAM||||CtrlCPU: IMG_SPARAM_ID_FLASH_SYNC|||Flash Synch. on 2. curtain: %d||CtrlCPU: IMG_SPARAM_ID_AUTO_SLOW_SYNC|||auto slow synch. (Flash threshold): %d||CtrlCPU: IMG_SPARAM_ID_AUTOISO_SETTINGS|auto ISO settings (a'
+sec=92 name='IMG-System' off=0xbab3f va=0xbab3f needle='FLASH' context=': %d|selected ISO (ISO): %d||CtrlCPU: IMG_SPARAM_ID_KEY_LOCK|key lock: %d||||CtrlCPU: IMG_SPARAM_ID_FLASH_COMPENSATION|||flash compensation: %d||CtrlCPU: IMG_SPARAM_ID_AE_LOCK||lock on: %d|CtrlCPU: IMG_SPARAM_ID_MAX_EXP_TIME|maximum exposure time: %d|||CtrlCPU: IMG_SPARAM_ID_GUI_INFO|'
+sec=92 name='IMG-System' off=0xc1ad0 va=0xc1ad0 needle='FLASH' context='_ID_FOCUS_POS|||current pos: %d|max. pos: %d||||min. pos: %d||||AFOverride: %d||SET - IMG_MPARAM_ID_FLASH_INFO||SET - IMG_MPARAM_ID_BATT_INFO|||SET - IMG_MPARAM_ID_OVERHEATING|SET - IMG_MPARAM_ID_FCT_BLOCKED|SET - IMG_MPARAM_ID_WARNING|SET - IMG_MPARAM_ID_P_SHIFT_EV||SET - IMG_MPARAM_'
+sec=92 name='IMG-System' off=0xca1bc va=0xca1bc needle='FLASH' context=': Read Value from ADC: 0x%02x|||FPGA_W||FPGA_R||%s(): Read Register %d (0x%02X) from FPGA: 0x%02x|||FLASH_DATA_R||||\\â\x84BFLASH_WRITE|xà\x84BFLASH_ERASE_BLOCK|||TEST||||PROX_W||PROX_R||%s(): Proximity sensor raw value: %d||||ORBIT_W|ORBIT_R|%s(): Read Orbit register: (%d ; %d)||||***** EVF'
+sec=92 name='IMG-System' off=0xca1d0 va=0xca1d0 needle='FLASH' context='C: 0x%02x|||FPGA_W||FPGA_R||%s(): Read Register %d (0x%02X) from FPGA: 0x%02x|||FLASH_DATA_R||||\\â\x84BFLASH_WRITE|xà\x84BFLASH_ERASE_BLOCK|||TEST||||PROX_W||PROX_R||%s(): Proximity sensor raw value: %d||||ORBIT_W|ORBIT_R|%s(): Read Orbit register: (%d ; %d)||||***** EVF Configuration *****'
+sec=92 name='IMG-System' off=0xca1e0 va=0xca1e0 needle='FLASH' context='_W||FPGA_R||%s(): Read Register %d (0x%02X) from FPGA: 0x%02x|||FLASH_DATA_R||||\\â\x84BFLASH_WRITE|xà\x84BFLASH_ERASE_BLOCK|||TEST||||PROX_W||PROX_R||%s(): Proximity sensor raw value: %d||||ORBIT_W|ORBIT_R|%s(): Read Orbit register: (%d ; %d)||||***** EVF Configuration *****|||*************'
+sec=92 name='IMG-System' off=0xca70a va=0xca70a needle='FLASH' context='sp_evf_visoflex_2;ORBIT_W;[X];[Y]|\x14á\x84BÌà\x84B***** ORBIT_R *****|drv_disp_evf_visoflex_2;ORBIT_R|***** FLASH_WRITE *****|drv_disp_evf_visoflex_2;FLASH_WRITE;[ADDRESS];[FILENAME]||||\x0câ\x84B\\á\x84B***** FLASH_ERASE_BLOCK *****|||drv_disp_evf_visoflex_2;FLASH_ERASE_BLOCK;[ADDRESS]|¤á\x84Bpµ\x04|\nJ\x0b¡\x01 u'
+sec=92 name='IMG-System' off=0xca734 va=0xca734 needle='FLASH' context='***** ORBIT_R *****|drv_disp_evf_visoflex_2;ORBIT_R|***** FLASH_WRITE *****|drv_disp_evf_visoflex_2;FLASH_WRITE;[ADDRESS];[FILENAME]||||\x0câ\x84B\\á\x84B***** FLASH_ERASE_BLOCK *****|||drv_disp_evf_visoflex_2;FLASH_ERASE_BLOCK;[ADDRESS]|¤á\x84Bpµ\x04|\nJ\x0b¡\x01 uðÇü|%íC\x01,\x05Ñ\x17!\x07 Ö÷éÿ\x05|\x04à|!\x07 Ö÷ãÿ\x05|(|p½\x07M\x80B%'
+sec=92 name='IMG-System' off=0xca766 va=0xca766 needle='FLASH' context='R|***** FLASH_WRITE *****|drv_disp_evf_visoflex_2;FLASH_WRITE;[ADDRESS];[FILENAME]||||\x0câ\x84B\\á\x84B***** FLASH_ERASE_BLOCK *****|||drv_disp_evf_visoflex_2;FLASH_ERASE_BLOCK;[ADDRESS]|¤á\x84Bpµ\x04|\nJ\x0b¡\x01 uðÇü|%íC\x01,\x05Ñ\x17!\x07 Ö÷éÿ\x05|\x04à|!\x07 Ö÷ãÿ\x05|(|p½\x07M\x80B%s()||||øµ\x06|\r|\x1bJ\x1b¡\x01 uð¨ü×÷æù\x04||,*Ñ(\x0c|\x04\x01!\t\x04G\x18\x01!8|ÿ÷\\'
+sec=92 name='IMG-System' off=0xca798 va=0xca798 needle='FLASH' context='FLASH_WRITE;[ADDRESS];[FILENAME]||||\x0câ\x84B\\á\x84B***** FLASH_ERASE_BLOCK *****|||drv_disp_evf_visoflex_2;FLASH_ERASE_BLOCK;[ADDRESS]|¤á\x84Bpµ\x04|\nJ\x0b¡\x01 uðÇü|%íC\x01,\x05Ñ\x17!\x07 Ö÷éÿ\x05|\x04à|!\x07 Ö÷ãÿ\x05|(|p½\x07M\x80B%s()||||øµ\x06|\r|\x1bJ\x1b¡\x01 uð¨ü×÷æù\x04||,*Ñ(\x0c|\x04\x01!\t\x04G\x18\x01!8|ÿ÷\\ø\x04||,\x18Ñ\x10J\x12¡\x02 uð\x92ü*|1|| ×÷?ú\x04||,\x05Ñ\tJ\x13¡\x02 uð\x85ü\x0bà\x06J\x18¡\x04'
+sec=92 name='IMG-System' off=0x13f3db va=0x13f3db needle='FLASH' context='ng.||HSK: hsk_control_manager:E_HSK_CMD_CAP_STILL_EVENT received|HSK: hsk_control_manager:E_HSK_CMD_FLASH_FILE_FROM_SD received||7q}J|\x8c\x8c@\x80\x8c\x8c@\x88\x13||L¹\x83BHSK: hsk_control_manager: Country [%s]||HSK: hsk_control_manager: CountryCode [%s]||HSK: hsk_control_manager: Offset [%d]|||ø¯\x83B\x04\x9a|ðaþrá'
+sec=92 name='IMG-System' off=0x1c2ca7 va=0x1c2ca7 needle='FLASH' context='LINK|¬ÿ\x99@LED_RED_SHOULD_LIGHT||||LED_GREEN_SHOULD_LIGHT||LED_YELLOW_SHOULD_LIGHT|ì|\x9a@LED_RED_SHOULD_FLASH||||LED_GREEN_SHOULD_FLASH||LED_YELLOW_SHOULD_FLASH|,\x02\x9a@LED_RED_BLINK_OFF|||LED_GREEN_BLINK_OFF|LED_YELLOW_BLINK_OFF||||,\x03\x9a@LED_RED_LIGHT_OFF|||LED_GREEN_LIGHT_OFF|,\x04\x9a@LED_YELLOW_L'
+sec=92 name='IMG-System' off=0x1c2cc1 va=0x1c2cc1 needle='FLASH' context='GHT||||LED_GREEN_SHOULD_LIGHT||LED_YELLOW_SHOULD_LIGHT|ì|\x9a@LED_RED_SHOULD_FLASH||||LED_GREEN_SHOULD_FLASH||LED_YELLOW_SHOULD_FLASH|,\x02\x9a@LED_RED_BLINK_OFF|||LED_GREEN_BLINK_OFF|LED_YELLOW_BLINK_OFF||||,\x03\x9a@LED_RED_LIGHT_OFF|||LED_GREEN_LIGHT_OFF|,\x04\x9a@LED_YELLOW_LIGHT_OFF||||LED_CONTROL_GO'
+sec=92 name='IMG-System' off=0x1c2cda va=0x1c2cda needle='FLASH' context='IGHT||LED_YELLOW_SHOULD_LIGHT|ì|\x9a@LED_RED_SHOULD_FLASH||||LED_GREEN_SHOULD_FLASH||LED_YELLOW_SHOULD_FLASH|,\x02\x9a@LED_RED_BLINK_OFF|||LED_GREEN_BLINK_OFF|LED_YELLOW_BLINK_OFF||||,\x03\x9a@LED_RED_LIGHT_OFF|||LED_GREEN_LIGHT_OFF|,\x04\x9a@LED_YELLOW_LIGHT_OFF||||LED_CONTROL_GOTO_OFF||||,\x05\x9a@LED_CONTROL'
+sec=92 name='IMG-System' off=0x1dfd87 va=0x1dfd87 needle='FLASH' context='÷\x95þ\x0cä\x15"Û¡ |oö\x19ú|(\x04Ñ1|ê Ü÷\x89þ\x0cä\x18"µá\x99ã||LED_GREEN_SHOULD_LIGHT||LED_YELLOW_SHOULD_LIGHT|LED_RED_SHOULD_FLASH||||LED_GREEN_SHOULD_FLASH||LED_YELLOW_SHOULD_FLASH|LED_RED_BLINK_OFF|||LED_GREEN_BLINK_OFF|LED_YELLOW_BLINK_OFF||||LED_RED_LIGHT_OFF|||LED_GREEN_LIGHT_OFF|LED_YELLOW_LIGHT_OFF||||'
+sec=92 name='IMG-System' off=0x1dfda1 va=0x1dfda1 needle='FLASH' context='þ\x0cä\x18"µá\x99ã||LED_GREEN_SHOULD_LIGHT||LED_YELLOW_SHOULD_LIGHT|LED_RED_SHOULD_FLASH||||LED_GREEN_SHOULD_FLASH||LED_YELLOW_SHOULD_FLASH|LED_RED_BLINK_OFF|||LED_GREEN_BLINK_OFF|LED_YELLOW_BLINK_OFF||||LED_RED_LIGHT_OFF|||LED_GREEN_LIGHT_OFF|LED_YELLOW_LIGHT_OFF||||LED_CONTROL_GOTO_OFF||||LE'
+sec=92 name='IMG-System' off=0x1dfdba va=0x1dfdba needle='FLASH' context='LD_LIGHT||LED_YELLOW_SHOULD_LIGHT|LED_RED_SHOULD_FLASH||||LED_GREEN_SHOULD_FLASH||LED_YELLOW_SHOULD_FLASH|LED_RED_BLINK_OFF|||LED_GREEN_BLINK_OFF|LED_YELLOW_BLINK_OFF||||LED_RED_LIGHT_OFF|||LED_GREEN_LIGHT_OFF|LED_YELLOW_LIGHT_OFF||||LED_CONTROL_GOTO_OFF||||LED_CONTROL_RED_GOTO_LIGHT|'
+sec=92 name='IMG-System' off=0xa1aa1 va=0xa1aa1 needle='Flash' context='Ñ\x10J8¡\x02 \x9eð\x86û\x17à\rJ@¡\x04 \x9eð\x80û| ÀCø½\tJG¡\x04 \x9eðxû| ÀCöç\x05JN¡\x04 \x9eðpû| ÀCîç |ìç||×N\x80B%s()||||%s(): Visoflex 2 SPI-Flash: Erase...||||%s(): Visoflex 2 SPI-Flash: Erase done! --> Program...||%s(): Visoflex 2 SPI-Flash: Program done! --> Verify...|%s(): Visoflex 2 SPI-Flash: Verify done!||||%s(): Viso'
+sec=92 name='IMG-System' off=0xa1ac9 va=0xa1ac9 needle='Flash' context=' ÀCöç\x05JN¡\x04 \x9eðpû| ÀCîç |ìç||×N\x80B%s()||||%s(): Visoflex 2 SPI-Flash: Erase...||||%s(): Visoflex 2 SPI-Flash: Erase done! --> Program...||%s(): Visoflex 2 SPI-Flash: Program done! --> Verify...|%s(): Visoflex 2 SPI-Flash: Verify done!||||%s(): Visoflex 2 SPI-Flash: Verify FAILED!||%s(): '
+sec=92 name='IMG-System' off=0xa1b01 va=0xa1b01 needle='Flash' context='SPI-Flash: Erase...||||%s(): Visoflex 2 SPI-Flash: Erase done! --> Program...||%s(): Visoflex 2 SPI-Flash: Program done! --> Verify...|%s(): Visoflex 2 SPI-Flash: Verify done!||||%s(): Visoflex 2 SPI-Flash: Verify FAILED!||%s(): Visoflex 2 SPI-Flash: Program FAILED!|%s(): Visoflex 2 S'
+sec=92 name='IMG-System' off=0xa1b39 va=0xa1b39 needle='Flash' context=' done! --> Program...||%s(): Visoflex 2 SPI-Flash: Program done! --> Verify...|%s(): Visoflex 2 SPI-Flash: Verify done!||||%s(): Visoflex 2 SPI-Flash: Verify FAILED!||%s(): Visoflex 2 SPI-Flash: Program FAILED!|%s(): Visoflex 2 SPI-Flash: Erase FAILED!|||\x10µ\x14J\x14¡\x01 \x9eðºú|!\x03 ÿ÷Òü\x04||,\x15Ñ\x01!\x08|'
+sec=92 name='IMG-System' off=0xa1b65 va=0xa1b65 needle='Flash' context='Flash: Program done! --> Verify...|%s(): Visoflex 2 SPI-Flash: Verify done!||||%s(): Visoflex 2 SPI-Flash: Verify FAILED!||%s(): Visoflex 2 SPI-Flash: Program FAILED!|%s(): Visoflex 2 SPI-Flash: Erase FAILED!|||\x10µ\x14J\x14¡\x01 \x9eðºú|!\x03 ÿ÷Òü\x04||,\x15Ñ\x01!\x08|ÿ÷Ëü\x04||,\x08Ñ\nJ\r¡\x02 \x9eð§ú\x02 ½÷´ú\nà\x06J\x14¡\x04 \x9eð\x9eú\x04à\x03J\x1f¡'
+sec=92 name='IMG-System' off=0xa1b91 va=0xa1b91 needle='Flash' context='oflex 2 SPI-Flash: Verify done!||||%s(): Visoflex 2 SPI-Flash: Verify FAILED!||%s(): Visoflex 2 SPI-Flash: Program FAILED!|%s(): Visoflex 2 SPI-Flash: Erase FAILED!|||\x10µ\x14J\x14¡\x01 \x9eðºú|!\x03 ÿ÷Òü\x04||,\x15Ñ\x01!\x08|ÿ÷Ëü\x04||,\x08Ñ\nJ\r¡\x02 \x9eð§ú\x02 ½÷´ú\nà\x06J\x14¡\x04 \x9eð\x9eú\x04à\x03J\x1f¡\x04 \x9eð\x98ú |\x10½«N\x80B%s()||||%s(): Reset OLED relea'
+sec=92 name='IMG-System' off=0xa1bbd va=0xa1bbd needle='Flash' context='oflex 2 SPI-Flash: Verify FAILED!||%s(): Visoflex 2 SPI-Flash: Program FAILED!|%s(): Visoflex 2 SPI-Flash: Erase FAILED!|||\x10µ\x14J\x14¡\x01 \x9eðºú|!\x03 ÿ÷Òü\x04||,\x15Ñ\x01!\x08|ÿ÷Ëü\x04||,\x08Ñ\nJ\r¡\x02 \x9eð§ú\x02 ½÷´ú\nà\x06J\x14¡\x04 \x9eð\x9eú\x04à\x03J\x1f¡\x04 \x9eð\x98ú |\x10½«N\x80B%s()||||%s(): Reset OLED release of FPGA reset done.||||%s(): Reset OLED d'
+sec=92 name='IMG-System' off=0xa1d29 va=0xa1d29 needle='Flash' context=" \x9eðEú)| |'ð?ý\x06||.\x0bÑ\nJ\rI\x02 \x9eð9ú*|!|8|ÿ÷xþ\x06|\x07à\x04J\x08¡\x04 \x9eð-ú| ÀCø½0|üçYN\x80B%s()||||\xa0â\x84B%s(): Visoflex 2 SPI-Flash: Overwrite Header FAILED!||||þµ\x05||&|$|!hF\x01q\x0c!Aq\x01!\x81q\x01-\x03Ñ\x03 iFÈq\x02à\x01 iFÈqiFÈy\x01!H@iF\x08r\x05à`\x1c\x04\x06$\x0e\x01 ½÷óù\x05 \x01#\x02|\x01©|\x90U ,ð!ý|(\x01Ð\x03,íÛ\x03,\x01Û|&öC0|þ½þµ\x05||&|$|!hF\x01q\x0c!Aq\x01!\x81q\x01-\x03Ñ\x01 iFÈq\x02à| iFÈqiFÈy\x01!H@"
+sec=92 name='IMG-System' off=0xa8bcb va=0xa8bcb needle='Flash' context='cnt:%i|||CA9: WB Mode  - Mode:%i | Preset:%i | Kelvin:%i|\x18u\x83BCA9: WB Image - ISO:%i | ClampLvl:%i | Flash:%i|CA9: WB WSET  - x:%i | y:%i|CA9: WB Cal h - B:%i | Gb:%i | Gr:%i | R:%i|CA9: WB Cal l - B:%i | Gb:%i | Gr:%i | R:%i|\x10µ\x92°÷H\x11\x90÷H|x|(\x04Ðö¡þH|h\x97ðyúóH|x|(\x0fÐ\x05!É\x01\x11\x98@\x18|x\x10\x90\x06"\x11\x99\x8a^\x0f\x92ö¡ôH\x10\x9b'
+sec=92 name='IMG-System' off=0xa905d va=0xa905d needle='Flash' context='0\x02l\x11\x98ÿ0Ù0Ãk\x11\x98ÿ0Ù0\x80k\x0b\x93\x0c\x92\r\x91\n\x90\x11\x98ÿ0Ù0Ak\x11\x98ÿ0Ù0\x02k\x11\x98ÿ0Ù0;à|[pC\x19\x88\x81@CA9: ***** Output Data *****||||\x1c\x88\x81@CA9: Flash%%: %i  WSET successful: %i|||xt\x83BÌ]pCÀt\x83Bpw\x83B\x18w\x83B¸u\x83B\x10v\x83Bhv\x83BÀv\x83BÃj\x11\x98ÿ0Ù0\x80j\x07\x93\x08\x92\t\x91\x06\x90\x11\x98ÿ0Ù0Bj\x11\x98ÿ0Ù0\x01j\x11\x98ÿ0Ù0Ãi\x11\x98ÿ0Ù0\x80i\x03\x93\x05\x92\x04\x91\x02\x90\x11\x98ÿ0Ù0Ai|à\x15à\x11\x98ÿ0Ù0|i\x01\x91|\x90\x11\x98ÿ0Ù0Àh\x10\x90\x11\x98ÿ0Ù0\x82h\x0f\x92jIjH\x10\x9b|h\x97ð\x1fø'
+sec=92 name='IMG-System' off=0xb8079 va=0xb8079 needle='Flash' context=' parameter!||||pµ|$\x0f \x93ð\x11ÿ\x05|(\x02}!É|\x97÷\x08ë\x06|0\x04\x04\x14 |p½pµ\x01$\x14 \x93ð\x01ÿ\x05||-\x03Ð\x01-\x03ÑÀF\x06à|$\x04à\x03¡\x04 \x88ðvøÀFÀF |p½CtrlCPU: FlashSynchOn2Curtain - unknown parameter!||þµ\x04|^ \x93ðÑþ\x05|b \x93ðÍþ\x06|] \x93ðÉþ\x07|A \x97ðÅø\x01\x90% \x97ðÁø|\x90|-\x04Ð\x01-\x05Ð\x02-\tÑ\x05à| àp\nà\x01 àp\x07à\x02 àp\x04à%¡\x04 \x88ð.øÀFÀF|.\x02Ð\x01.\x06Ñ\x02à\x01 \xa0p\x07à| \xa0p\x04à+¡\x04 \x88ð\x1døÀFÀF| `p\x01/\x18Ñ|\x98|(\x08Ð\x01(\tÐ\x02('
+sec=92 name='IMG-System' off=0xb91d0 va=0xb91d0 needle='Flash' context='\x02 \x86ðñÿ. |]|\x07Â\x0fõ¡\x02 \x86ðéÿ. |]À\x06Â\x0fù¡\x02 \x86ðáÿ. |]@\x06Â\x0fþ¡\x02 \x86ðÙÿ. |]\x05âCtrlCPU: MR- IMG_CMD_MASTER_END_OF_INIT|Flash Synch. on 2. curtain: %d||auto slow synch. (Flash threshold): %d||auto ISO settings (auto ISO in M): %d|||auto ISO settings (max. exp. time): %d||auto ISO settings (max. still ISO'
+sec=92 name='IMG-System' off=0xb9202 va=0xb9202 needle='Flash' context='\x86ðÙÿ. |]\x05âCtrlCPU: MR- IMG_CMD_MASTER_END_OF_INIT|Flash Synch. on 2. curtain: %d||auto slow synch. (Flash threshold): %d||auto ISO settings (auto ISO in M): %d|||auto ISO settings (max. exp. time): %d||auto ISO settings (max. still ISO): %d||auto ISO settings (max. video ISO): %d||sel'
+sec=92 name='IMG-System' off=0xb9fd8 va=0xb9fd8 needle='Flash' context='|\x91\x01\x90kx*xí¡\x02 \x86ðèøIç¥\x1cðá||CtrlCPU: MR- IMG_CMD_SET_SLAVE_PARAM||||CtrlCPU: IMG_SPARAM_ID_FLASH_SYNC|||Flash Synch. on 2. curtain: %d||CtrlCPU: IMG_SPARAM_ID_AUTO_SLOW_SYNC|||auto slow synch. (Flash threshold): %d||CtrlCPU: IMG_SPARAM_ID_AUTOISO_SETTINGS|auto ISO settings (auto ISO in M)'
+sec=92 name='IMG-System' off=0xba032 va=0xba032 needle='Flash' context='SH_SYNC|||Flash Synch. on 2. curtain: %d||CtrlCPU: IMG_SPARAM_ID_AUTO_SLOW_SYNC|||auto slow synch. (Flash threshold): %d||CtrlCPU: IMG_SPARAM_ID_AUTOISO_SETTINGS|auto ISO settings (auto ISO in M): %d|||auto ISO settings (max. exp. time): %d||auto ISO settings (max. still ISO): %d||aut'
+sec=92 name='IMG-System' off=0xbfd90 va=0xbfd90 needle='Flash' context=' Duration: %u us||||Bracketing EV: %d|||Program Shift EV: %d||||Lightmeter: %d||Lightmeter on: %d|||Flash Handgrip Ready: %d||||Flash Handgrip Mounted: %d||Flash Handgrip Compensation: %d|Flash Camera Ready: %d||Flash Camera Mounted: %d||||Flash Camera Compensation: %d|||Batt Camera C'
+sec=92 name='IMG-System' off=0xbfdac va=0xbfdac needle='Flash' context='ng EV: %d|||Program Shift EV: %d||||Lightmeter: %d||Lightmeter on: %d|||Flash Handgrip Ready: %d||||Flash Handgrip Mounted: %d||Flash Handgrip Compensation: %d|Flash Camera Ready: %d||Flash Camera Mounted: %d||||Flash Camera Compensation: %d|||Batt Camera Capacity: %d||||Batt Handgrip'
+sec=92 name='IMG-System' off=0xbfdc8 va=0xbfdc8 needle='Flash' context=': %d||||Lightmeter: %d||Lightmeter on: %d|||Flash Handgrip Ready: %d||||Flash Handgrip Mounted: %d||Flash Handgrip Compensation: %d|Flash Camera Ready: %d||Flash Camera Mounted: %d||||Flash Camera Compensation: %d|||Batt Camera Capacity: %d||||Batt Handgrip Capacity: %d||Power Supply:'
+sec=92 name='IMG-System' off=0xbfde8 va=0xbfde8 needle='Flash' context='er on: %d|||Flash Handgrip Ready: %d||||Flash Handgrip Mounted: %d||Flash Handgrip Compensation: %d|Flash Camera Ready: %d||Flash Camera Mounted: %d||||Flash Camera Compensation: %d|||Batt Camera Capacity: %d||||Batt Handgrip Capacity: %d||Power Supply: %d||||Focus Confiramtion -AFRea'
+sec=92 name='IMG-System' off=0xbfe00 va=0xbfe00 needle='Flash' context='ip Ready: %d||||Flash Handgrip Mounted: %d||Flash Handgrip Compensation: %d|Flash Camera Ready: %d||Flash Camera Mounted: %d||||Flash Camera Compensation: %d|||Batt Camera Capacity: %d||||Batt Handgrip Capacity: %d||Power Supply: %d||||Focus Confiramtion -AFReadyForExposure: %d||Focus'
+sec=92 name='IMG-System' off=0xbfe1c va=0xbfe1c needle='Flash' context='ip Mounted: %d||Flash Handgrip Compensation: %d|Flash Camera Ready: %d||Flash Camera Mounted: %d||||Flash Camera Compensation: %d|||Batt Camera Capacity: %d||||Batt Handgrip Capacity: %d||Power Supply: %d||||Focus Confiramtion -AFReadyForExposure: %d||Focus Confiramtion -BadSignal: %d'
+sec=92 name='IMG-System' off=0xc2f98 va=0xc2f98 needle='Flash' context='\x08\x06|\x14\x10C}!É|HC\x05|À\x17|\x0e@\x19\x01\x12\x02 \x8cð\x92úax* \x8cðDúWH@x|(\x03ÑUH@y|(\x11ÐSH\x80x\x01(\x03ÐQH\x80y\x01(\x04Ñ\x02!( \x8cð0ú\x08à\x01!( \x8cð+ú\x03à|!( \x8cð&úp½||Flash Info (camera-compensation x 256): %d||Flash Info (camera-flash mounted): %d|||Flash Info (camera-flash ready): %d|Flash Info (FlashSyncTimeSelected): %d||Flash Info (handgrip-comp'
+sec=92 name='IMG-System' off=0xc2fc4 va=0xc2fc4 needle='Flash' context='UH@y|(\x11ÐSH\x80x\x01(\x03ÐQH\x80y\x01(\x04Ñ\x02!( \x8cð0ú\x08à\x01!( \x8cð+ú\x03à|!( \x8cð&úp½||Flash Info (camera-compensation x 256): %d||Flash Info (camera-flash mounted): %d|||Flash Info (camera-flash ready): %d|Flash Info (FlashSyncTimeSelected): %d||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-'
+sec=92 name='IMG-System' off=0xc2fec va=0xc2fec needle='Flash' context='+ú\x03à|!( \x8cð&úp½||Flash Info (camera-compensation x 256): %d||Flash Info (camera-flash mounted): %d|||Flash Info (camera-flash ready): %d|Flash Info (FlashSyncTimeSelected): %d||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-flash mounted): %d|Flash Info (handgrip-'
+sec=92 name='IMG-System' off=0xc3010 va=0xc3010 needle='Flash' context='ompensation x 256): %d||Flash Info (camera-flash mounted): %d|||Flash Info (camera-flash ready): %d|Flash Info (FlashSyncTimeSelected): %d||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-flash mounted): %d|Flash Info (handgrip-flash ready): %d|||¥\x0f\x8f@\x10µ\x04|`x"x|\x02\x10C\x01'
+sec=92 name='IMG-System' off=0xc301c va=0xc301c needle='Flash' context='x 256): %d||Flash Info (camera-flash mounted): %d|||Flash Info (camera-flash ready): %d|Flash Info (FlashSyncTimeSelected): %d||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-flash mounted): %d|Flash Info (handgrip-flash ready): %d|||¥\x0f\x8f@\x10µ\x04|`x"x|\x02\x10C\x01|M \x8cðÒù\x10½||\x10'
+sec=92 name='IMG-System' off=0xc3038 va=0xc3038 needle='Flash' context='ra-flash mounted): %d|||Flash Info (camera-flash ready): %d|Flash Info (FlashSyncTimeSelected): %d||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-flash mounted): %d|Flash Info (handgrip-flash ready): %d|||¥\x0f\x8f@\x10µ\x04|`x"x|\x02\x10C\x01|M \x8cðÒù\x10½||\x10µ\x04|ó÷>ý\x02(\x14Û¢x\n¡\x02 }ð5øâx\x0b¡\x02 }'
+sec=92 name='IMG-System' off=0xc3068 va=0xc3068 needle='Flash' context=' ready): %d|Flash Info (FlashSyncTimeSelected): %d||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-flash mounted): %d|Flash Info (handgrip-flash ready): %d|||¥\x0f\x8f@\x10µ\x04|`x"x|\x02\x10C\x01|M \x8cðÒù\x10½||\x10µ\x04|ó÷>ý\x02(\x14Û¢x\n¡\x02 }ð5øâx\x0b¡\x02 }ð0ø\x01"¢V\x0e¡\x02 }ð*ø"x\x12¡\x02 }ð%ø\x10½bad signal = %d|confi'
+sec=92 name='IMG-System' off=0xc3090 va=0xc3090 needle='Flash' context='ected): %d||Flash Info (handgrip-compensation x 256): %d||||Flash Info (handgrip-flash mounted): %d|Flash Info (handgrip-flash ready): %d|||¥\x0f\x8f@\x10µ\x04|`x"x|\x02\x10C\x01|M \x8cðÒù\x10½||\x10µ\x04|ó÷>ý\x02(\x14Û¢x\n¡\x02 }ð5øâx\x0b¡\x02 }ð0ø\x01"¢V\x0e¡\x02 }ð*ø"x\x12¡\x02 }ð%ø\x10½bad signal = %d|confirmation on = %d||||confirmation value = '
+sec=92 name='IMG-System' off=0xc98ba va=0xc98ba needle='Flash' context='\x01ªÿ÷¦ÿ|%\x13à\x01¨A]\x83\x98|\x19@]\x81B\tÐc\x19\rJ\x0e¡\x04 vðmü| ÀC\x81\x90\x05àh\x1c\x05\x04-\x0c|\x98\x85BèÓÀFÿ4ÿ4\x014´BÐÓ\x81\x98\x7f°\x06°ð½||ÿ\x01||ÓP\x80B%s(): Verifiy Flash failed at position %d!||þµ\x04|\x0f|| \x01\x90|%|/\x08Ð} |\x03\x87B\x04Øà\x19\x01!I\x05\x88B\x02Ù\x0b ÀCþ½ÿ |\x04\x04@|&^à0\x04¸BWÒ0\x04|\x19\x01!I\x05\x88BQÒ\x06 ×÷Ëü|%ÀFjF\x01!\x05 ×÷\x90üm\x1chF|x\x02!\x08@|(\x01Ñd-ñÓd-\tÓ+|"J#I\x04 vð\x01ü| ÀC\x01\x908à0\x04\x03\x19\x1dJ\x1e¡\x03 vðöû1\x04\x08\x19×÷ ü|%À'
+sec=92 name='IMG-System' off=0x12d3a8 va=0x12d3a8 needle='Flash' context='keting Frames|||Bracketing Aperture|Bracketing Shift||||Exposure Metering|||Exposure Compensation|||Flash Settings||Flash Sync||Auto Slow Sync||Exposure Compensation Flash|ISO Setup|||Sensitivity|Sensitivity Push||||Sensitivity Auto Max||||Sensitivity Auto Time|||White Balance|||White'
+sec=92 name='IMG-System' off=0x12d3b8 va=0x12d3b8 needle='Flash' context='Bracketing Aperture|Bracketing Shift||||Exposure Metering|||Exposure Compensation|||Flash Settings||Flash Sync||Auto Slow Sync||Exposure Compensation Flash|ISO Setup|||Sensitivity|Sensitivity Push||||Sensitivity Auto Max||||Sensitivity Auto Time|||White Balance|||White Balance Greycar'
+sec=92 name='IMG-System' off=0x12d3ea va=0x12d3ea needle='Flash' context='etering|||Exposure Compensation|||Flash Settings||Flash Sync||Auto Slow Sync||Exposure Compensation Flash|ISO Setup|||Sensitivity|Sensitivity Push||||Sensitivity Auto Max||||Sensitivity Auto Time|||White Balance|||White Balance Greycard LiveView|White Balance Greycard Photo||||White B'
+sec=92 name='IMG-System' off=0x12e128 va=0x12e128 needle='Flash' context=' Detection_Favorite|Drive Mode_Favorite|Exposure Metering_Favorite||Exposure Compensation_Favorite||Flash Settings_Favorite|ISO Setup_Favorite||Sensitivity Push_Favorite|||White Balance_Favorite||Photo File Format_Favorite||Photo JPG Settings_Favorite|Photo JPG Resolution_Favorite|||A'
+sec=92 name='IMG-System' off=0x13b364 va=0x13b364 needle='Flash' context='\x07ð6ÿ\x05||-\x1cÐ"||#)|0|fð ï\xa0B\x0eÑ"|9|(|\x02ðòû\x01(\x01Ñ|\x90\x10à2|\x0c¡\x04 \x04ð\x0fÿ\nà2|\x19I\x04 \x04ð\tÿ\x04à2|\x17¡\x04 \x04ð\x03ÿ\x04à2|"¡\x04 \x04ðýþ|\x98ø½||hsk_FlashFileFromSDCard: [%s] couldn\'t flash all bytes to NOR!||\x84\xad\x83Bhsk_FlashFileFromSDCard: [%s] could not allocate memory|hsk_FlashFileFromSDCard: [%s] is not exists or size is = 0||\x0f´\x1fµ|'
+sec=92 name='IMG-System' off=0x13b3a8 va=0x13b3a8 needle='Flash' context='2|\x17¡\x04 \x04ð\x03ÿ\x04à2|"¡\x04 \x04ðýþ|\x98ø½||hsk_FlashFileFromSDCard: [%s] couldn\'t flash all bytes to NOR!||\x84\xad\x83Bhsk_FlashFileFromSDCard: [%s] could not allocate memory|hsk_FlashFileFromSDCard: [%s] is not exists or size is = 0||\x0f´\x1fµ|$\x1bà\x18 `C\x11I\x08X|(\x14Ñ#|\x10¡\x01 \x06\x9a\x04ð\x8eþ\x08¨\x0fÈ\x03\x93kF\x07Ã |\x07\x9b\x06\x9a\x02ð\x9aú\x04°\x10¼\x08¼\x04°\x18Gd\x1c\n,áÓ\x13¡\x04 \x04'
+sec=92 name='IMG-System' off=0x13b3e0 va=0x13b3e0 needle='Flash' context="] couldn't flash all bytes to NOR!||\x84\xad\x83Bhsk_FlashFileFromSDCard: [%s] could not allocate memory|hsk_FlashFileFromSDCard: [%s] is not exists or size is = 0||\x0f´\x1fµ|$\x1bà\x18 `C\x11I\x08X|(\x14Ñ#|\x10¡\x01 \x06\x9a\x04ð\x8eþ\x08¨\x0fÈ\x03\x93kF\x07Ã |\x07\x9b\x06\x9a\x02ð\x9aú\x04°\x10¼\x08¼\x04°\x18Gd\x1c\n,áÓ\x13¡\x04 \x04ðxþ  ÀCðç||\x18\x93\x8f@hsk_AddSoftTimertoArray: Timer(%d) was pu"
+sec=92 name='IMG-System' off=0x13b8fc va=0x13b8fc needle='Flash' context='file [%d][%s] - VER: 0x%08X|ä°\x83Bøµ\x05||&\r¡(|\x13÷\x07û\x07|\n¡| \x13÷\x02û|"\x11||\x90\x13÷]ø\x04|#|:|\x05¡\x02 \x04ð6ü!|8|ÿ÷üü0|ø½;|||hsk_FlashFileFromSDCard: [%s] ADR=[0x%08X]||\x10µ\x04|!|\x01 #÷Vý\x10½||øµ\x06||\'| 0`"H|h|(&Ñ!\xa0eðÚû\x04||,\x1fÐ |\x06ðúý\x05||-\x13Ð"||#)|\x19\xa0fðöë\xa0B\x08Ð\x17¢\x19¡\x04 \x04ðîû(|\x06ðÁø\x07à\x11H\x05`\x04à"|"I\x04 \x04ðâûÀFÀF\x0cH|h|(\x12Ð\nH|h|h\x1dI\x88B\x05Ñ\x07H|h@h0`\x01\'\x06à\x04'
+sec=92 name='IMG-System' off=0x13dc7b va=0x13dc7b needle='Flash' context="\x99\x02\x98\x88BãÛ`\x08\x03\x90| \x02\x90\x0cà2\x88i\x08\x1fH|h@ð&ú\x01\x90¶\x1c¤\x1e\xad\x1c\x02\x98@\x1c\x02\x90\x03\x99\x02\x98\x88BîÛ|,\x01Ñ\x01 \x08\x90ÀFÀF|,|Ðrç\x06ðÐú!÷Qü\x08\x98eçhsk_camera_data_if_FlashDataToNOR: 0x%08X 0x%08X 0x%08X ||||Äë\x8e@¬\x1b\x85BÀë\x8e@÷µ\x84°\x06|\x14|| \x03\x90|ðÈø\x05\x99\r\x1a@H|h|(\x02Ñ\x03\x98\x07°ð½!÷Ûú\x06ðuúlà\x01 @\x04\x84B*Ój\x0c9¡\x04 \x02ð3ú|'\x15ài\x083|4H\x02hDH|h@ðýù\x02\x900H|h@|6\x18.H|h@|$\x1a,H|h@|E\x19\x7f\x1c*H|hA|\x01 @\x04\x11÷\x8eì¸BàÜ|,@Ñ"
+sec=92 name='IMG-System' off=0x13dddf va=0x13dddf needle='Flash' context="h@|E\x19\x7f\x1c\x02\x98\x87BæÛ`\x08\x01\x90|'\nà2\x88i\x08\x1dH|h@ðrù|\x90¶\x1c¤\x1e\xad\x1c\x7f\x1c\x01\x98\x87BñÛ|,\x01Ñ\x01 \x03\x90ÀF|,\x90Ñ\x06ð!ú!÷¢û\x03\x98\x83ç||Äë\x8e@hsk_camera_data_if_FlashDataWithoutErase: Writing Sector %03d|||Àë\x8e@øµ\x05||&t\x1e#'?\x05(|ÿ÷!þ\x04||,\tÛxh\xa0B\x06Ùl `C9|\x081@\x18Fh\x04à*|\x03I\x04 \x02ð\x87ù0|ø½||´\x19\x85B\x10µ\x08H|h|(\tÑ\x01 @\x06\x05I\x08`\x08|\x04¡\x02h\x04 \x02ðsù\x01H|h\x10½Àë\x8e@hsk_camera_data_GetNORAddress: N"
+sec=92 name='IMG-System' off=0x13de9b va=0x13de9b needle='Flash' context='\x18Fh\x04à*|\x03I\x04 \x02ð\x87ù0|ø½||´\x19\x85B\x10µ\x08H|h|(\tÑ\x01 @\x06\x05I\x08`\x08|\x04¡\x02h\x04 \x02ðsù\x01H|h\x10½Àë\x8e@hsk_camera_data_GetNORAddress: NOR Flash found on: 0x%08X|||øµ\x07|\x0c|| ÀC|\x90|&#%-\x05|,=Ð(h\x01((Ñ!H\x87B\x0cÑ `ÿ"C2\x1f¡ |\x080\x10÷¹ù@\x1c``| |\x90\x1eà|&\x12àl pC)|\x081\x08X¸B\nÑl pC\n|\x81\x18l" |\x11÷ðé| |\x90\x03àv\x1chh°BéØ\x05à\x01#\x0eI\x04 *h\x02ð\x13ùhh°B\x0fØ:|\x0b¡\x04 \x02ð\x0bù\x0e ÀC|\x90\x06à\x16¡\x04 \x02ð\x03ù\x0b ÀC|\x90'
+sec=92 name='IMG-System' off=0x13f1c0 va=0x13f1c0 needle='Flash' context='öî\x07\x91\x06\x90àh§ððî\x05\x91\x04\x90\x07\x99\x06\x98\x01\x91|\x90ÄI\x04 \x05\x9b\x87áHSK: hsk_control_manager: Task started. _first_state =%d||||µ¸\x13Bhsk_FlashFileFromSDCardForDebug|\x8dÕ\x13Bhsk_UpdateFirmwareFromSDCard||||ÝÖ\x13Bhsk_UpdateLensFirmwareFromSDCard||||±p\x14Bhsk_save_settings|||\x9dp\x14Bhsk_reset_settings||\x95À\x13Bhsk_GetPositionInformationFor'
+sec=92 name='IMG-System' off=0x837e92 va=0x837e92 needle='Flash' context='rlCPU (lens): lens data not valid - no lens correction data function!!!|||CtrlCPU (lens): load lens Flash data (distortion) error - total number of sub-points > 100!!||||CtrlCPU (lens): load lens Flash data (shading) error - total numbers of Sub-Points > %d!!|||CtrlCPU (lens): load le'
+sec=92 name='IMG-System' off=0x837ef2 va=0x837ef2 needle='Flash' context='ens Flash data (distortion) error - total number of sub-points > 100!!||||CtrlCPU (lens): load lens Flash data (shading) error - total numbers of Sub-Points > %d!!|||CtrlCPU (lens): load lens Flash data (shading) error - Polynomgrad!!||||CtrlCPU (Lens): lens master not valid --> ERROR'
+sec=92 name='IMG-System' off=0x837f4e va=0x837f4e needle='Flash' context='ad lens Flash data (shading) error - total numbers of Sub-Points > %d!!|||CtrlCPU (lens): load lens Flash data (shading) error - Polynomgrad!!||||CtrlCPU (Lens): lens master not valid --> ERROR! - lens functions are limited!!|CtrlCPU (lens): load lens Flash data (distortion) error - p'
+sec=92 name='IMG-System' off=0x837fe6 va=0x837fe6 needle='Flash' context='U (Lens): lens master not valid --> ERROR! - lens functions are limited!!|CtrlCPU (lens): load lens Flash data (distortion) error - polynomegrade!!|||CtrCPU (lens): ##### FATAL ERROR ###### - LensMasterFile missing!!||CtrlCPU (lens): load lens Flash data (shading) error - CRC - checks'
+sec=92 name='IMG-System' off=0x838076 va=0x838076 needle='Flash' context='e!!|||CtrCPU (lens): ##### FATAL ERROR ###### - LensMasterFile missing!!||CtrlCPU (lens): load lens Flash data (shading) error - CRC - checksum!!|CtrlCPU (lens): load lens Flash data (distortion) error - CRC - checksum!!||CtrlCPU (lens): load lens Flash data (shading) error - Number o'
+sec=92 name='IMG-System' off=0x8380be va=0x8380be needle='Flash' context='||CtrlCPU (lens): load lens Flash data (shading) error - CRC - checksum!!|CtrlCPU (lens): load lens Flash data (distortion) error - CRC - checksum!!||CtrlCPU (lens): load lens Flash data (shading) error - Number of Aperture Sub-points!!||CtrlCPU (lens): load lens Flash data (shading) '
+sec=92 name='IMG-System' off=0x83810a va=0x83810a needle='Flash' context='rlCPU (lens): load lens Flash data (distortion) error - CRC - checksum!!||CtrlCPU (lens): load lens Flash data (shading) error - Number of Aperture Sub-points!!||CtrlCPU (lens): load lens Flash data (shading) error - Number of FocalLength Sub-points!!|||CtrlCPU (lens): load lens Flash'
+sec=92 name='IMG-System' off=0x838162 va=0x838162 needle='Flash' context=': load lens Flash data (shading) error - Number of Aperture Sub-points!!||CtrlCPU (lens): load lens Flash data (shading) error - Number of FocalLength Sub-points!!|||CtrlCPU (lens): load lens Flash data (shading) error - total numbers of sub-points!!||||CtrlCPU (lens): load lens Flash'
+sec=92 name='IMG-System' off=0x8381be va=0x8381be needle='Flash' context='ad lens Flash data (shading) error - Number of FocalLength Sub-points!!|||CtrlCPU (lens): load lens Flash data (shading) error - total numbers of sub-points!!||||CtrlCPU (lens): load lens Flash data (distortion) error - Number of focal-distance-sub-points!!|CtrlCPU (lens): load lens F'
+sec=92 name='IMG-System' off=0x838216 va=0x838216 needle='Flash' context=': load lens Flash data (shading) error - total numbers of sub-points!!||||CtrlCPU (lens): load lens Flash data (distortion) error - Number of focal-distance-sub-points!!|CtrlCPU (lens): load lens Flash data (distortion) error - Number of sector-sub-points!!|CtrlCPU: ctrlcpu_lens_wrapp'
+sec=92 name='IMG-System' off=0x838276 va=0x838276 needle='Flash' context='ens Flash data (distortion) error - Number of focal-distance-sub-points!!|CtrlCPU (lens): load lens Flash data (distortion) error - Number of sector-sub-points!!|CtrlCPU: ctrlcpu_lens_wrapper_GetLensData_Sync - READY (from Simulator)!||||CtrlCPU (Lens): ctrlcpu_lens_CommandWrapper: E_'
+sec=92 name='IMG-System' off=0x83ad8c va=0x83ad8c needle='Flash' context="mented!|hsk_control_manager: STATE_CHANGE received but state E_SYS_STATE_init not implemented!||hsk_FlashFileFromSDCard: [%s] couldn't read all bytes from file!||||hsk_IsCameraBundleTypeDebug: Could not allocate memory for TOC, need %d Byte!|||hsk_GetCameraBundleVersion: Could not all"
+sec=92 name='IMG-System' off=0x84e094 va=0x84e094 needle='Flash' context='0x%x\n|||fj_mipi_init() Error!!:Im_MIPI_Set_Lane_Info() error. result=0x%x\n||%s(): Write data to SPI-Flash FAILED! Failed to get filesize of file on SD-Card!||||    [Y]            Move display content vertically (range -10 .. +10)|||    [X]            Move display content horizontally '
+sec=92 name='IMG-System' off=0x84e193 va=0x84e193 needle='Flash' context=' display content horizontally (range -10 .. +10)|    [FILENAME]     Name of source for write to SPI-Flash (on SD-Card)|||    [ADDRESS]      Address of block in Visoflex SPI-Flash that should be erased (bounded to 64kByte)||||    [ADDRESS]      Target address in Visoflex SPI-Flash (bou'
+sec=92 name='IMG-System' off=0x84e1dc va=0x84e1dc needle='Flash' context='of source for write to SPI-Flash (on SD-Card)|||    [ADDRESS]      Address of block in Visoflex SPI-Flash that should be erased (bounded to 64kByte)||||    [ADDRESS]      Target address in Visoflex SPI-Flash (bounded to 64kByte)||||%s(): Read Flash ID from FPGA-->SPI-Flash: 0x%02x 0x%'
+sec=92 name='IMG-System' off=0x84e242 va=0x84e242 needle='Flash' context='ash that should be erased (bounded to 64kByte)||||    [ADDRESS]      Target address in Visoflex SPI-Flash (bounded to 64kByte)||||%s(): Read Flash ID from FPGA-->SPI-Flash: 0x%02x 0x%02x 0x%02x ...|%s(): Visoflex 2 SPI-Flash: Overwrite Header done! --> Start Update...||%s(): I2C write'
+sec=92 name='IMG-System' off=0x84e26b va=0x84e26b needle='Flash' context='Byte)||||    [ADDRESS]      Target address in Visoflex SPI-Flash (bounded to 64kByte)||||%s(): Read Flash ID from FPGA-->SPI-Flash: 0x%02x 0x%02x 0x%02x ...|%s(): Visoflex 2 SPI-Flash: Overwrite Header done! --> Start Update...||%s(): I2C write error for device: 0x%x! This may be Levi'
+sec=92 name='IMG-System' off=0x84e284 va=0x84e284 needle='Flash' context='   Target address in Visoflex SPI-Flash (bounded to 64kByte)||||%s(): Read Flash ID from FPGA-->SPI-Flash: 0x%02x 0x%02x 0x%02x ...|%s(): Visoflex 2 SPI-Flash: Overwrite Header done! --> Start Update...||%s(): I2C write error for device: 0x%x! This may be Levis HW Rev. 1|    [REGISTER'
+sec=92 name='IMG-System' off=0x84e2b9 va=0x84e2b9 needle='Flash' context='4kByte)||||%s(): Read Flash ID from FPGA-->SPI-Flash: 0x%02x 0x%02x 0x%02x ...|%s(): Visoflex 2 SPI-Flash: Overwrite Header done! --> Start Update...||%s(): I2C write error for device: 0x%x! This may be Levis HW Rev. 1|    [REGISTER]     Register to be read from FPGA --> See documenta'
+sec=92 name='IMG-System' off=0x851bc3 va=0x851bc3 needle='Flash' context='data_if_GetEntryDataLength: Entry (0x%08X) was found, replacing it at index = %d|hsk_camera_data_if_FlashDataToNOR: Deleting and Writing Sector %03d|hsk_camera_init_NORDriver: device ID 0x%08x and/or manufacturer ID 0x%02x are invalid|||hsk_camera_init_NORDriver: device ID = 0x%08x, m'
+sec=92 name='IMG-System' off=0x1c60fe va=0x1c60fe needle='GREYCARD' context='OTO_VALUE|¬v\x9a@MENU_GOTO_DYNAMIC_LIST||MENU_GOTO_CONFIRM|||MENU_GOTO_QUICK_BULB_PRESET|ìw\x9a@MENU_GOTO_GREYCARD_PHOTO||||MENU_GOTO_GREYCARD_PHOTO_PREVIEW||||MENU_GOTO_LEICA_CONNECT_MESSAGE|,y\x9a@MENU_GOTO_CONNECTION_STATUS_INFO||||MENU_GOTO_WIFI_EASYCONNECT||MENU_GOTO_WIFI_EASYCONNECT_CONNECT'
+sec=92 name='IMG-System' off=0x1c611a va=0x1c611a needle='GREYCARD' context='MIC_LIST||MENU_GOTO_CONFIRM|||MENU_GOTO_QUICK_BULB_PRESET|ìw\x9a@MENU_GOTO_GREYCARD_PHOTO||||MENU_GOTO_GREYCARD_PHOTO_PREVIEW||||MENU_GOTO_LEICA_CONNECT_MESSAGE|,y\x9a@MENU_GOTO_CONNECTION_STATUS_INFO||||MENU_GOTO_WIFI_EASYCONNECT||MENU_GOTO_WIFI_EASYCONNECT_CONNECTED||||lz\x9a@MENU_GOTO_WIFI_EAS'
+sec=92 name='IMG-System' off=0x1c61fe va=0x1c61fe needle='GREYCARD' context='NU_GOTO_WIFI_EASYCONNECT_CONNECTED||||lz\x9a@MENU_GOTO_WIFI_EASYCONNECT_CONNECTIONINEXPIRY|||MENU_GOTO_GREYCARD_LV|||MENU_GOTO_FAVORITES|¬{\x9a@MENU_GOTO_DUST_DETECTION||||MENU_GOTO_DUST_DETECTION_PREVIEW||||Ð¡ÚH\x88ö¶þÿ ì0×I@1\x88\x84\x03 $1\x88pÕ¡ÔHl0\x88ö©þÿ í0ÑIÀ1\x08\x82\x03 \x101\x88pÕ¡ÍHØ0\x88ö\x9cþÿ î0ÙI\x88\x87\x03 <1\x88pØ¡ÖHD0\x88ö\x90þÿ '
+sec=92 name='IMG-System' off=0x1e3052 va=0x1e3052 needle='GREYCARD' context='||MENU_GOTO_VALUE|MENU_GOTO_DYNAMIC_LIST||MENU_GOTO_CONFIRM|||MENU_GOTO_QUICK_BULB_PRESET|MENU_GOTO_GREYCARD_PHOTO||||MENU_GOTO_GREYCARD_PHOTO_PREVIEW||||MENU_GOTO_LEICA_CONNECT_MESSAGE|MENU_GOTO_CONNECTION_STATUS_INFO||||MENU_GOTO_WIFI_EASYCONNECT||MENU_GOTO_WIFI_EASYCONNECT_CONNECTED||'
+sec=92 name='IMG-System' off=0x1e306e va=0x1e306e needle='GREYCARD' context='DYNAMIC_LIST||MENU_GOTO_CONFIRM|||MENU_GOTO_QUICK_BULB_PRESET|MENU_GOTO_GREYCARD_PHOTO||||MENU_GOTO_GREYCARD_PHOTO_PREVIEW||||MENU_GOTO_LEICA_CONNECT_MESSAGE|MENU_GOTO_CONNECTION_STATUS_INFO||||MENU_GOTO_WIFI_EASYCONNECT||MENU_GOTO_WIFI_EASYCONNECT_CONNECTED||||MENU_GOTO_WIFI_EASYCONNECT'
+sec=92 name='IMG-System' off=0x1e314a va=0x1e314a needle='GREYCARD' context='||MENU_GOTO_WIFI_EASYCONNECT_CONNECTED||||MENU_GOTO_WIFI_EASYCONNECT_CONNECTIONINEXPIRY|||MENU_GOTO_GREYCARD_LV|||MENU_GOTO_FAVORITES|MENU_GOTO_DUST_DETECTION||||MENU_GOTO_DUST_DETECTION_PREVIEW||||MENU_GOTO_DUST_DETECTION_ERROR_TIMER||||MENU_GOTO_BRIGHTNESS||||MENU_GOTO_EXPOSURE_COMPENS'
+sec=92 name='IMG-System' off=0x12d46a va=0x12d46a needle='Greycard' context='y|Sensitivity Push||||Sensitivity Auto Max||||Sensitivity Auto Time|||White Balance|||White Balance Greycard LiveView|White Balance Greycard Photo||||White Balance Color Temperature|Photo File Format|||Photo JPG Settings||Photo JPG Resolution||||Contrast||||Sharpness|||Saturation||Monoch'
+sec=92 name='IMG-System' off=0x12d48a va=0x12d48a needle='Greycard' context='y Auto Max||||Sensitivity Auto Time|||White Balance|||White Balance Greycard LiveView|White Balance Greycard Photo||||White Balance Color Temperature|Photo File Format|||Photo JPG Settings||Photo JPG Resolution||||Contrast||||Sharpness|||Saturation||Monochrome||Toning||Hue|Strength||||AS'
+sec=92 name='IMG-System' off=0x839975 va=0x839975 needle='Greycard' context='enu_Dust_Detection|Camera_Info|Menu_Connection_Status_Info|LV_Photo_info|||LV_Zoom_Photo_info||Menu_Greycard_Photo|Menu_Value_Icons||||Menu_Regulatory_Infos|||Menu_Debug_GPS_Status|||Menu_Leica_Connect||Menu_WiFi_EasyConnect|||Menu_Bulb_Preset||||PLAY_info_fit|||PLAY_default_fit||||LV_Zo'
+sec=92 name='IMG-System' off=0xa3c48 va=0xa3c48 needle='Color Temperature' context='CM2 R1: % 8.5f % 8.5f % 8.5f||||CA9: %s(), %d - DNG CM2 R2: % 8.5f % 8.5f % 8.5f||||CA9: %s(), %d - Color Temperature CM1: % 8.0f|||CA9: %s(), %d - [in] Gain R: %4i | G: %4i | B: %4i||f\x87\x81@`WpC||p@øHCi\x02i| ÷I\x03\x93\x02\x92Bñ\x8eê\x05\x91\x04\x90üðÄî\t\x91\x08\x90ñIËh\x8ah| ðI\x03\x93\x02\x92Bñ~ê\x05\x91\x04\x90üð´î\x07\x91\x06\x90\x0b\x99\n\x98\x05\x91\x04\x90\t\x99\x08\x98\x03\x91\x02\x90\x07\x99\x06\x98ð#æJ\x01\x91|\x90å¡ôH|h\x9cð%úàI\x88'
+sec=92 name='IMG-System' off=0x12d4aa va=0x12d4aa needle='Color Temperature' context='ime|||White Balance|||White Balance Greycard LiveView|White Balance Greycard Photo||||White Balance Color Temperature|Photo File Format|||Photo JPG Settings||Photo JPG Resolution||||Contrast||||Sharpness|||Saturation||Monochrome||Toning||Hue|Strength||||ASC Cine Classic Look|||ASC Contemporary Lo'
+sec=92 name='IMG-System' off=0x80edc va=0x80edc needle='AWB' context=' StorageStoreImage: Error writing pRAW of %s, %x(%d)||||STR_IMG: StorageStoreImage: Error writing pRAWBLK of %s, %x(%d)|STR_IMG: StorageStoreImage: Error writing JPGBT of %s, %x(%d)|||\x8c"\x84B$ñ\x02ü3|\x14ªGI\x04 |\x96¿ð\x07ù0|\nä\x1f¨|\x90\x05 À\x01(\x18\x85!É|@\x18%#\x9b\x03Bk\x1e\x99%\x98;ñ4ø\x06||.\x0cÚ\x1e©%\x98$ñãû3|\x14ª9I\x04 |\x96¿ðèø0|1ä\x0e¨Þ÷uù\x1e©%\x98$'
+sec=92 name='IMG-System' off=0xa7e08 va=0xa7e08 needle='AWB' context='"¡\x04 \x98ðÔù*à)I h\x88B\nÐ\x0b\'ÿC h\x0b|\x14J%¡|\x90\x04 \x98ðÅù\x1bà`h\x01(\nÐ\x0b\'ÿC`h\x01#\rJ+¡|\x90\x04 \x98ð·ù\rà\x18"!|0|§÷\x80ê3H|x|(\x04Ð2¡>H|h\x98ð¨ù8|þ½AWB.bin|o\x9f\x1eBCA9: %s() file not found||||CA9: %s() failed!!! Size %i != %ll||BWA CA9: %s() failed!!! MagicNumber 0x%08X != 0x%08X||||CA9: %s() failed!!! VersionNumber 0x08X != 0x08X|||'
+sec=92 name='IMG-System' off=0xa7ff8 va=0xa7ff8 needle='AWB' context=') failed!!! MagicNumber 0x%08X != 0x%08X||||CA9: %s() failed!!! VersionNumber 0x%08X != 0x%08X||`\x0e\x8f@AWB.bin|\x19\x88\x81@CA9: %s() - write successful to %s||\x1c\x88\x81@CA9: %s() - write error %i||pµ\x04||%\x18"\x02I |§÷Lé(|p½`\x0e\x8f@\x0f´pµ\x05\x9c\x06\x9d\x07\x9e |\\0ÿ0ÿ0\x020@o=I\x08` |\\0\x9d!\x89|@\x18@h9IH` |\\0\x9d!\x89|@\x18\x80h5I\x88` |\\0ÿ0ÿ0\x020@o2I\x88a |\\0\x9d'
+sec=92 name='IMG-System' off=0xa86e1 va=0xa86e1 needle='AWB' context='ð¼ù0|}æ\x18\x88\x81@Û\x9f\x1eBCA9: %s() - white balance module not active|¤ZpCCA9: %s(FrameStatus: %i) invalid for AWB -> set WB to Daylight||du\x83BÌ]pC\x19\x88\x81@\x1ct\x83B\x1c\x88\x81@`\x0e\x8f@CA9: pInfo    - Frame Status:%i ImgID:%i||||pµ\x04||%&|\x9c60\x88\x10(.Ñà\x8c\x01(\x14Ñ jÿ÷Ðû\x05||-\x06Ð\x17Hôð°ý`hôð»ý\x1dà\x13H@\x1eôð¨ý`hôð³ý\x15àà\x8c|(\x12Ñ jÿ÷^ü\x05|\rJ\r¡\x04 #j\x97ð'
+sec=92 name='IMG-System' off=0xd92ff va=0xd92ff needle='AWB' context='%\rà\x11%\x0bà\x12%\tà\x13%\x07à\x05M#|\x05J\x05¡\x04 fðNÿÀFÀF(|p½ÿ\x7f||û\x99\x1eBPrepro: %s - Prepro-mode %d not connected with any AFAEAWBMode||pµ\x05|\x05-\x1aÐ\x08Ü\x01-\rÐ\x02-\rÐ\x03-\x0eÐ\x04-\x1cÑ\x0eà\x11-\x11Ð\x12-\x12Ð\x13-\x15Ñ\x11à\x0fL\x18à\x0eL|4\x15à\x0cLø4\x12à\x0cL\x10à\x0bL|4\rà\tLø4\nà\tL\x08à\x08L|4\x05à|$\x07I\x04 fð÷þÀFÀF |p½||,÷\x8e@\xa0ø\x8e@\x14ú\x8e@\x8cj\x83B\x10µÿ!E1\x0fHv÷\x1aè\x01 \x0eI\x08v|ð\x9fû\x02 |ð\x9cû\x03 |ð\x99û\x04 |ð\x96û\x05 |ð\x93û\x11 |ð\x90û\x12 '
+sec=92 name='IMG-System' off=0xd94fe va=0xd94fe needle='AWB' context='²¡\x02 \x16\x9afðXþ»¡\x02 \x19\x9afðSþÇ¡\x02 \x1a\x9afðNþÒ¡\x02 \x1b\x9afðIþà¡\x02 \x1c\x9afðDþí¡\x02 \x17\x9afð?þ÷¡\x02 \x18\x9a|àJâfð8þþIýá\x10÷\x8e@\x94i\x83BØg\x83BPrepro: AEAWB Window (h-start-pixel): %d||||Prepro: AEAWB Window (v-start-line): %d|Prepro: AEAWB Window (h-pixel-count): %d||||Prepro: AEAWB Window (v-line-count): %d|Prepro: AEAWB Block Numbe'
+sec=92 name='IMG-System' off=0xd952a va=0xd952a needle='AWB' context='\x1c\x9afðDþí¡\x02 \x17\x9afð?þ÷¡\x02 \x18\x9a|àJâfð8þþIýá\x10÷\x8e@\x94i\x83BØg\x83BPrepro: AEAWB Window (h-start-pixel): %d||||Prepro: AEAWB Window (v-start-line): %d|Prepro: AEAWB Window (h-pixel-count): %d||||Prepro: AEAWB Window (v-line-count): %d|Prepro: AEAWB Block Numbers (horizontal): %d||||Prepro: AEAWB Block N'
+sec=92 name='IMG-System' off=0xd9552 va=0xd9552 needle='AWB' context='\x83BØg\x83BPrepro: AEAWB Window (h-start-pixel): %d||||Prepro: AEAWB Window (v-start-line): %d|Prepro: AEAWB Window (h-pixel-count): %d||||Prepro: AEAWB Window (v-line-count): %d|Prepro: AEAWB Block Numbers (horizontal): %d||||Prepro: AEAWB Block Numbers (vertical): %d||Prepro: AE Field '
+sec=92 name='IMG-System' off=0xd957e va=0xd957e needle='AWB' context='%d||||Prepro: AEAWB Window (v-start-line): %d|Prepro: AEAWB Window (h-pixel-count): %d||||Prepro: AEAWB Window (v-line-count): %d|Prepro: AEAWB Block Numbers (horizontal): %d||||Prepro: AEAWB Block Numbers (vertical): %d||Prepro: AE Field (h-pixel-count): %d||||Prepro: AE Field (v-l'
+sec=92 name='IMG-System' off=0xd95a6 va=0xd95a6 needle='AWB' context='): %d|Prepro: AEAWB Window (h-pixel-count): %d||||Prepro: AEAWB Window (v-line-count): %d|Prepro: AEAWB Block Numbers (horizontal): %d||||Prepro: AEAWB Block Numbers (vertical): %d||Prepro: AE Field (h-pixel-count): %d||||Prepro: AE Field (v-line-count): %d|Prepro: AWB Field (h-pixe'
+sec=92 name='IMG-System' off=0xd95d6 va=0xd95d6 needle='AWB' context='||Prepro: AEAWB Window (v-line-count): %d|Prepro: AEAWB Block Numbers (horizontal): %d||||Prepro: AEAWB Block Numbers (vertical): %d||Prepro: AE Field (h-pixel-count): %d||||Prepro: AE Field (v-line-count): %d|Prepro: AWB Field (h-pixel-count): %d|||Prepro: AWB Field (v-line-count):'
+sec=92 name='IMG-System' off=0xd964c va=0xd964c needle='AWB' context='(vertical): %d||Prepro: AE Field (h-pixel-count): %d||||Prepro: AE Field (v-line-count): %d|Prepro: AWB Field (h-pixel-count): %d|||Prepro: AWB Field (v-line-count): %d||||Prepro: AF Field (h-start-pixel): %d||||Prepro: AF Field (v-start-line): %d|Prepro: AF Field (h-pixel-count): %'
+sec=92 name='IMG-System' off=0xd9674 va=0xd9674 needle='AWB' context='l-count): %d||||Prepro: AE Field (v-line-count): %d|Prepro: AWB Field (h-pixel-count): %d|||Prepro: AWB Field (v-line-count): %d||||Prepro: AF Field (h-start-pixel): %d||||Prepro: AF Field (v-start-line): %d|Prepro: AF Field (h-pixel-count): %d||||Prepro: AF Field (v-line-count): %d'
+sec=92 name='IMG-System' off=0xd973a va=0xd973a needle='AWB' context='line): %d|Prepro: AF Field (h-pixel-count): %d||||Prepro: AF Field (v-line-count): %d|àh\x83BPrepro: AEAWB Window (current h-start-pixel): %d||||Prepro: AEAWB Window (current v-start-line): %d|Prepro: AFAEAWB mode-Window (current h-start-pixel): %d|Prepro: AFAEAWB mode-Window (current '
+sec=92 name='IMG-System' off=0xd976e va=0xd976e needle='AWB' context='epro: AF Field (v-line-count): %d|àh\x83BPrepro: AEAWB Window (current h-start-pixel): %d||||Prepro: AEAWB Window (current v-start-line): %d|Prepro: AFAEAWB mode-Window (current h-start-pixel): %d|Prepro: AFAEAWB mode-Window (current v-start-line): %d||Prepro: AFAEAWB middle-mode-Windo'
+sec=92 name='IMG-System' off=0xd97a0 va=0xd97a0 needle='AWB' context='B Window (current h-start-pixel): %d||||Prepro: AEAWB Window (current v-start-line): %d|Prepro: AFAEAWB mode-Window (current h-start-pixel): %d|Prepro: AFAEAWB mode-Window (current v-start-line): %d||Prepro: AFAEAWB middle-mode-Window (current h-start-pixel): %d||Prepro: AFAEAWB mid'
+sec=92 name='IMG-System' off=0xd97d8 va=0xd97d8 needle='AWB' context='ndow (current v-start-line): %d|Prepro: AFAEAWB mode-Window (current h-start-pixel): %d|Prepro: AFAEAWB mode-Window (current v-start-line): %d||Prepro: AFAEAWB middle-mode-Window (current h-start-pixel): %d||Prepro: AFAEAWB middle mode-Window (current v-start-line): %d|||Prepro: AF '
+sec=92 name='IMG-System' off=0xd9810 va=0xd9810 needle='AWB' context='dow (current h-start-pixel): %d|Prepro: AFAEAWB mode-Window (current v-start-line): %d||Prepro: AFAEAWB middle-mode-Window (current h-start-pixel): %d||Prepro: AFAEAWB middle mode-Window (current v-start-line): %d|||Prepro: AF Field (current h-start-pixel): %d||||Prepro: AF Field (c'
+sec=92 name='IMG-System' off=0xd9850 va=0xd9850 needle='AWB' context='rent v-start-line): %d||Prepro: AFAEAWB middle-mode-Window (current h-start-pixel): %d||Prepro: AFAEAWB middle mode-Window (current v-start-line): %d|||Prepro: AF Field (current h-start-pixel): %d||||Prepro: AF Field (current v-start-line): %d|\x88h\x83B\x02 fð5ü$I\x02 \x1d\x9afð0ü"¡\x02 \x1e\x9afð+ü0I\x02 fð\'ü/'
+sec=92 name='IMG-System' off=0xd998c va=0xd998c needle='AWB' context='\x82i\x02 fð\x12ü$Hà81¡\x02i\x02 fð\x0bü!Hà89¡Âi\x02 fð\x04ü\x1dHà8A¡Bi\x02 fðýû\x1aHà8\x02\x8cH¡\x02 fðöû\x16Hà8\x82\x8cO¡\x02 fðïû\x1f°0½|||\x98\rBPrepro: AFAEAWB middle-mode-Window (current v-start-line): %d|||0h\x83Bð\x03\x8f@ð\x94\rBPrepro: AF global-Window (h-start-pixel): %d||||Prepro: AF global-Window (v-start-line): %d|Prepro: AF global-Window (h'
+sec=92 name='IMG-System' off=0xd9eea va=0xd9eea needle='AWB' context='É|\x01e\x81hAeÁh\x81eAlÁe\x81l\x01fAlAf\x81l\x81f\x01|ÈlÁ\x0f\t\x18J\x10\x1aIø1InR\x18\x18Iø1Êf\x08mÁ\x0f\t\x18J\x10\x15Iø1\x89lR\x18\x13Iø1\ng\x08|%à\x10÷\x8e@Prepro: reset AFAEAWB Mode 0x%x|X\x14||\x10\x1e||\x10\x13||®\x0e||¤\t||¾\x06||<\x04||\x8b\x02||$ø\x8e@|\x15||Àn\x01|\x9cHAg|o\x01|\x9aH\x81g+á{!\x89\x01\x98H\x0c0\x01gQ!I\x01p0A`\x95I\x81`\x95IÁ`M!É|\x01aÿ!¡1Aa\x16!\x81a\x10!Áa7!É\x01\x01b\x1c!Ab\x1a!\x81b\x10!Áb\x01c\x89Iü1Ac\x89I\x9c1\x81cp!Ách!\x01d\x84Iü1Ad\x84I\x9c1\x81dp!Ádh!\x01e\x81hAeÁ'
+sec=92 name='IMG-System' off=0xda494 va=0xda494 needle='AWB' context='\t\x18J\x10¡nR\x18"ghh|(\x05Ðih\x08\x1d|"!|t÷Rï |Áæð\x03\x8f@ B\x01|\x10÷\x8e@Prepro: middle (ref. used image): x=%d  y=%d||||Prepro: AWB-ext. pos. (ref. LVDS image): x=%d  y=%d|Prepro: AWB-ext. first pixel color: %d||\x80\x02\x8f@Prepro: set AF/AE/AWB-field-position||||Prepro: edge (ref. valid image): x=%d  y=%d|pµ\x04||%|,\x01Ðd'
+sec=92 name='IMG-System' off=0xda4c8 va=0xda4c8 needle='AWB' context='middle (ref. used image): x=%d  y=%d||||Prepro: AWB-ext. pos. (ref. LVDS image): x=%d  y=%d|Prepro: AWB-ext. first pixel color: %d||\x80\x02\x8f@Prepro: set AF/AE/AWB-field-position||||Prepro: edge (ref. valid image): x=%d  y=%d|pµ\x04||%|,\x01Ðd,\x06ÑñJñ¡\x03 eðþý| p½\x01 ýIH` |þ÷\x84þúI\x08\x80\x08||\x88ð!\x08@|(}ÑöH|\x88\x03|Å'
+sec=92 name='IMG-System' off=0xda4fe va=0xda4fe needle='AWB' context='t. pos. (ref. LVDS image): x=%d  y=%d|Prepro: AWB-ext. first pixel color: %d||\x80\x02\x8f@Prepro: set AF/AE/AWB-field-position||||Prepro: edge (ref. valid image): x=%d  y=%d|pµ\x04||%|,\x01Ðd,\x06ÑñJñ¡\x03 eðþý| p½\x01 ýIH` |þ÷\x84þúI\x08\x80\x08||\x88ð!\x08@|(}ÑöH|\x88\x03|Å÷\x06ê\x06þ\x04F\x91Úýþ\x05!\x89\x03òH\x01`ÿ!·1 8A\x80x! 8\x01\x84|! 0Á\x80P!\x81\x80@!A\x81\x01\x81 !\x81\x81Á'
+sec=92 name='IMG-System' off=0xda995 va=0xda995 needle='AWB' context='prepro settings for IDLE/POWERDOWN|\x10\x03\x8f@\x10\x04\x8f@.\x02||\x10\x1e||\x10\x13||è\x08||®\x03||\\\x0e||Ê\x05||\x8c\x14||Prepro: %s  -unknown AFAEAWB-Mode|||È\x0f||7!É\x01HH\x01`HI 8A\x80HI 8\x01\x84\x1c! 0Á\x80\x1a!\x81\x80\x16!A\x81\x10!\x01\x81\x1c!\x81\x81\x1a!Á\x81\x10!\x01\x82A\x82=Iü1à8\x81a<I\x9c1\x01ap!Áah!Aa|!\x01\x84\x81\x84p!A\x84h!Á\x84ÿ!\x9112HA`\x04!|\x1dA`{!\x89\x01\x81`Q!I\x01Á`ü!\x81b\x9c!ÁbM!É|\x01cÿ!¡1AcKà7!É\x01&H\x01`&I 8A\x80&I 8\x01\x84\x1c! 0Á\x80\x1a!\x81\x80\x16!'
+sec=92 name='IMG-System' off=0xe5854 va=0xe5854 needle='AWB' context='\x8c9\x08g\x1aH\x80z\x01(\x08Ñ\x18H\x8c8|o\x01!I\x02\x08C\x15I\x8c9\x08g\x14HÀz\x01(\x08Ñ\x12H\x8c8|o\x01!\x89\x02\x08C\x0fI\x8c9\x08g\x01,\x01Ñø÷\x08þ\x0bI\x8c9\x08oö÷¡þ(|]ä||\x10÷\x8e@PrePro: start AEAWB/PW(6)|||4\x02\x8f@¨ÿ\x8e@PrePro: start HIST||PrePro: start pzsft A1||PrePro: start pzsft A2||PrePro: start LNR/RB/LVDS|||PrePro: start M2P(0)/M2P(1)/PR(0)/PR(1)|pµ\x04|\r||&\x15HÀm|(\nÐ\x14H\x80h\x02(\x03Ø\x13¡\x02'
+sec=92 name='IMG-System' off=0xe6a8e va=0xe6a8e needle='AWB' context='|~0!iCIª\x8a\x18\x18!qCQ\x18\x08sh )|AC |ÿ0é0P0\t\x184 pC\x08\x18|\x8e0!iCIª\x8a\x18\x18!qCQ\x18\x88uv\x1c\x19à\x10÷\x8e@PrePro: set HIST||||PrePro: set AEAWB|||\x10\x04\x8f@\x90\x02\x8f@\x02.|ÚÞæm\x1c\x03-|ÚØæ7¨ö÷bèMHõ÷»ÿ\x07!É\x01b\x18\x08 \x10^ù÷vüq!É|b\x18\x02 \x10^ù÷¯üÿ \x050|Y|(}Ð|\'|!\x1b\x91ÿ \x110\x01Yu\x91ÿ \t0\x01Ys\x91ÿ \x150|YA\x08v\x91ÿ \r0|YA\x08t\x91ÿ )0|]|(\x0cÑ|!\x1b\x91p¨Arÿ \x050\x01Yÿ \x110|Y@|\x0f\x18$à\x01!\x1b\x91\x02!p¨Arÿ \x050\x07Yÿ!\x111\tY\x0c"QC\x08'
+sec=92 name='IMG-System' off=0xf43c1 va=0xf43c1 needle='AWB' context='M2P3/PR2/PR3)- Channel Error|||Prepro (test): Image-Write (PW2/PW5)- Channel Error|Prepro (test): AEAWB-Write (PW6)- Channel Error|Prepro (test): Reentry (M2P0/M2P1/PR0/PR1)- Channel Error|||Prepro (test): undefined Macro Error||||ÿÿ||0µ\x9b°\x05|è\x8c\x01(\x03Ñhh¨ðEÿâá,jò¡\x02 KðwþiF\x01 ð÷aú\x05\x98 \x80hF|\x8b`\x80'
+sec=92 name='IMG-System' off=0xf6344 va=0xf6344 needle='AWB' context='ent: checking currend loaded sdc maps|||\x10µ\x04|\x02¡\x02 Ið ÿ\x10½||Prepro (test): drv_prepro_test_if_CallbackAEAWBReady()||\x10µ\x04|\x02¡\x02 Iðüþ\x10½||Prepro (test): drv_prepro_test_if_CallbackAFReady()|\x10µ\x03¡\x02 IðÛþ|ð\x87ý\x10½Prepro (test): drv_prepro_test_if_CallbackCaptureReady()||||\x10µ|ðQý\x10½pµ\x05|\x0c|(\x1d|(\x06ÑDI\x02 Ið¬'
+sec=92 name='IMG-System' off=0x16f35c va=0x16f35c needle='AWB' context='data->QualFactor:%f|LÃ\x8f@IMG: restart encoder core 6 with quality %f   Percent:%i||||IMG: Continuous AWB STOP||||Xí\x8c@\x05¡\x04 Ð÷ðþÀFÀFr\x98Ì÷Óúú÷Wü||IMG: Invalid command||||\x1cµ\x04|\x04H|\x90\x01\x94\x08"iF\x07 Í÷4þ| \x1c½\x01||Dþµ\x05|\x0e||\'\x14H|h|(#Ð|$\x1bà\xa0|\x11I\th\x11J\x89\x18\x08X|(\x12Ð\xa0|\rI\th\x89\x18\tX\x03Éh@q@\x08C\x08Ñ\x01\'"|\t¡\x02 \x01\x96|\x95Ð÷ªþ\x05àd\x1c\x03H|h@x\xa0BÞØÀF8|þ'
+sec=92 name='IMG-System' off=0x175b5d va=0x175b5d needle='AWB' context='ate() - Media Data Module not active|||MDA: Allocate_Memory(Type %i) - Semaphore Error %i||MDA: SetRAWBLK(Type %i) - ImageInfo 0x%08X not in Map|||MDA: SetRAWBLK(Type %i | ImageInfo_ID %lld) - Type not in Map|||\x90i¦@|.\x85Bhì\x8e@0µ\x04|| \x0b|)÷Ôî!\x12\x1a"*:B2JRZbjrz\x82\x8a\x92\x9a¢ª²ºÂÊÒÚâñùîíìëê|\x05#Û\x01ã\x18\x01%\xad\x02[\x19'
+sec=92 name='IMG-System' off=0x175b95 va=0x175b95 needle='AWB' context='ory(Type %i) - Semaphore Error %i||MDA: SetRAWBLK(Type %i) - ImageInfo 0x%08X not in Map|||MDA: SetRAWBLK(Type %i | ImageInfo_ID %lld) - Type not in Map|||\x90i¦@|.\x85Bhì\x8e@0µ\x04|| \x0b|)÷Ôî!\x12\x1a"*:B2JRZbjrz\x82\x8a\x92\x9a¢ª²ºÂÊÒÚâñùîíìëê|\x05#Û\x01ã\x18\x01%\xad\x02[\x19\x9ab\ná\x05#Û\x01ã\x18\x85%í|[\x19Z`\x02á\x05#Û\x01ã\x18\x85%í|[\x19\x9a`úà\x05#Û\x01ã\x18\x85%í|[\x19Ú`òà\x05#Û\x01'
+sec=92 name='IMG-System' off=0x1dc537 va=0x1dc537 needle='AWB' context='YDIST = 0x%08X|||sys_still_PrepareCapture: B2YBT or B2YBTDIST = 0x%08X|||sys_still_PrepareCapture: RAWBLK = 0x%08X|||$¯\x84Büµ\x04|\x0f|\x01%iF`hþ÷zÿ\x06|(|ü½||þµ\x05|\x01&iFhhþ÷oÿ\x07|\x01\x9c\x17I`j\x88B\nÑ\x93÷Cù\x01 .÷Èøÿ!a1\x01\x98ÿ÷\x7fú\x1dà |Ïöûø|!g r÷\x1fÿ\x93÷1ùè |Y\x01!I\x02\x88B\x0eÑâ÷gø\x01(\nÐ\r ©÷\nû\x03(\x05Ð\x04I\x03 c÷Äý\x92÷Dÿ0|þ½í\x03||Ì³\x84Bþµ\x05|\x01&iFhhþ÷3ÿ\x07|\x01\x9c'
+sec=92 name='IMG-System' off=0x1e9a19 va=0x1e9a19 needle='AWB' context='ensorTimeOut|drv_prepro_test_BuildPreproImage|drv_prepro_if_GetModeWindow|drv_prepro_afaeawb_GetAFAEAWBMode|drv_prepro_afaeawb_SetPreproGlobalSettings|drv_prepro_afaeawb_if_Config||||\x02|||\x04|||\x08|||\x10||| |||@|||\x80||||\x01||ø\x01||ð\x03||à\x07||À\x0f|||\x80||\x02|||\x04|||\x08|||\x10||| |||@|||\x80||||\x01||ø\x01||ð\x03||à\x07||À\x0f||'
+sec=92 name='IMG-System' off=0x8351da va=0x8351da needle='AWB' context='eter[1]>;<Parameter[2]>;<Parameter[3]>||||Prepro (test): E_DRV_PREPRO_DEBUG_OBJECT_INSTRUCTIONS_AFAEAWB_MODE||Prepro (test): E_DRV_PREPRO_DEBUG_OBJECT_INSTRUCTIONS_REQ_BLACK_IMAGE|||Prepro (test): E_DRV_PREPRO_DEBUG_OBJECT_INSTRUCTIONS_SENSOR_RESET_EXPOSURE_TIME||||Prepro (test): E_'
+sec=92 name='IMG-System' off=0x835e93 va=0x835e93 needle='AWB' context=' frame capture numbers must be 1 within mode E_DRV_PREPRO_IF_PREPROMODE_STILL||||PrePro: start of AEAWB macro not possible - g_drv_prepro_AFAEAWBPreproSet.pToAEAWBData = LC_NULL||||PrePro: start of AF macro not possible - g_drv_prepro_AFAEAWBPreproSet.pToAFData = LC_NULL||PrePro: Co'
+sec=92 name='IMG-System' off=0x835ebd va=0x835ebd needle='AWB' context='de E_DRV_PREPRO_IF_PREPROMODE_STILL||||PrePro: start of AEAWB macro not possible - g_drv_prepro_AFAEAWBPreproSet.pToAEAWBData = LC_NULL||||PrePro: start of AF macro not possible - g_drv_prepro_AFAEAWBPreproSet.pToAFData = LC_NULL||PrePro: Configure Prepro - E_DRV_PREPRO_IF_PREPROMOD'
+sec=92 name='IMG-System' off=0x835ecf va=0x835ecf needle='AWB' context='_PREPROMODE_STILL||||PrePro: start of AEAWB macro not possible - g_drv_prepro_AFAEAWBPreproSet.pToAEAWBData = LC_NULL||||PrePro: start of AF macro not possible - g_drv_prepro_AFAEAWBPreproSet.pToAFData = LC_NULL||PrePro: Configure Prepro - E_DRV_PREPRO_IF_PREPROMODE_STILL_ROLLING_SH'
+sec=92 name='IMG-System' off=0x835f1e va=0x835f1e needle='AWB' context='FAEAWBPreproSet.pToAEAWBData = LC_NULL||||PrePro: start of AF macro not possible - g_drv_prepro_AFAEAWBPreproSet.pToAFData = LC_NULL||PrePro: Configure Prepro - E_DRV_PREPRO_IF_PREPROMODE_STILL_ROLLING_SHUTTER|Prepro: drv_prepro_manager_SDCChannelInterrupt -channel: %d -Error: %d||P'
+sec=92 name='IMG-System' off=0x8367ec va=0x8367ec needle='AWB' context='gs/ %d errors|||PrePro (sdc): check sdc1-map ready - found %d warnings/ %d errors|||Prepro: ### AFAEAWB-mode-configuration: positions referenced to VALID Image NULLPOS!##||Prepro: ### driver settings: positions referenced to LVDS-NULLPOS --> AF/AEAWB ######|||Prepro: ### current pos'
+sec=92 name='IMG-System' off=0x83687f va=0x83687f needle='AWB' context=' VALID Image NULLPOS!##||Prepro: ### driver settings: positions referenced to LVDS-NULLPOS --> AF/AEAWB ######|||Prepro: ### current positions: positions referenced to USED Image NULLPOS!##########||||Prepro: ### current positions: positions referenced to VALID Image NULLPOS!#######'
+sec=92 name='IMG-System' off=0x836959 va=0x836959 needle='AWB' context='nt positions: positions referenced to VALID Image NULLPOS!##########|||Prepro: NULL-Pointer for AFAEAWB address - using global memory (only for testing allowed)|||Prepro: AFAEAWB configuration of Mode E_DRV_PREPRO_IF_AFAEAWB_MODE_%02x:||||Prepro: %s no afaeawb-config while E_DRV_PRE'
+sec=92 name='IMG-System' off=0x8369a4 va=0x8369a4 needle='AWB' context='ro: NULL-Pointer for AFAEAWB address - using global memory (only for testing allowed)|||Prepro: AFAEAWB configuration of Mode E_DRV_PREPRO_IF_AFAEAWB_MODE_%02x:||||Prepro: %s no afaeawb-config while E_DRV_PREPRO_IF_PREPROMODE_IDLE/POWERDOWN||||Prepro: not possible to change AFAWB-mo'
+sec=92 name='IMG-System' off=0x8369d2 va=0x8369d2 needle='AWB' context='lobal memory (only for testing allowed)|||Prepro: AFAEAWB configuration of Mode E_DRV_PREPRO_IF_AFAEAWB_MODE_%02x:||||Prepro: %s no afaeawb-config while E_DRV_PREPRO_IF_PREPROMODE_IDLE/POWERDOWN||||Prepro: not possible to change AFAWB-mode-data of PreproMode=%d while current PreproM'
+sec=92 name='IMG-System' off=0x836a55 va=0x836a55 needle='AWB' context=' afaeawb-config while E_DRV_PREPRO_IF_PREPROMODE_IDLE/POWERDOWN||||Prepro: not possible to change AFAWB-mode-data of PreproMode=%d while current PreproMode=%d|Prepro: drv_prepro_if_Get_AFAEAWBMode_Data -unknown AFAEAWB-Mode||||SD0_FS_SD_malloc failed, OS_User_Pget_Mpl --- error=%d |'
+sec=92 name='IMG-System' off=0x836aae va=0x836aae needle='AWB' context='o change AFAWB-mode-data of PreproMode=%d while current PreproMode=%d|Prepro: drv_prepro_if_Get_AFAEAWBMode_Data -unknown AFAEAWB-Mode||||SD0_FS_SD_malloc failed, OS_User_Pget_Mpl --- error=%d | size %d\n|||SD0_FS_SD_malloc failed, OS_User_Ref_Mpl --- error=%d | freesize %d | fblksz='
+sec=92 name='IMG-System' off=0x836ac8 va=0x836ac8 needle='AWB' context='f PreproMode=%d while current PreproMode=%d|Prepro: drv_prepro_if_Get_AFAEAWBMode_Data -unknown AFAEAWB-Mode||||SD0_FS_SD_malloc failed, OS_User_Pget_Mpl --- error=%d | size %d\n|||SD0_FS_SD_malloc failed, OS_User_Ref_Mpl --- error=%d | freesize %d | fblksz=%d\n||||SD1_FS_SD_malloc fa'
+sec=92 name='IMG-System' off=0x83d076 va=0x83d076 needle='AWB' context='  img_b2y_fill_T_IMG_B2Y_FB2Y7A_STRINGS Contrast||IMG: E_IMG_WRITEMEM_AAA_JPGDCF_JPGFRHC_JPGBT_RAW_RAWBLK  ID =0x%x ||IMG: E_IMG_WRITEMEM_AAA_JPGDCF_JPGFRHC_JPGBT_JPGFULL_RAWCOMP  ID =0x%x |IMG: E_IMG_WRITEMEM_AAA_JPGDCF_JPGFHRC_JPGBT_JPGFULL_RAW  ID =0x%x |IMG: img_general_search_c'
+sec=92 name='IMG-System' off=0x84240e va=0x84240e needle='AWB' context='torageStoreImage: Error writing RATING_XMP of %s, %x(%d)||STR_IMG: StorageStoreImage: Error writing AWB data of %s, %x(%d)||||STR_IMG: StorageStoreImage: Error writing encripted data of %s, %x(%d)||STR_IMG: StorageStoreImage: Error writing dngLosslessJPEG_Marker of %s, %x(%d)||STR_I'
+sec=92 name='IMG-System' off=0x852e8b va=0x852e8b needle='AWB' context='|MDA: ImageInfo_ReAllocate(ID %lld)[cnt=%d] - Successful Pointer SYS 0x%08X | IMG 0x%08X|MDA:   SetRAWBLK(Type %2i | Size %5iKB | ImgInfoID %lld) - Successful 0x%08X||||MDA: Free_Memory(Type %2i | Size %5iKB | ImgInfoID %lld) - Successful 0x%08X||||MDA:   Allocate_Memory(Type %2i | '
+sec=98 name='WLAN EW-Dorin' off=0x4b1a70 va=0x4b1a70 needle='AWB' context='\'oêïÁ\x02\xa0ìF\x1b¸nM1\x0b`û±µãä--\x86\x9c\x88i5±÷\x16\x860É\x06ÔG©\x84ßî\x18\x04\x9b \x92úCÅm¨¸Æ}íZÂ ê©\naéÐêà&¼qCT\x02\x06\x92\x94½ü\x141u|$ijj"ÚQ/:ÍÂÖêcB^ºvÒAWBTÈ#\x05\x80\x87\\H\x1e\x9aï·Hÿã \x97TÌòQ\n\x9aQ¨(<\x8ctT\x11¨\x9e\x99½5\x82"£«Å.§H;ævÓ²ò\x0cªþÏÂ\x1d/\x0f\x02\x81*\x93)\x17\x18\x8aN\x05©G/\x1d\x93w\n\r.§#¶¥ó,ÿZ@Þï)lØÏºÎ¢Ò\x1b9qÁ=ô·Ssu\x053\x11b\x87ª\x19\x05¾&Á\x93Û\x01£w\x0f×ù\r¶T\x05\x9d¸P2#\x04©ýIUÉX/\tM1P\x8f]«\x98(À\x87ì8J\x98\x8b\x87Õ±\r\x90¹\x15\x84ÔU¦¬t\x17~;\x7fr¶ÜÚ¦'
+sec=99 name='IMG-CA9 System' off=0x1c548 va=0x1c548 needle='DAYLIGHT' context=': %i: Fpos: %i: Tilt: %i:|||CA9: wb_startWhiteBalance() - WB Mode not implemented! WB set to Preset DAYLIGHT||||CA9: %s() - WB Preset not implemented! WB set to Preset DAYLIGHT||||CA9: %s() - StartPixel: %i | B: %4i | Gb: %4i | Gr: %4i | R: %4i |||P2.6||||V3.83UV|CA9: ca9_shared_memory_t'
+sec=99 name='IMG-CA9 System' off=0x1c58c va=0x1c58c needle='DAYLIGHT' context='t implemented! WB set to Preset DAYLIGHT||||CA9: %s() - WB Preset not implemented! WB set to Preset DAYLIGHT||||CA9: %s() - StartPixel: %i | B: %4i | Gb: %4i | Gr: %4i | R: %4i |||P2.6||||V3.83UV|CA9: ca9_shared_memory_test: set ca9_test_structure variable_1 to %i||||CA9: ca9_shared_memo'
+sec=99 name='IMG-CA9 System' off=0xa4a8 va=0xa4a8 needle='AWB' context='\x01|Pã |Y\x03\n||\x1a\x03 \xa0á\x080\x94åÐ|Äá\x080\x8då\x0b0\xa0á\x0c \x8då\t \xa0áð|ÍáL\x10\x8fâ\x04|\xa0ã\x96\x0e|ë\x14Ð\x8dâð\x8f½èÍË\x01@CA9: ca9_wb_get_cluster() - AFAEAWB mode not implemented %i|CA9: WB(%2i|%2i) R:%4i Gr:%4i Gb:%4i B:%4i||\x0b|Yã\x08|[\x03ßÿÿ\x1a\x03|\xa0á\x02\x10\xa0áÐ Äá\x0c|\x8då\x04|\xa0ã\x08\x10\x8dåX\x10Oâð Íá\x0b0\xa0á\t \xa0ák\x0e|ë\x14Ð\x8dâð\x8f½è\x0b|Yã\x08|[\x03Ïÿÿ\x1a\x03\x10\xa0á\x02|\xa0áÐ Äáø|Íá\x90\x10Oâ\x04|\xa0ãð Íá\x0b0\xa0á\t \xa0'
+sec=99 name='IMG-CA9 System' off=0x1c560 va=0x1c560 needle='WB Preset' context=':|||CA9: wb_startWhiteBalance() - WB Mode not implemented! WB set to Preset DAYLIGHT||||CA9: %s() - WB Preset not implemented! WB set to Preset DAYLIGHT||||CA9: %s() - StartPixel: %i | B: %4i | Gb: %4i | Gr: %4i | R: %4i |||P2.6||||V3.83UV|CA9: ca9_shared_memory_test: set ca9_test_structu'
+sec=100 name='IMG-SAM7' off=0xca8e va=0xca8e needle='FLASH' context=' device connected is not supported \n||\x9c\x11@C\xa0\x11@C¤\x11@C¨\x11@C||\x80Âÿÿ||Dd_GIC_Ctrl error.E_DD_GIC_INTID_NAND_FLASH_INT\n||||Dd_GIC_Ctrl error.E_DD_GIC_INTID_EXSTRAGE_XDMAC_CH1_INT\n||||ýo||\x02|ÿÿ|\x07\x80Âq¿|C¬\x11@CSÀ|CxV@C\x03\x98@\x19\x03\x90þHÀhhC?\x18üHAj0|£ðfì\x0c||,\nÐ"|9|\x02¨ÿ÷Pù\x05\x90\x05\x98|(\x01Ð\x05\x98Kç| Içðµ\x89°\x07|\x0c|\x01 \x01\x90\x80 \x02\x90| \x03\x90B \x08\x908h@'
+sec=100 name='IMG-SAM7' off=0x2f568 va=0x2f568 needle='FLASH' context='\n\r||[I]             loop - read all channels until key pressed\n\r||||TSW|[I] TSW:CPU|ADC|DRAM0|DRAM1|FLASH|FPGA|LED|BTN]\n\r|||[I] see TSW documentation\n\r|beep||||[I] beep <freq> <duration> <duty>\n\r|[I]  sound the beeper\n\r|[I]  <freq>    : frequency\n\r||||[I]  <duration>: duration of the '
+sec=100 name='IMG-SAM7' off=0xbc93 va=0xbc93 needle='Flash' context="`\x08|\x04a\x10½ðµ\x85°\x04|!I\x07H|hÿ÷¥ú|'àiB(\x03Ðàiÿ÷Þÿ\x01'ÿ÷\x86ÿ5àè\x08\x80CS¸|CÿÿÿÏ\x88\x13||°\x11@C||\x10Ï|\x04\x80Âýÿ||\x10'||MWNF : ERROR :Nand Flash Controller IDLE ERROR.\n|||||\x01\x80Â|\x07\x80Â V@C|||Ââ÷ÿÿ\x01 þI\x08` x|\x06\x01!I\x03\x08C¡\x88\t\x04\x08C¡h\t\x02\x08Cáh\x08C\x02\x90\xa0i\x03\x90| \x04\x90|%\x10àôI\t\x7f i\x88@\x01!É\x06\x08Cai\x08CðI\x08`¨|\x02©\x08XîI\x08am\x1c\x03-ìÛìH\x02#ìJ\x01©|\x90ìH|hÿ÷\x14ú\x06||.\x04Ñ\x04!\x01\x98\x08@|(\x1aÑ\x01\x98À\x07À\x0f|(\x02Ð\x06&öC"
+sec=100 name='IMG-SAM7' off=0x2f2d0 va=0x2f2d0 needle='Flash' context='  memory display\n\r||[I]  mf       memory fill\n\r|[I]  mm       memory mode\n\r|[I]  memtest  SDRAM anf Flash memory test\n\r|[I]  psram    read PSRAM config register and enable page mode\n\r|[I]  pwr      set power mode\n\r||[I]  rand     generate random data\n\r||||[I]  ver      print TSW versi'
+sec=100 name='IMG-SAM7' off=0x2faac va=0x2faac needle='Flash' context='flash <cmd>\n\r|||[I]  provide flash memory informations like size or ID\n\r||||[I]  <cmd>: info - read Flash IDs and size\n\r||||[I]         toc  - read firmware table of contents\n\r||||[I]         test - start erase /write / read test\n\r|>\xa0~ðcøGH~ð`øF\xa0~ð]øMH~ðZøL¡`h~ðPí|(\x05ÑJ\xa0~ðQøN\xa0~ðNøU¡`h~'
+sec=100 name='IMG-SAM7' off=0xfe3b8 va=0xfe3b8 needle='Flash' context='Result>\n||||TestSD0|TestSD1|</SystemAnalyserTests>||TestFPGA||||TestI2C|GetADC||TestADC|TestLED|TestFlashMID||||TestFlashID|TestCF||TestHDMI||||TestSDRAMAL|TestSDRAMDL|TestCOM|TestWLAN||||ReadSN||WriteSN|TestGPIO||||TestPOWERSP|TestGPS|TestCPU|TestSDRAMDEV||||StartTSW||||TestDcc|GetLo'
+sec=100 name='IMG-SAM7' off=0xfe3c8 va=0xfe3c8 needle='Flash' context='SD0|TestSD1|</SystemAnalyserTests>||TestFPGA||||TestI2C|GetADC||TestADC|TestLED|TestFlashMID||||TestFlashID|TestCF||TestHDMI||||TestSDRAMAL|TestSDRAMDL|TestCOM|TestWLAN||||ReadSN||WriteSN|TestGPIO||||TestPOWERSP|TestGPS|TestCPU|TestSDRAMDEV||||StartTSW||||TestDcc|GetLog||TestFlash|||N'
+sec=100 name='IMG-SAM7' off=0xfe478 va=0xfe478 needle='Flash' context='SN||WriteSN|TestGPIO||||TestPOWERSP|TestGPS|TestCPU|TestSDRAMDEV||||StartTSW||||TestDcc|GetLog||TestFlash|||NotOk|||Ok||SetErrorLvl|TestAudio|||EndTestSeq||StartTestSeq||||SetPower||||Test3DAxis||NotInit|last||||debug/logs/sam7|tst_NextWritePosition: ERROR. ret=0x%x. Failed to reset f'
+sec=100 name='IMG-SAM7' off=0x5d433 va=0x5d433 needle='AWB' context='bAj\x11@²\x05\x92\t\x11CAbú÷mù| ø½\x10µ\x04|\x1cÐú÷_ù\x8bI\x88k"x|\n|\x02\x10C\x88cÈk"y|\n|\x02\x10CÈc\x08l"z|\n|\x02\x10C\x08dHl"{|\n|\x02\x10CHd\x8ak%áEá||I:Im_PRO_AEAWB_Stop. PWch macro not stopped error. \n||||\x05||\x02ê\x13||\x082\x10Cô~\x05CI:Im_PRO_AEAWB_Ctrl error. \'aeawb_mode\' value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl error. \'aeawb_ctrl\'is NULL\n|I:Im_PRO_AEAWB'
+sec=100 name='IMG-SAM7' off=0x5d47b va=0x5d47b needle='AWB' context="{|\n|\x02\x10CHd\x8ak%áEá||I:Im_PRO_AEAWB_Stop. PWch macro not stopped error. \n||||\x05||\x02ê\x13||\x082\x10Cô~\x05CI:Im_PRO_AEAWB_Ctrl error. 'aeawb_mode' value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl error. 'aeawb_ctrl'is NULL\n|I:Im_PRO_AEAWB_Ctrl error. 'awb_mode' value over!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. buffe"
+sec=100 name='IMG-SAM7' off=0x5d4b7 va=0x5d4b7 needle='AWB' context=" error. \n||||\x05||\x02ê\x13||\x082\x10Cô~\x05CI:Im_PRO_AEAWB_Ctrl error. 'aeawb_mode' value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl error. 'aeawb_ctrl'is NULL\n|I:Im_PRO_AEAWB_Ctrl error. 'awb_mode' value over!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. buffer num over (%d)\n||I:Im_PRO_AEAWB_Ctrl. h_bc_num input value "
+sec=100 name='IMG-SAM7' off=0x5d4e7 va=0x5d4e7 needle='AWB' context=" error. 'aeawb_mode' value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl error. 'aeawb_ctrl'is NULL\n|I:Im_PRO_AEAWB_Ctrl error. 'awb_mode' value over!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. buffer num over (%d)\n||I:Im_PRO_AEAWB_Ctrl. h_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. v_bc_num inpu"
+sec=100 name='IMG-SAM7' off=0x5d523 va=0x5d523 needle='AWB' context=" error. 'aeawb_ctrl'is NULL\n|I:Im_PRO_AEAWB_Ctrl error. 'awb_mode' value over!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. buffer num over (%d)\n||I:Im_PRO_AEAWB_Ctrl. h_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. v_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. detect_size value"
+sec=100 name='IMG-SAM7' off=0x5d54f va=0x5d54f needle='AWB' context="Ctrl error. 'awb_mode' value over!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. buffer num over (%d)\n||I:Im_PRO_AEAWB_Ctrl. h_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. v_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. detect_size value under!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. detec"
+sec=100 name='IMG-SAM7' off=0x5d587 va=0x5d587 needle='AWB' context='AWB_Ctrl. buffer num over (%d)\n||I:Im_PRO_AEAWB_Ctrl. h_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. v_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. detect_size value under!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. detect_addr=NULL\n||D\x12\x80CÐ½\x85C|@| |S| \x01||\x02þ\x1f||ú/||\x081\x10CI:Im_PRO_A'
+sec=100 name='IMG-SAM7' off=0x5d5bf va=0x5d5bf needle='AWB' context="bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. v_bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. detect_size value under!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. detect_addr=NULL\n||D\x12\x80CÐ½\x85C|@| |S| \x01||\x02þ\x1f||ú/||\x081\x10CI:Im_PRO_AEAWB_Set_Area error. 'aeawb_area'is NULL\n|\\1\x10Cÿÿ|ü#|ÿ |\x02"
+sec=100 name='IMG-SAM7' off=0x5d5f7 va=0x5d5f7 needle='AWB' context="bc_num input value over!! (%d)\n||I:Im_PRO_AEAWB_Ctrl. detect_size value under!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. detect_addr=NULL\n||D\x12\x80CÐ½\x85C|@| |S| \x01||\x02þ\x1f||ú/||\x081\x10CI:Im_PRO_AEAWB_Set_Area error. 'aeawb_area'is NULL\n|\\1\x10Cÿÿ|ü#|ÿ |\x02\x1b\x06\x82C\x1b\x0c\x1aC\x8acÊk#}\x82C\x1b\x06\x1b\x0c\x1aCÊc\nl#~\x82C\x1b\x06\x1b\x0c\x1aC\ndJl\x82C \x7f|\x06|\x0c\x02CJdú÷\x06ø"
+sec=100 name='IMG-SAM7' off=0x5d63f va=0x5d63f needle='AWB' context='under!! (%d)\n||||I:Im_PRO_AEAWB_Ctrl. detect_addr=NULL\n||D\x12\x80CÐ½\x85C|@| |S| \x01||\x02þ\x1f||ú/||\x081\x10CI:Im_PRO_AEAWB_Set_Area error. \'aeawb_area\'is NULL\n|\\1\x10Cÿÿ|ü#|ÿ |\x02\x1b\x06\x82C\x1b\x0c\x1aC\x8acÊk#}\x82C\x1b\x06\x1b\x0c\x1aCÊc\nl#~\x82C\x1b\x06\x1b\x0c\x1aC\ndJl\x82C \x7f|\x06|\x0c\x02CJdú÷\x06ø| \x06äòJòIóH¦÷Fÿò\xa0¦÷Cÿ¦÷BÿûHDä\x10µ\x04|cÐù÷ìÿøI\x88l"x|\n|\x02\x10C\x88d\x8alcxÿ |\x02\x82C\x1b\x02\x1aC\x8adÊl£x'
+sec=100 name='IMG-SAM7' off=0x5da93 va=0x5da93 needle='AWB' context="\x07\xad\x0c)C\x95\x01©C¥{í\x07m\x0c)CÕ\x01©Cå{í\x07-\x0c)C\x15\x02©C%|í\x07í\x0b)CU\x02©Ce|í\x07\xad\x0b)C\x95\x02©C¥|í\x07m\x0b)CÕ\x02©Cå|KàÃàÉà\x8e\x14||\x082\x10Cô~\x05CI:Im_PRO_AEAWB_Set_Lv_Gate. lv_gate=NULL\n|||\x01||\x02|@| ÿÿ|þI:Im_PRO_AEAWB_Set_Matrix_Lv_Gate. mt_lv_gate=NULL\n|ÿ\x01||¼%\x10CÔ½\x85CD\x12\x80CË\x15||X'\x10C|0| í\x07-\x0b)C\x15\x03©C%}í\x07í\n)CU\x03©Ce}í\x07\xad\n)C\x95\x03©C¥}í\x07m\n)CÕ\x03©Cå}í\x07-\n)C\x15\x04©C"
+sec=100 name='IMG-SAM7' off=0x5dacb va=0x5dacb needle='AWB' context="C¥|í\x07m\x0b)CÕ\x02©Cå|KàÃàÉà\x8e\x14||\x082\x10Cô~\x05CI:Im_PRO_AEAWB_Set_Lv_Gate. lv_gate=NULL\n|||\x01||\x02|@| ÿÿ|þI:Im_PRO_AEAWB_Set_Matrix_Lv_Gate. mt_lv_gate=NULL\n|ÿ\x01||¼%\x10CÔ½\x85CD\x12\x80CË\x15||X'\x10C|0| í\x07-\x0b)C\x15\x03©C%}í\x07í\n)CU\x03©Ce}í\x07\xad\n)C\x95\x03©C¥}í\x07m\n)CÕ\x03©Cå}í\x07-\n)C\x15\x04©C%~í\x07í\t)CU\x04©Ce~í\x07\xad\t)C\x95\x04©C¥~í\x07m\t)CÕ\x04©Cå~í\x07-\t)C\x15\x05©C%\x7fí\x07í\x08)C"
+sec=100 name='IMG-SAM7' off=0x62f87 va=0x62f87 needle='AWB' context='âð Àá\x03\n\x89â\x15\x0e\x80â\x19 Öå|À\xa0á/||ê\x88\x0e||I:Im_PRO_ELF_Set_Noisefunc error. nfunc==NULL\n||\x80@| ||ÿ\x7f3\x15||I:Im_PRO_AEAWB_Set_Line_Data_Position error. line_info=NULL\n||||Ì\x16||I:Im_PRO_AF_Ctrl_Horizon error. tap max value over!! (%d)\n||Ð|Àáÿ\x10Áã\x020\x81á| \xa0áð Ìáº\x01Öá\\\x11\x95å!\x18\xa0á\x01\x18\xa0á\x01|\x80á\\\x01\x85å\x1c|Öåd\x11\x95åÿ\x10Áã\x01|\x80ád\x01\x85å\x1d|'
+sec=100 name='IMG-SAM7' off=0x1025cb va=0x1025cb needle='AWB' context='Workspace/DS-5_Workspace/SystemAnalyserM7/Utils/M7_API/Project/ImageMacro/src/im_xch.c|||I:Im_PRO_AEAWB_Set_AEYK. aeyk value over!! (aeykr:0x%04X aeykgr:0x%04X aeykgb:0x%04X aeykb:0x%04X)\n|I:Im_PRO_OBL_Set_Border error. border1 > border2\n (border1 %d, border2 %d)\n|I:Im_PRO_OBT_Set_B'
+sec=100 name='IMG-SAM7' off=0x102767 va=0x102767 needle='AWB' context="er!! <= 1\n (%d)\n|I:Im_PRO_OB_Set_Interrupt error. 'permission_flg' value over!! (%d)\n||||I:Im_PRO_AEAWB_Set_Interrupt error. 'permission_flg' value over!! (%d)\n|I:Im_PRO_SDC_Set_Interrupt error. 'permission_flg' value over!! (%d)\n|||I:Im_PRO_NRD_Set_Interrupt error. 'permission_flg'"
+sec=100 name='IMG-SAM7' off=0x103117 va=0x103117 needle='AWB' context=' set as [(out_start_position + out_size) > %d]. (out_start_position(%d),out_size(%d)\n||||I:Im_PRO_AEAWB_Set_Area. input value over!! (pos_x:%d pos_y:%d width:%d lines:%d)\n||I:Im_PRO_AEAWB_Set_CW. input value over!! (aechw:%d aecvw:%d awchw:%d awcvw:%d)\n||||I:Im_PRO_PZSFTA_Start_ELF_'
+sec=100 name='IMG-SAM7' off=0x10316b va=0x10316b needle='AWB' context='\n||||I:Im_PRO_AEAWB_Set_Area. input value over!! (pos_x:%d pos_y:%d width:%d lines:%d)\n||I:Im_PRO_AEAWB_Set_CW. input value over!! (aechw:%d aecvw:%d awchw:%d awcvw:%d)\n||||I:Im_PRO_PZSFTA_Start_ELF_Zero_Lv error. input param:[shift_type] value over!! <= 1\n||||C:/Workspace/DS-5_Work'
+
+=== KNOWN SEMANTIC ===
+Top-level mode value 3 is DAYLIGHT from IMG and CA9 fallback diagnostics. Keep preset-case numbers separate until target/table provenance maps them.
