@@ -1,0 +1,159 @@
+name: M10-R v0.97 AEAWB window schema
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v097-aeawb-window-schema.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Decode true Prepro AEAWB window schema
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int bb=r.get();if(!bb)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v097_aeawb_window_schema.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); BASE=0x42000000; PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+          def off(a): return PFX+a-BASE
+          def u32a(a):
+            o=off(a)
+            return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+          def cstr(a):
+            o=off(a)
+            if not 0<=o<len(b): return None
+            x=b[o:min(len(b),o+260)].split(b'\0',1)[0]
+            try:s=x.decode('ascii')
+            except:return None
+            return s if len(s)>=4 and all((32<=ord(c)<127) or c in '\r\n\t' for c in s) else None
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                a=((i.address+4)&~3)+i.operands[1].mem.disp
+                return a,u32a(a)
+            except: pass
+          def adr_targets(i):
+            vals=[]
+            if i.mnemonic!='adr': return vals
+            try:
+              for op in i.operands:
+                if op.type==ARM_OP_IMM: vals.append(op.imm & 0xffffffff)
+            except: pass
+            try:
+              tok=i.op_str.split(',')[-1].strip().lstrip('#'); v=int(tok,0)
+              vals += [v&0xffffffff, (((i.address+4)&~3)+v)&0xffffffff, (i.address+4+v)&0xffffffff]
+            except: pass
+            out=[]
+            for a in vals:
+              if a not in out: out.append(a)
+            return out
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            q=lit(i)
+            if q and q[1] is not None:
+              s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'
+              st=cstr(q[1]);
+              if st:s+=f' STRING={st!r}'
+            if i.mnemonic=='adr':
+              labs=[(a,cstr(a)) for a in adr_targets(i) if cstr(a)]
+              if labs:s+=' ; ADRSTR '+repr(labs)
+            return s
+          ins=[i for i in md.disasm(b[off(0x420d9860):off(0x420d99d0)],0x420d9860) if i.id]
+          print('M10-R v0.97 TRUE AEAWB WINDOW SCHEMA')
+          print('v0.96 correction: former 22/16 candidates were c-aberration ABLRVL/ABLRHL, not AE grid counts.')
+          print('\n=== AEAWB WINDOW DEBUG FUNCTION ===')
+          for i in ins: print(fmt(i))
+          print('\n=== RAW AEAWB DEBUG STRINGS 0x420D94E0..0x420D9860 ===')
+          p=off(0x420d94e0); end=off(0x420d9860)
+          while p<end:
+            if 32<=b[p]<127:
+              q=p
+              while q<end and 32<=b[q]<127:q+=1
+              if q-p>=4 and q<end and b[q]==0:
+                try:s=b[p:q].decode('ascii')
+                except:s=''
+                if s and ('AEAWB' in s or 'Window' in s or 'Prepro' in s or '%' in s): print(hex(BASE+p-PFX),repr(s))
+                p=q+1;continue
+            p+=1
+          # Resolve all labels actually passed to print call by lightweight register tracking of r1 pointer.
+          print('\n=== RESOLVED PRINT FIELDS ===')
+          # Track r0 base values derived from PC literals plus adds/subs, r1 string ptr from LDR/ADR+ADD, and r2 data address from [r0,#disp].
+          regs={}
+          rows=[]
+          for i in ins:
+            m=i.mnemonic; ops=i.operands
+            # recognize literal loads into register
+            q=lit(i)
+            if q and len(ops)>=1:
+              try: regs[ops[0].reg]=q[1]
+              except: pass
+            if m=='adr' and len(ops)>=1:
+              labs=[a for a in adr_targets(i) if cstr(a)]
+              if labs: regs[ops[0].reg]=labs[0]
+            if m in ('adds','subs') and len(ops)>=2:
+              try:
+                rd=ops[0].reg
+                if len(ops)==2 and ops[1].type==ARM_OP_IMM and rd in regs:
+                  regs[rd]=(regs[rd]+(ops[1].imm if m=='adds' else -ops[1].imm))&0xffffffff
+                elif len(ops)>=3 and ops[1].reg in regs and ops[2].type==ARM_OP_IMM:
+                  regs[rd]=(regs[ops[1].reg]+(ops[2].imm if m=='adds' else -ops[2].imm))&0xffffffff
+              except: pass
+            if m.startswith('ldr') and len(ops)>=2 and ops[1].type==ARM_OP_MEM and ops[1].mem.base!=ARM_REG_PC:
+              try:
+                rd=ops[0].reg; rb=ops[1].mem.base; d=ops[1].mem.disp
+                if rb in regs:
+                  addr=(regs[rb]+d)&0xffffffff
+                  if rd==66: pass
+                  regs[rd]=('mem',addr,m)
+              except: pass
+            # print function; r1 should be string and r2 a mem source
+            if m in ('bl','blx') and '0x42140150' in i.op_str:
+              # ARM_REG_R1/R2 numeric values vary; use op_str-independent names by querying reg_name
+              named={md.reg_name(k):v for k,v in regs.items()}
+              sv=named.get('r1'); dv=named.get('r2')
+              if isinstance(sv,int):
+                s=cstr(sv)
+                if s:
+                  print(f'call @{i.address:#x}: label={s!r} data={dv!r}')
+          print('\n=== GLOBAL XREF FOCUS ===')
+          print('Known debug roots include 0x408F03F0 and nearby AEAWB window state near 0x408F0310/0x408F03D0.')
+          # Search literal pools for addresses in 0x408f0200..0x408f0500 and print only code xrefs in driver neighborhood.
+          vals=[]
+          for p in range(PFX,len(b)-3,4):
+            v=struct.unpack_from('<I',b,p)[0]
+            if 0x408f0200<=v<0x408f0500: vals.append((BASE+p-PFX,v))
+          seen=set()
+          for pa,v in vals:
+            if (pa,v) in seen:continue
+            seen.add((pa,v)); print(f'pool {pa:#x} -> {v:#x}')
+          print('\n=== DECISION ===')
+          print('Use named AEAWB window/count fields—not c-aberration constants—to locate the 22x16 producer geometry. Do not freeze until the true count fields are identified and tied to programming/iteration.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v097_aeawb_window_schema.txt
+          git commit -m 'research: record v0.97 AEAWB window schema' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
