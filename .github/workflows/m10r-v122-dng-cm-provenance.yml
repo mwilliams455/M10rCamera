@@ -1,0 +1,115 @@
+name: M10-R v1.22 DNG CM provenance
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v122-dng-cm-provenance.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace DNG CM provenance and matrix helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v122_dng_cm_provenance.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          ib=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); BASE=0x42000000; PFX=4
+          th=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);th.detail=True
+          ar=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);ar.detail=True
+          def off(a):return PFX+a-BASE
+          def dis(md,a,z):return list(md.disasm(ib[off(a):off(z)],a))
+          def lit(i,arm=False):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                pc=i.address+(8 if arm else 4)
+                if not arm: pc &= ~3
+                la=pc+i.operands[1].mem.disp;o=off(la)
+                if 0<=o<=len(ib)-4:return la,struct.unpack_from('<I',ib,o)[0]
+            except:pass
+          def s_at(v):
+            if not BASE<=v<BASE+len(ib)-PFX:return None
+            o=off(v);e=ib.find(b'\0',o,min(len(ib),o+180))
+            if e<=o:return None
+            b=ib[o:e]
+            if len(b)>=4 and all(0x20<=x<=0x7e for x in b):return b.decode('ascii','replace')
+          def fmt(i,arm=False):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            q=lit(i,arm)
+            if q:
+              s+=f' ; LIT {hex(q[0])}->{hex(q[1])}'
+              st=s_at(q[1])
+              if st:s+=f' STRING={st!r}'
+            if not arm and i.mnemonic=='adr' and len(i.operands)>=2 and i.operands[1].type==ARM_OP_IMM:
+              # Capstone renders Thumb ADR immediate as displacement here.
+              targ=((i.address+4)&~3)+i.operands[1].imm
+              st=s_at(targ)
+              s+=f' ; ADR_TARGET={hex(targ)}'
+              if st:s+=f' STRING={st!r}'
+            return s
+          print('M10-R v1.22 DNG CM PROVENANCE')
+          print('\n=== DNG CM WRAPPER PROVENANCE 0x420A3400..0x420A3B00 ===')
+          for i in dis(th,0x420a3400,0x420a3b00):print(fmt(i))
+          print('\n=== DNG DIAGNOSTIC ADR SITES ===')
+          for i in dis(th,0x420a3400,0x420a3b00):
+            if i.mnemonic=='adr' and len(i.operands)>=2 and i.operands[1].type==ARM_OP_IMM:
+              targ=((i.address+4)&~3)+i.operands[1].imm;st=s_at(targ)
+              if st and ('DNG CM' in st or 'Color Temperature CM' in st):print(fmt(i))
+          print('\n=== FUNCTION PROLOGUE CANDIDATES BEFORE DNG PRINT CORE ===')
+          for i in dis(th,0x420a3300,0x420a3800):
+            if i.mnemonic=='push':print(fmt(i))
+
+          print('\n=== ARM ABI HELPERS USED BY DNG PRINT / CM FILL ===')
+          for name,a,z in [('helper_421E61D0',0x421e61d0,0x421e62b0),('helper_421E6614',0x421e6614,0x421e66d0),('helper_421E6648',0x421e6648,0x421e66d0)]:
+            print(f'\n-- {name} --')
+            for i in dis(ar,a,z):print(fmt(i,True))
+
+          # CA9 ARM matrix helper semantics.
+          cb=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes(); CBASE=0x40000000; CPFX=4
+          ca=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);ca.detail=True
+          def coff(x):return CPFX+x-CBASE
+          def cdis(x,z):return list(ca.disasm(cb[coff(x):coff(z)],x))
+          def cfmt(i):return f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+          for name,a,z in [('MatrixScale?',0x40004320,0x40004440),('MatrixCombine?',0x400046e0,0x40004820)]:
+            print(f'\n=== CA9 {name} ===')
+            for i in cdis(a,z):print(cfmt(i))
+
+          print('\n=== CA9 0x40013D48 TABLE AS F64 RECORDS ===')
+          o=coff(0x40013d48)
+          for rec in range(8):
+            vals=[]
+            for k in range(4):
+              q=o+(rec*32)+(k*8)
+              if q+8<=len(cb): vals.append(struct.unpack_from('<d',cb,q)[0])
+            print('record',rec,':',' '.join(f'{v:.12g}' for v in vals))
+
+          print('\n=== DECISION ===')
+          print('Determine whether CM1/CM2 values are fixed firmware tables, calibration/OTP-supplied DNG rationals, or workflow-owned metadata. Preserve DNG matrix path separately from rendered CC0/CC1.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v122_dng_cm_provenance.txt
+          git commit -m 'research: record v1.22 DNG CM provenance' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
