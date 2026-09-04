@@ -1,0 +1,85 @@
+name: M10-R v0.15 IMG command 0x32 sender
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v015-img-command32-sender.yml']
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Recover IMG
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+      - name: Locate command 32 sender
+        shell: bash
+        run: |
+          python3 - <<'PY' | tee /tmp/m10r-v015-img-command32-sender.txt
+          from pathlib import Path
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_REG_PC
+          import struct
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();base=0x42000000;p=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(v):return p+v-base
+          def va(o):return base+o-p
+          def r32(v):
+            o=off(v);return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+          def astr(v,n=240):
+            o=off(v)
+            if not 0<=o<len(b):return None
+            s=[]
+            for c in b[o:o+n]:
+              if c==0:break
+              if c in (9,10,13) or 32<=c<127:s.append(chr(c))
+              else:return None
+            q=''.join(s);return q if len(q)>=4 else None
+          def dump(a,z):
+            for i in md.disasm(b[off(a):off(z)],a):
+              if i.mnemonic=='.byte':continue
+              ex=''
+              if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;v=r32(la)
+                if v is not None:
+                  s=astr(v);ex=f' ; literal {la:#x}->{v:#x}'+(f' STRING={s!r}' if s else '')
+              print(f'{i.address:08x}: {i.mnemonic:9s} {i.op_str}{ex}')
+          # Raw Thumb MOVS immediate candidates for 0x32/0x33 in any low register.
+          seen=set()
+          for imm in (0x32,0x33):
+            print(f'\n=== MOVS immediate {imm:#x} candidates ===')
+            for rd in range(8):
+              hw=0x2000|(rd<<8)|imm;pat=struct.pack('<H',hw);s=p
+              while True:
+                k=b.find(pat,s)
+                if k<0:break
+                a=va(k);s=k+2
+                if a&1:continue
+                # Confirm instruction and require a BL/BLX within next 20 decoded instructions.
+                ins=list(md.disasm(b[k:min(len(b),k+0x80)],a))
+                if not ins or ins[0].mnemonic!='movs' or f'#0x{imm:x}' not in ins[0].op_str:continue
+                if not any(x.mnemonic in ('bl','blx') for x in ins[:20]):continue
+                key=(imm,a)
+                if key in seen:continue
+                seen.add(key)
+                print('\nCANDIDATE',hex(a),ins[0].op_str)
+                dump(max(base,a-0xc0),min(base+len(b)-p,a+0x240))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m10r-v015-img-command32-sender
+          path: /tmp/m10r-v015-img-command32-sender.txt
+          if-no-files-found: error
