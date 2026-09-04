@@ -1,0 +1,100 @@
+name: M10-R v0.15 BvCMOS accessor xrefs
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v015-bvcmos-accessor-xrefs.yml']
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Recover CTRL
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+      - name: Trace BvCMOS state accessors and callers
+        shell: bash
+        run: |
+          python3 - <<'PY' | tee /tmp/m10r-v015-bvcmos-accessor-xrefs.txt
+          from pathlib import Path
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM, ARM_OP_MEM, ARM_REG_PC
+          import struct
+
+          b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes(); base=0x08000000; pfx=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+          def off(v): return pfx+v-base
+          def word_at_va(v):
+            o=off(v)
+            if o<0 or o+4>len(b): return None
+            return struct.unpack_from('<I',b,o)[0]
+          def dis(s,e):
+            return [i for i in md.disasm(b[off(s):off(e)],s) if i.mnemonic!='.byte']
+          def dump(label,s,e):
+            print(f'\n=== {label} {s:#010x}..{e:#010x} ===')
+            for i in dis(s,e): print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
+          ins=list(md.disasm(b[pfx:],base))
+          ins=[i for i in ins if i.mnemonic!='.byte']
+          idx={i.address:n for n,i in enumerate(ins)}
+
+          AE_BASE=0x2001A918; BVCMOS_ADDR=AE_BASE+0x16
+          print('AE_BASE',hex(AE_BASE),'BvCMOS direct address',hex(BVCMOS_ADDR))
+          print('raw AE_BASE word offsets',[hex(base+x-pfx) for x in range(pfx,len(b)-3) if b[x:x+4]==struct.pack('<I',AE_BASE)][:100])
+          print('raw BvCMOS-address word offsets',[hex(base+x-pfx) for x in range(pfx,len(b)-3) if b[x:x+4]==struct.pack('<I',BVCMOS_ADDR)][:100])
+
+          dump('AE ACCESSOR CLUSTER',0x08011c80,0x08011f20)
+
+          print('\n=== PC-LITERAL LOADS OF AE BASE / DIRECT BvCMOS ADDRESS ===')
+          hits=[]
+          for n,i in enumerate(ins):
+            if i.mnemonic!='ldr' or len(i.operands)<2 or i.operands[1].type!=ARM_OP_MEM: continue
+            m=i.operands[1].mem
+            if m.base!=ARM_REG_PC: continue
+            lit=((i.address+4)&~3)+m.disp
+            val=word_at_va(lit)
+            if val in (AE_BASE,BVCMOS_ADDR):
+              hits.append((n,i,val,lit))
+              print(f'\n-- hit {i.address:#010x}: {i.mnemonic} {i.op_str}; literal {lit:#010x} -> {val:#010x}')
+              for j in ins[max(0,n-10):min(len(ins),n+18)]:
+                mark='>>' if j.address==i.address else '  '
+                print(f'{mark} {j.address:08x}: {j.mnemonic:8s} {j.op_str}')
+
+          print('\n=== ALL #0x16 HALFWORD/SIGNED-HALFWORD ACCESSES (context) ===')
+          for n,i in enumerate(ins):
+            if i.mnemonic not in ('ldrh','ldrsh','strh'): continue
+            if '#0x16' not in i.op_str: continue
+            print(f'\n-- candidate {i.address:#010x}: {i.mnemonic} {i.op_str}')
+            for j in ins[max(0,n-8):min(len(ins),n+10)]:
+              mark='>>' if j.address==i.address else '  '
+              print(f'{mark} {j.address:08x}: {j.mnemonic:8s} {j.op_str}')
+
+          print('\n=== DIRECT BL/BLX TARGETS INTO ACCESSOR CLUSTER 0x08011c80..0x08011f20 ===')
+          calls={}
+          for i in ins:
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:
+              t=i.operands[0].imm & ~1
+              if 0x08011c80 <= t < 0x08011f20: calls.setdefault(t,[]).append(i.address)
+          for t,cs in sorted(calls.items()):
+            print(hex(t),'callers',[hex(x) for x in cs])
+            dump('TARGET_'+hex(t),t,min(t+0x50,0x08011f20))
+            for a in cs[:30]: dump('CALL_'+hex(a),max(base,a-0x60),min(base+len(b)-pfx,a+0xa0))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m10r-v015-bvcmos-accessor-xrefs
+          path: /tmp/m10r-v015-bvcmos-accessor-xrefs.txt
+          if-no-files-found: error
