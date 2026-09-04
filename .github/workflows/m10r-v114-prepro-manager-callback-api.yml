@@ -1,0 +1,98 @@
+name: M10-R v1.14 Prepro manager callback API
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v114-prepro-manager-callback-api.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Decode manager callback/config APIs near 0x420E5D50
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int bb=r.get();if(!bb)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v114_prepro_manager_callback_api.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def raw(a,n):
+            o=PFX+a-BASE;return b[o:o+n]
+          def u32(a):
+            x=raw(a,4);return struct.unpack('<I',x)[0] if len(x)==4 else None
+          def dump(lo,hi,title):
+            print(f'\n=== {title} {lo:#x}..{hi:#x} ===')
+            for i in md.disasm(raw(lo,hi-lo),lo):
+              if not i.id: continue
+              ex=''
+              try:
+                if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                  lit=((i.address+4)&~3)+i.operands[1].mem.disp;v=u32(lit)
+                  if v is not None: ex=f' ; LIT {lit:#x}->{v:#x}'
+              except:pass
+              print(f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}{ex}')
+          print('M10-R v1.14 PREPRO MANAGER CALLBACK/API TRACE')
+          print('Target table 0x408F0254; callbacks observed at +0x08,+0x0C,+0x14,+0x18. No direct code-side writer found in v1.13.')
+          # Dump the manager cluster around all table readers; identify clean function starts/ends and adjacent setter APIs.
+          dump(0x420e5900,0x420e60c0,'PREPRO MANAGER CORE')
+          dump(0x420e6d80,0x420e6f80,'PREPRO MANAGER AUX/APIS')
+          # Extract printable Leica strings in manager code neighborhood and globally containing manager/callback/interrupt/prepro.
+          print('\n=== RELEVANT STRINGS GLOBAL ===')
+          for m in re.finditer(rb'[ -~]{8,}',b):
+            s=m.group().decode('latin1','replace')
+            sl=s.lower()
+            if ('prepro' in sl and ('manager' in sl or 'callback' in sl or 'interrupt' in sl or 'config' in sl or 'init' in sl)):
+              addr=BASE+(m.start()-PFX)
+              print(hex(addr),repr(s[:240]))
+          # Exact slot addresses raw pointer occurrences (sometimes setters use slot literal rather than base).
+          print('\n=== RAW SLOT POINTER POOLS ===')
+          for a in (0x408f0254,0x408f0258,0x408f025c,0x408f0260,0x408f0264,0x408f0268,0x408f026c,0x408f0270):
+            pat=struct.pack('<I',a);p=0;hits=[]
+            while True:
+              q=b.find(pat,p)
+              if q<0:break
+              hits.append(BASE+(q-PFX));p=q+1
+            print(hex(a),*[hex(h) for h in hits])
+          # Find code pointers into manager core in literal pools / call sites for public API candidates.
+          print('\n=== DIRECT CALLERS OF MANAGER CLUSTER FUNCTIONS ===')
+          funcs=[0x420e59dc,0x420e5bd0,0x420e5ca4,0x420e5d50,0x420e5e70,0x420e5ec0,0x420e5f44,0x420e607c,0x420e6e00,0x420e6e50,0x420e6ec0,0x420e6f18]
+          # limited section-chunk scan to avoid runner timeout
+          for tgt in funcs:
+            callers=[]
+            for lo in range(BASE,BASE+0x180000,0x10000):
+              for i in md.disasm(raw(lo,0x10000),lo):
+                if not i.id or i.mnemonic not in ('bl','blx'): continue
+                try:
+                  if i.operands and i.operands[0].type==ARM_OP_IMM and (i.operands[0].imm&~1)==tgt:callers.append(i.address)
+                except:pass
+            print(hex(tgt),*[hex(c) for c in callers])
+          print('\n=== DECISION ===')
+          print('Find manager API that accepts function pointers/config and initializes callback table. Resolve production callback at +0x08, or if callbacks remain zero, prove the production route instead continues synchronously after PW mask completion into a known consumer.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v114_prepro_manager_callback_api.txt
+          git commit -m 'research: record v1.14 Prepro manager callback API trace' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
