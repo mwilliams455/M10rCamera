@@ -1,0 +1,143 @@
+name: M10-R v1.17 workflow480 constructor boundary
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v117-workflow480-constructor-boundary.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Close workflow plus480 constructor / ABI boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v117_workflow480_constructor_boundary.txt
+          from pathlib import Path
+          import struct, re, collections
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_OP_REG,ARM_REG_PC
+
+          IMG=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); BASE=0x42000000; PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+          def off(a): return PFX+a-BASE
+          def dis(a,z):
+            a=max(BASE,a); z=min(BASE+len(IMG)-PFX,z)
+            if z<=a:return []
+            return [i for i in md.disasm(IMG[off(a):off(z)],a) if i.id]
+          def literal(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp; lo=off(la)
+                if 0<=lo<=len(IMG)-4:return la,struct.unpack_from('<I',IMG,lo)[0]
+            except: pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            q=literal(i)
+            if q:s+=f' ; LIT {hex(q[0])}->{hex(q[1])}'
+            return s
+          def dump(a,z):
+            for i in dis(a,z): print(fmt(i))
+
+          print('M10-R v1.17 WORKFLOW+0x480 CONSTRUCTOR / ABI BOUNDARY')
+          print('Known: ca9_StartImageProcessing=0x420A2FB4; first arg persisted to 0x408187EC; 0x420A3104 reads workflow+0x480.')
+          print('Known: PW channel 6 hardware output destination is AFAEAWB allocation base+0x80; production optional pointer callback is NULL.')
+
+          print('\n=== REFERENCE CONSUMER 0x420A3104 ===')
+          dump(0x420a30f0,0x420a3148)
+          print('\n=== REFERENCE WB SELECTOR 0x420A835C ===')
+          dump(0x420a83b0,0x420a8428)
+
+          # One streaming pass over IMG-System: find direct large displacement accesses and
+          # short arithmetic patterns capable of forming 0x45c/0x480/0x484/0x488/0x48c.
+          direct=[]; arithmetic=[]; last=collections.deque(maxlen=14)
+          targets={0x45c,0x480,0x484,0x488,0x48c}
+          comps={0x428,0x45c,0x480,0x484,0x488,0x48c,0x85,0x34,0x58,0x5c,0x60,0x80}
+          for i in md.disasm(IMG[PFX:],BASE):
+            if not i.id: continue
+            try:
+              mems=[o for o in i.operands if o.type==ARM_OP_MEM]
+              if any(m.mem.disp in targets for m in mems): direct.append((i.address,i.mnemonic,i.op_str))
+              imms=[o.imm for o in i.operands if o.type==ARM_OP_IMM]
+              if any(v in comps for v in imms):
+                win=list(last)+[i]
+                if any(q.mnemonic.startswith('str') for q in win): arithmetic.append(i.address)
+            except: pass
+            last.append(i)
+          print('\n=== IMG-SYSTEM DIRECT +0x45C/+0x480 FAMILY ACCESSES ===')
+          print('count',len(direct))
+          for a,m,o in direct:
+            print(f'\n--- direct @{hex(a)} {m} {o} ---'); dump(a-0x28,a+0x34)
+          print('\n=== IMG-SYSTEM ARITHMETIC+STORE CANDIDATES ===')
+          # de-dupe candidate neighborhoods
+          chosen=[]
+          for a in arithmetic:
+            if not chosen or a-chosen[-1]>0x30: chosen.append(a)
+          print('raw',len(arithmetic),'deduped',len(chosen))
+          for a in chosen[:220]:
+            print(f'\n--- arithmetic/store @{hex(a)} ---'); dump(a-0x30,a+0x44)
+
+          # Search every extracted section for the exported API name and concrete Thumb/code pointers.
+          print('\n=== CROSS-SECTION API NAME / POINTER OCCURRENCES ===')
+          names=[b'ca9_StartImageProcessing',b'ca9_wb_fill_parameter']
+          ptrvals=[0x420a2fb4,0x420a2fb5,0x420a3104,0x420a3105]
+          for p in sorted(Path('/tmp/sections').iterdir()):
+            if not p.is_file(): continue
+            d=p.read_bytes(); hits=[]
+            for n in names:
+              q=0
+              while True:
+                q=d.find(n,q)
+                if q<0:break
+                hits.append(('ascii',n.decode(),q)); q+=1
+            for v in ptrvals:
+              pat=struct.pack('<I',v); q=0
+              while True:
+                q=d.find(pat,q)
+                if q<0:break
+                hits.append(('ptr',hex(v),q)); q+=1
+            if hits:
+              print('\nSECTION',p.name,'size',len(d))
+              for h in hits[:100]:print(*h)
+
+          # Stronger writer test: exact builder pattern root=(0x85<<3)=0x428 then +0x34/+0x58.
+          print('\n=== EXACT 0x85<<3 PATTERN SITES ===')
+          ins=dis(BASE,BASE+len(IMG)-PFX)
+          sites=[]
+          for n,i in enumerate(ins):
+            try:
+              if i.mnemonic.startswith('mov') and any(o.type==ARM_OP_IMM and o.imm==0x85 for o in i.operands):
+                w=ins[n:min(len(ins),n+12)]
+                if any(q.mnemonic.startswith('lsl') and any(o.type==ARM_OP_IMM and o.imm==3 for o in q.operands) for q in w): sites.append(n)
+            except: pass
+          print('count',len(sites))
+          for n in sites:
+            a=ins[n].address; print(f'\n--- 0x85<<3 @{hex(a)} ---'); dump(a-0x18,a+0x50)
+
+          print('\n=== CLOSURE RULE ===')
+          print('If IMG-System contains no writer/constructor for +0x480 while ca9_StartImageProcessing remains an externally-entered API, freeze +0x480 as caller-owned CA9 input contract, not as an internally-produced field. Do not assert pointer equality with Prepro base+0x80 without an explicit bridge.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v117_workflow480_constructor_boundary.txt
+          git commit -m 'research: record v1.17 workflow480 constructor boundary' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
