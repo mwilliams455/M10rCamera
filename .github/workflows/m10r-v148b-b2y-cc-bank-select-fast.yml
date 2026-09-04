@@ -1,0 +1,91 @@
+name: M10-R v1.48b B2Y CC bank select fast
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v148b-b2y-cc-bank-select-fast.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace B2Y CC bank controls with bounded windows
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text(); a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n"); z=p.index("\n          CPP",a); Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v148b_b2y_cc_bank_select_fast.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); B=0x42000000; P=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+          def off(a): return P+a-B
+          def dis(a,z): return list(md.disasm(b[off(a):off(z)],a))
+          def cstr(a,n=220):
+            o=off(a)
+            if not 0<=o<len(b): return None
+            e=b.find(b'\0',o,min(len(b),o+n)); q=b[o:e]
+            return q.decode('ascii','replace') if e>o and all(32<=x<127 for x in q) else None
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp; o=off(la)
+                if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+            except:pass
+          def call(i):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm&~1
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i)
+            if q:s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'+(f' STRING={cstr(q[1])!r}' if cstr(q[1]) else '')
+            c=call(i)
+            if c is not None:s+=f' ; CALL {c:#x}'
+            return s
+          print('M10-R v1.48b B2Y CC BANK SELECT FAST')
+          for title,a,z in [('PROGRAMMER_A',0x42152f8c,0x421530c0),('PROGRAMMER_B',0x421536bc,0x421537f0),('CALLER_A',0x421615b0,0x421616d0),('CALLER_B',0x42161980,0x42161ab0),('CM_FINISHED',0x420a35f0,0x420a3760)]:
+            print('\n===',title,'===')
+            for i in dis(a,z):print(fmt(i))
+          print('\n=== raw literal pools and bounded users ===')
+          for t in (0x408fe124,0x408fe130,0x408fe15c,0x20020080,0x20020880,0x20022400):
+            pat=struct.pack('<I',t); p=0; pools=[]
+            while True:
+              p=b.find(pat,p)
+              if p<0:break
+              pools.append(B+p-P);p+=4
+            print(hex(t),[hex(x) for x in pools])
+            for lp in pools:
+              # only inspect code up to 0x500 bytes before each literal pool
+              for i in dis(max(B,lp-0x500),lp):
+                q=lit(i)
+                if q and q[0]==lp:print(fmt(i))
+          print('\n=== semantic strings 0x42161500..0x42161b00 ===')
+          a=0x42161500
+          while a<0x42161b00:
+            s=cstr(a)
+            if s and any(k in s for k in ('B2Y','MAGNI','SLIVE','STILL')):print(hex(a),repr(s));a+=len(s)+1
+            else:a+=1
+          print('\n=== PROVEN REGISTER ABI ===')
+          print('CC0 0x408FE130: pairs -> 0x20020120/124/128/12C, word8 -> 0x20020130, scale/control low2 -> bits4..5 of 0x20020100')
+          print('CC1 0x408FE15C: pairs -> 0x200208A0/A4/A8/AC, word8 -> 0x200208B0, scale/control low2 -> bits4..5 of 0x20020880')
+          print('Header 0x408FE124: hword+0 -> low11 of 0x2002008C; hword+8 -> bits16..26 of 0x2002008C; hword+4 duplicated to low11 and bits16..26 of 0x20020090.')
+          print('Both CC0 and CC1 banks are programmed per invocation.')
+          print('\n=== TARGET ===')
+          print('Determine semantic role of header and discriminate programmer A/B workflow mode without full-image disassembly.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v148b_b2y_cc_bank_select_fast.txt
+          git commit -m 'research: record bounded v1.48b B2Y CC bank-select trace' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
