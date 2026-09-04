@@ -1,0 +1,582 @@
+M10-R v1.45 ROUND HELPER / B2Y START BRIDGE
+
+=== soft-float helpers used by 0x421A0A44 ===
+
+-- 421e6050 --
+421e6050: teq        r1, r3
+421e6054: push       {r4, lr}
+421e6058: eormi      r3, r3, #0x80000000
+421e605c: bmi        #0x421e6d54
+421e6060: subs       r4, r0, r2
+421e6064: sbcs       ip, r1, r3
+421e6068: bhs        #0x421e607c
+421e606c: adds       r2, r2, r4
+421e6070: adc        r3, r3, ip
+421e6074: subs       r0, r0, r4
+421e6078: sbc        r1, r1, ip
+421e607c: ldr        lr, [pc, #0x11c] ; LIT 0x421e61a0->0xffe00000
+421e6080: lsr        r4, r1, #0x14
+421e6084: sub        ip, r4, r3, lsr #20
+421e6088: tst        lr, r3, lsl #1
+421e608c: teqne      lr, r4, lsl #21
+421e6090: beq        #0x421e6174
+421e6094: bic        r3, r3, lr
+421e6098: rsbs       lr, ip, #0x20
+421e609c: bic        r1, r1, r4, lsl #20
+421e60a0: orr        r3, r3, #0x100000
+421e60a4: blo        #0x421e60fc
+421e60a8: adds       r0, r0, r2, lsr ip
+421e60ac: adc        r1, r1, r3, lsr ip
+421e60b0: adds       r0, r0, r3, lsl lr
+421e60b4: adcs       r1, r1, #0
+421e60b8: cmp        r1, #0x100000
+421e60bc: bhs        #0x421e6124
+421e60c0: add        r1, r1, r4, lsl #20
+421e60c4: lsls       r2, r2, lr
+421e60c8: pop        {r4, lr}
+421e60cc: bxpl       lr
+421e60d0: adds       r0, r0, #1
+421e60d4: lslslo     r2, r2, #1
+421e60d8: bxne       lr
+421e60dc: cmp        r0, #0
+421e60e0: bicne      r0, r0, #1
+421e60e4: adceq      r1, r1, #0
+421e60e8: lsl        r3, r1, #1
+421e60ec: cmn        r3, #0x200000
+421e60f0: bxlo       lr
+421e60f4: sub        r1, r1, #0x60000000
+421e60f8: b          #0x421e69d0
+421e60fc: cmp        r2, #1
+421e6100: adc        r2, r3, r3
+421e6104: sub        ip, ip, #0x20
+421e6108: rsbs       lr, ip, #0x1f
+421e610c: movlo      lr, #0
+421e6110: addshs     r0, r0, r3, lsr ip
+421e6114: adc        r1, r1, r4, lsl #20
+421e6118: cmp        r4, r1, lsr #20
+421e611c: beq        #0x421e60c4
+421e6120: sub        r1, r1, r4, lsl #20
+421e6124: add        r1, r1, #0x100000
+421e6128: lsrs       r1, r1, #1
+421e612c: rrxs       r0, r0
+421e6130: add        r1, r1, r4, lsl #20
+421e6134: blo        #0x421e615c
+421e6138: adcs       r0, r0, #0
+421e613c: lslslo     lr, r2, lr
+421e6140: bne        #0x421e615c
+421e6144: pop        {r4, lr}
+421e6148: b          #0x421e60dc
+421e614c: adds       r0, r0, #1
+421e6150: lslslo     r2, r2, #1
+421e6154: bne        #0x421e60e8
+421e6158: b          #0x421e60dc
+421e615c: pop        {r4, lr}
+421e6160: lsl        r3, r1, #1
+421e6164: cmn        r3, #0x200000
+421e6168: bxlo       lr
+421e616c: sub        r1, r1, #0x60000000
+421e6170: b          #0x421e69d0
+421e6174: teq        lr, r4, lsl #21
+421e6178: beq        #0x421e6190
+421e617c: tst        r1, lr, lsr #1
+421e6180: pop        {r4, lr}
+421e6184: moveq      r0, #0
+421e6188: andeq      r1, r1, #0x80000000
+421e618c: bx         lr
+421e6190: pop        {r4, lr}
+421e6194: push       {r4, r5, r6, lr}
+421e6198: bl         #0x421e6918 ; CALL 0x421e6918
+421e619c: vcvtlo.s16.f64 d15, d15, #7
+
+-- 421e670c --
+421e670c: orrs       ip, r1, r3
+421e6710: bmi        #0x421e6750
+421e6714: cmn        ip, #0x100000
+421e6718: cmppl      ip, #0x100000
+421e671c: bmi        #0x421e6730
+421e6720: cmp        r1, r3
+421e6724: bxne       lr
+421e6728: cmpeq      r0, r2
+421e672c: bx         lr
+421e6730: bvc        #0x421e6748
+421e6734: cmn        r1, #0x100000
+421e6738: cmnpl      r3, #0x100000
+421e673c: bmi        #0x421e6788
+421e6740: cmp        r1, r3
+421e6744: bx         lr
+421e6748: cmp        r1, r1
+421e674c: bx         lr
+421e6750: cmn        ip, #0x100000
+421e6754: bpl        #0x421e6770
+421e6758: cmp        ip, #0x100000
+421e675c: bpl        #0x421e6748
+421e6760: cmp        r3, r1
+421e6764: bxne       lr
+421e6768: cmpeq      r2, r0
+421e676c: bx         lr
+421e6770: mov        ip, #0x200000
+421e6774: cmn        ip, r1, lsl #1
+421e6778: cmnlo      ip, r3, lsl #1
+421e677c: bhs        #0x421e6788
+421e6780: cmp        r3, r1
+421e6784: bx         lr
+421e6788: push       {r4, r5, r6, lr}
+421e678c: bl         #0x421e6918 ; CALL 0x421e6918
+
+-- 421e69e0 --
+421e69e0: orrs       ip, r3, r1
+421e69e4: bmi        #0x421e6a24
+421e69e8: cmn        ip, #0x100000
+421e69ec: cmppl      ip, #0x100000
+421e69f0: bmi        #0x421e6a04
+421e69f4: cmp        r3, r1
+421e69f8: bxne       lr
+421e69fc: cmpeq      r2, r0
+421e6a00: bx         lr
+421e6a04: bvc        #0x421e6a1c
+421e6a08: cmn        r3, #0x100000
+421e6a0c: cmnpl      r1, #0x100000
+421e6a10: bmi        #0x421e6a5c
+421e6a14: cmp        r3, r1
+421e6a18: bx         lr
+421e6a1c: cmp        r3, r3
+421e6a20: bx         lr
+421e6a24: cmn        ip, #0x100000
+421e6a28: bpl        #0x421e6a44
+421e6a2c: cmp        ip, #0x100000
+421e6a30: bpl        #0x421e6a1c
+421e6a34: cmp        r1, r3
+421e6a38: bxne       lr
+421e6a3c: cmpeq      r0, r2
+
+-- 421e6a6c --
+421e6a6c: lsls       ip, r1, #1
+421e6a70: lsrs       ip, ip, #0x15
+421e6a74: sub        r3, ip, #0x400
+421e6a78: adds       r3, r3, #1
+421e6a7c: bmi        #0x421e6afc
+421e6a80: rsbs       r2, r3, #0x34
+421e6a84: ble        #0x421e6b18
+421e6a88: subs       r3, r2, #0x20
+421e6a8c: bge        #0x421e6abc
+421e6a90: mov        ip, #1
+421e6a94: lsl        ip, ip, r2
+421e6a98: sub        r3, ip, #1
+421e6a9c: ands       r3, r0, r3
+421e6aa0: subs       r2, r3, ip, lsr #1
+421e6aa4: bic        r0, r0, r3
+421e6aa8: tsteq      r0, ip
+421e6aac: bxls       lr
+421e6ab0: adds       r0, r0, ip
+421e6ab4: adc        r1, r1, #0
+421e6ab8: bx         lr
+421e6abc: beq        #0x421e6ad8
+421e6ac0: rsb        r2, r3, #0x20
+421e6ac4: lsl        ip, r1, r2
+421e6ac8: cmp        r0, #1
+421e6acc: lsr        r1, r1, r3
+421e6ad0: lsl        r1, r1, r3
+421e6ad4: adc        r0, ip, #0
+421e6ad8: mov        ip, #1
+421e6adc: lsl        ip, ip, r3
+421e6ae0: sub        r3, ip, #1
+421e6ae4: cmp        r0, #0x80000000
+421e6ae8: mov        r0, #0
+421e6aec: bic        r1, r1, r3
+421e6af0: tsteq      r1, ip
+421e6af4: addhi      r1, r1, ip
+421e6af8: bx         lr
+421e6afc: cmn        r3, #1
+421e6b00: orrshs     ip, r0, r1, lsl #11
+421e6b04: mov        r0, #0
+421e6b08: and        r1, r1, #0x80000000
+421e6b0c: orrhi      r1, r1, #0x3f000000
+421e6b10: orrhi      r1, r1, #0xf00000
+421e6b14: bx         lr
+421e6b18: cmp        r3, #0x400
+421e6b1c: bxlt       lr
+421e6b20: push       {r4, r5, r6, lr}
+421e6b24: bl         #0x421e6918 ; CALL 0x421e6918
+421e6b28: vrintrlt.f64 d13, d0
+
+-- 421e6b2c --
+421e6b2c: teq        r1, r3
+421e6b30: push       {r4, lr}
+421e6b34: eor        r1, r1, #0x80000000
+421e6b38: bmi        #0x421e6060
+421e6b3c: eor        r3, r3, #0x80000000
+421e6b40: b          #0x421e6d54
+421e6b44: push       {r4, r5, r6, r7, r8, lr}
+421e6b48: add        ip, r1, #0x100000
+421e6b4c: cmp        ip, #0x200000
+421e6b50: blt        #0x421e6d04
+421e6b54: lsr        ip, r1, #0x14
+421e6b58: bic        r1, r1, ip, lsl #20
+421e6b5c: add        ip, ip, #0xfd
+421e6b60: orr        r1, r1, #0x100000
+421e6b64: lsrs       ip, ip, #1
+421e6b68: add        ip, ip, #0x180
+421e6b6c: blo        #0x421e6b78
+421e6b70: lsls       r0, r0, #1
+421e6b74: adcs       r1, r1, r1
+421e6b78: add        r4, pc, #0x100
+421e6b7c: lsls       r1, r1, #0xa
+421e6b80: orr        r1, r1, r0, lsr #22
+421e6b84: lsls       r7, r0, #0xa
+421e6b88: lsrs       r6, r1, #0x1a
+421e6b8c: lsrs       r2, r1, #0x10
+421e6b90: ldrb       r4, [r4, r6]
+421e6b94: mul        r6, r4, r4
+421e6b98: mul        r6, r2, r6
+421e6b9c: rsb        r6, r6, #0xc0000000
+421e6ba0: umull      r6, r2, r4, r6
+421e6ba4: lsrs       r6, r6, #0x17
+421e6ba8: orr        r6, r6, r2, lsl #9
+421e6bac: mul        r4, r6, r6
+421e6bb0: umull      r2, r3, r4, r1
+421e6bb4: rsbs       r2, r2, #0
+421e6bb8: rsc        r3, r3, #0xc0000000
+421e6bbc: umull      r4, r2, r6, r2
+421e6bc0: movs       r4, #0
+421e6bc4: umlal      r2, r4, r6, r3
+421e6bc8: lsrs       r2, r2, #0xf
+421e6bcc: orr        r6, r2, r4, lsl #17
+421e6bd0: umull      r2, r3, r6, r6
+421e6bd4: umull      lr, r2, r1, r2
+421e6bd8: umull      lr, r4, r3, r7
+421e6bdc: adds       r4, r4, r2
+421e6be0: mov        r2, #0
+421e6be4: adcs       r2, r2, #0
+421e6be8: umlal      r4, r2, r3, r1
+421e6bec: rsbs       r4, r4, #0
+421e6bf0: rsc        lr, r2, #0xc0000000
+421e6bf4: umull      r2, r3, r6, r4
+421e6bf8: mov        r2, #0
+421e6bfc: umlal      r3, r2, r6, lr
+421e6c00: umull      r4, r6, r2, r3
+421e6c04: mov        r4, #0
+421e6c08: adds       r6, r6, r6
+421e6c0c: adcs       r4, r4, #0
+
+-- 421e6d44 --
+421e6d44: teq        r1, r3
+421e6d48: push       {r4, lr}
+421e6d4c: eormi      r3, r3, #0x80000000
+421e6d50: bmi        #0x421e6060
+421e6d54: subs       r4, r0, r2
+421e6d58: sbcs       ip, r1, r3
+421e6d5c: bhs        #0x421e6d74
+421e6d60: adds       r2, r2, r4
+421e6d64: eor        ip, ip, #0x80000000
+421e6d68: adc        r3, r3, ip
+421e6d6c: subs       r0, r0, r4
+421e6d70: sbc        r1, r1, ip
+421e6d74: ldr        lr, [pc, #0x1c4] ; LIT 0x421e6f40->0xffe00000
+421e6d78: lsr        r4, r1, #0x14
+421e6d7c: sub        ip, r4, r3, lsr #20
+421e6d80: tst        lr, r3, lsl #1
+421e6d84: teqne      lr, r4, lsl #21
+421e6d88: beq        #0x421e6f08
+421e6d8c: rsbs       r2, r2, #0
+421e6d90: bic        r3, r3, lr, asr #1
+421e6d94: rsc        r3, r3, lr, asr #1
+421e6d98: rsbs       lr, ip, #0x20
+421e6d9c: bic        r1, r1, r4, lsl #20
+421e6da0: blo        #0x421e6de4
+421e6da4: adds       r0, r0, r2, lsr ip
+421e6da8: adc        r1, r1, r3, asr ip
+421e6dac: adds       r0, r0, r3, lsl lr
+
+=== 0x421A0A44 round candidate ===
+421a0a44: push       {r4, r5, r6, r7, r8, sl, fp, lr}
+421a0a48: mov        r7, r0
+421a0a4c: mov        r6, r1
+421a0a50: bl         #0x421e6a6c ; CALL 0x421e6a6c
+421a0a54: mov        r4, r0
+421a0a58: mov        r5, r1
+421a0a5c: mov        r2, r7
+421a0a60: mov        r3, r6
+421a0a64: bl         #0x421e6b2c ; CALL 0x421e6b2c
+421a0a68: ldr        sl, [pc, #0xac] ; LIT 0x421a0b1c->0x3ff00000
+421a0a6c: mov        r7, r0
+421a0a70: mov        r8, r1
+421a0a74: mov        r2, #0
+421a0a78: tst        r6, #0x80000000
+421a0a7c: sub        fp, sl, #0x100000
+421a0a80: rsb        r3, fp, sl, lsl #2
+421a0a84: beq        #0x421a0aac
+421a0a88: bl         #0x421e670c ; CALL 0x421e670c
+421a0a8c: bls        #0x421a0ab4
+421a0a90: mov        r2, #0
+421a0a94: mov        r3, fp
+421a0a98: mov        r0, r7
+421a0a9c: mov        r1, r8
+421a0aa0: bl         #0x421e69e0 ; CALL 0x421e69e0
+421a0aa4: bhs        #0x421a0b08
+421a0aa8: b          #0x421a0aec
+421a0aac: bl         #0x421e670c ; CALL 0x421e670c
+421a0ab0: bhs        #0x421a0ad4
+421a0ab4: mov        r2, #0
+421a0ab8: mov        r3, sl
+421a0abc: mov        r0, r4
+421a0ac0: mov        r1, r5
+421a0ac4: bl         #0x421e6d44 ; CALL 0x421e6d44
+421a0ac8: mov        r4, r0
+421a0acc: mov        r5, r1
+421a0ad0: b          #0x421a0b08
+421a0ad4: mov        r2, #0
+421a0ad8: mov        r3, fp
+421a0adc: mov        r0, r7
+421a0ae0: mov        r1, r8
+421a0ae4: bl         #0x421e69e0 ; CALL 0x421e69e0
+421a0ae8: bhi        #0x421a0b08
+421a0aec: mov        r2, #0
+421a0af0: mov        r3, sl
+421a0af4: mov        r0, r4
+421a0af8: mov        r1, r5
+421a0afc: bl         #0x421e6050 ; CALL 0x421e6050
+421a0b00: mov        r4, r0
+421a0b04: mov        r5, r1
+421a0b08: and        r1, r6, #0x80000000
+421a0b0c: bic        r0, r5, #0x80000000
+421a0b10: orr        r1, r1, r0
+421a0b14: mov        r0, r4
+421a0b18: pop        {r4, r5, r6, r7, r8, sl, fp, pc}
+
+=== ca9_StartColorManagement 0x420A2EB0..0x420A2FB4 ===
+420a2eb0: push       {r4, r5, r6, lr}
+420a2eb2: sub        sp, #0x38
+420a2eb4: movs       r4, r0
+420a2eb6: movs       r5, r1
+420a2eb8: movs       r6, #0
+420a2eba: ldr        r0, [pc, #0x78] ; LIT 0x420a2f34->0x4081875c
+420a2ebc: ldrb       r0, [r0]
+420a2ebe: cmp        r0, #1
+420a2ec0: beq        #0x420a2ed6
+420a2ec2: movs       r3, #0x53
+420a2ec4: ldr        r2, [pc, #0x70] ; LIT 0x420a2f38->0x421e9cb4 STRING='ca9_StartColorManagement'
+420a2ec6: adr        r1, #0x74 ; ADR_EFF 0x420a2f3c STRING='CA9: %s(), %d - color management module not active'
+420a2ec8: movs       r0, #4
+420a2eca: bl         #0x42140150 ; CALL 0x42140150
+420a2ece: movs       r0, #0xd
+420a2ed0: mvns       r0, r0
+420a2ed2: add        sp, #0x38
+420a2ed4: pop        {r4, r5, r6, pc}
+420a2ed6: ldr        r0, [pc, #0x98] ; LIT 0x420a2f70->0x4081875d
+420a2ed8: ldrb       r0, [r0]
+420a2eda: cmp        r0, #1
+420a2edc: bne        #0x420a2efa
+420a2ede: movs       r3, #0x57
+420a2ee0: ldr        r2, [pc, #0x54] ; LIT 0x420a2f38->0x421e9cb4 STRING='ca9_StartColorManagement'
+420a2ee2: adr        r1, #0x90 ; ADR_EFF 0x420a2f74 STRING='CA9: %s(), %d - time measurement started'
+420a2ee4: ldr        r0, [pc, #0xb8] ; LIT 0x420a2fa0->0x40818760
+420a2ee6: ldr        r0, [r0]
+420a2ee8: bl         #0x42140150 ; CALL 0x42140150
+420a2eec: movs       r0, #0
+420a2eee: ldr        r1, [pc, #0xb4] ; LIT 0x420a2fa4->0x4081876c
+420a2ef0: str        r0, [r1]
+420a2ef2: bl         #0x420f71a0 ; CALL 0x420f71a0
+420a2ef6: ldr        r1, [pc, #0xb0] ; LIT 0x420a2fa8->0x40818768
+420a2ef8: str        r0, [r1]
+420a2efa: movs       r0, r4
+420a2efc: bl         #0x420a591c ; CALL 0x420a591c
+420a2f00: movs       r0, #0x40
+420a2f02: str        r0, [sp, #0x14]
+420a2f04: ldr        r0, [pc, #0xa4] ; LIT 0x420a2fac->0x420a3639
+420a2f06: str        r0, [sp, #0x18]
+420a2f08: ldr        r0, [pc, #0xa4] ; LIT 0x420a2fb0->0x43705760
+420a2f0a: str        r0, [sp, #0x1c]
+420a2f0c: str        r4, [sp, #0x20]
+420a2f0e: str        r5, [sp, #0x24]
+420a2f10: movs       r0, #0
+420a2f12: str        r0, [sp, #0x28]
+420a2f14: str        r0, [sp, #0x2c]
+420a2f16: str        r0, [sp, #0x30]
+420a2f18: str        r0, [sp, #0x34]
+420a2f1a: movs       r2, #0x14
+420a2f1c: add        r1, sp, #0x24
+420a2f1e: mov        r0, sp
+420a2f20: blx        #0x4204f2ec ; CALL 0x4204f2ec
+420a2f24: add        r0, sp, #0x14
+420a2f26: ldm        r0, {r0, r1, r2, r3}
+420a2f28: bl         #0x420a3488 ; CALL 0x420a3488
+420a2f2c: movs       r6, r0
+420a2f2e: movs       r0, r6
+420a2f30: b          #0x420a2ed2
+420a2f32: movs       r0, r0
+420a2f34: strh       r4, [r3, #0x3a]
+420a2f36: lsls       r1, r0
+420a2f38: ldr        r4, [sp, #0x2d0]
+420a2f3a: tst        r6, r3
+420a2f3c: adcs       r3, r0
+420a2f3e: subs       r2, #0x39
+420a2f40: movs       r5, #0x20
+420a2f42: cmp        r0, #0x73
+420a2f44: cmp        r4, #0x29
+420a2f46: movs       r5, #0x20
+420a2f48: movs       r0, #0x64
+420a2f4a: movs       r0, #0x2d
+420a2f4c: ldr        r3, [r4, #0x74]
+420a2f4e: ldr        r4, [r5, #0x74]
+420a2f50: movs       r0, #0x72
+420a2f52: str        r5, [r5, #0x14]
+420a2f54: str        r6, [r5, #0x14]
+420a2f56: str        r7, [r4, #0x54]
+420a2f58: str        r5, [r5, #0x54]
+420a2f5a: strb       r6, [r5, #0x11]
+420a2f5c: ldr        r0, [r4, #0x50]
+420a2f5e: str        r7, [r5, #0x44]
+420a2f60: ldr        r5, [r6, #0x44]
+420a2f62: movs       r0, #0x65
+420a2f64: ldr        r6, [r5, #0x74]
+420a2f66: movs       r0, #0x74
+420a2f68: str        r1, [r4, #0x34]
+420a2f6a: ldr        r4, [r6, #0x14]
+420a2f6c: str        r6, [r6, #0x54]
+420a2f6e: movs       r0, r0
+420a2f70: strh       r5, [r3, #0x3a]
+420a2f72: lsls       r1, r0
+420a2f74: adcs       r3, r0
+420a2f76: subs       r2, #0x39
+420a2f78: movs       r5, #0x20
+420a2f7a: cmp        r0, #0x73
+420a2f7c: cmp        r4, #0x29
+420a2f7e: movs       r5, #0x20
+420a2f80: movs       r0, #0x64
+420a2f82: movs       r0, #0x2d
+420a2f84: ldr        r4, [r6, #0x14]
+420a2f86: str        r5, [r5, #0x54]
+420a2f88: ldr        r0, [r4, #0x50]
+420a2f8a: str        r5, [r4, #0x14]
+420a2f8c: strb       r3, [r6, #0x15]
+420a2f8e: str        r2, [r6, #0x54]
+420a2f90: str        r5, [r5, #0x54]
+420a2f92: strb       r6, [r5, #0x11]
+420a2f94: strb       r0, [r4, #0xc]
+420a2f96: str        r4, [r6, #0x14]
+420a2f98: strb       r2, [r6, #0x11]
+420a2f9a: str        r5, [r4, #0x44]
+420a2f9c: movs       r0, r0
+420a2f9e: movs       r0, r0
+420a2fa0: strh       r0, [r4, #0x3a]
+420a2fa2: lsls       r1, r0
+420a2fa4: strh       r4, [r5, #0x3a]
+420a2fa6: lsls       r1, r0
+420a2fa8: strh       r0, [r5, #0x3a]
+420a2faa: lsls       r1, r0
+420a2fac: adds       r6, #0x39
+420a2fae: tst        r2, r1
+420a2fb0: ldrsb      r0, [r4, r5]
+420a2fb2: muls       r0, r6, r0
+
+=== color start caller / B2Y init 0x420A7860..0x420A7930 ===
+420a7860: movs       r0, r4
+420a7862: bl         #0x420a6f88 ; CALL 0x420a6f88
+420a7866: b          #0x420a7890
+420a7868: movs       r0, r4
+420a786a: bl         #0x420a6544 ; CALL 0x420a6544
+420a786e: b          #0x420a7890
+420a7870: movs       r5, r4
+420a7872: adds       r5, #0x9c
+420a7874: movs       r1, #0
+420a7876: ldr        r0, [r5]
+420a7878: bl         #0x420a7bcc ; CALL 0x420a7bcc
+420a787c: ldr        r0, [r4, #4]
+420a787e: bl         #0x4219d2e0 ; CALL 0x4219d2e0
+420a7882: b          #0x420a7890
+420a7884: movs       r2, r6
+420a7886: ldr        r1, [pc, #0x10] ; LIT 0x420a7898->0x42837274 STRING='CA9: ca9_debug_DbgObject (fill responsibility: host) - invalid instruction: 0x%02X '
+420a7888: movs       r0, #4
+420a788a: bl         #0x42140150 ; CALL 0x42140150
+420a788e: mov        r8, r8
+420a7890: mov        r8, r8
+420a7892: movs       r0, r7
+420a7894: pop        {r3, r4, r5, r6, r7, pc}
+420a7896: movs       r0, r0
+420a7898: strb       r4, [r6, #9]
+420a789a: cmp        r3, r0
+420a789c: push       {r4, lr}
+420a789e: movs       r4, r0
+420a78a0: ldr        r0, [pc, #0xc] ; LIT 0x420a78b0->0x408ced00
+420a78a2: str        r4, [r0]
+420a78a4: ldr        r1, [pc, #0xc] ; LIT 0x420a78b4->0x420a78bd
+420a78a6: ldr        r0, [pc, #0x10] ; LIT 0x420a78b8->0x408187ec
+420a78a8: ldr        r0, [r0]
+420a78aa: bl         #0x420a2ffc ; CALL 0x420a2ffc
+420a78ae: pop        {r4, pc}
+420a78b0: stc        p0, c4, [r0, #-0x230]
+420a78b4: ldrb       r5, [r7, #2]
+420a78b6: tst        r2, r1
+420a78b8: strh       r4, [r5, #0x3e]
+420a78ba: lsls       r1, r0
+420a78bc: push       {r4, lr}
+420a78be: ldr        r1, [pc, #0xc] ; LIT 0x420a78cc->0x420a78d5
+420a78c0: ldr        r0, [pc, #0xc] ; LIT 0x420a78d0->0x408187ec
+420a78c2: ldr        r0, [r0]
+420a78c4: bl         #0x420a2eb0 ; CALL 0x420a2eb0
+420a78c8: pop        {r4, pc}
+420a78ca: movs       r0, r0
+420a78cc: ldrb       r5, [r2, #3]
+420a78ce: tst        r2, r1
+420a78d0: strh       r4, [r5, #0x3e]
+420a78d2: lsls       r1, r0
+420a78d4: push       {r4, lr}
+420a78d6: ldr        r0, [pc, #8] ; LIT 0x420a78e0->0x408187f0
+420a78d8: ldr        r0, [r0]
+420a78da: blx        r0
+420a78dc: pop        {r4, pc}
+420a78de: movs       r0, r0
+420a78e0: strh       r0, [r6, #0x3e]
+420a78e2: lsls       r1, r0
+420a78e4: push       {r4, lr}
+420a78e6: bl         #0x420a88dc ; CALL 0x420a88dc
+420a78ea: bl         #0x420a5de4 ; CALL 0x420a5de4
+420a78ee: movs       r0, #1
+420a78f0: ldr        r1, [pc, #4] ; LIT 0x420a78f8->0x408187e4
+420a78f2: strb       r0, [r1]
+420a78f4: pop        {r4, pc}
+420a78f6: movs       r0, r0
+420a78f8: strh       r4, [r4, #0x3e]
+420a78fa: lsls       r1, r0
+420a78fc: push       {r0, r1, r2, r3}
+420a78fe: push       {r4, r5, lr}
+420a7900: sub        sp, #0x3c
+420a7902: movs       r4, #1
+420a7904: ldr        r5, [sp, #0x50]
+420a7906: ldr        r0, [pc, #0x170] ; LIT 0x420a7a78->0x437065c0
+420a7908: ldr        r0, [r0]
+420a790a: subs       r0, r0, #1
+420a790c: ldr        r1, [pc, #0x168] ; LIT 0x420a7a78->0x437065c0
+420a790e: str        r0, [r1]
+420a7910: ldr        r0, [pc, #0x168] ; LIT 0x420a7a7c->0x437065d4
+420a7912: ldr        r0, [r0, #4]
+420a7914: adds       r0, r0, #1
+420a7916: ldr        r1, [pc, #0x164] ; LIT 0x420a7a7c->0x437065d4
+420a7918: str        r0, [r1, #4]
+420a791a: movs       r0, r1
+420a791c: ldr        r0, [r0, #8]
+420a791e: adds       r0, r0, #1
+420a7920: str        r0, [r1, #8]
+420a7922: movs       r0, r1
+420a7924: ldr        r0, [r0, #0xc]
+420a7926: adds       r0, r0, #1
+420a7928: str        r0, [r1, #0xc]
+420a792a: movs       r0, r1
+420a792c: ldr        r0, [r0, #0x10]
+420a792e: adds       r0, r0, #1
+
+=== direct calls to fill_parameter / B2Y config init in local color-control region ===
+0x420a591c []
+0x420a5de4 ['0x420a78ea']
+0x420a2eb0 ['0x420a78c4']
+0x420a363a []
+
+=== B2Y globals 0x43705830/0x43705950 local literal references ===
+0x43705830 ['0x420a5e14']
+420a5de6: ldr        r0, [pc, #0x2c] ; LIT 0x420a5e14->0x43705830
+0x43705950 ['0x420a5b00', '0x420a5e18']
+420a5a9a: ldr        r0, [pc, #0x64] ; LIT 0x420a5b00->0x43705950
+420a5dec: ldr        r0, [pc, #0x28] ; LIT 0x420a5e18->0x43705950
+
+=== TARGET ===
+Prove 0x421A0A44 semantics from its arithmetic/compare helpers and establish start-time relationship among fill_parameter, B2Y config construction, and CA9 color-management submission.
