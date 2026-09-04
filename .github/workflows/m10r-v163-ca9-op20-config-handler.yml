@@ -1,0 +1,82 @@
+name: M10-R v1.63 CA9 op20 config handler
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v163-ca9-op20-config-handler.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace CA9 opcode 0x20 config handler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text(); a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n"); z=p.index("\n          CPP",a); Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v163_ca9_op20_config_handler.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes();BASE=0x40000000;PFX=4;END=BASE+len(b)-PFX
+          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(a):return PFX+a-BASE
+          def dis(a,z):return list(md.disasm(b[off(max(BASE,a)):off(min(END,z))],max(BASE,a)))
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=i.address+8+i.operands[1].mem.disp;o=off(la)
+                if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+            except:pass
+          def call(i):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm&~1
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i);c=call(i)
+            if q:s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'
+            if c is not None:s+=f' ; CALL {c:#x}'
+            return s
+          print('M10-R v1.63 CA9 OPCODE 0x20 CONFIG HANDLER')
+          print('\n=== dispatcher op20 proof ===')
+          for i in dis(0x40006354,0x400063b0):print(fmt(i))
+          # derive function end heuristically: dump bounded and identify pops/bx lr
+          A=0x4000b59c; W=dis(A,A+0x1800)
+          print('\n=== handler bounded 0x4000b59c..+0x1800 ===')
+          for i in W:print(fmt(i))
+          calls=[]
+          for i in W[:500]:
+            c=call(i)
+            if c is not None and BASE<=c<END and c not in calls:calls.append(c)
+          print('\n=== early direct calls ===');print([hex(x) for x in calls])
+          for c in calls[:25]:
+            print(f'\n-- callee {c:#x} --')
+            for i in dis(c,c+0x700):print(fmt(i))
+          print('\n=== handler exact accesses with displacements 0x120..0x22c ===')
+          for i in W:
+            for o in i.operands:
+              if o.type==ARM_OP_MEM and 0x120<=o.mem.disp<=0x22c:
+                print(fmt(i));break
+          print('\n=== calls around exact +0x128/+0x12c/+0x134 ===')
+          for n,i in enumerate(W):
+            if any(o.type==ARM_OP_MEM and o.mem.disp in (0x128,0x12c,0x134) for o in i.operands):
+              for x in W[max(0,n-15):min(len(W),n+25)]:print(fmt(x))
+              print('---')
+          print('\n=== TARGET ===')
+          print('Determine opcode 0x20 request layout, whether it receives CM config pointer, and whether TF enable/count/pairs are consumed or reformatted here.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v163_ca9_op20_config_handler.txt
+          git commit -m 'research: record v1.63 CA9 op20 config handler' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
