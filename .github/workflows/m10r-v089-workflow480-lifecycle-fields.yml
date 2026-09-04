@@ -1,0 +1,121 @@
+name: M10-R v0.89 workflow480 lifecycle fields
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v089-workflow480-lifecycle-fields.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace lifecycle methods and effective offsets near workflow plus480
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v089_workflow480_lifecycle_fields.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_OP_REG,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); BASE=0x42000000; PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+          def off(a): return PFX+a-BASE
+          def dis(a,z): return [i for i in md.disasm(b[off(a):off(z)],a) if i.id]
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp; lo=off(la)
+                if 0<=lo<=len(b)-4:return la,struct.unpack_from('<I',b,lo)[0]
+            except: pass
+          def tgt(i):
+            try:
+              if i.mnemonic.startswith('bl') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm&~1
+            except: pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            q=lit(i)
+            if q:s+=f' ; LIT {hex(q[0])}->{hex(q[1])}'
+            t=tgt(i)
+            if t is not None:s+=f' ; CALL {hex(t)}'
+            return s
+          def dump(title,a,z):
+            print(f'\n=== {title} {hex(a)}..{hex(z)} ===')
+            for i in dis(a,z): print(fmt(i))
+          print('M10-R v0.89 WORKFLOW+0x480 LIFECYCLE / FIELD TRACE')
+          print('Known exact object: first argument to 0x420A2FB4 is persisted at 0x408187EC; 0x420A3104 consumes object+0x480.')
+          dump('CA9 startup + lifecycle methods',0x420a2e80,0x420a3260)
+          dump('Saved-object callback wrappers',0x420a7600,0x420a7a20)
+          # callback target addresses stored as odd Thumb pointers
+          for addr in (0x420a789c,0x420a78bc,0x420a78d4,0x420a2ffc,0x420a2eb0):
+            a=max(BASE,addr-0x80); z=addr+0x180; dump(f'focus {hex(addr)}',a,z)
+          # Search bounded CA9 module for direct large offsets and arithmetic components that can form 0x480.
+          ins=dis(0x42080000,0x420c0000)
+          print('\n=== DIRECT MEMORY DISPLACEMENTS 0x470..0x490 ===')
+          hs=[]
+          for n,i in enumerate(ins):
+            try:
+              for op in i.operands:
+                if op.type==ARM_OP_MEM and 0x470<=op.mem.disp<=0x490: hs.append(n); break
+            except: pass
+          print('count',len(hs))
+          for k,n in enumerate(hs):
+            print(f'\n--- direct field {k+1}/{len(hs)} @{hex(ins[n].address)} ---')
+            for j in range(max(0,n-12),min(len(ins),n+16)): print(fmt(ins[j]))
+          print('\n=== ARITHMETIC COMPONENTS THAT CAN BUILD 0x480 ===')
+          # Collect contexts with common components 0x400,0x80,0x480,0x90<<3,0x85<<3 +0x58.
+          comps={0x400,0x80,0x480,0x90,0x85,0x48,0x58}
+          hs=[]
+          for n,i in enumerate(ins):
+            try:
+              imms=[op.imm for op in i.operands if op.type==ARM_OP_IMM]
+              if any(v in comps for v in imms): hs.append(n)
+            except: pass
+          # Reduce to neighborhoods containing a load/store within 8 instructions.
+          keep=[]
+          for n in hs:
+            win=ins[max(0,n-4):min(len(ins),n+9)]
+            if any(q.mnemonic.startswith(('ldr','str')) for q in win): keep.append(n)
+          print('candidate contexts',len(keep))
+          # Deduplicate close hits.
+          chosen=[]
+          for n in keep:
+            if not chosen or ins[n].address-ins[chosen[-1]].address>0x20: chosen.append(n)
+          print('deduped',len(chosen))
+          for k,n in enumerate(chosen[:160]):
+            print(f'\n--- arithmetic candidate {k+1}/{len(chosen)} @{hex(ins[n].address)} ---')
+            for j in range(max(0,n-8),min(len(ins),n+12)): print(fmt(ins[j]))
+          print('\n=== FUNCTION POINTER LITERALS FOR CALLBACK WRAPPERS ===')
+          for val in (0x420a789d,0x420a78bd,0x420a78d5):
+            pat=struct.pack('<I',val); p=0; hits=[]
+            while True:
+              p=b.find(pat,p)
+              if p<0:break
+              hits.append(BASE+p-PFX); p+=1
+            print(hex(val),'count',len(hits),*[hex(x) for x in hits[:80]])
+          print('\n=== DECISION TARGET ===')
+          print('Identify an initialization/copy path for the persistent object field at +0x480. Only then compare that exact pointer against AFAEAWB base+0x80/base+0x14080.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v089_workflow480_lifecycle_fields.txt
+          git commit -m 'research: record v0.89 workflow480 lifecycle fields' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
