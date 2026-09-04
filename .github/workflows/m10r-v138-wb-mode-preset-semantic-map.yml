@@ -28,14 +28,13 @@ jobs:
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
           python3 - <<'PY' > research/M10R_v138_wb_mode_preset_semantic_map.txt
           from pathlib import Path
-          import csv,struct,re
+          import csv,struct
           from capstone import *
           from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
           b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes(); BASE=0x40000000; PFX=4
           md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
           def off(a): return PFX+a-BASE
           def u32(a): return struct.unpack_from('<I',b,off(a))[0]
-          def u16(a): return struct.unpack_from('<H',b,off(a))[0]
           def dis(a,z): return list(md.disasm(b[off(a):off(z)],a))
           def cstr(a):
             o=off(a)
@@ -49,54 +48,48 @@ jobs:
                 if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
             except: pass
           def fmt(i):
-            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
-            q=lit(i)
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'; q=lit(i)
             if q:
-              s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'
-              st=cstr(q[1])
+              s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'; st=cstr(q[1])
               if st:s+=f' STRING={st!r}'
             if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:s+=f' ; CALL {(i.operands[0].imm&~1):#x}'
             return s
           print('M10-R v1.38 WB MODE / PRESET SEMANTIC MAP')
           print('\n=== TOP-LEVEL WB MODE JUMP TABLE @0x4000B178 (14 words) ===')
-          mode_targets=[]
-          for n in range(14):
-            t=u32(0x4000b178+4*n); mode_targets.append(t); print(f'mode {n:2d} -> {t:#010x}')
+          mode_targets=[u32(0x4000b178+4*n) for n in range(14)]
+          for n,t in enumerate(mode_targets):print(f'mode {n:2d} -> {t:#010x}')
           print('\n=== UNIQUE MODE TARGET BLOCKS ===')
           for t in sorted(set(mode_targets)):
             if BASE<=t<BASE+len(b)-PFX:
-              print(f'\n-- mode target {t:#x}; modes {[i for i,x in enumerate(mode_targets) if x==t]} --')
-              for i in dis(t,min(t+0x90,0x4000b59c)): print(fmt(i))
+              print(f'\n-- target {t:#x}; modes {[i for i,x in enumerate(mode_targets) if x==t]} --')
+              for i in dis(t,min(t+0xa0,0x4000b59c)):print(fmt(i))
           print('\n=== PRESET JUMP TABLE @0x4000B218 ===')
           presets=[u32(0x4000b218+4*n) for n in range(10)]
           for n,t in enumerate(presets):print(f'preset {n} -> {t:#010x}')
-          print('\n=== PRESET TABLE HALFWORDS AT 0x4004324C-RELATED OFFSETS ===')
-          base=0x4004324c
-          # exact accesses seen in cases 1..8; case 9 uses variable mapping helper
+          print('\n=== PRESET RUNTIME TABLE ACCESSES ===')
+          print('r7 loads runtime base 0x4004324c; it is outside static section 099 and values are not firmware-image-readable here')
           pairs={1:(0x1c8,0x1d8),2:(0x1ce,0x1de),3:(0x1cc,0x1dc),4:(0x1c2,0x1d2),5:(0x1c4,0x1d4),6:(0x1c6,0x1d6),7:(0x1ca,0x1da),8:(0x1d0,0x1e0)}
-          for n,(a,c) in pairs.items(): print(f'preset {n}: raw_pair=({u16(base+a)}, {u16(base+c)}) @ +{a:#x}/+{c:#x}')
-          print('\n=== WB START / PARAMETER STRINGS ===')
+          for n,(a,c) in pairs.items():print(f'preset {n}: halfwords at runtime_base+{a:#x} and +{c:#x}')
+          print('preset 9 uses input+0x1c -> helper 0x4000aa34 -> indexed halfwords at runtime_base+0x1e2 and +0x262 families')
+          print('\n=== STRING-BACKED WB START REFERENCES ===')
           for i in dis(0x4000b13c,0x4000b700):
             q=lit(i)
-            if q and cstr(q[1]): print(fmt(i))
-          print('\n=== WB/PRESET SEMANTIC STRINGS ACROSS ALL SECTIONS ===')
+            if q and cstr(q[1]):print(fmt(i))
+          print('\n=== SEMANTIC WB STRINGS ACROSS EXTRACTED SECTIONS ===')
           rows=list(csv.DictReader(Path('/tmp/sections/sections.csv').open()))
           terms=('daylight','cloud','shadow','tungsten','incandescent','fluores','hmi','flash','greycard','graycard','color temperature','colour temperature','automatic white','auto white','awb','white balance','wb preset','preset daylight')
           for row in rows:
-            data=(Path('/tmp/sections')/row['file']).read_bytes(); low=data.lower(); ibase=int(row['image_base'],16)
-            hits=[]
+            data=(Path('/tmp/sections')/row['file']).read_bytes(); low=data.lower(); ibase=int(row['image_base'],16); hits=[]
             for term in terms:
               q=0; nb=term.encode()
               while True:
                 q=low.find(nb,q)
-                if q<0: break
-                lo=max(0,q-90); hi=min(len(data),q+len(nb)+180)
-                ctx=data[lo:hi].replace(b'\0',b'|').decode('latin1','replace')
-                hits.append((q,term,ctx)); q+=1
-            for q,term,ctx in sorted(hits)[:120]: print(f"sec={row['index']} name={row['name']!r} va={ibase+q:#x} term={term!r} ctx={ctx!r}")
+                if q<0:break
+                lo=max(0,q-90);hi=min(len(data),q+len(nb)+180);ctx=data[lo:hi].replace(b'\0',b'|').decode('latin1','replace')
+                hits.append((q,term,ctx));q+=1
+            for q,term,ctx in sorted(hits)[:120]:print(f"sec={row['index']} name={row['name']!r} va={ibase+q:#x} term={term!r} ctx={ctx!r}")
           print('\n=== FROZEN SO FAR ===')
-          print('top-level WB mode 3 = DAYLIGHT is firmware-proven by IMG and CA9 fallback diagnostics')
-          print('input+0x18 is a separate 10-way preset selector; do not alias mode enum and preset enum')
+          print('top-level WB mode 3 = DAYLIGHT is firmware-proven; input+0x18 is a separate 10-way preset selector')
           PY
       - name: Commit result
         shell: bash
