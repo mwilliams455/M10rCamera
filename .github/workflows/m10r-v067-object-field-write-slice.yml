@@ -1,0 +1,48 @@
+name: M10-R v0.67 object field write slice
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v067-object-field-write-slice.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  reduce:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m10r-metering-latch-trace
+          fetch-depth: 0
+      - name: Extract exact instruction slices
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > research/M10R_v067_object_field_write_slice.txt
+          from pathlib import Path
+          import re
+          L=Path('research/M10R_v064_workflow_state5_owner.txt').read_text(errors='replace').splitlines()
+          inst={}
+          for x in L:
+              m=re.match(r'^([0-9a-fA-F]{8}):\s+.*$',x)
+              if m: inst.setdefault(int(m.group(1),16),x)
+          print('M10-R v0.67 OBJECT FIELD WRITE SLICE')
+          for a,z,name in [
+              (0x42161a80,0x42161d90,'write cluster 61A80-61D90'),
+              (0x42163080,0x42163180,'streaming write cluster 63080-63180'),
+              (0x42163380,0x421634a0,'streaming write cluster 63380-634A0'),
+              (0x42163740,0x42163840,'streaming write cluster 63740-63840')]:
+              print(f'\n=== {name} ===')
+              for va in sorted(k for k in inst if a<=k<z): print(inst[va])
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v067_object_field_write_slice.txt
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: record v0.67 object field write slices'
+          git pull --rebase origin m10r-metering-latch-trace
+          git push origin HEAD:m10r-metering-latch-trace
