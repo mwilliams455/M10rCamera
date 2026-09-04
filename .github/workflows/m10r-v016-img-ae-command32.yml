@@ -1,0 +1,105 @@
+name: M10-R v0.16 IMG AE command32 producer
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v016-img-ae-command32.yml', '.m10r-v016-img-ae-command32-trigger']
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Recover firmware and trace IMG AE command32 producer
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' >/tmp/m10r-v016-img-ae-command32.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_REG_PC,ARM_OP_IMM
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();base=0x42000000;pfx=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(v):return pfx+v-base
+          end=base+len(b)-pfx
+          def dis(label,s,e):
+            s=max(base,s);e=min(end,e)
+            print(f'\n=== {label} ===')
+            for i in md.disasm(b[off(s):off(e)],s):
+              if i.mnemonic!='.byte':print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
+          # locate AE/CA9 strings and xrefs
+          strings=[]
+          for m in re.finditer(rb'[ -~]{6,220}\x00',b):
+            s=m.group()[:-1].decode('ascii','ignore');low=s.lower()
+            if ('ae module' in low or 'ae algorithm' in low or 'brightness' in low or 'bv' in low or 'exposure' in low or 'meter' in low):
+              strings.append((base+m.start()-pfx,s))
+          print('AE_STRINGS')
+          for va,s in strings:print(hex(va),repr(s))
+          def ptrs_to(v):
+            out=[]
+            for x in (v,v|1):
+              q=0;n=struct.pack('<I',x)
+              while True:
+                q=b.find(n,q)
+                if q<0:break
+                out.append(base+q-pfx);q+=1
+            return sorted(set(out))
+          def refs_to_ptrs(ptrs):
+            out=[]
+            ps=set(ptrs)
+            for i in md.disasm(b[pfx:],base):
+              if i.mnemonic=='.byte':continue
+              for op in i.operands:
+                if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC:
+                  lit=((i.address+4)&~3)+op.mem.disp
+                  if lit in ps:out.append(i.address)
+            return sorted(set(out))
+          chosen=[x for x in strings if 'ae module' in x[1].lower() or 'ae algorithm' in x[1].lower()]
+          for va,s in chosen:
+            ps=ptrs_to(va);rs=refs_to_ptrs(ps)
+            print('\nSTRING_XREF',hex(va),repr(s),'PTRS',[hex(x) for x in ps],'REFS',[hex(x) for x in rs])
+            for a in rs:dis('AE_STRING_REF_'+hex(a),a-0x500,a+0x900)
+          # scan for immediate command 0x32 / length 0x49 and nearby call sequences
+          ins=[i for i in md.disasm(b[pfx:],base) if i.mnemonic!='.byte']
+          hits=[]
+          for n,i in enumerate(ins):
+            imms=[op.imm for op in i.operands if op.type==ARM_OP_IMM]
+            if 0x32 in imms or 0x49 in imms:
+              hits.append((n,i.address,i.mnemonic,i.op_str,0x32 in imms,0x49 in imms))
+          print('\nIMM_HITS_COUNT',len(hits))
+          for n,a,m,o,h32,h49 in hits:
+            # Only print compact context when 0x32 occurs or 0x49 is within 20 instructions of a 0x32 hit.
+            near32=any(abs(n-n2)<=20 and h322 for n2,_,_,_,h322,_ in hits)
+            if h32 or (h49 and near32):
+              print('\nIMM_HIT',hex(a),m,o,'CMD32',h32,'LEN49',h49)
+              lo=max(0,n-12);hi=min(len(ins),n+18)
+              for j in ins[lo:hi]:print(f'{j.address:08x}: {j.mnemonic:8s} {j.op_str}')
+          # likely transport call sites: find mov imm 0x32 then next BL within 24 instructions
+          print('\nCMD32_NEXT_CALLS')
+          for n,i in enumerate(ins):
+            if any(op.type==ARM_OP_IMM and op.imm==0x32 for op in i.operands):
+              calls=[]
+              for j in ins[n+1:min(len(ins),n+25)]:
+                if j.mnemonic.startswith('bl'):
+                  calls.append((j.address,j.op_str))
+                  if len(calls)>=4:break
+              print(hex(i.address),i.mnemonic,i.op_str,'NEXT_CALLS',[(hex(a),s) for a,s in calls])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m10r-v016-img-ae-command32
+          path: /tmp/m10r-v016-img-ae-command32.txt
+          if-no-files-found: error
