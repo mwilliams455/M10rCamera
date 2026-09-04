@@ -19,6 +19,11 @@ Thus the exposure-update event is generated every ten callback invocations. The 
 
 The 300-ms negative-Bv mechanism is also closed: it does not suspend ADC sampling. A negative traditional Bv sets a latch and arms a scheduler timer for `0x12C = 300`; the registered timer callback clears the same latch. The latch therefore delays traditional-Bv eligibility/source acceptance while metering/update activity can continue.
 
+Two additional lifecycle details are now resolved:
+
+- the periodic scheduler callback has explicit start/stop wrappers used around larger CTRL state transitions;
+- the selector suppression byte at `0x2001AD78` is not a normal shutter/capture busy flag. It is used as a short-lived guard around factory/service ambient-meter calibration transactions so the periodic selector does not collide with those controlled sensor operations.
+
 ## 2. Final-Bv selector has one direct production caller
 
 `0x0800D6A8` has one direct call site in CTRL-System:
@@ -35,13 +40,19 @@ Relevant event-consumer behavior:
 wait/read exposure event object
 ...
 if event bit 0 is set:
-    if local/global eligibility gate permits:
+    if selector_suppression_gate == 0:
         changed = final_bv_selector()
         copy changed into event bit 1
 
 if event bit 1 is set:
     if downstream state permits:
         build exposure input / run calculator
+```
+
+The selector suppression gate is the byte at:
+
+```text
+0x2001AD78
 ```
 
 The final-Bv selector is therefore event-driven rather than called directly from the shutter-button state machine.
@@ -70,7 +81,7 @@ One direct producer of exposure event mask `1` is:
 
 It lives in scheduler callback `0x080104B8`.
 
-The callback maintains a halfword counter. The relevant block is:
+The callback maintains a halfword counter at `0x20000124`. The relevant block is:
 
 ```text
 counter_value = state_counter
@@ -97,7 +108,7 @@ meter/exposure update  = 100 ms
 
 The second line is the practical production model to preserve. The first line should remain labeled a strong static inference until a named scheduler period, RTOS timer configuration, or hardware trace confirms it directly.
 
-## 5. Callback is scheduler-registered
+## 5. Callback registration and enable/disable lifecycle
 
 The callback appears as Thumb pointer:
 
@@ -127,6 +138,19 @@ Nearby entries use the same callback/state pairing pattern:
 ```
 
 This confirms that both the periodic update callback and the negative-Bv expiry callback participate in the same scheduler/timer callback infrastructure.
+
+The periodic callback also has paired control wrappers:
+
+```text
+0x080105E4  -> scheduler/timer stop-or-suspend operation
+0x080105F0  -> sets local enable state and invokes scheduler/timer start operation
+```
+
+`0x080105E4` is used by several larger camera/control state transitions, including paths at `0x08002756`, `0x0800C25E`, `0x080101C6`, and `0x08010452`. `0x080105F0` is used on paired reverse/enable transitions, including `0x0800C24E` and `0x080104A6`.
+
+The exact RTOS API names of `0x0801CFC6` and `0x0801CF9E` are not frozen, so the conservative identity is **periodic callback stop/suspend** and **start/enable** rather than inventing a specific timer API name.
+
+For the host model this means the ~100-ms cadence applies while the AE/metering service is enabled, not unconditionally for the entire camera process lifetime.
 
 ## 6. Negative-Bv timer lifecycle
 
@@ -194,18 +218,56 @@ negative Bv
 
 This distinction matters for a replica because stopping the phone luminance estimator for 300 ms would produce different recovery and lock behavior.
 
-## 8. Meter/update cadence model
+## 8. Selector suppression gate `0x2001AD78`
+
+The suppression byte has an unusually clean xref shape:
+
+- one production reader: `0x0800DD1E` in the exposure-event consumer;
+- one setter function: `0x0800E192`.
+
+The setter's callers occur in tightly paired sequences such as:
+
+```text
+gate = 1
+sleep/delay 100
+perform one controlled sensor/service transaction
+gate = 0
+```
+
+Examples are the wrappers beginning near:
+
+```text
+0x0800D33C
+0x0800D374
+0x0800D3B0
+0x0800D3D6
+```
+
+Their upstream callers are in the factory/service calibration command dispatcher around `0x0800B0D4..0x0800B3xx`. Those paths:
+
+- collect multiple ambient/Bv calibration points;
+- write them into the persisted calibration record;
+- set ambient-light calibration validity bits;
+- invoke the guarded sensor transactions;
+- include the already-identified AV0/Bv calibration service family.
+
+Therefore `0x2001AD78` should be modeled as a **periodic meter-selector suppression guard for calibration/service sensor transactions**, not as a general shutter, capture, or AE-lock state.
+
+This is important for the replica: ordinary shooting should not suppress periodic metering merely because capture is underway unless a separate production path is later proven.
+
+## 9. Meter/update cadence model
 
 For a deterministic host implementation, the practical model is:
 
 ```text
-while metering subsystem active:
+while AE/metering service is enabled:
     every ~100 ms:
-        acquire fresh traditional meter sample set
-        update Tlog / traditional Bv / BvExt-related state as available
-        run final-Bv source selection and deadbands
-        if final-Bv/update state changed:
-            request exposure recalculation
+        if calibration_transaction_guard == 0:
+            acquire fresh traditional meter sample set
+            update Tlog / traditional Bv / BvExt-related state as available
+            run final-Bv source selection and deadbands
+            if final-Bv/update state changed:
+                request exposure recalculation
 ```
 
 Separately:
@@ -219,9 +281,9 @@ on expiry:
     negative_Bv_delay_latch = false
 ```
 
-AE lock remains downstream of this process and freezes the allocator's cached calculation Bv rather than stopping the 100-ms metering loop.
+AE lock remains downstream of this process and freezes the allocator's cached calculation Bv rather than stopping the periodic metering loop.
 
-## 9. Relationship to first-detent AE lock
+## 10. Relationship to first-detent AE lock
 
 This timing result reinforces v0.07/v0.08:
 
@@ -232,13 +294,12 @@ This timing result reinforces v0.07/v0.08:
 
 For the phone replica, do not perform a special meter read merely because first detent was pressed. Freeze the allocator cache when the lock transition is processed and let the normal meter loop continue upstream.
 
-## 10. Remaining timing questions
+## 11. Remaining timing questions
 
 The highest-value remaining timing details are now narrower:
 
-1. Identify the exact enable/disable lifecycle of scheduler callback `0x080104B8` (when metering starts/stops with camera state).
-2. Resolve the local/global gate at `0x0800DD1E..0x0800DD28` that can suppress the selector even when event bit 0 is pending.
-3. Determine whether release state changes force an immediate mask-1 update in addition to the periodic cadence.
-4. If exact hardware parity is eventually required, confirm the inferred 10-ms scheduler base experimentally or through the timer service configuration.
+1. Determine whether release/shutter state changes post an immediate mask-1 meter update in addition to the periodic cadence.
+2. Resolve the exact camera-state meaning of the periodic callback start/stop transitions; their timer-control role is clear, but the user-facing states are not yet named.
+3. If exact hardware parity is eventually required, confirm the inferred 10-ms scheduler base experimentally or through the timer service configuration.
 
 These are refinements around a now-stable production abstraction rather than blockers for the offline exposure oracle.
