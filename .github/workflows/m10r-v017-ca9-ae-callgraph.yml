@@ -1,0 +1,84 @@
+name: M10-R v0.17 CA9 AE callgraph
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v017-ca9-ae-callgraph.yml', '.m10r-v017-ca9-ae-callgraph-trigger']
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Recover firmware and trace CA9 AE caller/output handoff
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' >/tmp/m10r-v017-ca9-ae-callgraph.txt
+          from pathlib import Path
+          import struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_ARM,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes();base=0x40000000;pfx=4;end=base+len(b)-pfx
+          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);md.detail=True
+          def off(a):return pfx+a-base
+          def va(o):return base+o-pfx
+          def one(a):
+            o=off(a)
+            if o<4 or o+4>len(b):return None
+            ds=list(md.disasm(b[o:o+4],a,1));return ds[0] if ds else None
+          def dump(label,a,pre=0x180,post=0x300):
+            print(f'\n=== {label} {hex(a)} ===')
+            s=max(base,a-pre)&~3;e=min(end,a+post)&~3
+            for aa in range(s,e,4):
+              i=one(aa)
+              if i: print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
+          target=0x40000790
+          callers=[]
+          for a in range(base,end-4,4):
+            i=one(a)
+            if not i or not i.mnemonic.startswith('bl') or not i.operands:continue
+            op=i.operands[0]
+            if op.type==ARM_OP_IMM and (op.imm&~3)==target:
+              callers.append(a)
+          print('CALLERS_40000790',[hex(x) for x in callers])
+          # static function pointers
+          ptrs=[]
+          for v in [target,target|1]:
+            n=struct.pack('<I',v);q=0
+            while True:
+              q=b.find(n,q)
+              if q<0:break
+              ptrs.append(va(q));q+=1
+          print('PTRS_40000790',[hex(x) for x in sorted(set(ptrs))])
+          dump('AE_MAIN',target,0x40,0x760)
+          for a in callers:dump('DIRECT_CALLER',a,0x300,0x500)
+          for a in sorted(set(ptrs)):dump('PTR_TABLE_CONTEXT',a,0x100,0x180)
+          # Search for post-call accesses to canonical result offsets +1c..+2c in each caller window.
+          for ca in callers:
+            print('\nPOSTCALL_RESULT_ACCESS',hex(ca))
+            s=ca;e=min(end,ca+0x500)
+            for aa in range(s,e,4):
+              i=one(aa)
+              if not i:continue
+              text=i.op_str.lower()
+              if any(f'#0x{x:x}' in text for x in [0x1c,0x1e,0x20,0x22,0x24,0x26,0x28,0x2a,0x2c,0x30,0x32,0x34,0x36,0x38,0x3a,0x3c,0x3e]):
+                print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m10r-v017-ca9-ae-callgraph
+          path: /tmp/m10r-v017-ca9-ae-callgraph.txt
+          if-no-files-found: error
