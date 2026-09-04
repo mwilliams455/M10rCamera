@@ -1,0 +1,121 @@
+name: M10-R v0.35 shared BV alias readers
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v035-shared-bv-alias-readers.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m10r-metering-latch-trace
+          fetch-depth: 0
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace all nearby shared-memory aliases into BV fields
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          mkdir -p research
+          python3 - <<'PY' > research/M10R_v035_shared_bv_alias_readers.txt
+          from pathlib import Path
+          import struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_OP_REG,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();base=0x42000000;pfx=4;code=b[pfx:]
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          lo,hi=0x408f0ee0,0x408f0f20
+          wanted={0x408f0eea:'Integral_lo',0x408f0eeb:'Integral_hi',0x408f0eec:'Spot_lo',0x408f0eed:'Spot_hi',0x408f0eee:'MFM_lo',0x408f0eef:'MFM_hi',0x408f0ef0:'AVfield_lo',0x408f0ef1:'AVfield_hi'}
+          def off(a):return pfx+a-base
+          def u32(a):
+            o=off(a);return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+          def fmt(i):
+            ex=''
+            if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+              la=((i.address+4)&~3)+i.operands[1].mem.disp;v=u32(la)
+              if v is not None:ex=f' ; LIT {la:#x}->{v:#x}'
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:ex+=f' ; CALL {i.operands[0].imm:#x}'
+            return f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}{ex}'
+          def dump(a,z,title):
+            print(f'\n=== {title} {a:#x}..{z:#x} ===')
+            for i in md.disasm(b[off(a):off(z)],a):
+              if i.mnemonic!='.byte':print(fmt(i))
+          # collect all literal values that could serve as a base within ±0x4000 of the target fields
+          literals=[]
+          for q in range(pfx,len(b)-3,4):
+            v=struct.unpack_from('<I',b,q)[0]
+            if 0x408ec000<=v<=0x408f4000:
+              literals.append((base+q-pfx,v))
+          print('NEAR_SHARED_LITERALS',[(hex(a),hex(v)) for a,v in literals])
+          # raw PC-relative LDR refs to those literal-pool slots
+          litmap={a:v for a,v in literals}; refs=[]
+          for p in range(0,len(code)-4,2):
+            a=base+p;h1=struct.unpack_from('<H',code,p)[0];la=None;rt=None
+            if (h1&0xf800)==0x4800:
+              rt=(h1>>8)&7;la=((a+4)&~3)+((h1&0xff)<<2)
+            elif h1 in (0xf8df,0xf85f):
+              h2=struct.unpack_from('<H',code,p+2)[0];rt=(h2>>12)&15;imm=h2&0xfff;la=((a+4)&~3)+(imm if h1==0xf8df else -imm)
+            if la in litmap:refs.append((a,rt,litmap[la],la))
+          print('\nNEAR_SHARED_LDR_REFS',[(hex(a),r,hex(v),hex(la)) for a,r,v,la in refs])
+          hits=[]
+          for start,reg,ptr,la in refs:
+            seq=[i for i in md.disasm(b[off(start):off(start)+0x500],start) if i.mnemonic!='.byte']
+            aliases={reg:ptr}
+            local=[]
+            for i in seq:
+              # first inspect all memory accesses through known absolute aliases
+              for op in i.operands:
+                if op.type==ARM_OP_MEM and op.mem.base in aliases:
+                  addr=aliases[op.mem.base]+op.mem.disp
+                  if lo<=addr<=hi:
+                    kind='WRITE' if i.mnemonic.startswith('str') else 'READ'
+                    local.append((i.address,addr,kind,fmt(i)))
+              ops=i.operands
+              # pointer propagation
+              if i.mnemonic.startswith('mov') and len(ops)>=2 and ops[0].type==ARM_OP_REG:
+                d=ops[0].reg
+                if ops[1].type==ARM_OP_REG and ops[1].reg in aliases:aliases[d]=aliases[ops[1].reg]
+                else:aliases.pop(d,None)
+              elif (i.mnemonic.startswith('add') or i.mnemonic.startswith('sub')) and ops and ops[0].type==ARM_OP_REG:
+                d=ops[0].reg;sgn=1 if i.mnemonic.startswith('add') else -1;nv=None
+                if len(ops)==2 and ops[1].type==ARM_OP_IMM and d in aliases:nv=aliases[d]+sgn*ops[1].imm
+                elif len(ops)>=3 and ops[1].type==ARM_OP_REG and ops[1].reg in aliases and ops[2].type==ARM_OP_IMM:nv=aliases[ops[1].reg]+sgn*ops[2].imm
+                if nv is None:aliases.pop(d,None)
+                else:aliases[d]=nv
+              elif i.mnemonic.startswith('ldr') and ops and ops[0].type==ARM_OP_REG:
+                d=ops[0].reg
+                if i.address==start:aliases[d]=ptr
+                else:aliases.pop(d,None)
+              # stop alias trust at control-flow boundaries likely ending local block
+              if i.address>start and i.mnemonic in ('bx','pop') and ('pc' in i.op_str or i.mnemonic=='bx'):break
+            if local:
+              hits.append((start,ptr,local));print(f'\nREF {start:#x} BASEPTR {ptr:#x}')
+              for a,addr,k,line in local:print(k,hex(addr),wanted.get(addr,''),'@',hex(a),'::',line)
+              dump(max(base,start-0x40),min(base+len(code),start+0x180),'REF CONTEXT '+hex(start))
+          print('\nHIT_REFS',[hex(s) for s,_,_ in hits])
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v035_shared_bv_alias_readers.txt
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: record v0.35 shared BV alias readers'
+          git pull --rebase origin m10r-metering-latch-trace
+          git push origin HEAD:m10r-metering-latch-trace
