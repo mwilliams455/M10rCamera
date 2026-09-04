@@ -1,0 +1,101 @@
+name: M10-R v1.15 Prepro module init callbacks
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v115-prepro-module-init-callbacks.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace Prepro module initialization and callback wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int bb=r.get();if(!bb)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v115_prepro_module_init_callbacks.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); BASE=0x42000000; PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+          def raw(a,n):
+            o=PFX+a-BASE; return b[o:o+n]
+          def u32(a):
+            x=raw(a,4); return struct.unpack('<I',x)[0] if len(x)==4 else None
+          def insns(lo,hi): return [i for i in md.disasm(raw(lo,hi-lo),lo) if i.id]
+          def dump(lo,hi,title):
+            print(f'\n=== {title} {lo:#x}..{hi:#x} ===')
+            for i in insns(lo,hi):
+              ex=''
+              try:
+                if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                  lit=((i.address+4)&~3)+i.operands[1].mem.disp; v=u32(lit); ex=f' ; LIT {lit:#x}->{v:#x}' if v is not None else ''
+              except: pass
+              print(f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}{ex}')
+          target=b'PrePro: **************initialize PrePro-module*******************'
+          ix=b.find(target); saddr=BASE+(ix-PFX)
+          print('M10-R v1.15 PREPRO MODULE INIT CALLBACK WIRING')
+          print('init_string',hex(saddr),target.decode())
+          pat=struct.pack('<I',saddr); pools=[];p=0
+          while True:
+            q=b.find(pat,p)
+            if q<0:break
+            pools.append(BASE+(q-PFX));p=q+1
+          print('string_pools',*[hex(x) for x in pools])
+          xrefs=[]
+          for pool in pools:
+            for i in insns(max(BASE,pool-0x600),pool+0x40):
+              try:
+                if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                  lit=((i.address+4)&~3)+i.operands[1].mem.disp
+                  if lit==pool:xrefs.append(i.address)
+              except:pass
+          print('init_xrefs',*[hex(x) for x in xrefs])
+          for x in xrefs:
+            cand=insns(max(BASE,x-0x200),x)
+            pushes=[i.address for i in cand if i.mnemonic=='push']; st=pushes[-1] if pushes else x-0x100
+            dump(st,st+0x900,f'PREPRO INIT FUNCTION xref={x:#x} start={st:#x}')
+          # Also dump caller-side configuration around known production configure routine, looking for function pointers fed to init.
+          for lo,hi,title in ((0x420e4100,0x420e4500,'PREPRO CONFIG/INIT NEIGHBORHOOD'),(0x420e5500,0x420e5900,'MANAGER SETUP NEIGHBORHOOD')):
+            dump(lo,hi,title)
+          print('\n=== CODE POINTER LITERALS IN INIT WINDOWS ===')
+          ranges=[]
+          for x in xrefs:
+            cand=insns(max(BASE,x-0x200),x);pushes=[i.address for i in cand if i.mnemonic=='push'];st=pushes[-1] if pushes else x-0x100;ranges.append((st,st+0x900))
+          for lo,hi in ranges:
+            seen=set()
+            for i in insns(lo,hi):
+              try:
+                if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                  lit=((i.address+4)&~3)+i.operands[1].mem.disp;v=u32(lit)
+                  if v is not None and 0x42000000<=v<0x42800000 and v not in seen:
+                    seen.add(v);print(hex(i.address),hex(v))
+              except:pass
+          print('\n=== DECISION ===')
+          print('Resolve initialization call that populates Prepro manager callback/config table. Track any code-pointer arguments to the callback table used by aggregate PW completion; if no production callback is installed, continue from the post-completion synchronous manager routine instead.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v115_prepro_module_init_callbacks.txt
+          git commit -m 'research: record v1.15 Prepro module init callback wiring' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
