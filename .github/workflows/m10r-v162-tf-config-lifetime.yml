@@ -1,0 +1,104 @@
+name: M10-R v1.62 TF config lifetime
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v162-tf-config-lifetime.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace TF config destination and lifetime
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text(); a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n"); z=p.index("\n          CPP",a); Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v162_tf_config_lifetime.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;PFX=4;END=BASE+len(b)-PFX
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(a):return PFX+a-BASE
+          def dis(a,z):
+            a=max(BASE,a);z=min(END,z)
+            return list(md.disasm(b[off(a):off(z)],a)) if z>a else []
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;o=off(la)
+                if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+            except:pass
+          def call(i):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm&~1
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i);c=call(i)
+            if q:s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'
+            if c is not None:s+=f' ; CALL {c:#x}'
+            return s
+          print('M10-R v1.62 TF CONFIG LIFETIME')
+          # locate last plausible Thumb prologue before parser call at 0x420a583a
+          w=dis(0x420a5200,0x420a591c);pro=[]
+          for i in w:
+            if i.address<0x420a583a and ((i.mnemonic=='push' and 'lr' in i.op_str) or i.mnemonic=='stmdb'):
+              pro.append(i.address)
+          print('\n=== prologues before ca9_cm_config_fill parser call ===');print([hex(x) for x in pro[-20:]])
+          start=pro[-1] if pro else 0x420a5400
+          print(f'\n=== ca9_cm_config_fill candidate body {start:#x}..0x420a591c ===')
+          body=dis(start,0x420a591c)
+          for i in body:print(fmt(i))
+          print('\n=== direct callers of candidate config_fill start ===')
+          whole=[];a=BASE
+          while a<END:
+            whole.extend(dis(a,min(END,a+0x10000)));a+=0x10000
+          print([hex(i.address) for i in whole if call(i)==start])
+          # exact literal refs to known shared config/parameter globals
+          for target in (0x43705760,0x43705830,0x43705950):
+            refs=[]
+            for i in whole:
+              q=lit(i)
+              if q and q[1]==target:refs.append(i.address)
+            print(f'\n=== literal refs to {target:#x} ===');print([hex(x) for x in refs])
+            for a in refs:
+              print(f'-- ref {a:#x} --')
+              for i in dis(a-0x80,a+0x140):print(fmt(i))
+          # calls to transport helper 0x420d4c24 and request construction around each
+          print('\n=== all direct calls to mailbox transport 0x420d4c24 ===')
+          hs=[i.address for i in whole if call(i)==0x420d4c24]
+          print([hex(x) for x in hs])
+          for a in hs:
+            print(f'-- transport call {a:#x} --')
+            for i in dis(a-0x100,a+0x80):print(fmt(i))
+          # parser direct callers globally
+          print('\n=== all direct callers of TF parser 0x420a4884 ===')
+          hs=[i.address for i in whole if call(i)==0x420a4884];print([hex(x) for x in hs])
+          # direct readers/writers of exact global config address via literal loads; classify nearby mem offsets.
+          print('\n=== config-global ref offset usage summaries ===')
+          refs=[]
+          for i in whole:
+            q=lit(i)
+            if q and q[1] in (0x43705830,0x43705950):refs.append(i.address)
+          for a in refs:
+            print(f'\n-- config ref {a:#x} --')
+            for i in dis(a-0x40,a+0x100):print(fmt(i))
+          print('\n=== TARGET ===')
+          print('Prove ca9_cm_config_fill destination base, identify all consumers/transport of TF fields, and determine whether they travel only by shared pointer or a separate command.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v162_tf_config_lifetime.txt
+          git commit -m 'research: record v1.62 TF config lifetime' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
