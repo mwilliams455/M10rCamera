@@ -1,0 +1,133 @@
+name: M10-R v1.57 CA9 callback registration exact op40
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v157-ca9-callback-registration-exact-op40.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace indirect callback registration and exact opcode 0x40
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text(); a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n"); z=p.index("\n          CPP",a); Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v157_ca9_callback_registration_exact_op40.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC,ARM_REG_R0
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes();BASE=0x40000000;PFX=4;END=BASE+len(b)-PFX
+          def off(a): return PFX+a-BASE
+          def cstr(a,n=180):
+            o=off(a)
+            if not 0<=o<len(b): return None
+            e=b.find(b'\0',o,min(len(b),o+n)); q=b[o:e]
+            return q.decode('ascii','replace') if e>o and all(32<=x<127 for x in q) else None
+          def mk(mode):
+            md=Cs(CS_ARCH_ARM,mode|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True;return md
+          arm=mk(CS_MODE_ARM); thumb=mk(CS_MODE_THUMB)
+          def dis(md,a,z): return list(md.disasm(b[off(a):off(z)],a))
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                # ARM PC+8, Thumb PC aligned +4
+                pc=(i.address+8) if i.size==4 and i.address%4==0 else ((i.address+4)&~3)
+                la=pc+i.operands[1].mem.disp;o=off(la)
+                if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+            except: pass
+          def call(i):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm&~1
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i)
+            if q:s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'+(f' STRING={cstr(q[1])!r}' if cstr(q[1]) else '')
+            c=call(i)
+            if c is not None:s+=f' ; CALL {c:#x}'
+            return s
+          print('M10-R v1.57 CA9 CALLBACK REGISTRATION / EXACT OPCODE 0x40')
+          # data occurrences of register function and callback global
+          for val,name in [(0x4000beb8,'register_func'),(0x40026810,'callback_global')]:
+            pat=struct.pack('<I',val);p=0;hits=[]
+            while True:
+              p=b.find(pat,p)
+              if p<0:break
+              hits.append(BASE+p-PFX);p+=1
+            print(f'\n=== data occurrences {name} {val:#x} ===');print([hex(x) for x in hits])
+            for h in hits:
+              print(f'-- pool/data {h:#x} --')
+              for md,label in [(arm,'ARM'),(thumb,'THUMB')]:
+                for i in dis(md,max(BASE,h-0x500),min(END,h+4)):
+                  q=lit(i)
+                  if q and q[0]==h: print(label,fmt(i))
+          # exact direct calls in both modes
+          print('\n=== exact calls to register function ===')
+          for md,label in [(arm,'ARM'),(thumb,'THUMB')]:
+            ins=dis(md,BASE,END); hits=[i for i in ins if call(i)==0x4000beb8]
+            print(label,[hex(i.address) for i in hits])
+            for ci in hits:
+              for x in dis(md,max(BASE,ci.address-0x80),min(END,ci.address+0x40)):print(label,fmt(x))
+          # exact immediate compare r0,#0x40 (and other regs exact #64), no substring
+          print('\n=== exact immediate CMP/TEQ #0x40 ===')
+          for md,label in [(arm,'ARM'),(thumb,'THUMB')]:
+            ins=dis(md,BASE,END); hs=[]
+            for i in ins:
+              if not i.mnemonic.startswith(('cmp','teq')):continue
+              try:
+                if any(o.type==ARM_OP_IMM and o.imm==0x40 for o in i.operands): hs.append(i)
+              except:pass
+            print(label,[hex(i.address) for i in hs])
+            for ci in hs:
+              print(f'-- {label} cmp40 {ci.address:#x} --')
+              for x in dis(md,max(BASE,ci.address-0x80),min(END,ci.address+0x120)):print(fmt(x))
+          # search likely callback prologues: first 0x80 bytes contain exact cmp r0,#0x40 or sub/cmp range around 0x40
+          print('\n=== candidate functions whose early code tests opcode 0x40 ===')
+          # derive ARM prologues by push including lr
+          ins=dis(arm,BASE,END)
+          pro=[]
+          for i in ins:
+            if i.mnemonic.startswith('push') and 'lr' in i.op_str: pro.append(i.address)
+            elif i.mnemonic=='stmdb' and 'sp!' in i.op_str and 'lr' in i.op_str: pro.append(i.address)
+          candidates=[]
+          for a in pro:
+            w=dis(arm,a,min(END,a+0x100))
+            exact=[]
+            for i in w:
+              if i.mnemonic.startswith(('cmp','teq')):
+                try:
+                  if any(o.type==ARM_OP_IMM and o.imm==0x40 for o in i.operands): exact.append(i)
+                except:pass
+            if exact:candidates.append(a)
+          print([hex(x) for x in candidates])
+          for a in candidates:
+            print(f'-- func {a:#x} --')
+            for i in dis(arm,a,min(END,a+0x260)):print(fmt(i))
+          # Function pointer tables: show words equal to addresses of candidate functions, and words around register function pointer occurrences
+          print('\n=== pointers to candidate op40 functions in data ===')
+          for a in candidates:
+            pat=struct.pack('<I',a);p=0;hh=[]
+            while True:
+              p=b.find(pat,p)
+              if p<0:break
+              hh.append(BASE+p-PFX);p+=4
+            if hh: print(hex(a),[hex(x) for x in hh[:30]])
+          print('\n=== TARGET ===')
+          print('Resolve indirect registration path and exact opcode 0x40 callback. Do not accept #0x400 false positives.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v157_ca9_callback_registration_exact_op40.txt
+          git commit -m 'research: record v1.57 exact callback registration and op40 trace' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
