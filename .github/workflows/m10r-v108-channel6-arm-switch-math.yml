@@ -1,0 +1,78 @@
+name: M10-R v1.08 channel6 ARM switch math
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v108-channel6-arm-switch-math.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Decode ARM switch helper and PWLSIZE math
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int bb=r.get();if(!bb)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v108_channel6_arm_switch_math.txt
+          from pathlib import Path
+          import struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN,CS_MODE_ARM
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;PFX=4
+          th=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);th.detail=True;th.skipdata=True
+          ar=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);ar.detail=True;ar.skipdata=True
+          def off(a): return PFX+a-BASE
+          def raw(a,n): return b[off(a):off(a)+n]
+          def dump(md,lo,hi,title):
+            print(f'\n=== {title} {lo:#x}..{hi:#x} ===')
+            for i in md.disasm(raw(lo,hi-lo),lo):
+              if i.id: print(f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}')
+          print('M10-R v1.08 CHANNEL-6 ARM SWITCH / PWLSIZE MATH')
+          print('Correction: BLX targets 0x4209F988 / 0x421E6648 / 0x421E61D0 / 0x421E6050 / 0x421E65A4 are ARM-state targets; v1.07 Thumb decode was invalid.')
+          dump(th,0x420e05d0,0x420e0660,'PW_INIT THUMB, treating 0x420e05e4.. table bytes separately')
+          for a,name in ((0x4209f988,'ARM switch helper 4209F988'),(0x421e6648,'ARM helper 421E6648'),(0x421e61d0,'ARM helper 421E61D0'),(0x421e6050,'ARM helper 421E6050'),(0x421e65a4,'ARM helper 421E65A4')):
+            dump(ar,a,a+0xc0,name)
+            print('RAW',hex(a),raw(a,0x40).hex(' '))
+          # The switch BLX is at 0x420e05e0 and LR on entry to helper is 0x420e05e4|1.
+          # Print table bytes and several standard GNU helper target formulas for channels 0..10.
+          table=raw(0x420e05e4,16)
+          print('\n=== INLINE SWITCH TABLE RAW ===')
+          print('table_base 0x420e05e4 bytes',list(table))
+          for ch in range(0,11):
+            v=table[ch]
+            print(f'ch={ch} entry={v:#x} candidate_lr_plus_2entry={0x420e05e4+2*v:#x} candidate_aligned_after_table_plus_2entry={0x420e05f0+2*v:#x}')
+          # Dump likely landing-zone range on exact halfword boundaries.
+          dump(th,0x420e05f0,0x420e0660,'LANDING ZONES AFTER INLINE TABLE')
+          # Standard ARM EABI helper fingerprint snippets: detect common operations and constants.
+          print('\n=== ARM HELPER FIRST INSTRUCTIONS SUMMARY ===')
+          for a in (0x4209f988,0x421e6648,0x421e61d0,0x421e6050,0x421e65a4):
+            ins=list(ar.disasm(raw(a,0x40),a))
+            print(hex(a), ' | '.join(f'{i.mnemonic} {i.op_str}' for i in ins[:8]))
+          n=0x1b80
+          print('\n=== CHANNEL6 SOURCE NUMBERS ===')
+          print('descriptor_plus8',n,'grid_cells',22*16,'ratio',n//352,'remainder',n%352)
+          print('\n=== DECISION ===')
+          print('Use ARM helper semantics plus inline table to identify the exact channel-6 landing PC and PWLSIZE transform. Freeze 20-byte cell stride only if 7040 itself is proven to be the emitted line/payload byte count for all 352 AEAWB cells.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v108_channel6_arm_switch_math.txt
+          git commit -m 'research: record v1.08 channel6 ARM switch/math decode' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
