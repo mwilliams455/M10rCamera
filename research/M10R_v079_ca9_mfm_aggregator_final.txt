@@ -1,0 +1,184 @@
+M10-R v0.79 CA9 MFM AGGREGATOR FINAL
+40003650: strb      r5, [r1]
+40003654: bne       #0x40003630
+40003658: ldr       r1, [pc, #0x24c] ; LIT 0x400038ac->0x400138bc
+4000365c: ldrb      r2, [r1, #0x19]
+40003660: ldrb      r1, [r6, #0xc]
+40003664: orr       r2, r2, r1
+40003668: strb      r2, [r6, #0xc]
+4000366c: ldrb      r1, [r0, #2]
+40003670: cmp       r1, #0
+40003674: beq       #0x400036c4
+40003678: add       r2, ip, #0x19
+4000367c: ldrb      lr, [ip, #0x1a]
+40003680: mov       r3, #6
+40003684: sub       r1, r6, #1
+40003688: subs      r3, r3, #1
+4000368c: ldrb      r5, [r1, #1]
+40003690: orr       r5, r5, lr
+40003694: ldrb      lr, [r2, #2]!
+40003698: strb      r5, [r1, #1]
+4000369c: ldrb      r5, [r1, #2]!
+400036a0: orr       r5, r5, lr
+400036a4: ldrb      lr, [r2, #1]
+400036a8: strb      r5, [r1]
+400036ac: bne       #0x40003688
+400036b0: ldr       r1, [pc, #0x1f4] ; LIT 0x400038ac->0x400138bc
+400036b4: ldrb      r2, [r1, #0x26]
+400036b8: ldrb      r1, [r6, #0xc]
+400036bc: orr       r2, r2, r1
+400036c0: strb      r2, [r6, #0xc]
+400036c4: ldrb      r1, [r0, #3]
+400036c8: cmp       r1, #0
+400036cc: beq       #0x4000371c
+400036d0: add       r2, ip, #0x26
+400036d4: ldrb      lr, [ip, #0x27]
+400036d8: mov       r3, #6
+400036dc: sub       r1, r6, #1
+400036e0: subs      r3, r3, #1
+400036e4: ldrb      r5, [r1, #1]
+400036e8: orr       r5, r5, lr
+400036ec: ldrb      lr, [r2, #2]!
+400036f0: strb      r5, [r1, #1]
+400036f4: ldrb      r5, [r1, #2]!
+400036f8: orr       r5, r5, lr
+400036fc: ldrb      lr, [r2, #1]
+40003700: strb      r5, [r1]
+40003704: bne       #0x400036e0
+40003708: ldr       r1, [pc, #0x19c] ; LIT 0x400038ac->0x400138bc
+4000370c: ldrb      r2, [r1, #0x33]
+40003710: ldrb      r1, [r6, #0xc]
+40003714: orr       r2, r2, r1
+40003718: strb      r2, [r6, #0xc]
+4000371c: ldrb      r0, [r0, #4]
+40003720: cmp       r0, #0
+40003724: beq       #0x40003774
+40003728: add       r0, ip, #0x33
+4000372c: ldrb      r3, [ip, #0x34]
+40003730: mov       r2, #6
+40003734: sub       r1, r6, #1
+40003738: subs      r2, r2, #1
+4000373c: ldrb      ip, [r1, #1]
+40003740: orr       ip, ip, r3
+40003744: ldrb      r3, [r0, #2]!
+40003748: strb      ip, [r1, #1]
+4000374c: ldrb      ip, [r1, #2]!
+40003750: orr       ip, ip, r3
+40003754: ldrb      r3, [r0, #1]
+40003758: strb      ip, [r1]
+4000375c: bne       #0x40003738
+40003760: ldr       r0, [pc, #0x144] ; LIT 0x400038ac->0x400138bc
+40003764: ldrb      r1, [r0, #0x40]
+40003768: ldrb      r0, [r6, #0xc]
+4000376c: orr       r1, r1, r0
+40003770: strb      r1, [r6, #0xc]
+40003774: mov       r1, r4
+40003778: mov       r0, r6
+4000377c: bl        #0x40001598
+40003780: ldrsh     r0, [r4]
+40003784: movw      r1, #0x152
+40003788: add       r1, r1, r4
+4000378c: mov       lr, #6
+40003790: str       r1, [sp, #0x18]
+40003794: add       r1, r4, #0x180
+40003798: str       r6, [sp, #4]
+4000379c: movw      r2, #0x172
+400037a0: str       r0, [sp]
+400037a4: add       r2, r2, r4
+400037a8: str       r1, [sp, #0x14]
+400037ac: movw      r1, #0x17f
+400037b0: str       r0, [sp, #0xc]
+400037b4: add       r0, r4, #0x150
+400037b8: str       lr, [sp, #8]
+400037bc: add       r1, r1, r4
+400037c0: ldrb      lr, [r2, #1]
+400037c4: mov       ip, #0
+400037c8: ldrb      r4, [r1, #1]
+400037cc: mov       r6, ip
+400037d0: ldrsh     sb, [r0, #2]
+400037d4: mov       r5, ip
+400037d8: mov       r3, ip
+400037dc: ldr       sl, [sp, #8]
+400037e0: ldrb      r8, [r1, #2]!
+400037e4: ldrb      r7, [r2, #2]!
+400037e8: sub       sl, sl, #1
+400037ec: cmp       sl, #0
+400037f0: str       sl, [sp, #8]
+400037f4: smulbb    sl, r4, lr
+400037f8: smlabb    r6, r4, lr, r6
+400037fc: ldrsh     lr, [r0, #4]!
+40003800: smulbb    fp, r8, r7
+40003804: smlabb    r5, r8, r7, r5
+40003808: mla       ip, sl, sb, ip
+4000380c: str       lr, [sp, #0x10]
+40003810: ldr       r7, [sp, #0x10]
+40003814: ldrb      r4, [r1, #1]
+40003818: ldrb      lr, [r2, #1]
+4000381c: mla       r3, fp, r7, r3
+40003820: ldrsh     sb, [r0, #2]
+40003824: bne       #0x400037dc
+40003828: ldr       r0, [sp, #0x14]
+4000382c: add       r2, r6, r5
+40003830: ldrb      r1, [r0, #0xc]
+40003834: ldr       r0, [sp, #4]
+40003838: ldrb      r0, [r0, #0xc]
+4000383c: smulbb    lr, r1, r0
+40003840: smlabb    r1, r1, r0, r2
+40003844: ldr       r2, [sp, #0x18]
+40003848: add       r0, ip, r3
+4000384c: cmp       r1, #0
+40003850: ldrsh     r2, [r2, #0x18]
+40003854: mla       r0, lr, r2, r0
+40003858: ldreq     r0, [sp, #0xc]
+4000385c: beq       #0x4000386c
+40003860: bl        #0x4000fe30
+40003864: sxth      r0, r0
+40003868: str       r0, [sp, #0xc]
+4000386c: ldr       r1, [sp, #0x24]
+40003870: sub       r0, r0, r1
+40003874: sxth      r6, r0
+40003878: ldr       r0, [sp]
+4000387c: add       r0, r0, #0x200
+40003880: cmp       r0, r6
+40003884: blt       #0x40003898
+40003888: ldr       r0, [sp]
+4000388c: sub       r0, r0, #0x200
+40003890: cmp       r0, r6
+40003894: ble       #0x4000389c
+40003898: sxth      r6, r0
+4000389c: add       sp, sp, #0x2c
+400038a0: mov       r0, r6
+400038a4: pop       {r4, r5, r6, r7, r8, sb, sl, fp, pc}
+400038a8: bhs       #0x3eaae35c
+400038ac: strhmi    r3, [r1], -ip
+400038b0: push      {r4, r5, r6, r7, r8, lr}
+400038b4: mov       r6, r1
+400038b8: mov       r5, r0
+400038bc: mov       r0, #1
+400038c0: rsb       r1, r2, #9
+400038c4: mov       r7, r3
+400038c8: vpush     {d8}
+400038cc: lsl       r0, r0, r1
+400038d0: str       r2, [r5, #0x24]
+400038d4: vmov      s0, r0
+400038d8: vcvt.f64.s32 d8, s0
+400038dc: vldr      d0, [r6]
+400038e0: vmul.f64  d0, d0, d8
+400038e4: blx       #0x40012940
+400038e8: vcvt.s32.f64 s0, d0
+400038ec: ldr       r4, [pc, #0x744] ; LIT 0x40004038->0x40013930
+400038f0: ldr       r0, [r4]
+400038f4: ldr       r2, [r4, #4]
+400038f8: vmov      r1, s0
+400038fc: bl        #0x40012b4c
+40003900: str       r0, [r5]
+40003904: vldr      d0, [r6, #8]
+40003908: vmul.f64  d0, d0, d8
+4000390c: blx       #0x40012940
+40003910: vcvt.s32.f64 s0, d0
+40003914: ldr       r0, [r4]
+40003918: ldr       r2, [r4, #4]
+4000391c: vmov      r1, s0
+
+TABLE_400138BC
+00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 01 00 01 01 01 00 00 00 00 01 01 01 01 00 00 01 01 01 00 00 01 00 01 01 01 01 00 00 00 00 00 01 00 01 00 00 00 00 00 00 00 03 05 05 05 05 05 05 05 05 05 05 05 05 05 0a 0f 14 1e 28 3c 50 64 50 28 05 0a 14 19 1e 23 28 2d 32 37 3c 41 46 4b 50 5a 64 64 64 64 50 46 28 14 00 00 00 00 f8 ff ff ff 07 00 00 00 00 00 00
