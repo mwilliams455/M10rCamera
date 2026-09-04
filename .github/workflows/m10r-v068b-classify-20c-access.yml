@@ -1,0 +1,65 @@
+name: M10-R v0.68b classify object20c accesses
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v068b-classify-20c-access.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  reduce:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m10r-metering-latch-trace
+          fetch-depth: 0
+      - name: Classify exact next accesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > research/M10R_v068b_object20c_access_classifier.txt
+          from pathlib import Path
+          import re
+          L=Path('research/M10R_v068_global_object20c_signature.txt').read_text(errors='replace').splitlines()
+          print('M10-R v0.68b OBJECT+0x20C ACCESS CLASSIFIER')
+          cur=None; hits=[]
+          for line in L:
+              m=re.match(r'^=== HIT (0x[0-9a-fA-F]+) r(\d+) ===$',line)
+              if m:
+                  cur=(int(m.group(1),16),int(m.group(2)));continue
+              if cur:
+                  m2=re.match(r'^([0-9a-fA-F]{8}):\s+([a-zA-Z0-9.]+)\s+(.*)$',line)
+                  if m2:
+                      a=int(m2.group(1),16)
+                      if a==cur[0]+8:
+                          hits.append((cur[0],cur[1],m2.group(2),m2.group(3),line))
+                          cur=None
+          print('CLASSIFIED',len(hits))
+          from collections import Counter
+          c=Counter((mn,ops) for _,_,mn,ops,_ in hits)
+          print('\nACCESS_FORMS')
+          for k,n in c.most_common(): print(n,k)
+          print('\nEXACT_PLUS20C_ACCESSES')
+          for a,r,mn,ops,line in hits:
+              # +0x208 base then memory +4 => +0x20c
+              if re.search(r'\[r%d,\s*#4\]'%r,ops):
+                  print(hex(a),f'r{r}',mn,ops)
+          print('\nWRITES_TO_PLUS20C')
+          for a,r,mn,ops,line in hits:
+              if mn.startswith('str') and re.search(r'\[r%d,\s*#4\]'%r,ops): print(hex(a),line)
+          print('\nREADS_FROM_PLUS20C')
+          for a,r,mn,ops,line in hits:
+              if mn.startswith('ldr') and re.search(r'\[r%d,\s*#4\]'%r,ops): print(hex(a),line)
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v068b_object20c_access_classifier.txt
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: classify v0.68 object20c accesses'
+          git pull --rebase origin m10r-metering-latch-trace
+          git push origin HEAD:m10r-metering-latch-trace
