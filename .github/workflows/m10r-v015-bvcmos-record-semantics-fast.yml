@@ -1,0 +1,67 @@
+name: M10-R v0.15 BvCMOS record semantics fast
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v015-bvcmos-record-semantics-fast.yml']
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Recover CTRL
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+      - name: Dump record semantics
+        shell: bash
+        run: |
+          python3 - <<'PY' | tee /tmp/m10r-v015-bvcmos-record-semantics-fast.txt
+          from pathlib import Path
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_REG_PC
+          import struct
+          b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes();base=0x08000000;p=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(v):return p+v-base
+          def r32(v):
+            o=off(v);return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+          def astr(v,n=300):
+            o=off(v)
+            if not 0<=o<len(b):return None
+            s=[]
+            for c in b[o:o+n]:
+              if c==0:break
+              if c in (9,10,13) or 32<=c<127:s.append(chr(c))
+              else:return None
+            q=''.join(s);return q if len(q)>=4 else None
+          def dump(a,z):
+            for i in md.disasm(b[off(a):off(z)],a):
+              if i.mnemonic=='.byte':continue
+              ex=''
+              if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;v=r32(la)
+                if v is not None:
+                  s=astr(v);ex=f' ; {la:#x}->{v:#x}'+(f' STRING={s!r}' if s else '')
+              print(f'{i.address:08x}: {i.mnemonic:9s} {i.op_str}{ex}')
+          print('=== PREPARE ===');dump(0x08003068,0x080035b4)
+          print('=== F228 ===');dump(0x0800f228,0x0800f97a)
+          print('=== F1C0 ===');dump(0x0800f1c0,0x0800f220)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m10r-v015-bvcmos-record-semantics-fast
+          path: /tmp/m10r-v015-bvcmos-record-semantics-fast.txt
+          if-no-files-found: error
