@@ -1,0 +1,86 @@
+name: M10-R v0.94 AFAEAWB mode geometry
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v094-afaeawb-mode-geometry.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Decode mode geometry defaults and AE grid fields
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v094_afaeawb_mode_geometry.txt
+          from pathlib import Path
+          import struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(a):return PFX+a-BASE
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;lo=off(la)
+                if 0<=lo<=len(b)-4:return la,struct.unpack_from('<I',b,lo)[0]
+            except:pass
+          def cstr(a):
+            o=off(a)
+            if not 0<=o<len(b):return None
+            x=b[o:min(len(b),o+220)].split(b'\0',1)[0]
+            try:s=x.decode('ascii')
+            except:return None
+            return s if len(s)>=4 and all(32<=ord(c)<127 or c in '\r\n\t' for c in s) else None
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i)
+            if q:
+              s+=f' ; LIT {hex(q[0])}->{hex(q[1])}'
+              st=cstr(q[1])
+              if st:s+=f' STRING={st!r}'
+            return s
+          print('M10-R v0.94 AFAEAWB MODE GEOMETRY')
+          print('Mode objects are 0x7C-byte structures selected by drv_prepro_afaeawb_GetAFAEAWBMode / 0x420D9304.')
+          print('\n=== MODE DEFAULT/GEOMETRY INITIALIZER 0x420D9A80..0x420DA1C0 ===')
+          for i in md.disasm(b[off(0x420d9a80):off(0x420da1c0)],0x420d9a80):
+            if i.id:print(fmt(i))
+          print('\n=== SMALL CONSTANT STORES TO MODE STRUCTURE OFFSETS ===')
+          # Collect stores to likely config/header offsets with nearby immediate-defining instruction.
+          ins=[i for i in md.disasm(b[off(0x420d9a80):off(0x420da1c0)],0x420d9a80) if i.id]
+          for n,i in enumerate(ins):
+            if not i.mnemonic.startswith('str'):continue
+            try:mem=[op.mem for op in i.operands if op.type==ARM_OP_MEM]
+            except:mem=[]
+            if not mem:continue
+            d=mem[-1].disp
+            if d in (0x4c,0x50,0x54,0x58,0x5c,0x60,0x64,0x68,0x6c,0x70,0x74,0x78):
+              print('\nSTORE',hex(i.address),'offset',hex(d))
+              for j in range(max(0,n-4),min(len(ins),n+2)):print(fmt(ins[j]))
+          print('\n=== TARGET SEMANTIC QUESTION ===')
+          print('Identify which offsets encode full block extent versus AE/AWB cell/window count. In particular, do not reinterpret +0x5C/+0x60 as 16x22 after v0.93 proved 4880x3758 defaults in one mode.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v094_afaeawb_mode_geometry.txt
+          git commit -m 'research: record v0.94 AFAEAWB mode geometry' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
