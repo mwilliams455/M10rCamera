@@ -1,0 +1,122 @@
+name: M10-R v1.49 B2Y TF remapping
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v149-b2y-tf-remap.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace B2Y TF remapping configuration and consumers
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v149_b2y_tf_remap.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); BASE=0x42000000; PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+          def off(a): return PFX+a-BASE
+          def dis(a,z): return list(md.disasm(b[off(a):off(z)],a))
+          def cstr(a,limit=300):
+            o=off(a)
+            if not 0<=o<len(b): return None
+            e=b.find(b'\0',o,min(len(b),o+limit)); q=b[o:e]
+            return q.decode('ascii','replace') if e>o and all(0x20<=x<=0x7e for x in q) else None
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp; o=off(la)
+                if 0<=o<=len(b)-4: return la,struct.unpack_from('<I',b,o)[0]
+            except: pass
+          def adr(i):
+            try:
+              if i.mnemonic=='adr' and len(i.operands)>=2 and i.operands[1].type==ARM_OP_IMM:
+                a=((i.address+4)&~3)+i.operands[1].imm; return a,cstr(a)
+            except: pass
+          def call(i):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM: return i.operands[0].imm&~1
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'; q=lit(i)
+            if q:
+              s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'; st=cstr(q[1])
+              if st: s+=f' STRING={st!r}'
+            a=adr(i)
+            if a: s+=f' ; ADR_EFF {a[0]:#x}'+(f' STRING={a[1]!r}' if a[1] else '')
+            c=call(i)
+            if c is not None: s+=f' ; CALL {c:#x}'
+            return s
+          local=dis(0x420a4500,0x420a6100)
+          print('M10-R v1.49 B2Y TF REMAPPING TRACE')
+          print('\n=== TF loader / CC builder / config fill region ===')
+          for i in local: print(fmt(i))
+          for target in (0x420a4884,0x420a4aac,0x420a4628):
+            print(f'\n=== direct callers of {target:#x} in color-local region ===')
+            print([hex(i.address) for i in local if call(i)==target])
+          print('\n=== exact strings containing TF/GAMMA/TONE/REMAP/CONTRAST/SATURATION ===')
+          data=b; hits=[]
+          for m in re.finditer(rb'[ -~]{4,}\x00',data):
+            s=m.group()[:-1].decode('ascii','replace')
+            if any(k in s.upper() for k in ('TF','GAMMA','TONE','REMAP','CONTRAST','SATURATION')):
+              a=BASE+m.start()-PFX
+              if 0x42000000<=a<0x42860000: hits.append((a,s))
+          for a,s in hits: print(hex(a),repr(s))
+          print('\n=== literal refs to B2Y config globals ===')
+          # one linear disassembly pass only
+          whole=list(md.disasm(b[PFX:],BASE))
+          for target in (0x43705830,0x43705950):
+            refs=[]
+            for i in whole:
+              q=lit(i)
+              if q and q[1]==target: refs.append(i.address)
+            print(f'{target:#x}',[hex(x) for x in refs])
+            for a in refs:
+              for i in dis(max(BASE,a-0x50),min(BASE+len(b)-PFX,a+0xa0)): print(fmt(i))
+          print('\n=== B2Y programmer and neighboring register setup ===')
+          for a,z in ((0x42152f8c,0x42153380),(0x421536bc,0x42153900)):
+            print(f'-- {a:#x}..{z:#x} --')
+            for i in dis(a,z): print(fmt(i))
+          print('\n=== B2Y.bin loader/string neighborhoods ===')
+          # bounded neighborhoods around first several B2Y.bin strings
+          cnt=0
+          for a,s in hits:
+            if s=='B2Y.bin' and cnt<6:
+              print(f'-- string {a:#x} --'); cnt+=1
+              # find literal/ADR users in +/-0x300 around string
+              lo=max(BASE,a-0x500); hi=min(BASE+len(b)-PFX,a+0x500)
+              for i in dis(lo,hi):
+                q=lit(i); aa=adr(i)
+                if (q and q[1]==a) or (aa and aa[0]==a): print(fmt(i))
+          print('\n=== known TF serialization ABI ===')
+          print('B2Y_TF_REMAPPING_CA9_CM.bin size = 0x100 bytes')
+          print('serialized destination: enable byte +0x128; header u32 +0x12C; payload file[8:0x100] => +0x134..+0x22B (0xF8 bytes)')
+          print('\n=== TARGET ===')
+          print('Determine whether TF remapping is static baseline calibration or dynamically rewritten; identify its B2Y consumer/MMIO upload and distinguish it from generic B2Y.bin tuning.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v149_b2y_tf_remap.txt
+          git commit -m 'research: record v1.49 B2Y TF remapping trace' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
