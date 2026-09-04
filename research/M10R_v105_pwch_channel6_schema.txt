@@ -1,0 +1,1125 @@
+M10-R v1.05 PREPRO WRITE-CHANNEL 6 SCHEMA
+Known: AFAEAWB config calls drv_prepro_driver_pwch_setPWSA(channel=6,address=base+0x80).
+STRING 0x420e0814 'Prepro (driver): PWSA: 0x%x'
+STRING 0x420e08a7 '@Prepro (driver): set pw-channel[%d] - PWSA: 0x%x'
+STRING 0x42836060 'Prepro: drv_prepro_manager_PWChannelInterrupt -channel: %d -Error: %d'
+STRING 0x4284f7a4 'PrePro (driver): ERROR - drv_prepro_driver_pwch_setPWSA(channel %d) write address is NULL!!!'
+STRING 0x4284f804 'PrePro (driver): ERROR - drv_prepro_driver_pwch_setPWSA(channel %d) write address is not 8 Byte aligned!!!'
+
+=== PWCH STRING XREF WINDOWS ===
+
+--- 'Prepro (driver): PWSA: 0x%x' xref=0x420e068a function=0x420e05b4 ---
+420e05b4: push       {r1, r2, r3, r4, r5, r6, r7, lr}
+420e05b6: movs       r6, r0
+420e05b8: movs       r7, r1
+420e05ba: ldrb       r0, [r6, #4]
+420e05bc: lsls       r0, r0, #0x1d
+420e05be: lsrs       r0, r0, #0x1d
+420e05c0: cmp        r0, #0
+420e05c2: beq        #0x420e05d0
+420e05c4: ldrh       r2, [r6]
+420e05c6: ldr        r1, [pc, #0x210] ; LIT 0x420e07d8->0x4284f870 STRING='PrePro (driver): ERROR - drv_prepro_driver_pw_init(channel %d) write address is not 8 Byte aligned!!!'
+420e05c8: movs       r0, #4
+420e05ca: bl         #0x42140150
+420e05ce: pop        {r1, r2, r3, r4, r5, r6, r7, pc}
+420e05d0: ldrh       r1, [r6]
+420e05d2: lsls       r1, r1, #8
+420e05d4: ldr        r2, [pc, #0x204] ; LIT 0x420e07dc->0x20004d00
+420e05d6: adds       r1, r1, r2
+420e05d8: ldr        r0, [r6, #4]
+420e05da: str        r0, [r1, #0x1c]
+420e05dc: ldrh       r0, [r6]
+420e05de: movs       r3, r0
+420e05e0: blx        #0x4209f988
+420e05e4: lsls       r1, r1, #0x18
+420e05e6: lsrs       r7, r0, #0x20
+420e05e8: lsrs       r1, r1, #8
+420e05ea: adds       r4, #0xb
+420e05ec: subs       r4, #0x3b
+420e05ee: lsls       r3, r0, #1
+420e05f0: mov        r8, r8
+420e05f2: mov        r8, r8
+420e05f4: mov        r8, r8
+420e05f6: mov        r8, r8
+420e05f8: mov        r8, r8
+420e05fa: cmp        r7, #1
+420e05fc: bne        #0x420e062c
+420e05fe: movs       r2, #0xc
+420e0600: ldr        r1, [r6, #8]
+420e0602: muls       r1, r2, r1
+420e0604: movs       r0, r1
+420e0606: blx        #0x421e6648
+420e060a: movs       r2, #0
+420e060c: ldr        r3, [pc, #0x1d0] ; LIT 0x420e07e0->0x40200000
+420e060e: str        r1, [sp, #4]
+420e0610: str        r0, [sp]
+420e0612: blx        #0x421e61d0
+420e0616: movs       r4, r0
+420e0618: movs       r5, r1
+420e061a: movs       r2, #0
+420e061c: ldr        r3, [pc, #0x1c4] ; LIT 0x420e07e4->0x3fe00000
+420e061e: movs       r0, r4
+420e0620: movs       r1, r5
+420e0622: blx        #0x421e6050
+420e0626: movs       r4, r0
+420e0628: movs       r5, r1
+420e062a: b          #0x420e0638
+420e062c: ldr        r1, [r6, #8]
+420e062e: lsls       r0, r1, #1
+420e0630: blx        #0x421e6648
+420e0634: movs       r4, r0
+420e0636: movs       r5, r1
+420e0638: movs       r0, r4
+420e063a: movs       r1, r5
+420e063c: blx        #0x421e65a4
+420e0640: ldrh       r1, [r6]
+420e0642: lsls       r1, r1, #8
+420e0644: ldr        r2, [pc, #0x194] ; LIT 0x420e07dc->0x20004d00
+420e0646: adds       r1, r1, r2
+420e0648: str        r0, [r1, #0x20]
+420e064a: b          #0x420e066c
+420e064c: movs       r0, #0
+420e064e: ldrh       r1, [r6]
+420e0650: lsls       r1, r1, #8
+420e0652: ldr        r2, [pc, #0x188] ; LIT 0x420e07dc->0x20004d00
+420e0654: adds       r1, r1, r2
+420e0656: str        r0, [r1, #0x20]
+420e0658: b          #0x420e066c
+420e065a: mov        r8, r8
+420e065c: movs       r0, #0
+420e065e: ldrh       r1, [r6]
+420e0660: lsls       r1, r1, #8
+420e0662: ldr        r2, [pc, #0x178] ; LIT 0x420e07dc->0x20004d00
+420e0664: adds       r1, r1, r2
+420e0666: str        r0, [r1, #0x20]
+420e0668: b          #0x420e066c
+420e066a: mov        r8, r8
+420e066c: mov        r8, r8
+420e066e: ldr        r0, [pc, #0x178] ; LIT 0x420e07e8->0x409aa1c4
+420e0670: ldr        r0, [r0]
+420e0672: cmp        r0, #1
+420e0674: bhi        #0x420e06a4
+420e0676: ldrh       r2, [r6]
+420e0678: adr        r1, #0x170 ; ADRSTR [(1108215788, 'Prepro (driver): set pw-channel[%d]!')]
+420e067a: movs       r0, #2
+420e067c: bl         #0x42140150
+420e0680: ldrh       r0, [r6]
+420e0682: lsls       r0, r0, #8
+420e0684: ldr        r1, [pc, #0x154] ; LIT 0x420e07dc->0x20004d00
+420e0686: adds       r0, r0, r1
+420e0688: ldr        r2, [r0, #0x1c]
+420e068a: adr        r1, #0x188 ; ADRSTR [(1108215828, 'Prepro (driver): PWSA: 0x%x'), (1108215830, 'epro (driver): PWSA: 0x%x')]
+420e068c: movs       r0, #2
+420e068e: bl         #0x42140150
+420e0692: ldrh       r0, [r6]
+420e0694: lsls       r0, r0, #8
+420e0696: ldr        r1, [pc, #0x144] ; LIT 0x420e07dc->0x20004d00
+420e0698: adds       r0, r0, r1
+420e069a: ldr        r2, [r0, #0x20]
+420e069c: adr        r1, #0x190 ; ADRSTR [(1108215856, 'Prepro (driver): PWLSIZE: %d')]
+420e069e: movs       r0, #2
+420e06a0: bl         #0x42140150
+420e06a4: ldrh       r0, [r6]
+420e06a6: lsls       r0, r0, #8
+420e06a8: ldr        r1, [pc, #0x130] ; LIT 0x420e07dc->0x20004d00
+420e06aa: adds       r0, r0, r1
+420e06ac: ldr        r0, [r0, #0xc]
+420e06ae: lsrs       r0, r0, #1
+420e06b0: lsls       r0, r0, #1
+420e06b2: adds       r0, r0, #1
+420e06b4: ldrh       r1, [r6]
+420e06b6: lsls       r1, r1, #8
+420e06b8: ldr        r2, [pc, #0x120] ; LIT 0x420e07dc->0x20004d00
+420e06ba: adds       r1, r1, r2
+420e06bc: str        r0, [r1, #0xc]
+420e06be: ldrh       r0, [r6]
+420e06c0: lsls       r0, r0, #8
+420e06c2: movs       r1, r2
+420e06c4: adds       r0, r0, r1
+420e06c6: ldr        r0, [r0, #0xc]
+420e06c8: movs       r1, #0x70
+420e06ca: bics       r0, r1
+420e06cc: adds       r0, #0x60
+420e06ce: ldrh       r1, [r6]
+420e06d0: lsls       r1, r1, #8
+420e06d2: adds       r1, r1, r2
+420e06d4: str        r0, [r1, #0xc]
+420e06d6: ldrh       r0, [r6]
+420e06d8: lsls       r0, r0, #8
+420e06da: movs       r1, r2
+420e06dc: adds       r0, r0, r1
+420e06de: ldr        r0, [r0, #4]
+420e06e0: lsrs       r0, r0, #2
+420e06e2: lsls       r0, r0, #2
+420e06e4: ldrb       r1, [r6, #0xc]
+420e06e6: lsls       r1, r1, #0x1e
+420e06e8: lsrs       r1, r1, #0x1e
+420e06ea: orrs       r0, r1
+420e06ec: ldrh       r1, [r6]
+420e06ee: lsls       r1, r1, #8
+420e06f0: adds       r1, r1, r2
+420e06f2: str        r0, [r1, #4]
+420e06f4: ldrh       r0, [r6]
+420e06f6: lsls       r0, r0, #8
+420e06f8: movs       r1, r2
+420e06fa: adds       r0, r0, r1
+420e06fc: ldr        r0, [r0, #8]
+420e06fe: movs       r1, #7
+420e0700: lsls       r1, r1, #8
+420e0702: bics       r0, r1
+420e0704: ldrb       r1, [r6, #0xe]
+420e0706: lsls       r1, r1, #8
+420e0708: movs       r2, #7
+420e070a: lsls       r2, r2, #8
+420e070c: ands       r1, r2
+420e070e: orrs       r0, r1
+420e0710: ldrh       r1, [r6]
+420e0712: lsls       r1, r1, #8
+420e0714: ldr        r2, [pc, #0xc4] ; LIT 0x420e07dc->0x20004d00
+420e0716: adds       r1, r1, r2
+420e0718: str        r0, [r1, #8]
+
+--- 'PrePro (driver): ERROR - drv_prepro_driver_pwch_setPWSA(channel %d) write address is NULL!!!' xref=0x420e085c function=0x420e0850 ---
+420e0850: push       {r4, r5, r6, lr}
+420e0852: movs       r5, r0
+420e0854: movs       r4, r1
+420e0856: cmp        r4, #0
+420e0858: bne        #0x420e0866
+420e085a: movs       r2, r5
+420e085c: ldr        r1, [pc, #0x3c] ; LIT 0x420e089c->0x4284f7a4 STRING='PrePro (driver): ERROR - drv_prepro_driver_pwch_setPWSA(channel %d) write address is NULL!!!'
+420e085e: movs       r0, #4
+420e0860: bl         #0x42140150
+420e0864: pop        {r4, r5, r6, pc}
+420e0866: lsls       r0, r4, #0x1d
+420e0868: lsrs       r0, r0, #0x1d
+420e086a: cmp        r0, #0
+420e086c: beq        #0x420e087a
+420e086e: movs       r2, r5
+420e0870: ldr        r1, [pc, #0x2c] ; LIT 0x420e08a0->0x4284f804 STRING='PrePro (driver): ERROR - drv_prepro_driver_pwch_setPWSA(channel %d) write address is not 8 Byte aligned!!!'
+420e0872: movs       r0, #4
+420e0874: bl         #0x42140150
+420e0878: b          #0x420e0864
+420e087a: ldr        r0, [pc, #0x28] ; LIT 0x420e08a4->0x409aa1c4
+420e087c: ldr        r0, [r0]
+420e087e: cmp        r0, #0
+420e0880: bne        #0x420e088e
+420e0882: movs       r3, r4
+420e0884: movs       r2, r5
+420e0886: adr        r1, #0x20 ; ADRSTR [(1108215976, 'Prepro (driver): set pw-channel[%d] - PWSA: 0x%x'), (1108215978, 'epro (driver): set pw-channel[%d] - PWSA: 0x%x')]
+420e0888: movs       r0, #2
+420e088a: bl         #0x42140150
+420e088e: lsls       r0, r5, #8
+420e0890: ldr        r1, [pc, #0x48] ; LIT 0x420e08dc->0x20004d00
+420e0892: adds       r0, r0, r1
+420e0894: str        r4, [r0, #0x1c]
+420e0896: mov        r8, r8
+420e0898: b          #0x420e0864
+420e089a: movs       r0, r0
+420e089e: cmp        r4, r0
+420e08a2: cmp        r4, r0
+420e08a4: adr        r1, #0x310
+420e08a6: lsls       r2, r3
+420e08a8: strb       r0, [r2, #9]
+420e08aa: strb       r5, [r4, #1]
+420e08ac: ldr        r2, [r6, #0x74]
+420e08ae: cmp        r0, #0x20
+420e08b0: strb       r4, [r4, #9]
+420e08b2: strb       r1, [r5, #0x19]
+420e08b4: strb       r5, [r4, #9]
+420e08b6: subs       r2, #0x29
+420e08b8: strb       r0, [r4, #0xc]
+420e08ba: strb       r5, [r4, #0x11]
+420e08bc: strb       r0, [r4]
+420e08be: cmp        r5, #0x77
+420e08c0: ldr        r3, [r4, #4]
+420e08c2: ldr        r1, [r4, #0x64]
+420e08c4: str        r6, [r5, #0x54]
+420e08c6: ldrh       r4, [r5, r5]
+420e08c8: str        r5, [r4, #0x40]
+420e08ca: movs       r0, #0x5d
+420e08cc: movs       r0, #0x2d
+420e08ce: ldrsb      r0, [r2, r5]
+420e08d0: adcs       r3, r2
+420e08d2: movs       r0, #0x3a
+420e08d4: ldrb       r0, [r6]
+420e08d6: ldrb       r5, [r4]
+420e08d8: movs       r0, r0
+420e08da: movs       r0, r0
+420e08dc: ldr        r5, [pc, #0] ; LIT 0x420e08e0->0x201b510
+420e08de: movs       r0, #0
+420e08e0: push       {r4, lr}
+420e08e2: lsls       r1, r0, #8
+420e08e4: ldr        r2, [pc, #0x10] ; LIT 0x420e08f8->0x20004d00
+420e08e6: ldr        r1, [r2, r1]
+420e08e8: lsrs       r1, r1, #2
+420e08ea: lsls       r1, r1, #2
+420e08ec: adds       r1, r1, #1
+420e08ee: lsls       r2, r0, #8
+420e08f0: ldr        r3, [pc, #4] ; LIT 0x420e08f8->0x20004d00
+
+--- 'PrePro (driver): ERROR - drv_prepro_driver_pwch_setPWSA(channel %d) write address is not 8 Byte aligned!!!' xref=0x420e0870 function=0x420e0850 ---
+420e0850: push       {r4, r5, r6, lr}
+420e0852: movs       r5, r0
+420e0854: movs       r4, r1
+420e0856: cmp        r4, #0
+420e0858: bne        #0x420e0866
+420e085a: movs       r2, r5
+420e085c: ldr        r1, [pc, #0x3c] ; LIT 0x420e089c->0x4284f7a4 STRING='PrePro (driver): ERROR - drv_prepro_driver_pwch_setPWSA(channel %d) write address is NULL!!!'
+420e085e: movs       r0, #4
+420e0860: bl         #0x42140150
+420e0864: pop        {r4, r5, r6, pc}
+420e0866: lsls       r0, r4, #0x1d
+420e0868: lsrs       r0, r0, #0x1d
+420e086a: cmp        r0, #0
+420e086c: beq        #0x420e087a
+420e086e: movs       r2, r5
+420e0870: ldr        r1, [pc, #0x2c] ; LIT 0x420e08a0->0x4284f804 STRING='PrePro (driver): ERROR - drv_prepro_driver_pwch_setPWSA(channel %d) write address is not 8 Byte aligned!!!'
+420e0872: movs       r0, #4
+420e0874: bl         #0x42140150
+420e0878: b          #0x420e0864
+420e087a: ldr        r0, [pc, #0x28] ; LIT 0x420e08a4->0x409aa1c4
+420e087c: ldr        r0, [r0]
+420e087e: cmp        r0, #0
+420e0880: bne        #0x420e088e
+420e0882: movs       r3, r4
+420e0884: movs       r2, r5
+420e0886: adr        r1, #0x20 ; ADRSTR [(1108215976, 'Prepro (driver): set pw-channel[%d] - PWSA: 0x%x'), (1108215978, 'epro (driver): set pw-channel[%d] - PWSA: 0x%x')]
+420e0888: movs       r0, #2
+420e088a: bl         #0x42140150
+420e088e: lsls       r0, r5, #8
+420e0890: ldr        r1, [pc, #0x48] ; LIT 0x420e08dc->0x20004d00
+420e0892: adds       r0, r0, r1
+420e0894: str        r4, [r0, #0x1c]
+420e0896: mov        r8, r8
+420e0898: b          #0x420e0864
+420e089a: movs       r0, r0
+420e089e: cmp        r4, r0
+420e08a2: cmp        r4, r0
+420e08a4: adr        r1, #0x310
+420e08a6: lsls       r2, r3
+420e08a8: strb       r0, [r2, #9]
+420e08aa: strb       r5, [r4, #1]
+420e08ac: ldr        r2, [r6, #0x74]
+420e08ae: cmp        r0, #0x20
+420e08b0: strb       r4, [r4, #9]
+420e08b2: strb       r1, [r5, #0x19]
+420e08b4: strb       r5, [r4, #9]
+420e08b6: subs       r2, #0x29
+420e08b8: strb       r0, [r4, #0xc]
+420e08ba: strb       r5, [r4, #0x11]
+420e08bc: strb       r0, [r4]
+420e08be: cmp        r5, #0x77
+420e08c0: ldr        r3, [r4, #4]
+420e08c2: ldr        r1, [r4, #0x64]
+420e08c4: str        r6, [r5, #0x54]
+420e08c6: ldrh       r4, [r5, r5]
+420e08c8: str        r5, [r4, #0x40]
+420e08ca: movs       r0, #0x5d
+420e08cc: movs       r0, #0x2d
+420e08ce: ldrsb      r0, [r2, r5]
+420e08d0: adcs       r3, r2
+420e08d2: movs       r0, #0x3a
+420e08d4: ldrb       r0, [r6]
+420e08d6: ldrb       r5, [r4]
+420e08d8: movs       r0, r0
+420e08da: movs       r0, r0
+420e08dc: ldr        r5, [pc, #0] ; LIT 0x420e08e0->0x201b510
+420e08de: movs       r0, #0
+420e08e0: push       {r4, lr}
+420e08e2: lsls       r1, r0, #8
+420e08e4: ldr        r2, [pc, #0x10] ; LIT 0x420e08f8->0x20004d00
+420e08e6: ldr        r1, [r2, r1]
+420e08e8: lsrs       r1, r1, #2
+420e08ea: lsls       r1, r1, #2
+420e08ec: adds       r1, r1, #1
+420e08ee: lsls       r2, r0, #8
+420e08f0: ldr        r3, [pc, #4] ; LIT 0x420e08f8->0x20004d00
+420e08f2: str        r1, [r3, r2]
+420e08f4: pop        {r4, pc}
+420e08f6: movs       r0, r0
+420e08f8: ldr        r5, [pc, #0] ; LIT 0x420e08fc->0xe008b510
+420e08fa: movs       r0, #0
+420e08fc: push       {r4, lr}
+420e08fe: b          #0x420e0912
+420e0900: lsls       r1, r0, #8
+420e0902: ldr        r2, [pc, #0x20] ; LIT 0x420e0924->0x20004d00
+
+FUNCTIONS 0x420e05b4 0x420e0850
+
+=== descriptor helper 0x420E05B4 ===
+420e05b4: push       {r1, r2, r3, r4, r5, r6, r7, lr}
+420e05b6: movs       r6, r0
+420e05b8: movs       r7, r1
+420e05ba: ldrb       r0, [r6, #4]
+420e05bc: lsls       r0, r0, #0x1d
+420e05be: lsrs       r0, r0, #0x1d
+420e05c0: cmp        r0, #0
+420e05c2: beq        #0x420e05d0
+420e05c4: ldrh       r2, [r6]
+420e05c6: ldr        r1, [pc, #0x210] ; LIT 0x420e07d8->0x4284f870 STRING='PrePro (driver): ERROR - drv_prepro_driver_pw_init(channel %d) write address is not 8 Byte aligned!!!'
+420e05c8: movs       r0, #4
+420e05ca: bl         #0x42140150
+420e05ce: pop        {r1, r2, r3, r4, r5, r6, r7, pc}
+420e05d0: ldrh       r1, [r6]
+420e05d2: lsls       r1, r1, #8
+420e05d4: ldr        r2, [pc, #0x204] ; LIT 0x420e07dc->0x20004d00
+420e05d6: adds       r1, r1, r2
+420e05d8: ldr        r0, [r6, #4]
+420e05da: str        r0, [r1, #0x1c]
+420e05dc: ldrh       r0, [r6]
+420e05de: movs       r3, r0
+420e05e0: blx        #0x4209f988
+420e05e4: lsls       r1, r1, #0x18
+420e05e6: lsrs       r7, r0, #0x20
+420e05e8: lsrs       r1, r1, #8
+420e05ea: adds       r4, #0xb
+420e05ec: subs       r4, #0x3b
+420e05ee: lsls       r3, r0, #1
+420e05f0: mov        r8, r8
+420e05f2: mov        r8, r8
+420e05f4: mov        r8, r8
+420e05f6: mov        r8, r8
+420e05f8: mov        r8, r8
+420e05fa: cmp        r7, #1
+420e05fc: bne        #0x420e062c
+420e05fe: movs       r2, #0xc
+420e0600: ldr        r1, [r6, #8]
+420e0602: muls       r1, r2, r1
+420e0604: movs       r0, r1
+420e0606: blx        #0x421e6648
+420e060a: movs       r2, #0
+420e060c: ldr        r3, [pc, #0x1d0] ; LIT 0x420e07e0->0x40200000
+420e060e: str        r1, [sp, #4]
+420e0610: str        r0, [sp]
+420e0612: blx        #0x421e61d0
+420e0616: movs       r4, r0
+420e0618: movs       r5, r1
+420e061a: movs       r2, #0
+420e061c: ldr        r3, [pc, #0x1c4] ; LIT 0x420e07e4->0x3fe00000
+420e061e: movs       r0, r4
+420e0620: movs       r1, r5
+420e0622: blx        #0x421e6050
+420e0626: movs       r4, r0
+420e0628: movs       r5, r1
+420e062a: b          #0x420e0638
+420e062c: ldr        r1, [r6, #8]
+420e062e: lsls       r0, r1, #1
+420e0630: blx        #0x421e6648
+420e0634: movs       r4, r0
+420e0636: movs       r5, r1
+420e0638: movs       r0, r4
+420e063a: movs       r1, r5
+420e063c: blx        #0x421e65a4
+420e0640: ldrh       r1, [r6]
+420e0642: lsls       r1, r1, #8
+420e0644: ldr        r2, [pc, #0x194] ; LIT 0x420e07dc->0x20004d00
+420e0646: adds       r1, r1, r2
+420e0648: str        r0, [r1, #0x20]
+420e064a: b          #0x420e066c
+420e064c: movs       r0, #0
+420e064e: ldrh       r1, [r6]
+420e0650: lsls       r1, r1, #8
+420e0652: ldr        r2, [pc, #0x188] ; LIT 0x420e07dc->0x20004d00
+420e0654: adds       r1, r1, r2
+420e0656: str        r0, [r1, #0x20]
+420e0658: b          #0x420e066c
+420e065a: mov        r8, r8
+420e065c: movs       r0, #0
+420e065e: ldrh       r1, [r6]
+420e0660: lsls       r1, r1, #8
+420e0662: ldr        r2, [pc, #0x178] ; LIT 0x420e07dc->0x20004d00
+420e0664: adds       r1, r1, r2
+420e0666: str        r0, [r1, #0x20]
+420e0668: b          #0x420e066c
+420e066a: mov        r8, r8
+420e066c: mov        r8, r8
+420e066e: ldr        r0, [pc, #0x178] ; LIT 0x420e07e8->0x409aa1c4
+420e0670: ldr        r0, [r0]
+420e0672: cmp        r0, #1
+420e0674: bhi        #0x420e06a4
+420e0676: ldrh       r2, [r6]
+420e0678: adr        r1, #0x170 ; ADRSTR [(1108215788, 'Prepro (driver): set pw-channel[%d]!')]
+420e067a: movs       r0, #2
+420e067c: bl         #0x42140150
+420e0680: ldrh       r0, [r6]
+420e0682: lsls       r0, r0, #8
+420e0684: ldr        r1, [pc, #0x154] ; LIT 0x420e07dc->0x20004d00
+420e0686: adds       r0, r0, r1
+420e0688: ldr        r2, [r0, #0x1c]
+420e068a: adr        r1, #0x188 ; ADRSTR [(1108215828, 'Prepro (driver): PWSA: 0x%x'), (1108215830, 'epro (driver): PWSA: 0x%x')]
+420e068c: movs       r0, #2
+420e068e: bl         #0x42140150
+420e0692: ldrh       r0, [r6]
+420e0694: lsls       r0, r0, #8
+420e0696: ldr        r1, [pc, #0x144] ; LIT 0x420e07dc->0x20004d00
+420e0698: adds       r0, r0, r1
+420e069a: ldr        r2, [r0, #0x20]
+420e069c: adr        r1, #0x190 ; ADRSTR [(1108215856, 'Prepro (driver): PWLSIZE: %d')]
+420e069e: movs       r0, #2
+420e06a0: bl         #0x42140150
+420e06a4: ldrh       r0, [r6]
+420e06a6: lsls       r0, r0, #8
+420e06a8: ldr        r1, [pc, #0x130] ; LIT 0x420e07dc->0x20004d00
+420e06aa: adds       r0, r0, r1
+420e06ac: ldr        r0, [r0, #0xc]
+420e06ae: lsrs       r0, r0, #1
+420e06b0: lsls       r0, r0, #1
+420e06b2: adds       r0, r0, #1
+420e06b4: ldrh       r1, [r6]
+420e06b6: lsls       r1, r1, #8
+420e06b8: ldr        r2, [pc, #0x120] ; LIT 0x420e07dc->0x20004d00
+420e06ba: adds       r1, r1, r2
+420e06bc: str        r0, [r1, #0xc]
+420e06be: ldrh       r0, [r6]
+420e06c0: lsls       r0, r0, #8
+420e06c2: movs       r1, r2
+420e06c4: adds       r0, r0, r1
+420e06c6: ldr        r0, [r0, #0xc]
+420e06c8: movs       r1, #0x70
+420e06ca: bics       r0, r1
+420e06cc: adds       r0, #0x60
+420e06ce: ldrh       r1, [r6]
+420e06d0: lsls       r1, r1, #8
+420e06d2: adds       r1, r1, r2
+420e06d4: str        r0, [r1, #0xc]
+420e06d6: ldrh       r0, [r6]
+420e06d8: lsls       r0, r0, #8
+420e06da: movs       r1, r2
+420e06dc: adds       r0, r0, r1
+420e06de: ldr        r0, [r0, #4]
+420e06e0: lsrs       r0, r0, #2
+420e06e2: lsls       r0, r0, #2
+420e06e4: ldrb       r1, [r6, #0xc]
+420e06e6: lsls       r1, r1, #0x1e
+420e06e8: lsrs       r1, r1, #0x1e
+420e06ea: orrs       r0, r1
+420e06ec: ldrh       r1, [r6]
+420e06ee: lsls       r1, r1, #8
+420e06f0: adds       r1, r1, r2
+420e06f2: str        r0, [r1, #4]
+420e06f4: ldrh       r0, [r6]
+420e06f6: lsls       r0, r0, #8
+420e06f8: movs       r1, r2
+420e06fa: adds       r0, r0, r1
+420e06fc: ldr        r0, [r0, #8]
+420e06fe: movs       r1, #7
+420e0700: lsls       r1, r1, #8
+420e0702: bics       r0, r1
+420e0704: ldrb       r1, [r6, #0xe]
+420e0706: lsls       r1, r1, #8
+420e0708: movs       r2, #7
+420e070a: lsls       r2, r2, #8
+420e070c: ands       r1, r2
+420e070e: orrs       r0, r1
+420e0710: ldrh       r1, [r6]
+420e0712: lsls       r1, r1, #8
+420e0714: ldr        r2, [pc, #0xc4] ; LIT 0x420e07dc->0x20004d00
+420e0716: adds       r1, r1, r2
+420e0718: str        r0, [r1, #8]
+420e071a: ldrh       r0, [r6]
+420e071c: lsls       r0, r0, #8
+420e071e: movs       r1, r2
+420e0720: adds       r0, r0, r1
+420e0722: ldr        r0, [r0, #8]
+420e0724: lsrs       r0, r0, #4
+420e0726: lsls       r0, r0, #4
+420e0728: ldrb       r1, [r6, #0xd]
+420e072a: lsls       r1, r1, #0x1c
+420e072c: lsrs       r1, r1, #0x1c
+420e072e: orrs       r0, r1
+420e0730: ldrh       r1, [r6]
+420e0732: lsls       r1, r1, #8
+
+=== pwch_setPWSA ===
+420e0850: push       {r4, r5, r6, lr}
+420e0852: movs       r5, r0
+420e0854: movs       r4, r1
+420e0856: cmp        r4, #0
+420e0858: bne        #0x420e0866
+420e085a: movs       r2, r5
+420e085c: ldr        r1, [pc, #0x3c] ; LIT 0x420e089c->0x4284f7a4 STRING='PrePro (driver): ERROR - drv_prepro_driver_pwch_setPWSA(channel %d) write address is NULL!!!'
+420e085e: movs       r0, #4
+420e0860: bl         #0x42140150
+420e0864: pop        {r4, r5, r6, pc}
+420e0866: lsls       r0, r4, #0x1d
+420e0868: lsrs       r0, r0, #0x1d
+420e086a: cmp        r0, #0
+420e086c: beq        #0x420e087a
+420e086e: movs       r2, r5
+420e0870: ldr        r1, [pc, #0x2c] ; LIT 0x420e08a0->0x4284f804 STRING='PrePro (driver): ERROR - drv_prepro_driver_pwch_setPWSA(channel %d) write address is not 8 Byte aligned!!!'
+420e0872: movs       r0, #4
+420e0874: bl         #0x42140150
+420e0878: b          #0x420e0864
+420e087a: ldr        r0, [pc, #0x28] ; LIT 0x420e08a4->0x409aa1c4
+420e087c: ldr        r0, [r0]
+420e087e: cmp        r0, #0
+420e0880: bne        #0x420e088e
+420e0882: movs       r3, r4
+420e0884: movs       r2, r5
+420e0886: adr        r1, #0x20 ; ADRSTR [(1108215976, 'Prepro (driver): set pw-channel[%d] - PWSA: 0x%x'), (1108215978, 'epro (driver): set pw-channel[%d] - PWSA: 0x%x')]
+420e0888: movs       r0, #2
+420e088a: bl         #0x42140150
+420e088e: lsls       r0, r5, #8
+420e0890: ldr        r1, [pc, #0x48] ; LIT 0x420e08dc->0x20004d00
+420e0892: adds       r0, r0, r1
+420e0894: str        r4, [r0, #0x1c]
+420e0896: mov        r8, r8
+420e0898: b          #0x420e0864
+420e089a: movs       r0, r0
+420e089e: cmp        r4, r0
+420e08a2: cmp        r4, r0
+420e08a4: adr        r1, #0x310
+420e08a6: lsls       r2, r3
+420e08a8: strb       r0, [r2, #9]
+420e08aa: strb       r5, [r4, #1]
+420e08ac: ldr        r2, [r6, #0x74]
+420e08ae: cmp        r0, #0x20
+420e08b0: strb       r4, [r4, #9]
+420e08b2: strb       r1, [r5, #0x19]
+420e08b4: strb       r5, [r4, #9]
+420e08b6: subs       r2, #0x29
+420e08b8: strb       r0, [r4, #0xc]
+420e08ba: strb       r5, [r4, #0x11]
+420e08bc: strb       r0, [r4]
+420e08be: cmp        r5, #0x77
+420e08c0: ldr        r3, [r4, #4]
+420e08c2: ldr        r1, [r4, #0x64]
+420e08c4: str        r6, [r5, #0x54]
+420e08c6: ldrh       r4, [r5, r5]
+420e08c8: str        r5, [r4, #0x40]
+420e08ca: movs       r0, #0x5d
+420e08cc: movs       r0, #0x2d
+420e08ce: ldrsb      r0, [r2, r5]
+420e08d0: adcs       r3, r2
+420e08d2: movs       r0, #0x3a
+420e08d4: ldrb       r0, [r6]
+420e08d6: ldrb       r5, [r4]
+420e08d8: movs       r0, r0
+420e08da: movs       r0, r0
+420e08dc: ldr        r5, [pc, #0] ; LIT 0x420e08e0->0x201b510
+420e08de: movs       r0, #0
+420e08e0: push       {r4, lr}
+420e08e2: lsls       r1, r0, #8
+420e08e4: ldr        r2, [pc, #0x10] ; LIT 0x420e08f8->0x20004d00
+420e08e6: ldr        r1, [r2, r1]
+420e08e8: lsrs       r1, r1, #2
+420e08ea: lsls       r1, r1, #2
+420e08ec: adds       r1, r1, #1
+420e08ee: lsls       r2, r0, #8
+420e08f0: ldr        r3, [pc, #4] ; LIT 0x420e08f8->0x20004d00
+420e08f2: str        r1, [r3, r2]
+420e08f4: pop        {r4, pc}
+420e08f6: movs       r0, r0
+420e08f8: ldr        r5, [pc, #0] ; LIT 0x420e08fc->0xe008b510
+420e08fa: movs       r0, #0
+420e08fc: push       {r4, lr}
+420e08fe: b          #0x420e0912
+420e0900: lsls       r1, r0, #8
+420e0902: ldr        r2, [pc, #0x20] ; LIT 0x420e0924->0x20004d00
+420e0904: ldr        r1, [r2, r1]
+420e0906: lsrs       r1, r1, #2
+420e0908: lsls       r1, r1, #2
+420e090a: adds       r1, r1, #2
+420e090c: lsls       r2, r0, #8
+420e090e: ldr        r3, [pc, #0x14] ; LIT 0x420e0924->0x20004d00
+420e0910: str        r1, [r3, r2]
+420e0912: lsls       r1, r0, #8
+420e0914: ldr        r2, [pc, #0xc] ; LIT 0x420e0924->0x20004d00
+420e0916: ldr        r1, [r2, r1]
+420e0918: lsls       r1, r1, #0x1e
+420e091a: lsrs       r1, r1, #0x1e
+420e091c: cmp        r1, #2
+420e091e: bne        #0x420e0900
+420e0920: pop        {r4, pc}
+420e0922: movs       r0, r0
+420e0924: ldr        r5, [pc, #0] ; LIT 0x420e0928->0x4b5fe
+420e0926: movs       r0, #0
+420e0928: push       {r1, r2, r3, r4, r5, r6, r7, lr}
+420e092a: movs       r4, r0
+420e092c: ldr        r0, [pc, #0x168] ; LIT 0x420e0a98->0x409aa1c4
+420e092e: ldr        r0, [r0]
+420e0930: cmp        r0, #1
+420e0932: bhi        #0x420e093c
+420e0934: adr        r1, #0x164 ; ADRSTR [(1108216476, 'Prepro (driver): set lnr!')]
+420e0936: movs       r0, #2
+420e0938: bl         #0x42140150
+420e093c: ldr        r0, [pc, #0x178] ; LIT 0x420e0ab8->0x20000300
+420e093e: ldr        r0, [r0, #4]
+420e0940: movs       r1, #0xf
+420e0942: lsls       r1, r1, #0x10
+420e0944: bics       r0, r1
+420e0946: movs       r1, #7
+420e0948: lsls       r1, r1, #0x11
+420e094a: adds       r0, r0, r1
+420e094c: ldr        r1, [pc, #0x168] ; LIT 0x420e0ab8->0x20000300
+420e094e: str        r0, [r1, #4]
+420e0950: movs       r0, r1
+420e0952: ldr        r0, [r0, #4]
+420e0954: movs       r1, #0x1f
+420e0956: lsls       r1, r1, #8
+420e0958: bics       r0, r1
+420e095a: movs       r1, #7
+420e095c: lsls       r1, r1, #9
+420e095e: adds       r0, r0, r1
+420e0960: ldr        r1, [pc, #0x154] ; LIT 0x420e0ab8->0x20000300
+420e0962: str        r0, [r1, #4]
+420e0964: movs       r0, r1
+420e0966: ldr        r0, [r0, #4]
+420e0968: lsrs       r0, r0, #1
+420e096a: lsls       r0, r0, #1
+420e096c: str        r0, [r1, #4]
+420e096e: movs       r0, r1
+420e0970: ldr        r0, [r0, #0xc]
+420e0972: movs       r1, #0x3f
+420e0974: lsls       r1, r1, #0x18
+420e0976: bics       r0, r1
+420e0978: ldr        r1, [pc, #0x13c] ; LIT 0x420e0ab8->0x20000300
+420e097a: str        r0, [r1, #0xc]
+420e097c: movs       r0, r1
+420e097e: ldr        r0, [r0, #0xc]
+420e0980: movs       r1, #0x3f
+420e0982: lsls       r1, r1, #0x10
+420e0984: bics       r0, r1
+420e0986: movs       r1, #1
+420e0988: lsls       r1, r1, #0x10
+420e098a: adds       r0, r0, r1
+420e098c: ldr        r1, [pc, #0x128] ; LIT 0x420e0ab8->0x20000300
+420e098e: str        r0, [r1, #0xc]
+420e0990: movs       r0, r1
+420e0992: ldr        r0, [r0, #0xc]
+420e0994: lsrs       r0, r0, #6
+420e0996: lsls       r0, r0, #6
+420e0998: str        r0, [r1, #0xc]
+420e099a: movs       r0, r1
+420e099c: ldr        r0, [r0, #0xc]
+420e099e: movs       r1, #0x3f
+420e09a0: lsls       r1, r1, #8
+420e09a2: bics       r0, r1
+420e09a4: adds       r0, #0xff
+420e09a6: adds       r0, #1
+420e09a8: ldr        r1, [pc, #0x10c] ; LIT 0x420e0ab8->0x20000300
+420e09aa: str        r0, [r1, #0xc]
+420e09ac: movs       r0, r1
+420e09ae: ldr        r0, [r0, #0x14]
+420e09b0: movs       r1, #0x3f
+420e09b2: lsls       r1, r1, #8
+420e09b4: bics       r0, r1
+420e09b6: adds       r0, #0xff
+420e09b8: adds       r0, #0xff
+420e09ba: adds       r0, #2
+420e09bc: ldr        r1, [pc, #0xf8] ; LIT 0x420e0ab8->0x20000300
+420e09be: str        r0, [r1, #0x14]
+420e09c0: movs       r0, r1
+420e09c2: ldr        r0, [r0, #0x14]
+420e09c4: lsrs       r0, r0, #6
+420e09c6: lsls       r0, r0, #6
+420e09c8: adds       r0, r0, #3
+420e09ca: str        r0, [r1, #0x14]
+420e09cc: movs       r0, r1
+420e09ce: ldr        r0, [r0, #0x14]
+
+=== 0x420DE0F0 geometry/channel helper ===
+420de0f0: push       {r4, lr}
+420de0f2: movs       r4, r0
+420de0f4: ldr        r0, [pc, #0x1d0] ; LIT 0x420de2c8->0x409aa1c4
+420de0f6: ldr        r0, [r0]
+420de0f8: cmp        r0, #1
+420de0fa: bhi        #0x420de12e
+420de0fc: ldrb       r2, [r4]
+420de0fe: adr        r1, #0x1cc ; ADRSTR [(1108206284, 'Prepro (driver): set p2m-channel[%d]!'), (1108206286, 'epro (driver): set p2m-channel[%d]!')]
+420de100: movs       r0, #2
+420de102: bl         #0x42140150
+420de106: adr        r1, #0x1ec ; ADRSTR [(1108206324, 'Prepro (driver): PTRMV = %d'), (1108206326, 'epro (driver): PTRMV = %d')]
+420de108: movs       r0, #2
+420de10a: ldr        r2, [r4, #8]
+420de10c: bl         #0x42140150
+420de110: adr        r1, #0x1fc ; ADRSTR [(1108206352, 'Prepro (driver): PTRMH = %d')]
+420de112: movs       r0, #2
+420de114: ldr        r2, [r4, #4]
+420de116: bl         #0x42140150
+420de11a: adr        r1, #0x210 ; ADRSTR [(1108206380, 'Prepro (driver): PTRMVW = %d'), (1108206382, 'epro (driver): PTRMVW = %d')]
+420de11c: movs       r0, #2
+420de11e: ldr        r2, [r4, #0x10]
+420de120: bl         #0x42140150
+420de124: adr        r1, #0x224 ; ADRSTR [(1108206412, 'Prepro (driver): PTRMHW = %d')]
+420de126: movs       r0, #2
+420de128: ldr        r2, [r4, #0xc]
+420de12a: bl         #0x42140150
+420de12e: ldrb       r0, [r4]
+420de130: lsls       r0, r0, #8
+420de132: ldr        r1, [pc, #0x238] ; LIT 0x420de36c->0x20004500
+420de134: adds       r0, r0, r1
+420de136: ldr        r0, [r0, #4]
+420de138: lsrs       r0, r0, #2
+420de13a: lsls       r0, r0, #2
+420de13c: ldrb       r1, [r4]
+420de13e: lsls       r1, r1, #8
+420de140: ldr        r2, [pc, #0x228] ; LIT 0x420de36c->0x20004500
+420de142: adds       r1, r1, r2
+420de144: str        r0, [r1, #4]
+420de146: ldrb       r0, [r4]
+420de148: lsls       r0, r0, #8
+420de14a: movs       r1, r2
+420de14c: adds       r0, r0, r1
+420de14e: ldr        r0, [r0, #4]
+420de150: movs       r1, #0x10
+420de152: bics       r0, r1
+420de154: ldrb       r1, [r4]
+420de156: lsls       r1, r1, #8
+420de158: adds       r1, r1, r2
+420de15a: str        r0, [r1, #4]
+420de15c: ldrb       r0, [r4]
+420de15e: lsls       r0, r0, #8
+420de160: movs       r1, r2
+420de162: adds       r0, r0, r1
+420de164: ldr        r0, [r0, #4]
+420de166: movs       r1, #0xff
+420de168: adds       r1, #1
+420de16a: bics       r0, r1
+420de16c: adds       r0, r0, r1
+420de16e: ldrb       r1, [r4]
+420de170: lsls       r1, r1, #8
+420de172: adds       r1, r1, r2
+420de174: str        r0, [r1, #4]
+420de176: ldrb       r0, [r4]
+420de178: lsls       r0, r0, #8
+420de17a: movs       r1, r2
+420de17c: adds       r0, r0, r1
+420de17e: ldr        r0, [r0, #4]
+420de180: movs       r1, #3
+420de182: lsls       r1, r1, #0xc
+420de184: bics       r0, r1
+420de186: ldrb       r1, [r4]
+420de188: lsls       r1, r1, #8
+420de18a: adds       r1, r1, r2
+420de18c: str        r0, [r1, #4]
+420de18e: ldrb       r0, [r4]
+420de190: lsls       r0, r0, #8
+420de192: movs       r1, r2
+420de194: adds       r0, r0, r1
+420de196: ldr        r0, [r0, #4]
+420de198: movs       r1, #3
+420de19a: lsls       r1, r1, #0x10
+420de19c: bics       r0, r1
+420de19e: ldrb       r1, [r4]
+420de1a0: lsls       r1, r1, #8
+420de1a2: adds       r1, r1, r2
+420de1a4: str        r0, [r1, #4]
+420de1a6: ldrb       r0, [r4]
+420de1a8: lsls       r0, r0, #8
+420de1aa: movs       r1, r2
+420de1ac: adds       r0, r0, r1
+420de1ae: ldr        r0, [r0, #0x60]
+420de1b0: lsrs       r0, r0, #6
+420de1b2: lsls       r0, r0, #6
+420de1b4: adds       r0, r0, #1
+420de1b6: ldrb       r1, [r4]
+420de1b8: lsls       r1, r1, #8
+420de1ba: adds       r1, r1, r2
+420de1bc: str        r0, [r1, #0x60]
+420de1be: ldrb       r0, [r4]
+420de1c0: lsls       r0, r0, #8
+420de1c2: movs       r1, r2
+420de1c4: adds       r0, r0, r1
+420de1c6: ldr        r0, [r0, #0x64]
+420de1c8: lsrs       r0, r0, #6
+420de1ca: lsls       r0, r0, #6
+420de1cc: adds       r0, r0, #1
+420de1ce: ldrb       r1, [r4]
+420de1d0: lsls       r1, r1, #8
+420de1d2: adds       r1, r1, r2
+420de1d4: str        r0, [r1, #0x64]
+420de1d6: ldrb       r0, [r4, #1]
+420de1d8: cmp        r0, #2
+420de1da: bne        #0x420de216
+420de1dc: ldrb       r0, [r4]
+420de1de: lsls       r0, r0, #8
+420de1e0: movs       r1, r2
+420de1e2: adds       r0, r0, r1
+420de1e4: ldr        r0, [r0, #4]
+420de1e6: movs       r1, #3
+420de1e8: lsls       r1, r1, #0x14
+420de1ea: bics       r0, r1
+420de1ec: movs       r1, #1
+420de1ee: lsls       r1, r1, #0x15
+420de1f0: adds       r0, r0, r1
+420de1f2: ldrb       r1, [r4]
+420de1f4: lsls       r1, r1, #8
+420de1f6: adds       r1, r1, r2
+420de1f8: str        r0, [r1, #4]
+420de1fa: ldrb       r0, [r4]
+420de1fc: lsls       r0, r0, #8
+420de1fe: movs       r1, r2
+420de200: adds       r0, r0, r1
+420de202: ldr        r0, [r0, #0x10]
+420de204: lsrs       r0, r0, #0x10
+420de206: lsls       r0, r0, #0x10
+420de208: ldr        r1, [pc, #0x164] ; LIT 0x420de370->0xfff
+420de20a: adds       r1, r0, r1
+420de20c: ldrb       r0, [r4]
+420de20e: lsls       r0, r0, #8
+420de210: adds       r0, r0, r2
+420de212: str        r1, [r0, #0x10]
+420de214: b          #0x420de24c
+420de216: ldrb       r0, [r4]
+420de218: lsls       r0, r0, #8
+420de21a: ldr        r1, [pc, #0x150] ; LIT 0x420de36c->0x20004500
+420de21c: adds       r0, r0, r1
+420de21e: ldr        r0, [r0, #4]
+420de220: movs       r1, #3
+420de222: lsls       r1, r1, #0x14
+420de224: bics       r0, r1
+420de226: adds       r0, r0, r1
+420de228: ldrb       r1, [r4]
+420de22a: lsls       r1, r1, #8
+420de22c: ldr        r2, [pc, #0x13c] ; LIT 0x420de36c->0x20004500
+420de22e: adds       r1, r1, r2
+420de230: str        r0, [r1, #4]
+420de232: ldrb       r0, [r4]
+420de234: lsls       r0, r0, #8
+420de236: movs       r1, r2
+420de238: adds       r0, r0, r1
+420de23a: ldr        r0, [r0, #0x10]
+420de23c: lsrs       r0, r0, #0x10
+420de23e: lsls       r0, r0, #0x10
+420de240: ldr        r1, [pc, #0x130] ; LIT 0x420de374->0x3fff
+420de242: adds       r0, r0, r1
+420de244: ldrb       r1, [r4]
+420de246: lsls       r1, r1, #8
+420de248: adds       r1, r1, r2
+420de24a: str        r0, [r1, #0x10]
+420de24c: ldrb       r0, [r4]
+420de24e: lsls       r0, r0, #8
+420de250: ldr        r1, [pc, #0x118] ; LIT 0x420de36c->0x20004500
+420de252: adds       r0, r0, r1
+420de254: ldr        r0, [r0, #0x50]
+420de256: lsrs       r0, r0, #0xe
+420de258: lsls       r0, r0, #0xe
+420de25a: ldrh       r1, [r4, #8]
+420de25c: lsls       r1, r1, #0x12
+420de25e: lsrs       r1, r1, #0x12
+420de260: orrs       r0, r1
+420de262: ldrb       r1, [r4]
+420de264: lsls       r1, r1, #8
+420de266: ldr        r2, [pc, #0x104] ; LIT 0x420de36c->0x20004500
+420de268: adds       r1, r1, r2
+420de26a: str        r0, [r1, #0x50]
+420de26c: ldrb       r0, [r4]
+420de26e: lsls       r0, r0, #8
+
+=== DIRECT CALLERS ===
+0x420e05b4 count 2 0x420dad34 0x420dad52
+
+--- caller @0x420dad34 ---
+420dad10: subs       r1, #0x90
+420dad12: ldr        r0, [r4, #4]
+420dad14: adds       r0, r0, r1
+420dad16: movs       r6, r0
+420dad18: adds       r6, #0x10
+420dad1a: movs       r1, #0
+420dad1c: mov        r0, sp
+420dad1e: strb       r1, [r0, #0x10]
+420dad20: movs       r0, #0
+420dad22: str        r0, [sp, #0x14]
+420dad24: movs       r0, #0x10
+420dad26: str        r0, [sp, #0xc]
+420dad28: movs       r1, #3
+420dad2a: mov        r0, sp
+420dad2c: strh       r1, [r0, #4]
+420dad2e: str        r6, [sp, #8]
+420dad30: movs       r1, #0
+420dad32: add        r0, sp, #4
+420dad34: bl         #0x420e05b4
+420dad38: movs       r1, #1
+420dad3a: mov        r0, sp
+420dad3c: strb       r1, [r0, #0x10]
+420dad3e: movs       r0, #0
+420dad40: str        r0, [sp, #0x14]
+420dad42: movs       r1, #4
+420dad44: mov        r0, sp
+420dad46: strh       r1, [r0, #4]
+420dad48: movs       r0, r6
+420dad4a: adds       r0, #0x10
+420dad4c: str        r0, [sp, #8]
+420dad4e: movs       r1, #0
+420dad50: add        r0, sp, #4
+420dad52: bl         #0x420e05b4
+420dad56: movs       r0, r7
+420dad58: b          #0x420dac2e
+420dad5a: movs       r0, r0
+420dad5c: ldr        r0, [r6, #0x20]
+420dad5e: cmp        r3, r0
+
+--- caller @0x420dad52 ---
+420dad2c: strh       r1, [r0, #4]
+420dad2e: str        r6, [sp, #8]
+420dad30: movs       r1, #0
+420dad32: add        r0, sp, #4
+420dad34: bl         #0x420e05b4
+420dad38: movs       r1, #1
+420dad3a: mov        r0, sp
+420dad3c: strb       r1, [r0, #0x10]
+420dad3e: movs       r0, #0
+420dad40: str        r0, [sp, #0x14]
+420dad42: movs       r1, #4
+420dad44: mov        r0, sp
+420dad46: strh       r1, [r0, #4]
+420dad48: movs       r0, r6
+420dad4a: adds       r0, #0x10
+420dad4c: str        r0, [sp, #8]
+420dad4e: movs       r1, #0
+420dad50: add        r0, sp, #4
+420dad52: bl         #0x420e05b4
+420dad56: movs       r0, r7
+420dad58: b          #0x420dac2e
+420dad5a: movs       r0, r0
+420dad5c: ldr        r0, [r6, #0x20]
+420dad5e: cmp        r3, r0
+420dad60: ldr        r2, [sp, #0x120]
+420dad62: tst        r6, r3
+420dad64: ldr        r0, [r4, #0x1c]
+420dad66: cmp        r3, r0
+420dad68: ldr        r0, [r7, #0x10]
+420dad6a: cmp        r3, r0
+420dad6c: cdp2       p0, #1, c4, c0, c14, #4
+420dad70: strb       r0, [r2, #9]
+420dad72: strb       r5, [r4, #1]
+420dad74: ldr        r2, [r6, #0x74]
+420dad76: movs       r0, #0x3a
+420dad78: ldr        r1, [r4, #0x44]
+420dad7a: ldr        r4, [r5, #0x74]
+420dad7c: str        r3, [r4, #0x14]
+0x420e0850 count 1 0x420dacd0
+
+--- caller @0x420dacd0 ---
+420daca4: strh       r0, [r1]
+420daca6: movs       r0, r4
+420daca8: bl         #0x420da1a8
+420dacac: ldr        r0, [pc, #0xfc] ; LIT 0x420dadac->0x408ef710
+420dacae: ldr        r0, [r0, #8]
+420dacb0: cmp        r0, #0
+420dacb2: bne        #0x420dacba
+420dacb4: ldrb       r0, [r4]
+420dacb6: bl         #0x420d93c8
+420dacba: ldr        r0, [pc, #0xf4] ; LIT 0x420dadb0->0x408f0314
+420dacbc: bl         #0x420dca28
+420dacc0: ldr        r0, [pc, #0xe0] ; LIT 0x420dada4->0x408f044c
+420dacc2: subs       r0, #0x5c
+420dacc4: bl         #0x420dc974
+420dacc8: ldr        r0, [r4, #4]
+420dacca: movs       r1, r0
+420daccc: adds       r1, #0x80
+420dacce: movs       r0, #6
+420dacd0: bl         #0x420e0850
+420dacd4: movs       r0, #8
+420dacd6: str        r0, [sp, #0x24]
+420dacd8: ldr        r0, [pc, #0xc8] ; LIT 0x420dada4->0x408f044c
+420dacda: subs       r0, #0x5c
+420dacdc: ldrh       r0, [r0, #0x14]
+420dacde: str        r0, [sp, #0x1c]
+420dace0: movs       r0, #4
+420dace2: str        r0, [sp, #0x28]
+420dace4: ldr        r1, [pc, #0xbc] ; LIT 0x420dada4->0x408f044c
+420dace6: subs       r1, #0x5c
+420dace8: ldrh       r0, [r1, #0x16]
+420dacea: lsrs       r1, r0, #0x1f
+420dacec: adds       r1, r1, r0
+420dacee: asrs       r1, r1, #1
+420dacf0: str        r1, [sp, #0x20]
+420dacf2: movs       r1, #0
+420dacf4: mov        r0, sp
+420dacf6: strb       r1, [r0, #0x19]
+420dacf8: movs       r1, #3
+0x420de0f0 count 2 0x420dacfe 0x420dad0a
+
+--- caller @0x420dacfe ---
+420dacda: subs       r0, #0x5c
+420dacdc: ldrh       r0, [r0, #0x14]
+420dacde: str        r0, [sp, #0x1c]
+420dace0: movs       r0, #4
+420dace2: str        r0, [sp, #0x28]
+420dace4: ldr        r1, [pc, #0xbc] ; LIT 0x420dada4->0x408f044c
+420dace6: subs       r1, #0x5c
+420dace8: ldrh       r0, [r1, #0x16]
+420dacea: lsrs       r1, r0, #0x1f
+420dacec: adds       r1, r1, r0
+420dacee: asrs       r1, r1, #1
+420dacf0: str        r1, [sp, #0x20]
+420dacf2: movs       r1, #0
+420dacf4: mov        r0, sp
+420dacf6: strb       r1, [r0, #0x19]
+420dacf8: movs       r1, #3
+420dacfa: strb       r1, [r0, #0x18]
+420dacfc: add        r0, sp, #0x18
+420dacfe: bl         #0x420de0f0
+420dad02: movs       r1, #4
+420dad04: mov        r0, sp
+420dad06: strb       r1, [r0, #0x18]
+420dad08: add        r0, sp, #0x18
+420dad0a: bl         #0x420de0f0
+420dad0e: ldr        r1, [pc, #0x90] ; LIT 0x420dada0->0x142b0
+420dad10: subs       r1, #0x90
+420dad12: ldr        r0, [r4, #4]
+420dad14: adds       r0, r0, r1
+420dad16: movs       r6, r0
+420dad18: adds       r6, #0x10
+420dad1a: movs       r1, #0
+420dad1c: mov        r0, sp
+420dad1e: strb       r1, [r0, #0x10]
+420dad20: movs       r0, #0
+420dad22: str        r0, [sp, #0x14]
+420dad24: movs       r0, #0x10
+420dad26: str        r0, [sp, #0xc]
+420dad28: movs       r1, #3
+
+--- caller @0x420dad0a ---
+420dace4: ldr        r1, [pc, #0xbc] ; LIT 0x420dada4->0x408f044c
+420dace6: subs       r1, #0x5c
+420dace8: ldrh       r0, [r1, #0x16]
+420dacea: lsrs       r1, r0, #0x1f
+420dacec: adds       r1, r1, r0
+420dacee: asrs       r1, r1, #1
+420dacf0: str        r1, [sp, #0x20]
+420dacf2: movs       r1, #0
+420dacf4: mov        r0, sp
+420dacf6: strb       r1, [r0, #0x19]
+420dacf8: movs       r1, #3
+420dacfa: strb       r1, [r0, #0x18]
+420dacfc: add        r0, sp, #0x18
+420dacfe: bl         #0x420de0f0
+420dad02: movs       r1, #4
+420dad04: mov        r0, sp
+420dad06: strb       r1, [r0, #0x18]
+420dad08: add        r0, sp, #0x18
+420dad0a: bl         #0x420de0f0
+420dad0e: ldr        r1, [pc, #0x90] ; LIT 0x420dada0->0x142b0
+420dad10: subs       r1, #0x90
+420dad12: ldr        r0, [r4, #4]
+420dad14: adds       r0, r0, r1
+420dad16: movs       r6, r0
+420dad18: adds       r6, #0x10
+420dad1a: movs       r1, #0
+420dad1c: mov        r0, sp
+420dad1e: strb       r1, [r0, #0x10]
+420dad20: movs       r0, #0
+420dad22: str        r0, [sp, #0x14]
+420dad24: movs       r0, #0x10
+420dad26: str        r0, [sp, #0xc]
+420dad28: movs       r1, #3
+420dad2a: mov        r0, sp
+420dad2c: strh       r1, [r0, #4]
+420dad2e: str        r6, [sp, #8]
+420dad30: movs       r1, #0
+420dad32: add        r0, sp, #4
+
+=== CHANNEL-6 PWCH MMIO LITERALS / USERS ===
+POOL 0x420dd5f4 -> 0x20004d00
+POOL 0x420ddccc -> 0x20004d00
+POOL 0x420ddf04 -> 0x20005300
+POOL 0x420e07dc -> 0x20004d00
+POOL 0x420e08dc -> 0x20004d00
+POOL 0x420e08f8 -> 0x20004d00
+POOL 0x420e0924 -> 0x20004d00
+
+=== DECISION ===
+Identify additional channel-6 setters (size/stride/height/format) and their arguments from AFAEAWB config. If a setter establishes 352 records or a stable per-cell byte stride, freeze the producer data layout. Keep workflow+0x480 identity unfrozen until a transfer/copy/provenance chain is explicit.
