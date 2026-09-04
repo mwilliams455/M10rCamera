@@ -1,0 +1,48 @@
+name: M10-R v0.66b focus workflow state writes
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v066b-focus-state-writes.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  reduce:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m10r-metering-latch-trace
+          fetch-depth: 0
+      - name: Extract focused write windows
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > research/M10R_v066b_workflow_state_write_focus.txt
+          from pathlib import Path
+          L=Path('research/M10R_v066_workflow_state_writers.txt').read_text(errors='replace').splitlines()
+          print('M10-R v0.66b WORKFLOW STATE WRITE FOCUS')
+          for key in ('42161b2e:','42161c26:','42161b0a:','42161bb4:','42161c00:','42161c10:','42161c20:'):
+              hits=[i for i,x in enumerate(L) if key in x]
+              print('\n###',key,'hits',hits[:30])
+              for i in hits[:8]:
+                  for x in L[max(0,i-70):min(len(L),i+90)]: print(x)
+          print('\n### UNIQUE 0x42161A80..0x42161CB0 INSTRUCTIONS')
+          seen=set()
+          for x in L:
+              if len(x)>=9:
+                  a=x[:8].lower()
+                  if '42161a80' <= a <= '42161cb0' and x not in seen:
+                      print(x);seen.add(x)
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v066b_workflow_state_write_focus.txt
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: focus v0.66 workflow state writes'
+          git pull --rebase origin m10r-metering-latch-trace
+          git push origin HEAD:m10r-metering-latch-trace
