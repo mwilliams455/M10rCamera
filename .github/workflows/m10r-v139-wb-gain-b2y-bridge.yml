@@ -1,0 +1,118 @@
+name: M10-R v1.39 WB gain B2Y bridge
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v139-wb-gain-b2y-bridge.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace WB gains into B2Y
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v139_wb_gain_b2y_bridge.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          def setup(path,base,mode):
+            b=Path(path).read_bytes(); md=Cs(CS_ARCH_ARM,mode|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True; return b,md,base,4
+          ib,imd,IB,IP=setup('/tmp/sections/092_IMG-System.bin',0x42000000,CS_MODE_THUMB)
+          cb,cmd,CB,CP=setup('/tmp/sections/099_IMG-CA9_System.bin',0x40000000,CS_MODE_ARM)
+          def off(base,pfx,a): return pfx+a-base
+          def cstr(b,base,pfx,a,limit=300):
+            o=off(base,pfx,a)
+            if not 0<=o<len(b):return None
+            e=b.find(b'\0',o,min(len(b),o+limit));q=b[o:e]
+            return q.decode('ascii','replace') if e>o and all(0x20<=x<=0x7e for x in q) else None
+          def dis(b,md,base,pfx,a,z): return list(md.disasm(b[off(base,pfx,a):off(base,pfx,z)],a))
+          def lit(b,base,pfx,i,thumb=False):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=(((i.address+4)&~3) if thumb else i.address+8)+i.operands[1].mem.disp; o=off(base,pfx,la)
+                if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+            except:pass
+          def fmt(b,base,pfx,i,thumb=False):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'; q=lit(b,base,pfx,i,thumb)
+            if q:
+              s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'; st=cstr(b,base,pfx,q[1]);
+              if st:s+=f' STRING={st!r}'
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:s+=f' ; CALL {(i.operands[0].imm&~1):#x}'
+            return s
+          print('M10-R v1.39 WB GAIN -> B2Y BRIDGE')
+          print('\n=== IMG ColorManagementFinished gain source window ===')
+          for i in dis(ib,imd,IB,IP,0x420a3f70,0x420a406a):print(fmt(ib,IB,IP,i,True))
+          print('\n=== DIRECT MEMORY OFFSETS +0xB8/+0xC0/+0xC8 IN IMG COLOR/WB AREA ===')
+          for i in dis(ib,imd,IB,IP,0x42090000,0x420b2000):
+            try:
+              if any(op.type==ARM_OP_MEM and op.mem.disp in (0xb8,0xc0,0xc8) for op in i.operands):
+                print('\nHIT',fmt(ib,IB,IP,i,True))
+                for j in dis(ib,imd,IB,IP,max(0x42000000,i.address-0x28),i.address+0x38):print(fmt(ib,IB,IP,j,True))
+            except:pass
+          print('\n=== DIRECT MEMORY OFFSETS +0xB8/+0xC0/+0xC8 IN CA9 COLOR/WB AREA ===')
+          for i in dis(cb,cmd,CB,CP,0x40003000,0x4000c000):
+            try:
+              if any(op.type==ARM_OP_MEM and op.mem.disp in (0xb8,0xc0,0xc8) for op in i.operands):
+                print('\nHIT',fmt(cb,CB,CP,i))
+                for j in dis(cb,cmd,CB,CP,max(CB,i.address-0x30),i.address+0x40):print(fmt(cb,CB,CP,j))
+            except:pass
+          def strings_with(b,base,pfx,terms):
+            out=[];i=0
+            while i<len(b):
+              if 0x20<=b[i]<=0x7e:
+                j=i
+                while j<len(b) and 0x20<=b[j]<=0x7e:j+=1
+                if j-i>=4:
+                  s=b[i:j].decode('ascii','replace');sl=s.lower()
+                  if any(t in sl for t in terms):out.append((base+i-pfx,s))
+                i=max(j+1,i+1)
+              else:i+=1
+            return out
+          terms=('b2y','white balance','wb gain','gain r','gain remap','rgb gain','color correction','colour correction')
+          print('\n=== IMG B2Y/WB/GAIN STRINGS ===')
+          ss=strings_with(ib,IB,IP,terms)
+          for a,s in ss:print(hex(a),repr(s))
+          print('\n=== IMG POINTER XREFS TO B2Y/WB/GAIN STRINGS ===')
+          for a,s in ss:
+            pat=struct.pack('<I',a);q=0;hits=[]
+            while True:
+              q=ib.find(pat,q)
+              if q<0:break
+              hits.append(IB+q-IP);q+=1
+            if hits:
+              print(f'\nSTRING {a:#x} {s!r} pools={[hex(x) for x in hits]}')
+              for h in hits[:12]:
+                for i in dis(ib,imd,IB,IP,max(IB,h-0x80),h+0x80):
+                  x=lit(ib,IB,IP,i,True)
+                  if x and x[0]==h: print(fmt(ib,IB,IP,i,True))
+          print('\n=== CA9 B2Y/WB/GAIN STRINGS ===')
+          for a,s in strings_with(cb,CB,CP,terms):print(hex(a),repr(s))
+          print('\n=== TARGET ===')
+          print('Identify the producer of R/G/B double gains and the exact conversion/programming boundary into B2Y; keep logged remapped integers separate from internal double gains.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v139_wb_gain_b2y_bridge.txt
+          git commit -m 'research: record v1.39 WB gain B2Y bridge' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
