@@ -1,0 +1,111 @@
+name: M10-R v1.69 structural TF consumer search
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v169-tf-layout-consumer-structural.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Search structural TF count/pair consumers in IMG and CA9
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v169_tf_layout_consumer_structural.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import *
+          def analyze(path,base,mode,label,pfx=4):
+            b=Path(path).read_bytes(); end=base+len(b)-pfx
+            md=Cs(CS_ARCH_ARM,mode|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+            def off(a):return pfx+a-base
+            def dis(a,z):return list(md.disasm(b[off(max(base,a)):off(min(end,z))],max(base,a)))
+            def ops(i):
+              try:return i.operands
+              except:return []
+            def imm_add(i):
+              oo=ops(i)
+              if i.mnemonic in ('add','adds','sub','subs') and len(oo)>=2:
+                for o in reversed(oo):
+                  if o.type==ARM_OP_IMM:return (-o.imm if i.mnemonic.startswith('sub') else o.imm)
+            whole=[];a=base
+            while a<end:
+              whole.extend(dis(a,min(end,a+0x10000)));a+=0x10000
+            print(f'\n===== {label} =====')
+            # Direct mem displacement hits
+            print('\n=== direct mem disp hits 0x120..0x140 ===')
+            direct=[]
+            for n,i in enumerate(whole):
+              try:
+                if any(o.type==ARM_OP_MEM and 0x120<=o.mem.disp<=0x140 for o in i.operands): direct.append(n)
+              except:pass
+            for n in direct:
+              print(f'-- hit {whole[n].address:#x} --')
+              for x in whole[max(0,n-12):min(len(whole),n+20)]: print(f'{x.address:08x}: {x.mnemonic:10s} {x.op_str}')
+            # Adjacent adds/subs on same destination whose sum lands on target offsets or near with final small mem disp.
+            print('\n=== adjacent add-chain candidates to 0x128/0x12c/0x130/0x134 ===')
+            targets={0x128,0x12c,0x130,0x134}
+            cand=set()
+            for n,i in enumerate(whole):
+              v=imm_add(i)
+              if v is None: continue
+              # scan next <=8 insns, accumulate immediate adds where destination textual first reg repeats
+              try: dst=i.reg_name(i.operands[0].reg) if i.operands and i.operands[0].type==ARM_OP_REG else None
+              except: dst=None
+              if not dst: continue
+              total=v
+              for k in range(n+1,min(len(whole),n+9)):
+                j=whole[k]; vv=imm_add(j)
+                try: jdst=j.reg_name(j.operands[0].reg) if j.operands and j.operands[0].type==ARM_OP_REG else None
+                except:jdst=None
+                if vv is not None and jdst==dst: total+=vv
+                # memory access through dst with small displacement
+                try:
+                  for o in j.operands:
+                    if o.type==ARM_OP_MEM and j.reg_name(o.mem.base)==dst:
+                      eff=total+o.mem.disp
+                      if eff in targets or any(abs(eff-t)<=4 for t in targets): cand.add((n,k,eff))
+                except:pass
+            for n,k,eff in sorted(cand,key=lambda q:whole[q[0]].address):
+              print(f'-- chain {whole[n].address:#x}->{whole[k].address:#x} eff={eff:#x} --')
+              for x in whole[max(0,n-8):min(len(whole),k+14)]:print(f'{x.address:08x}: {x.mnemonic:10s} {x.op_str}')
+            # stride-8 loop signatures near cmp #31 or count-like compare and paired word loads
+            print('\n=== stride-8 / cmp31 candidates ===')
+            hits=[]
+            for n,i in enumerate(whole):
+              txt=f'{i.mnemonic} {i.op_str}'
+              if ('#0x1f' in txt or '#31' in txt or ', #8' in txt or ',#8' in txt) and any(s in txt for s in ('cmp','add','adds','ldr','str')):
+                W=whole[max(0,n-8):min(len(whole),n+12)]
+                score=sum(1 for x in W if '#8' in x.op_str or '#0x1f' in x.op_str or '#31' in x.op_str)
+                if score>=2:hits.append(n)
+            seen=set()
+            for n in hits:
+              a0=whole[n].address
+              if any(abs(a0-s)<0x30 for s in seen):continue
+              seen.add(a0);print(f'-- stride candidate {a0:#x} --')
+              for x in whole[max(0,n-12):min(len(whole),n+18)]:print(f'{x.address:08x}: {x.mnemonic:10s} {x.op_str}')
+          analyze('/tmp/sections/092_IMG-System.bin',0x42000000,CS_MODE_THUMB,'IMG')
+          analyze('/tmp/sections/099_IMG-CA9_System.bin',0x40000000,CS_MODE_ARM,'CA9')
+          print('\n=== TARGET ===')
+          print('Identify any non-parser runtime consumer with count/pairs layout. If none, support that TF remap table is parsed/serialized but unused in this build.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v169_tf_layout_consumer_structural.txt
+          git commit -m 'research: record v1.69 structural TF consumer search' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
