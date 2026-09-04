@@ -1,0 +1,85 @@
+name: M10-R v1.10 AFAEAWB callback provenance
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v110-aeawb-callback-provenance.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace AFAEAWB callback registration
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int bb=r.get();if(!bb)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v110_aeawb_callback_provenance.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(a): return PFX+a-BASE
+          def raw(a,n):
+            o=off(a);return b[o:o+n]
+          def u32a(a):
+            x=raw(a,4);return struct.unpack('<I',x)[0]
+          def dump(lo,hi,title):
+            print(f'\n=== {title} {lo:#x}..{hi:#x} ===')
+            for i in md.disasm(raw(lo,hi-lo),lo):
+              if not i.id: continue
+              ex=''
+              try:
+                if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                  lit=((i.address+4)&~3)+i.operands[1].mem.disp; v=u32a(lit); ex=f' ; LIT {lit:#x}->{v:#x}'
+              except: pass
+              print(f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}{ex}')
+          print('M10-R v1.10 AFAEAWB CALLBACK PROVENANCE')
+          print('Known: drv_prepro_afaeawb_if_Config(0x420DAC08) stores config+0x18 into callback global 0x408F044C. Channel6 success 0x420DAADC invokes that callback with base+0x80.')
+          for call in (0x420f36aa,0x420f5244):
+            dump(call-0x180,call+0x80,f'CALLER OF 0x420DAC08 at {call:#x}')
+          # Also dump probable containing functions using nearest hand-entered broad windows.
+          dump(0x420f3500,0x420f3800,'CALLER1 FUNCTION AREA')
+          dump(0x420f50c0,0x420f5350,'CALLER2 FUNCTION AREA')
+          # Find all raw pointers to likely callback-code addresses referenced as literals in those windows.
+          print('\n=== LITERAL VALUES IN CALLER WINDOWS ===')
+          for lo,hi in ((0x420f3500,0x420f3800),(0x420f50c0,0x420f5350)):
+            seen=set()
+            for i in md.disasm(raw(lo,hi-lo),lo):
+              if not i.id: continue
+              try:
+                if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                  lit=((i.address+4)&~3)+i.operands[1].mem.disp; v=u32a(lit)
+                  if v not in seen:
+                    seen.add(v); print(f'{i.address:#x} literal={v:#x}', 'CODEPTR' if 0x42000000<=v<0x42800000 else '')
+              except: pass
+          # Dump callback invocation and registration snippets for one-document proof.
+          dump(0x420daadc,0x420daaf6,'CHANNEL6 CALLBACK INVOCATION')
+          dump(0x420dac70,0x420dac88,'CALLBACK REGISTRATION INSIDE CONFIG')
+          print('\n=== DECISION ===')
+          print('Identify the concrete function pointer stored at caller config+0x18 before BL 0x420DAC08. Trace that callback with r0=base+0x80. If it stores/queues that exact pointer into workflow/lifecycle state leading to workflow+0x480, producer-to-CA9 identity is closed.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v110_aeawb_callback_provenance.txt
+          git commit -m 'research: record v1.10 AFAEAWB callback provenance' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
