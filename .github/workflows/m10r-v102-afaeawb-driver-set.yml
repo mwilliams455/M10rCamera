@@ -1,0 +1,145 @@
+name: M10-R v1.02 AFAEAWB driver set trace
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v102-afaeawb-driver-set.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace named AFAEAWB driver set operations
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int bb=r.get();if(!bb)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v102_afaeawb_driver_set.txt
+          from pathlib import Path
+          import struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(a):return PFX+a-BASE
+          def u32a(a):
+            o=off(a);return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+          def cstr(a):
+            o=off(a)
+            if not 0<=o<len(b):return None
+            x=b[o:min(len(b),o+220)].split(b'\0',1)[0]
+            try:s=x.decode('ascii')
+            except:return None
+            return s if len(s)>=4 and all((32<=ord(c)<127) or c in '\r\n\t' for c in s) else None
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                a=((i.address+4)&~3)+i.operands[1].mem.disp;return a,u32a(a)
+            except:pass
+          def adrvals(i):
+            if i.mnemonic!='adr':return []
+            vals=[]
+            try:
+              for op in i.operands:
+                if op.type==ARM_OP_IMM:vals.append(op.imm&0xffffffff)
+            except:pass
+            try:
+              v=int(i.op_str.split(',')[-1].strip().lstrip('#'),0);vals += [v&0xffffffff,(((i.address+4)&~3)+v)&0xffffffff,(i.address+4+v)&0xffffffff]
+            except:pass
+            return list(dict.fromkeys(vals))
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            q=lit(i)
+            if q and q[1] is not None:
+              s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'
+              st=cstr(q[1])
+              if st:s+=f' STRING={st!r}'
+            if i.mnemonic=='adr':
+              ss=[(a,cstr(a)) for a in adrvals(i) if cstr(a)]
+              if ss:s+=' ; ADRSTR '+repr(ss)
+            return s
+          texts=[
+            'Prepro (driver): set aeawb!',
+            'Prepro (driver): set aeawb-window!',
+            'PrePro: set AEAWB',
+            'prepro set afaeawb field position',
+            'drv_prepro_afaeawb_SetPreproGlobalSettings',
+            'drv_prepro_afaeawb_if_Config',
+          ]
+          sadd={}
+          for t in texts:
+            # allow leading logging marker byte by exact substring search
+            p=b.find(t.encode())
+            sadd[t]=BASE+p-PFX if p>=0 else None
+          print('M10-R v1.02 AFAEAWB DRIVER SET TRACE')
+          for t,a in sadd.items():print('STRING',hex(a) if a else None,repr(t))
+          # scan likely Prepro driver range in independent chunks, keeping only code-looking instructions
+          ranges=[(0x420c8000,0x420e2000),(0x420e4000,0x420fa000)]
+          xrefs=[]; allins=[]
+          for lo,hi in ranges:
+            chunk=[i for i in md.disasm(b[off(lo):off(hi)],lo) if i.id]
+            allins.extend(chunk)
+            targets={a:t for t,a in sadd.items() if a}
+            for n,i in enumerate(chunk):
+              q=lit(i)
+              if q and q[1] in targets:xrefs.append((chunk,n,targets[q[1]],q[1]))
+              if i.mnemonic=='adr':
+                for a in adrvals(i):
+                  if a in targets:xrefs.append((chunk,n,targets[a],a))
+          print('\n=== STRING XREF FUNCTIONS ===')
+          funstarts=[]
+          for chunk,n,t,a in xrefs:
+            # nearest preceding push within 100 instructions
+            s=None
+            for k in range(n,max(-1,n-100),-1):
+              if chunk[k].mnemonic=='push':s=k;break
+            fs=chunk[s].address if s is not None else None
+            if fs:funstarts.append(fs)
+            print(f'\n--- {t!r} xref={chunk[n].address:#x} function={hex(fs) if fs else None} ---')
+            lo=max(0,(s if s is not None else n-30));hi=min(len(chunk),n+70)
+            for j in range(lo,hi):print(fmt(chunk[j]))
+          funstarts=sorted(set(funstarts));print('\nFUNCTION_STARTS',*[hex(x) for x in funstarts])
+          # Search direct BL callers robustly accepting optional # prefix.
+          print('\n=== DIRECT CALLERS OF NAMED SET FUNCTIONS ===')
+          for fs in funstarts:
+            callers=[]
+            for i in allins:
+              if i.mnemonic=='bl':
+                try:dest=int(i.op_str.strip().lstrip('#'),0)
+                except:continue
+                if dest==fs:callers.append(i.address)
+            print(hex(fs),'callers',*[hex(x) for x in callers])
+          print('\n=== PREPRO GLOBALS TOUCHED IN NAMED FUNCTIONS ===')
+          for chunk,n,t,a in xrefs:
+            s=None
+            for k in range(n,max(-1,n-100),-1):
+              if chunk[k].mnemonic=='push':s=k;break
+            if s is None:continue
+            for j in range(s,min(len(chunk),n+90)):
+              q=lit(chunk[j])
+              if q and q[1] is not None and 0x408e0000<=q[1]<0x40910000:print(t,fmt(chunk[j]))
+          print('\n=== DECISION ===')
+          print('Prioritize the named set-aeawb / set-aeawb-window function that consumes mode/window counts and touches the statistic-buffer owner globals. Trace its output/register writes next.')
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v102_afaeawb_driver_set.txt
+          git commit -m 'research: record v1.02 AFAEAWB driver set trace' || exit 0
+          git pull --rebase origin m10r-metering-latch-trace
+          git push
