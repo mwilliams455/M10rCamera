@@ -1,0 +1,62 @@
+name: M10-R v0.64b reduce workflow state5 trace
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v064b-reduce-state5.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  reduce:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m10r-metering-latch-trace
+          fetch-depth: 0
+      - name: Reduce trace
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > research/M10R_v064b_workflow_state5_summary.txt
+          from pathlib import Path
+          p=Path('research/M10R_v064_workflow_state5_owner.txt')
+          L=p.read_text(errors='replace').splitlines()
+          print('M10-R v0.64b WORKFLOW STATE-5 SUMMARY')
+          print('source',p,'lines',len(L))
+          # Anchors and compact windows around exact command32 owner compares.
+          needles=['LITERAL_POOLS','CODE_REFS','42162010:','42162012:','42162040:','42162042:','SEMANTIC STATE-COMPARE HITS','LIVEVIEW STATE/EVENT STRINGS']
+          for n in needles:
+              print('\n###',n)
+              hits=[i for i,x in enumerate(L) if n in x]
+              print('HITS',hits[:50])
+              for i in hits[:20]:
+                  for x in L[max(0,i-10):min(len(L),i+22)]: print(x)
+          # Specific semantic strings.
+          print('\n### SELECTED LIVEVIEW STRINGS')
+          keys=('CAP_LIVEVIEW_FIRST_FRAME_READY','CAP_LIVEVIEW_N_FRAME_READY','CAP_LIVEVIEW_LAST_FRAME_READY','CAP_LIVEVIEW_RESET_SENSOR','cap_liveview_wait_for_first_frame','cap_liveview_capture','cap_liveview_stopping','cap_liveview_end_state','restart','reset live','stop live')
+          seen=set()
+          for x in L:
+              if any(k.lower() in x.lower() for k in keys) and x not in seen:
+                  print(x);seen.add(x)
+          # All compact lines mentioning the shared global/table and compare values.
+          print('\n### SHARED-TABLE / STATE LINES')
+          seen=set();count=0
+          for x in L:
+              lo=x.lower()
+              if any(k in lo for k in ('408cecf0','408fc238','0x1d50','cmp        r0, #5','cmp        r0, #0xb')):
+                  if x not in seen:
+                      print(x);seen.add(x);count+=1
+                      if count>=600: break
+          PY
+      - name: Commit summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v064b_workflow_state5_summary.txt
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: summarize v0.64 workflow state-5 trace'
+          git pull --rebase origin m10r-metering-latch-trace
+          git push origin HEAD:m10r-metering-latch-trace
