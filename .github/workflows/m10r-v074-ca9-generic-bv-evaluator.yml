@@ -1,0 +1,109 @@
+name: M10-R v0.74 CA9 generic BV evaluator
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v074-ca9-generic-bv-evaluator.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m10r-metering-latch-trace
+          fetch-depth: 0
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace generic CA9 BV evaluator
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v074_ca9_generic_bv_evaluator.txt
+          from pathlib import Path
+          import struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_ARM,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_REG_PC
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes();base=0x40000000;pfx=4;code=b[pfx:];end=base+len(code)
+          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);md.detail=True
+          def off(a):return pfx+a-base
+          def u32(a):
+              o=off(a);return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+          def astr(a,n=260):
+              o=off(a)
+              if not 0<=o<len(b):return None
+              z=b.find(b'\0',o,min(len(b),o+n));z=z if z>=0 else min(len(b),o+n)
+              try:s=b[o:z].decode('ascii')
+              except:return None
+              return s if len(s)>3 and all(c in '\r\n\t' or ' '<=c<='~' for c in s) else None
+          def one(a):
+              o=off(a);x=list(md.disasm(b[o:o+4],a,1)) if 0<=o<=len(b)-4 else [];return x[0] if x else None
+          def fmt(i):
+              ex=''
+              try:
+                  if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                      la=i.address+8+i.operands[1].mem.disp;v=u32(la)
+                      if v is not None:
+                          s=astr(v);ex=f' ; LIT {la:#x}->{v:#x}'+(f' STRING={s!r}' if s else '')
+                  if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:ex+=f' ; CALL {i.operands[0].imm:#x}'
+              except:pass
+              return f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}{ex}'
+          def dump(a,z,title):
+              a=max(base,a)&~3;z=min(end,z)&~3;print(f'\n=== {title} {a:#x}..{z:#x} ===')
+              for aa in range(a,z,4):
+                  i=one(aa)
+                  if i:print(fmt(i))
+          print('M10-R v0.74 CA9 GENERIC BV EVALUATOR')
+          print('Target 0x40000178; called for Integral/Spot/AV-field and by MFM subpasses.')
+          dump(0x40000178,0x400003e0,'GENERIC EVALUATOR FULL')
+          # direct internal callees from evaluator
+          calls=[]
+          for a in range(0x40000178,0x400003e0,4):
+              i=one(a)
+              try:
+                  if i and i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:
+                      t=i.operands[0].imm&~3
+                      if base<=t<end:calls.append((a,t))
+              except:pass
+          print('\nEVALUATOR_CALLEES',[(hex(a),hex(t)) for a,t in calls])
+          for t in sorted(set(t for _,t in calls)):dump(t,t+0x180,'EVALUATOR CALLEE '+hex(t))
+          # candidate configuration/setup at top-level AE function
+          for a,z,name in (
+              (0x40000860,0x400009ac,'INTEGRAL SETUP'),
+              (0x400009ac,0x40000ac8,'SPOT SETUP'),
+              (0x40000ac8,0x40000be4,'AV-FIELD SETUP'),
+              (0x40000be4,0x40000e38,'MFM SETUP')):
+              dump(a,z,name)
+          # enumerate all callers to evaluator with compact context
+          callers=[]
+          for a in range(base,end-4,4):
+              i=one(a)
+              try:
+                  if i and i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM and (i.operands[0].imm&~3)==0x40000178:callers.append(a)
+              except:pass
+          print('\nALL_CALLERS_40000178',[hex(a) for a in callers])
+          for a in callers:
+              dump(a-0x34,a+0x28,'CALLSITE '+hex(a))
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v074_ca9_generic_bv_evaluator.txt
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: record v0.74 CA9 generic BV evaluator'
+          git pull --rebase origin m10r-metering-latch-trace
+          git push origin HEAD:m10r-metering-latch-trace
