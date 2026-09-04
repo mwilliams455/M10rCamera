@@ -1,0 +1,80 @@
+name: M10-R v0.13 ADC common search
+on:
+  push:
+    branches: [m10r-meter-integration-trace]
+    paths: ['.github/workflows/m10r-v013-adc-common-search.yml']
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Recover CTRL
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+      - name: Search ADC common setup
+        shell: bash
+        run: |
+          python3 - <<'PY' >/tmp/m10r-v013-adc-common.txt
+          from pathlib import Path
+          import struct
+          from collections import defaultdict
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_REG_PC,ARM_OP_IMM
+          b=Path('/tmp/sections/090_CTRL-System.bin').read_bytes();base=0x08000000;pfx=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          code=list(md.disasm(b[pfx:],base));pc=defaultdict(list);calls=defaultdict(list)
+          for i in code:
+            if not i.id:continue
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:calls[i.operands[0].imm].append(i.address)
+            for op in i.operands:
+              if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC:pc[((i.address+4)&~3)+op.mem.disp].append(i.address)
+          def off(v):return pfx+v-base
+          def dis(name,s,e):
+            print(f'\n=== {name} ===')
+            for i in md.disasm(b[off(s):off(e)],s):
+              if i.id:print(f'{i.address:08x}: {i.mnemonic:8s} {i.op_str}')
+          print('=== EXACT MMIO LITERALS ===')
+          addrs=[0x40012000,0x40012300,0x40012304,0x40023800,0x40023808,0x40023844,0x40023884]
+          for addr in addrs:
+            q=0;n=struct.pack('<I',addr);hits=[]
+            while True:
+              q=b.find(n,q)
+              if q<0:break
+              lit=base+q-pfx;hits.append((lit,pc.get(lit,[])));q+=1
+            print(hex(addr),[(hex(l),[hex(x) for x in rs]) for l,rs in hits])
+            for l,rs in hits:
+              for a in rs[:20]:dis('MMIO_'+hex(addr)+'_'+hex(a),max(base,a-120),min(base+len(b)-pfx,a+200))
+          # Every code ref to literal 0x40012000, wider contexts to find init routines beyond getter.
+          n=struct.pack('<I',0x40012000);q=0;refs=[]
+          while True:
+            q=b.find(n,q)
+            if q<0:break
+            lit=base+q-pfx;refs.extend(pc.get(lit,[]));q+=1
+          print('\nADC1_BASE_REFS',[hex(x) for x in refs])
+          for a in refs:dis('ADC1_REF_'+hex(a),max(base,a-150),min(base+len(b)-pfx,a+240))
+          # Low-level ADC helper callers often reveal init function.
+          for t in [0x080321ac,0x08032200,0x0803221e,0x08032238,0x0803232e,0x08032338,0x08032358]:
+            print('\nHELPER',hex(t),'callers',[hex(x) for x in calls.get(t,[])])
+            for a in calls.get(t,[]):
+              if 0x08017000<=a<0x0801a000:dis('HELPER_CALL_'+hex(a),max(base,a-140),min(base+len(b)-pfx,a+220))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m10r-v013-adc-common
+          path: /tmp/m10r-v013-adc-common.txt
+          if-no-files-found: error
