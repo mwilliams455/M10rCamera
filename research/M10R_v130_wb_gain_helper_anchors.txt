@@ -1,0 +1,291 @@
+M10-R v1.30 WB GAIN / HELPER ANCHORS
+
+=== EXACT LOCAL STRINGS ===
+0x420a40af 'Gain R: %4.f | G: %4.f | B: %4.f'
+0x420a4190 'CA9: %s(), %d - [out] x: % 8.5f'
+0x420a41b0 'CA9: %s(), %d - [out] y: % 8.5f'
+0x420a42d4 'CA9: %s(), %d - [out] Gain remapped R: %4d | G: %4d | B: %4d'
+0x420a42ea 'Gain remapped R: %4d | G: %4d | B: %4d'
+
+=== GAIN-REMAP CODE WITH LITERALS ===
+420a3f78: ldr        r1, [sp, #0x3c]
+420a3f7a: ldr        r0, [sp, #0x38]
+420a3f7c: movs       r3, #0xff
+420a3f7e: adds       r3, #0x33
+420a3f80: ldr        r2, [pc, #0x10c] ; LIT 0x420a4090=0x421e9ccd
+420a3f82: str        r1, [sp, #4]
+420a3f84: str        r0, [sp]
+420a3f86: adr        r1, #0x314
+420a3f88: ldr        r0, [pc, #0x144] ; LIT 0x420a40d0=0x40818760
+420a3f8a: ldr        r0, [r0]
+420a3f8c: bl         #0x42140150
+420a3f90: ldr        r0, [sp, #0x68]
+420a3f92: adds       r0, #0xb8
+420a3f94: ldr        r1, [r0, #0x14]
+420a3f96: ldr        r0, [r0, #0x10]
+420a3f98: str        r1, [sp, #0x14]
+420a3f9a: str        r0, [sp, #0x10]
+420a3f9c: ldr        r0, [sp, #0x68]
+420a3f9e: movs       r1, r0
+420a3fa0: adds       r1, #0xb8
+420a3fa2: ldr        r0, [r1, #8]
+420a3fa4: ldr        r1, [r1, #0xc]
+420a3fa6: str        r1, [sp, #0xc]
+420a3fa8: str        r0, [sp, #8]
+420a3faa: ldr        r0, [sp, #0x68]
+420a3fac: adds       r0, #0x28
+420a3fae: movs       r1, #0x90
+420a3fb0: ldr        r1, [r1, r0]
+420a3fb2: adds       r0, #0x80
+420a3fb4: ldr        r0, [r0, #0x14]
+420a3fb6: movs       r3, #0xff
+420a3fb8: adds       r3, #0x39
+420a3fba: ldr        r2, [pc, #0xd4] ; LIT 0x420a4090=0x421e9ccd
+420a3fbc: str        r1, [sp]
+420a3fbe: str        r0, [sp, #4]
+420a3fc0: ldr        r1, [pc, #0x308] ; LIT 0x420a42cc=0x428371e8
+420a3fc2: ldr        r0, [pc, #0x10c] ; LIT 0x420a40d0=0x40818760
+420a3fc4: ldr        r0, [r0]
+420a3fc6: bl         #0x42140150
+420a3fca: ldr        r0, [sp, #0x68]
+420a3fcc: movs       r1, r0
+420a3fce: adds       r1, #0xb8
+420a3fd0: ldr        r3, [r1, #0x14]
+420a3fd2: ldr        r2, [r1, #0x10]
+420a3fd4: movs       r0, #0
+420a3fd6: ldr        r1, [pc, #0xb4] ; LIT 0x420a408c=0x40700000
+420a3fd8: str        r3, [sp, #0xc]
+420a3fda: str        r2, [sp, #8]
+420a3fdc: blx        #0x421e61d0
+420a3fe0: movs       r2, #0
+420a3fe2: ldr        r3, [pc, #0x2ec] ; LIT 0x420a42d0=0x3fe00000
+420a3fe4: str        r1, [sp, #0x14]
+420a3fe6: str        r0, [sp, #0x10]
+420a3fe8: blx        #0x421e6050
+420a3fec: str        r1, [sp, #0x1c]
+420a3fee: str        r0, [sp, #0x18]
+420a3ff0: blx        #0x421e65a4
+420a3ff4: str        r0, [sp, #0x2c]
+420a3ff6: ldr        r0, [sp, #0x68]
+420a3ff8: adds       r0, #0xb8
+420a3ffa: ldr        r3, [r0, #0xc]
+420a3ffc: ldr        r2, [r0, #8]
+420a3ffe: movs       r0, #0
+420a4000: ldr        r1, [pc, #0x88] ; LIT 0x420a408c=0x40700000
+420a4002: str        r3, [sp, #0xc]
+420a4004: str        r2, [sp, #8]
+420a4006: blx        #0x421e61d0
+420a400a: movs       r2, #0
+420a400c: ldr        r3, [pc, #0x2c0] ; LIT 0x420a42d0=0x3fe00000
+420a400e: str        r1, [sp, #0x14]
+420a4010: str        r0, [sp, #0x10]
+420a4012: blx        #0x421e6050
+420a4016: str        r1, [sp, #0x1c]
+420a4018: str        r0, [sp, #0x18]
+420a401a: blx        #0x421e65a4
+420a401e: str        r0, [sp, #0x28]
+420a4020: ldr        r0, [sp, #0x68]
+420a4022: adds       r0, #0x28
+420a4024: movs       r1, #0x90
+420a4026: ldr        r2, [r1, r0]
+420a4028: adds       r0, #0x80
+420a402a: ldr        r3, [r0, #0x14]
+420a402c: movs       r0, #0
+420a402e: ldr        r1, [pc, #0x5c] ; LIT 0x420a408c=0x40700000
+420a4030: str        r3, [sp, #0xc]
+420a4032: str        r2, [sp, #8]
+420a4034: blx        #0x421e61d0
+420a4038: movs       r2, #0
+420a403a: ldr        r3, [pc, #0x294] ; LIT 0x420a42d0=0x3fe00000
+420a403c: str        r1, [sp, #0x14]
+420a403e: str        r0, [sp, #0x10]
+420a4040: blx        #0x421e6050
+420a4044: str        r1, [sp, #0x1c]
+420a4046: str        r0, [sp, #0x18]
+420a4048: blx        #0x421e65a4
+420a404c: str        r0, [sp, #0x24]
+420a404e: ldr        r2, [sp, #0x28]
+420a4050: ldr        r1, [sp, #0x2c]
+420a4052: ldr        r0, [sp, #0x24]
+420a4054: movs       r3, #0xff
+420a4056: adds       r3, #0x3f
+420a4058: str        r2, [sp, #4]
+420a405a: str        r1, [sp, #8]
+420a405c: str        r0, [sp]
+420a405e: ldr        r2, [pc, #0x30] ; LIT 0x420a4090=0x421e9ccd
+420a4060: adr        r1, #0x270
+420a4062: ldr        r0, [pc, #0x6c] ; LIT 0x420a40d0=0x40818760
+420a4064: ldr        r0, [r0]
+420a4066: bl         #0x42140150
+
+=== HELPER 0x421E6050 ARM ===
+421e6050: teq        r1, r3
+421e6054: push       {r4, lr}
+421e6058: eormi      r3, r3, #0x80000000
+421e605c: bmi        #0x421e6d54
+421e6060: subs       r4, r0, r2
+421e6064: sbcs       ip, r1, r3
+421e6068: bhs        #0x421e607c
+421e606c: adds       r2, r2, r4
+421e6070: adc        r3, r3, ip
+421e6074: subs       r0, r0, r4
+421e6078: sbc        r1, r1, ip
+421e607c: ldr        lr, [pc, #0x11c] ; LIT 0x421e619c=0x3ebefb64
+421e6080: lsr        r4, r1, #0x14
+421e6084: sub        ip, r4, r3, lsr #20
+421e6088: tst        lr, r3, lsl #1
+421e608c: teqne      lr, r4, lsl #21
+421e6090: beq        #0x421e6174
+421e6094: bic        r3, r3, lr
+421e6098: rsbs       lr, ip, #0x20
+421e609c: bic        r1, r1, r4, lsl #20
+421e60a0: orr        r3, r3, #0x100000
+421e60a4: blo        #0x421e60fc
+421e60a8: adds       r0, r0, r2, lsr ip
+421e60ac: adc        r1, r1, r3, lsr ip
+421e60b0: adds       r0, r0, r3, lsl lr
+421e60b4: adcs       r1, r1, #0
+421e60b8: cmp        r1, #0x100000
+421e60bc: bhs        #0x421e6124
+421e60c0: add        r1, r1, r4, lsl #20
+421e60c4: lsls       r2, r2, lr
+421e60c8: pop        {r4, lr}
+421e60cc: bxpl       lr
+421e60d0: adds       r0, r0, #1
+421e60d4: lslslo     r2, r2, #1
+421e60d8: bxne       lr
+421e60dc: cmp        r0, #0
+421e60e0: bicne      r0, r0, #1
+421e60e4: adceq      r1, r1, #0
+421e60e8: lsl        r3, r1, #1
+421e60ec: cmn        r3, #0x200000
+421e60f0: bxlo       lr
+421e60f4: sub        r1, r1, #0x60000000
+421e60f8: b          #0x421e69d0
+421e60fc: cmp        r2, #1
+421e6100: adc        r2, r3, r3
+421e6104: sub        ip, ip, #0x20
+421e6108: rsbs       lr, ip, #0x1f
+421e610c: movlo      lr, #0
+421e6110: addshs     r0, r0, r3, lsr ip
+421e6114: adc        r1, r1, r4, lsl #20
+421e6118: cmp        r4, r1, lsr #20
+421e611c: beq        #0x421e60c4
+421e6120: sub        r1, r1, r4, lsl #20
+421e6124: add        r1, r1, #0x100000
+421e6128: lsrs       r1, r1, #1
+421e612c: rrxs       r0, r0
+421e6130: add        r1, r1, r4, lsl #20
+421e6134: blo        #0x421e615c
+421e6138: adcs       r0, r0, #0
+421e613c: lslslo     lr, r2, lr
+421e6140: bne        #0x421e615c
+421e6144: pop        {r4, lr}
+421e6148: b          #0x421e60dc
+421e614c: adds       r0, r0, #1
+421e6150: lslslo     r2, r2, #1
+421e6154: bne        #0x421e60e8
+421e6158: b          #0x421e60dc
+421e615c: pop        {r4, lr}
+421e6160: lsl        r3, r1, #1
+421e6164: cmn        r3, #0x200000
+421e6168: bxlo       lr
+421e616c: sub        r1, r1, #0x60000000
+421e6170: b          #0x421e69d0
+421e6174: teq        lr, r4, lsl #21
+421e6178: beq        #0x421e6190
+421e617c: tst        r1, lr, lsr #1
+421e6180: pop        {r4, lr}
+421e6184: moveq      r0, #0
+421e6188: andeq      r1, r1, #0x80000000
+421e618c: bx         lr
+421e6190: pop        {r4, lr}
+421e6194: push       {r4, r5, r6, lr}
+421e6198: bl         #0x421e6918
+421e619c: vcvtlo.s16.f64 d15, d15, #7
+421e61a0: .byte      0x00, 0x00, 0xe0, 0xff
+421e61a4: ldr        r1, [pc, #4] ; LIT 0x421e61ac=0xea0005ee
+421e61a8: mov        r0, #0
+421e61ac: b          #0x421e796c
+421e61b0: svcvc      #0xf80000
+421e61b4: asrs       r1, r1, #1
+421e61b8: rsbpl      r1, r1, #0xc0000000
+421e61bc: asrs       r3, r3, #1
+421e61c0: rsbpl      r3, r3, #0xc0000000
+421e61c4: cmp        r3, r1
+421e61c8: mrs        r0, apsr
+421e61cc: bx         lr
+
+=== HELPER 0x421E65A4 ARM ===
+421e65a4: lsr        r3, r1, #0x14
+421e65a8: sub        r3, r3, #0x400
+421e65ac: rsbs       r3, r3, #0x1e
+421e65b0: rsbsge     ip, r3, #0x20
+421e65b4: blt        #0x421e65cc
+421e65b8: mov        r2, #0x80000000
+421e65bc: orr        r2, r2, r1, lsl #11
+421e65c0: orrs       r2, r2, r0, lsr #21
+421e65c4: lsrs       r0, r2, r3
+421e65c8: bx         lr
+421e65cc: tst        r1, r1
+421e65d0: bmi        #0x421e65f4
+421e65d4: cmp        r3, #0x10
+421e65d8: movgt      r0, #0
+421e65dc: bxgt       lr
+421e65e0: add        ip, r3, #0x3e0
+421e65e4: cmn        ip, #1
+421e65e8: beq        #0x421e65fc
+421e65ec: mvn        r0, #0
+421e65f0: bx         lr
+421e65f4: mov        r0, #0
+421e65f8: bx         lr
+421e65fc: push       {r4, r5, r6, lr}
+421e6600: bl         #0x421e6918
+421e6604: umaalhi    r2, sb, r2, r4
+421e6608: mov        r0, #0
+421e660c: bx         lr
+421e6610: b          #0x421e65ec
+
+=== STATIC CONSTANT WORDS AROUND 0x420A4088 ===
+0x420a4088 0x43705760
+0x420a408c 0x40700000
+0x420a4090 0x421e9ccd
+0x420a4094 0x3a394143
+0x420a4098 0x28732520
+0x420a409c 0x25202c29
+0x420a40a0 0x202d2064
+0x420a40a4 0x6265645b
+0x420a40a8 0x69206775
+0x420a40ac 0x47205d6e
+0x420a40b0 0x206e6961
+0x420a40b4 0x25203a52
+0x420a40b8 0x20662e34
+0x420a40bc 0x3a47207c
+0x420a40c0 0x2e342520
+0x420a40c4 0x207c2066
+0x420a40c8 0x25203a42
+0x420a40cc 0x00662e34
+0x420a40d0 0x40818760
+
+=== ALL-SECTIONS RAW STRING SEARCH FOR WHITE-POINT NAMES/KEYWORDS ===
+section=92 name='IMG-System' base=0x0 off=0xa307f va=0xa307f needle='white balance' context='\x90\x1cH\x07\x90\x08\x94\t\x95| \n\x90\x0b\x90\x0c\x90\r\x90\x14"\t©hF¬÷Ré\x05¨\x0fÈ|ð\x1cú\x06|0|áç||\x18\x88\x81@CA9: ca9_StartWhiteBalance() - white balance module not active||]\x80\nB¤ZpC\x10µ\x04|\x02¡\x04 \x9dðPø\x10½||ARM9: AE MODULE: AE algorithm finished default call back!!!|\x0f´pµ\x05\x9c\x06\x9d |¨Gp¼\x08¼'
+section=92 name='IMG-System' base=0x0 off=0xa8337 va=0xa8337 needle='white balance' context='\x8a\x81 \x80|\x01S\x1aHD0A\x8a\x19H|\x1d\x01S\x17HD0\x81\x8aA À|\x01S\x14HD0Á\x8a\x13H\x080\x01S(|\x89ç||\x18\x88\x81@CA9: wb_fill_parameter() - white balance module not active||¤ZpC\x02\x02||ðµ\x89°\x04||&|%ÆH|x\x01(\x08ÐÅJÅ¡\x04 \x97ðìþ\r ÀC\t°ð½¥h|ðçÿ\x06|\x80 |YÉIHa\x84 |Y\x88a\x88 |YÈa\x08|@i\x01(\x0bÐ\x08|@i\x02(\x07Ð\x08|@i\x07(\x03Ð\x08|@i'
+section=92 name='IMG-System' base=0x0 off=0xa8698 va=0xa8698 needle='white balance' context='\x05Ð n\x04(\x02Ð n\x05(\x02Ñ |ÿ÷Úý)H|x|(\x0bÐ |\x080ÿ0ÿ0\x020co(¡Bh%H|h\x97ðlý|ð¼ù0|}æ\x18\x88\x81@Û\x9f\x1eBCA9: %s() - white balance module not active|¤ZpCCA9: %s(FrameStatus: %i) invalid for AWB -> set WB to Daylight||du\x83BÌ]pC\x19\x88\x81@\x1ct\x83B\x1c\x88\x81@`\x0e\x8f@CA9: pInf'
+section=92 name='IMG-System' base=0x0 off=0xa93a0 va=0xa93a0 needle='white balance' context='i | %i||\x10µ|$\x0bH|x\x01(\x07Ð\nJ\x0b¡\x04 \x96ðóþ\r ÀC\x10½\\!\x12H¦÷"è¡!\x89|\x0fH\\0¦÷\x1cè |òç\x18\x88\x81@¨\x9f\x1eBCA9: %s() - white balance module not active|¤ZpC\x10µ|$\x08H|x\x01(\x07Ð\x07J\x08¡\x04 \x96ð½þ\r ÀC\x10½H!\x0fH¥÷ìï |øç\x18\x88\x81@¿\x9f\x1eBCA9: %s() - white balance module not active|\x84]pCñ'
+section=92 name='IMG-System' base=0x0 off=0xa9400 va=0xa9400 needle='white balance' context='dule not active|¤ZpC\x10µ|$\x08H|x\x01(\x07Ð\x07J\x08¡\x04 \x96ð½þ\r ÀC\x10½H!\x0fH¥÷ìï |øç\x18\x88\x81@¿\x9f\x1eBCA9: %s() - white balance module not active|\x84]pCñµ\x84°\x01«\x02ª\x03©\x04\x98|÷nî|\x90|\x98|(\x03Ð| ÀC\x05°ð½\x01\x98|(\x01Ñ\x01\x90\x02à\x01\x98@\x1e\x01\x90;¡\x04\x98¦÷\x12è|(\x16ÑÀFµ÷\x83þ\x01\x98=ñðè\x04|\r|\x03\x98=ñìè\x06|"|+|=ñ\x92é1J\x03Âµ'
+section=92 name='IMG-System' base=0x0 off=0x12d44c va=0x12d44c needle='White Balance' context='Sensitivity|Sensitivity Push||||Sensitivity Auto Max||||Sensitivity Auto Time|||White Balance|||White Balance Greycard LiveView|White Balance Greycard Photo||||White Balance Color Temperature|Photo File Format|||P'
+section=92 name='IMG-System' base=0x0 off=0x12d45c va=0x12d45c needle='White Balance' context='itivity Push||||Sensitivity Auto Max||||Sensitivity Auto Time|||White Balance|||White Balance Greycard LiveView|White Balance Greycard Photo||||White Balance Color Temperature|Photo File Format|||Photo JPG Setting'
+section=92 name='IMG-System' base=0x0 off=0x12d47c va=0x12d47c needle='White Balance' context=' Max||||Sensitivity Auto Time|||White Balance|||White Balance Greycard LiveView|White Balance Greycard Photo||||White Balance Color Temperature|Photo File Format|||Photo JPG Settings||Photo JPG Resolution||||Contr'
+section=92 name='IMG-System' base=0x0 off=0x12d49c va=0x12d49c needle='White Balance' context='White Balance|||White Balance Greycard LiveView|White Balance Greycard Photo||||White Balance Color Temperature|Photo File Format|||Photo JPG Settings||Photo JPG Resolution||||Contrast||||Sharpness|||Saturation||M'
+section=92 name='IMG-System' base=0x0 off=0x12e170 va=0x12e170 needle='White Balance' context='vorite||Flash Settings_Favorite|ISO Setup_Favorite||Sensitivity Push_Favorite|||White Balance_Favorite||Photo File Format_Favorite||Photo JPG Settings_Favorite|Photo JPG Resolution_Favorite|||ASC Cine Classic Look'
+section=99 name='IMG-CA9 System' base=0x0 off=0x14391 va=0x14391 needle='NeutralToXY' context='ýî?ca9_cm_ColorSpec_MapWhiteMatrix|ca9_cm_ColorSpec_SetWhiteXY|ca9_cm_ColorSpec_NeutralToXY|ca9_cm_ColorSpec_MatrixInterpolate|||||\x9a\x99\x99\x99\x99\x99¹?||||||$@ü©ñÒMbP?||||||ð?\x0f|||ca9_DarkStainCalib_Start|ca9_DarkStainCalib_'
+section=99 name='IMG-CA9 System' base=0x0 off=0x14375 va=0x14375 needle='SetWhiteXY' context='\x10ö7²<©?`\x81\x9e¼~w\x81¿êjáh}\x80¤?\x03\x8dãÑ×ýî?ca9_cm_ColorSpec_MapWhiteMatrix|ca9_cm_ColorSpec_SetWhiteXY|ca9_cm_ColorSpec_NeutralToXY|ca9_cm_ColorSpec_MatrixInterpolate|||||\x9a\x99\x99\x99\x99\x99¹?||||||$@ü©ñÒMbP?||||||ð?\x0f|||ca9_DarkStainCa'
+section=99 name='IMG-CA9 System' base=0x0 off=0x14355 va=0x14355 needle='MapWhiteMatrix' context=':\x9eà¬ÒÂ¿Ô8\x8ab¨yÄ?JÌXÙãªÛ?\x95n\x01Wh\x96à?\x93\x10ö7²<©?`\x81\x9e¼~w\x81¿êjáh}\x80¤?\x03\x8dãÑ×ýî?ca9_cm_ColorSpec_MapWhiteMatrix|ca9_cm_ColorSpec_SetWhiteXY|ca9_cm_ColorSpec_NeutralToXY|ca9_cm_ColorSpec_MatrixInterpolate|||||\x9a\x99\x99\x99\x99\x99¹?||||||$@ü©ñÒMbP'
+section=99 name='IMG-CA9 System' base=0x0 off=0x5644 va=0x5644 needle='Temperature_ToXYCoord' context='|\x0b)î\n+\x80î|+\x80í\t|\xa0á\n\x8b½ì\x08Ð\x8dâð\x9f½èÕ"|ã \x10\x8fâ\x04|\xa0ã-"|ë\x01\x94|ãõÿÿê||||||àÿÿÿïA|||||À\x82@ca9: cm_Temperature_ToXYCoord, line: %d - division by zero||\x10@-é\x01@\xa0á@;°î\x14+\x9fí\n\x8b-íA«°î\x10À\x80ò®\x8b\x1fí|\x0b\x90í\x10»\x9fí\x03\x9b\x88î|\x1b\x88î\t\x0b\x9fí\x1e5|ëI\x0b0î\n\x1b î\x0b\x0b\x81î\t\x0b0î|\x1b\x88î|\x1b\x84í\x02Ë\x84í\n\x8b½ì\x10'
+section=99 name='IMG-CA9 System' base=0x0 off=0x14276 va=0x14276 needle='Temperature_ToXYCoord' context='9_cm_Temperature_FromXYCoord|ca9_cm_Temperature_FromXYCoord_binarySearch|ca9_cm_Temperature_ToXYCoord|\x06|||||||\x1e|||\x06||||||||@\x9f@|||||pÇ@||||||||\x86ÉTÁ¨¤ì?±áé\x95²\x0cÑ?ð\x85ÉTÁ¨Ä¿Ä±.n£\x01è¿Ñ"Ûù~jû?\'Â\x86§WÊ¢?\tù\xa0g³ê£?ð§ÆK7\x89±¿·b\x7fÙ=yð?ZK\\"r\x95ï'
+section=99 name='IMG-CA9 System' base=0x0 off=0x1422b va=0x1422b needle='Temperature_FromXYCoord' context='@r¨L"Üç\x11@øþ\x99P§ß\x15@@T\x91?U3\x1b@O\x88]4\x94N!@\x8fÊfqs¼&@O\x8f3næQ/@w\x85_f¯X7@\x1f@ñ)!dD@\x0e²v%\x13\x1d]@ca9_cm_Temperature_FromXYCoord|ca9_cm_Temperature_FromXYCoord_binarySearch|ca9_cm_Temperature_ToXYCoord|\x06|||||||\x1e|||\x06||||||||@\x9f@|||||pÇ@||||||||\x86ÉTÁ¨¤'
+section=99 name='IMG-CA9 System' base=0x0 off=0x1424a va=0x1424a needle='Temperature_FromXYCoord' context='!@\x8fÊfqs¼&@O\x8f3næQ/@w\x85_f¯X7@\x1f@ñ)!dD@\x0e²v%\x13\x1d]@ca9_cm_Temperature_FromXYCoord|ca9_cm_Temperature_FromXYCoord_binarySearch|ca9_cm_Temperature_ToXYCoord|\x06|||||||\x1e|||\x06||||||||@\x9f@|||||pÇ@||||||||\x86ÉTÁ¨¤ì?±áé\x95²\x0cÑ?ð\x85ÉTÁ¨Ä¿Ä±.n£\x01è¿Ñ"Ûù~'
+section=99 name='IMG-CA9 System' base=0x0 off=0x14358 va=0x14358 needle='WhiteMatrix' context='¬ÒÂ¿Ô8\x8ab¨yÄ?JÌXÙãªÛ?\x95n\x01Wh\x96à?\x93\x10ö7²<©?`\x81\x9e¼~w\x81¿êjáh}\x80¤?\x03\x8dãÑ×ýî?ca9_cm_ColorSpec_MapWhiteMatrix|ca9_cm_ColorSpec_SetWhiteXY|ca9_cm_ColorSpec_NeutralToXY|ca9_cm_ColorSpec_MatrixInterpolate|||||\x9a\x99\x99\x99\x99\x99¹?||||||$@ü©ñÒMbP'
+section=99 name='IMG-CA9 System' base=0x0 off=0x14391 va=0x14391 needle='NeutralTo' context='ýî?ca9_cm_ColorSpec_MapWhiteMatrix|ca9_cm_ColorSpec_SetWhiteXY|ca9_cm_ColorSpec_NeutralToXY|ca9_cm_ColorSpec_MatrixInterpolate|||||\x9a\x99\x99\x99\x99\x99¹?||||||$@ü©ñÒMbP?||||||ð?\x0f|||ca9_DarkStainCalib_Start|ca9_DarkStainCali'
+section=99 name='IMG-CA9 System' base=0x0 off=0x14378 va=0x14378 needle='WhiteXY' context='²<©?`\x81\x9e¼~w\x81¿êjáh}\x80¤?\x03\x8dãÑ×ýî?ca9_cm_ColorSpec_MapWhiteMatrix|ca9_cm_ColorSpec_SetWhiteXY|ca9_cm_ColorSpec_NeutralToXY|ca9_cm_ColorSpec_MatrixInterpolate|||||\x9a\x99\x99\x99\x99\x99¹?||||||$@ü©ñÒMbP?||||||ð?\x0f|||ca9_DarkStainCa'
+section=99 name='IMG-CA9 System' base=0x0 off=0xb458 va=0xb458 needle='White Balance' context='\x18|\x9då\x14|Pã\x18||\x1a||\xa0ã\x80\x02Åå\x10|\x94å\x0c|\x90åt\x02\x85å\x10|\x94å\x10|\x90åx\x02\x85å\x10|\x94å\x14|\x90å|\x02\x85å Ð\x8dâð\x81½è|À\x01@CA9: %s() - White Balance started|||L2\x04@PÅ\x01@\x01|\xa0ã\x060\xa0á\x80\x02Åå\x07 \xa0á\x10|\x9då\x05\x10\xa0á°|Æá\x14|\x9då²|Æá\x04|\xa0á\x99ñÿë\x10\x10\x94åt\x02\x95å\x0c|\x81å\x10\x10\x94åx\x02\x95å\x10|\x81å\x10\x10\x94å|\x02\x95å\x14|\x81å Ð\x8dâð\x81½è\x10|\x94å\x0c\x10\x90å|\x10\x80å\x10'
