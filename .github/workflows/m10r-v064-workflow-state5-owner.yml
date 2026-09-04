@@ -1,0 +1,124 @@
+name: M10-R v0.64 IMG workflow state5 owner
+on:
+  push:
+    branches: [m10r-metering-latch-trace]
+    paths: ['.github/workflows/m10r-v064-workflow-state5-owner.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: m10r-metering-latch-trace
+          fetch-depth: 0
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace workflow state 5 owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v064_workflow_state5_owner.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();base=0x42000000;pfx=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(a): return pfx+a-base
+          def u32(a):
+              o=off(a)
+              return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+          def s_at(a,n=220):
+              o=off(a)
+              if not 0<=o<len(b): return None
+              z=b.find(b'\0',o,min(len(b),o+n)); z=z if z>=0 else min(len(b),o+n)
+              try:s=b[o:z].decode('ascii')
+              except:return None
+              return s if len(s)>=5 and all(c in '\t\r\n' or ' '<=c<='~' for c in s) else None
+          def fmt(i):
+              if i.id==0:return f'{i.address:08x}: .byte {i.op_str}'
+              ex=''
+              try:
+                  if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                      la=((i.address+4)&~3)+i.operands[1].mem.disp;v=u32(la)
+                      if v is not None:
+                          ss=s_at(v);ex=f' ; LIT {la:#x}->{v:#x}'+(f' STRING={ss!r}' if ss else '')
+              except:pass
+              return f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}{ex}'
+          def dump(a,z,title):
+              a=max(base,a);z=min(base+len(b)-pfx,z)
+              print(f'\n=== {title} {a:#x}..{z:#x} ===')
+              for i in md.disasm(b[off(a):off(z)],a):print(fmt(i))
+          print('M10-R v0.64 IMG WORKFLOW STATE-5 OWNER TRACE')
+          print('Known owner: 0x42161FA0 reads indexed object state +0x20C. state 0x0B => lf; state !=5 => rlv; state 5 => neither.')
+          targets=(0x408cecf0,0x408fc238,0x408f0ec0)
+          # Find literal pool words for the three globals.
+          pools=[]
+          for t in targets:
+              pat=struct.pack('<I',t);q=0
+              while True:
+                  q=b.find(pat,q)
+                  if q<0:break
+                  pools.append((base+q-pfx,t));q+=1
+          print('LITERAL_POOLS',[(hex(a),hex(t)) for a,t in pools])
+          # Search small windows around every pool for PC-relative LDRs actually resolving to it.
+          refs=[]
+          for pool,t in pools:
+              a=max(base,pool-0x1000);z=min(base+len(b)-pfx,pool+0x100)
+              for i in md.disasm(b[off(a):off(z)],a):
+                  try:
+                      if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                          la=((i.address+4)&~3)+i.operands[1].mem.disp
+                          if la==pool: refs.append((i.address,t,pool))
+                  except:pass
+          print('CODE_REFS',[(hex(a),hex(t),hex(p)) for a,t,p in refs])
+          # Dump compact windows around each code ref, deduped by 0x200-byte bucket.
+          seen=set()
+          for a,t,p in refs:
+              bucket=a&~0x1ff
+              if bucket in seen: continue
+              seen.add(bucket);dump(max(base,a-0x90),a+0x130,f'GLOBAL REF near {a:#x}')
+          # Target the exact owner and its immediate predecessor/follower.
+          dump(0x42161fa0,0x42162250,'COMMAND32 FLAG OWNER FULL')
+          # Search within only global-ref windows for state compares 5 / 0x0b and +0x20c style accesses.
+          print('\nSEMANTIC STATE-COMPARE HITS')
+          for a,t,p in refs:
+              start=max(base,a-0x180);end=min(base+len(b)-pfx,a+0x280)
+              ins=list(md.disasm(b[off(start):off(end)],start))
+              txt='\n'.join(fmt(i) for i in ins)
+              if any(x in txt for x in ('#5','#0xb','0x20c')):
+                  print(f'-- REF {a:#x} target {t:#x} --')
+                  for line in txt.splitlines():
+                      if any(k in line for k in ('#5','#0xb','#0x20c','0x1d50','408cecf0','408fc238')): print(line)
+          # Relevant liveview state/event strings plus their file/VA locations.
+          print('\nLIVEVIEW STATE/EVENT STRINGS')
+          for m in re.finditer(rb'[\x20-\x7e]{6,}',b):
+              s=m.group().decode('ascii','replace')
+              lo=s.lower()
+              if any(k in lo for k in ('cap_liveview_', 'liveview_wait', 'liveview_capture', 'liveview_stopping', 'liveview_end_state', 'reset_sensor', 'first_frame_ready', 'n_frame_ready', 'last_frame_ready')):
+                  print(hex(base+m.start()-pfx),repr(s[:300]))
+          PY
+      - name: Commit result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v064_workflow_state5_owner.txt
+          git diff --cached --quiet && exit 0
+          git commit -m 'research: record v0.64 workflow state-5 owner trace'
+          git pull --rebase origin m10r-metering-latch-trace
+          git push origin HEAD:m10r-metering-latch-trace
