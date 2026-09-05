@@ -1,0 +1,132 @@
+name: M10-R v2.31b bounded color-space mapper callers
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v231b-colorspace-mapper-callers.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Unpack and trace exact mapper/callers
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v231b_colorspace_mapper_callers.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;P=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(a):return P+a-BASE
+          def ops(i):
+              try:return i.operands
+              except:return []
+          def call(i):
+              try:
+                  o=ops(i)
+                  if i.mnemonic in ('bl','blx') and o and o[0].type==ARM_OP_IMM:return o[0].imm&~1
+              except:pass
+          def lit(i):
+              try:
+                  o=ops(i)
+                  if i.mnemonic.startswith('ldr') and len(o)>=2 and o[1].type==ARM_OP_MEM and o[1].mem.base==ARM_REG_PC:
+                      la=((i.address+4)&~3)+o[1].mem.disp;fo=off(la)
+                      if 0<=fo<=len(b)-4:return la,struct.unpack_from('<I',b,fo)[0]
+              except:pass
+          def adr_target(i):
+              # Capstone supplies ADR immediate as absolute/relative depending version; expose raw op + nearby string resolution by brute force below.
+              try:
+                  o=ops(i)
+                  if i.mnemonic in ('adr','adr.w') and len(o)>=2 and o[1].type==ARM_OP_IMM:return o[1].imm
+              except:pass
+          def str_at(a,limit=180):
+              o=off(a)
+              if not 0<=o<len(b):return None
+              e=b.find(b'\0',o,min(len(b),o+limit))
+              if e<0:return None
+              bb=b[o:e]
+              if len(bb)>=4 and all(32<=x<127 for x in bb):return bb.decode('ascii','replace')
+          def fmt(i):
+              s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i);c=call(i);a=adr_target(i)
+              if q:
+                  s+=f' ; LIT {q[0]:08x}->{q[1]:08x}'
+                  st=str_at(q[1]) if BASE<=q[1]<BASE+len(b)-P else None
+                  if st:s+=f' STRING={st!r}'
+              if a is not None:
+                  s+=f' ; ADR={a:#x}'
+                  st=str_at(a) if BASE<=a<BASE+len(b)-P else None
+                  if st:s+=f' STRING={st!r}'
+              if c is not None:s+=f' ; CALL {c:08x}'
+              return s
+          def dump(a,z):
+              for i in md.disasm(b[off(a):off(z)],a):print(fmt(i))
+          def callers(target):
+              out=[]
+              for i in md.disasm(b[P:],BASE):
+                  if call(i)==target:out.append(i.address)
+              return out
+          print('M10-R v2.31b BOUNDED COLOR-SPACE MAPPER / CALLERS')
+          print('Known anchor from v2.31: ColorSpace diagnostic literal reference at 0x42151540; suffix strings at 0x42151884/98/B0.')
+          print()
+          print('=== exact mapper region 0x42151480..0x42151900 ===')
+          dump(0x42151480,0x42151900)
+          print()
+
+          # Discover likely function starts in the region and print callers.
+          starts=[]
+          for i in md.disasm(b[off(0x42151400):off(0x42151900)],0x42151400):
+              if i.mnemonic in ('push','push.w') and 'lr' in i.op_str:starts.append(i.address)
+          print('=== push/LR function starts + direct callers ===')
+          for s in starts:
+              cs=callers(s)
+              print(f'{s:08x} callers={[hex(x) for x in cs]}')
+              for r in cs[:24]:
+                  a=max(BASE,(r-0x80)&~1);z=min(BASE+len(b)-P,r+0xc0)
+                  print(f'-- caller context {r:08x} --');dump(a,z)
+          print()
+
+          # Exact suffix bytes: find all immediate PC-relative ADR instructions resolving into each string range.
+          print('=== instructions resolving directly into color-space suffix strings ===')
+          ranges=[(0x42151884,0x42151898,'SRGB'),(0x42151898,0x421518b0,'ADOBERGB'),(0x421518b0,0x421518c0,'ECI')]
+          for lo,hi,n in ranges:
+              print('--',n,'--')
+              # scan bounded region only and inspect ADR targets / literal values
+              for i in md.disasm(b[off(0x42151000):off(0x42151900)],0x42151000):
+                  a=adr_target(i);q=lit(i)
+                  if (a is not None and lo<=a<hi) or (q and lo<=q[1]<hi):print(fmt(i))
+          print()
+
+          # CA9 fill wrapper exact parameter mapping, including +0x20 source to packet/result.
+          print('=== ca9_cm_fill_parameter 0x420A591C..0x420A5B40 ===')
+          dump(0x420a591c,0x420a5b40)
+          print()
+          print('=== direct caller of ca9_cm_fill_parameter around 0x420A2EFC ===')
+          dump(0x420a2e80,0x420a2f80)
+          print()
+
+          print('=== DECISION ===')
+          print('Freeze enum labels only if the exact mapper branches pair 0/1/2 with SRGB/ADOBERGB/ECI strings or with the corresponding output-profile objects.')
+          print('Freeze default only if a caller/initializer shows a stable value entering the same source field later read by ca9_cm_fill_parameter; otherwise leave default unresolved and use the DNG/JPEG embedded ICC/profile identity for per-reference validation.')
+          PY
+      - name: Commit v2.31b trace
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v231b_colorspace_mapper_callers.txt
+          git commit -m 'research: record v2.31b bounded color-space mapper callers' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
