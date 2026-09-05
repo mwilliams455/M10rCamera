@@ -1,0 +1,183 @@
+name: M10-R v2.10 tone integer boundary
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v210-tone-integer-boundary.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace bounded tone integer/configuration boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          rm -rf /tmp/m10r_b2y_assets
+          python3 tools/m10r_b2y_assets.py /tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin /tmp/m10r_b2y_assets >/dev/null
+          python3 - <<'PY' > research/M10R_v210_tone_integer_boundary.txt
+          from pathlib import Path
+          import struct, collections, json
+          from capstone import *
+          from capstone.arm import *
+
+          img=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); BASE=0x42000000; PFX=4; END=BASE+len(img)-PFX
+          th=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); th.detail=True; th.skipdata=True
+          ar=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN); ar.detail=True; ar.skipdata=True
+          def off(a): return PFX+a-BASE
+          def ops(i):
+            try:return i.operands
+            except:return []
+          def lit(i,mode):
+            oo=ops(i)
+            try:
+              if i.mnemonic.startswith('ldr') and len(oo)>=2 and oo[1].type==ARM_OP_MEM and oo[1].mem.base==ARM_REG_PC:
+                la=((((i.address+4)&~3) if mode=='T' else i.address+8)+oo[1].mem.disp); o=off(la)
+                if 0<=o<=len(img)-4:return la,struct.unpack_from('<I',img,o)[0]
+            except:pass
+          def call(i):
+            oo=ops(i)
+            try:
+              if i.mnemonic in ('bl','blx') and oo and oo[0].type==ARM_OP_IMM:return oo[0].imm&~1
+            except:pass
+          def dis(lo,hi,mode):
+            md=th if mode=='T' else ar; lo=max(BASE,lo);hi=min(END,hi)
+            return list(md.disasm(img[off(lo):off(hi)],lo))
+          def fmt(i,mode):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i,mode);c=call(i)
+            if q:s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'
+            if c is not None:s+=f' ; CALL {c:#x}'
+            return s
+
+          print('M10-R v2.10 TONE INTEGER / HARDWARE BOUNDARY')
+          print('scope: tone helper, tone descriptor, bounded B2Y driver reader scan, arithmetic candidate comparison')
+          print('firmware_sha256 ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498')
+
+          # Canonical descriptor comes from the v1.90-proven calibration record. Re-find ID 8 directly.
+          cal=Path('/tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin').read_bytes(); CP=4
+          u32=lambda d,o:struct.unpack_from('<I',d,o)[0]
+          count=u32(cal,CP+8); rec0=CP+0x10; stride=0xa90; payload_base=rec0+count*stride
+          rec8=None
+          for n in range(count):
+            o=rec0+n*stride; rid=u32(cal,o); rel=u32(cal,o+4); size=u32(cal,o+8)
+            if rid==8:
+              rec8=(n,payload_base+rel,size);break
+          assert rec8 and rec8[2]>=0xb0
+          desc=cal[rec8[1]:rec8[1]+0xb0]
+          print('\n=== exact tone descriptor 0xB0 ===')
+          print('record',rec8[0],'fileoff',hex(rec8[1]),'size',hex(rec8[2]))
+          for o in range(0,0xb0,4):
+            v=u32(desc,o); sv=struct.unpack_from('<i',desc,o)[0]
+            print(f'+{o:02x}: u32={v:#010x} {v:10d} s32={sv:11d}')
+
+          # Exact helper. Record every source load from r4 and the next MMIO store neighborhood.
+          helper=dis(0x420d3c1c,0x420d4290,'A')
+          print('\n=== exact ARM helper ===')
+          for i in helper: print(fmt(i,'A'))
+          print('\n=== descriptor-source load neighborhoods ===')
+          for idx,i in enumerate(helper):
+            oo=ops(i)
+            hit=False; disp=None
+            if i.mnemonic.startswith('ldr') and len(oo)>=2 and oo[1].type==ARM_OP_MEM and oo[1].mem.base==ARM_REG_R4:
+              hit=True; disp=oo[1].mem.disp
+            if hit:
+              print(f'-- source +{disp:#x} at {i.address:#x} --')
+              for j in helper[max(0,idx-2):min(len(helper),idx+10)]:print(fmt(j,'A'))
+
+          # Bounded effective-MMIO tracker. This is intentionally limited to 0x420d0000..0x420d5000.
+          def effective_mmio(ins,mode):
+            regs={}; out=[]
+            for i in ins:
+              oo=ops(i);q=lit(i,mode)
+              if q and oo and oo[0].type==ARM_OP_REG:regs[oo[0].reg]=q[1]
+              # record effective accesses before destination clobber
+              for op in oo:
+                if op.type==ARM_OP_MEM and op.mem.base in regs:
+                  ea=(regs[op.mem.base]+op.mem.disp)&0xffffffff
+                  if 0x20020800<=ea<=0x2002087c:out.append((i,ea))
+              if i.mnemonic in ('mov','movs') and len(oo)>=2 and oo[0].type==ARM_OP_REG:
+                if oo[1].type==ARM_OP_REG and oo[1].reg in regs:regs[oo[0].reg]=regs[oo[1].reg]
+                elif oo[1].type==ARM_OP_IMM:regs[oo[0].reg]=oo[1].imm&0xffffffff
+                else:regs.pop(oo[0].reg,None)
+              elif i.mnemonic in ('add','adds','sub','subs') and oo and oo[0].type==ARM_OP_REG:
+                d=oo[0].reg
+                if len(oo)==2 and oo[1].type==ARM_OP_IMM and d in regs:regs[d]=(regs[d]+(oo[1].imm if i.mnemonic.startswith('add') else -oo[1].imm))&0xffffffff
+                elif len(oo)>=3 and oo[1].type==ARM_OP_REG and oo[1].reg in regs and oo[2].type==ARM_OP_IMM:regs[d]=(regs[oo[1].reg]+(oo[2].imm if i.mnemonic.startswith('add') else -oo[2].imm))&0xffffffff
+                else:regs.pop(d,None)
+              elif oo and oo[0].type==ARM_OP_REG and i.mnemonic not in ('str','strb','strh','strd','stm','cmp','cmn','tst','teq','b','bl','blx','bx','push'):
+                if not q:regs.pop(oo[0].reg,None)
+            return out
+
+          print('\n=== bounded B2Y-driver accesses to tone register page 0x20020800..0x2002087c ===')
+          # ARM helper is known ARM. Other low-level routines in this mixed region are mostly Thumb;
+          # scan both decodings but classify only exact effective-MMIO hits.
+          for mode in ('A','T'):
+            ins=dis(0x420d0000,0x420d5000,mode)
+            hits=effective_mmio(ins,mode)
+            print('mode',mode,'hit_count',len(hits))
+            for i,ea in hits: print(f'{i.address:#x} {i.mnemonic:8s} EA={ea:#010x} {i.op_str}')
+
+          # Classify accesses outside the known tone helper window. Software reads outside helper would
+          # be evidence that firmware consumes runtime tone state; absence supports hardware-only arithmetic.
+          print('\n=== exact ARM tone-page accesses outside helper 0x420d3c1c..0x420d4290 ===')
+          for i,ea in effective_mmio(dis(0x420d0000,0x420d5000,'A'),'A'):
+            if not (0x420d3c1c<=i.address<0x420d4290):print(f'{i.address:#x} {i.mnemonic:8s} EA={ea:#010x} {i.op_str}')
+
+          # Candidate arithmetic comparison using canonical extracted MEDIUM table.
+          raw=Path('/tmp/m10r_b2y_assets/tone_medium_q15.u32le').read_bytes()
+          tone=list(struct.unpack('<%dI'%(len(raw)//4),raw))
+          assert len(tone)>=10240
+          xs=range(0x5000)
+          trunc=[]; rnd=[]
+          for x in xs:
+            g=tone[x>>1]
+            trunc.append((x*g)>>15)
+            rnd.append((x*g+0x4000)>>15)
+          diffs=[i for i,(a,b) in enumerate(zip(trunc,rnd)) if a!=b]
+          print('\n=== candidate Q15 arithmetic over x=0..0x4fff ===')
+          print('table_entries_used',10240)
+          print('trunc_minmax',min(trunc),max(trunc),'monotonic',all(a<=b for a,b in zip(trunc,trunc[1:])))
+          print('round_minmax',min(rnd),max(rnd),'monotonic',all(a<=b for a,b in zip(rnd,rnd[1:])))
+          print('candidate_difference_count',len(diffs),'of',0x5000)
+          print('first_difference_indices',diffs[:64])
+          if diffs:
+            print('first_difference_samples',[(x,tone[x>>1],trunc[x],rnd[x]) for x in diffs[:32]])
+          print('max_abs_candidate_delta',max(abs(a-b) for a,b in zip(trunc,rnd)))
+
+          # DG-output compatibility check: direct DG->tone would address only x<=0x3fff.
+          dg=Path('/tmp/m10r_b2y_assets/dg_expanded_u16le.bin').read_bytes()
+          dvals=struct.unpack('<32768H',dg)
+          dgmax=max(dvals); maxidx=dgmax>>1
+          print('\n=== domain compatibility only (NOT stage-order proof) ===')
+          print('dg_output_max',dgmax,hex(dgmax))
+          print('tone_index_if_direct_DG_output',maxidx,'of 10239')
+          print('tone_tail_entries_not_addressed_if_direct_DG_output',10240-(maxidx+1))
+          print('NOTE: unused tail can be intentional headroom; this does not establish order.')
+
+          # Summarize what firmware instructions can and cannot prove.
+          print('\nBOUNDARY TEST')
+          print('If no software multiply/lookup consumes tone RAM or tone-page output values, firmware exposes configuration/upload but not the internal hardware multiply rounding rule.')
+          print('Do not freeze truncation vs round-to-nearest solely from Q15 identity or visual plausibility.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v210_tone_integer_boundary.txt
+          git commit -m 'research: record v2.10 tone integer boundary' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
