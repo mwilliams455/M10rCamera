@@ -1,0 +1,74 @@
+name: M10-R v1.84b fast B2Y input CC provenance
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v184b-b2y-input-cc-provenance-fast.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Fast trace B2Y input structure and caller
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v184b_b2y_input_cc_provenance_fast.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;P=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(a):return P+a-BASE
+          def call(i):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm&~1
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;o=off(la)
+                if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+            except:pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i);c=call(i)
+            if q:s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'
+            if c is not None:s+=f' ; CALL {c:#x}'
+            return s
+          print('M10-R v1.84b FAST B2Y INPUT CC PROVENANCE')
+          print('\n=== exact input->stack CC marshalling ===')
+          for i in md.disasm(b[off(0x42152350):off(0x42152450)],0x42152350):print(fmt(i))
+          callers=[]
+          for i in md.disasm(b[P:],BASE):
+            if call(i)==0x4215220c:callers.append(i.address)
+          print('\ncallers_4215220c', [hex(x) for x in callers])
+          for ca in callers:
+            print('\n=== caller neighborhood',hex(ca),'===')
+            lo=max(BASE,ca-0x180); hi=ca+0x80
+            for i in md.disasm(b[off(lo):off(hi)],lo):print(fmt(i))
+          print('\n=== raw occurrences of rendered CC global addresses ===')
+          for g in (0x408fe130,0x408fe15c):
+            needle=struct.pack('<I',g);pos=0;occ=[]
+            while True:
+              k=b.find(needle,pos)
+              if k<0:break
+              occ.append(k);pos=k+1
+            print(hex(g),['fileoff='+hex(x)+' addr='+hex(BASE+x-P) for x in occ])
+          print('\nTARGET: prove exact input offsets marshalled into CC0/CC1 and identify direct caller(s) of 0x4215220c without whole-section nested disassembly.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v184b_b2y_input_cc_provenance_fast.txt
+          git commit -m 'research: record v1.84b fast B2Y input CC provenance' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
