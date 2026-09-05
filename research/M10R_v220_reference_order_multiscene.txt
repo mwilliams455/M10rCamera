@@ -1,0 +1,41 @@
+M10-R v2.20 MULTI-SCENE PUBLIC REFERENCE ORDER REPLICATION
+source: Photography Blog M10-R review samples 01..06; each JPEG/DNG pair identity checked independently
+proxy: rawpy-oriented linear camera-space green normalized back to DNG raw-code scale
+IMPORTANT: empirical replication, not direct hardware mux proof.
+
+=== per-sample verification and fits ===
+sample 01 identity=True defaults=True ISO=320 shutter=0.03333333333 f=5.6 rot90=0 align=(6,6) score=0.940641 patches=152
+  trunc: dg-tone rmse=0.599979 gamma=1.610 scale=1.560; tone-dg rmse=0.342795 gamma=0.980 scale=0.930; delta=0.257184
+  nearest: dg-tone rmse=0.598955 gamma=1.620 scale=1.570; tone-dg rmse=0.343917 gamma=0.970 scale=0.920; delta=0.255038
+sample 02 identity=True defaults=True ISO=640 shutter=0.02222222222 f=9.5 rot90=0 align=(6,6) score=0.942926 patches=81
+  trunc: dg-tone rmse=0.965992 gamma=1.580 scale=1.640; tone-dg rmse=0.313504 gamma=1.010 scale=0.960; delta=0.652488
+  nearest: dg-tone rmse=0.967008 gamma=1.580 scale=1.650; tone-dg rmse=0.321086 gamma=1.020 scale=0.970; delta=0.645923
+sample 03 identity=True defaults=True ISO=100 shutter=0.001333333333 f=2 rot90=0 align=(18,6) score=0.955752 patches=64
+  trunc: dg-tone rmse=0.558415 gamma=1.600 scale=1.470; tone-dg rmse=0.331796 gamma=0.990 scale=0.940; delta=0.226619
+  nearest: dg-tone rmse=0.557956 gamma=1.600 scale=1.470; tone-dg rmse=0.321467 gamma=0.990 scale=0.950; delta=0.236490
+sample 04 identity=True defaults=True ISO=100 shutter=0.0005 f=4 rot90=0 align=(18,6) score=0.946291 patches=282
+  trunc: dg-tone rmse=1.662238 gamma=1.480 scale=1.590; tone-dg rmse=0.660118 gamma=1.050 scale=0.970; delta=1.002119
+  nearest: dg-tone rmse=1.662719 gamma=1.480 scale=1.590; tone-dg rmse=0.662656 gamma=1.040 scale=0.960; delta=1.000063
+sample 05 identity=True defaults=True ISO=100 shutter=0.005555555556 f=2.4 rot90=0 align=(18,6) score=0.932775 patches=49
+  trunc: dg-tone rmse=0.423667 gamma=1.500 scale=1.260; tone-dg rmse=0.430830 gamma=0.970 scale=0.890; delta=-0.007164
+  nearest: dg-tone rmse=0.422383 gamma=1.500 scale=1.260; tone-dg rmse=0.431771 gamma=0.960 scale=0.880; delta=-0.009388
+sample 06 identity=True defaults=True ISO=100 shutter=0.004 f=2 rot90=0 align=(18,6) score=0.927675 patches=122
+  trunc: dg-tone rmse=0.501511 gamma=1.620 scale=1.520; tone-dg rmse=0.214595 gamma=1.010 scale=0.940; delta=0.286916
+  nearest: dg-tone rmse=0.500719 gamma=1.620 scale=1.520; tone-dg rmse=0.205422 gamma=1.010 scale=0.930; delta=0.295297
+
+=== aggregate ===
+trunc: valid=6 tone-dg wins=5 losses=1 ties=0 median_delta=0.2720498367787423 mean_delta=0.40302693968541364 median_gamma tone-dg=1.0 dg-tone=1.59
+  deltas [0.2571838306892387, 0.6524875154822602, 0.2266190235027981, 1.0021191758518788, -0.007163750281939774, 0.2869158428682458]
+nearest: valid=6 tone-dg wins=5 losses=1 ties=0 median_delta=0.27516759364373444 mean_delta=0.4039037441679284 median_gamma tone-dg=1.0 dg-tone=1.59
+  deltas [0.2550381434041201, 0.6459225692528956, 0.23648952931885026, 1.0000629444336584, -0.00938776528530283, 0.2952970438833488]
+
+tone-dg rounding: {'trunc_wins': 4, 'nearest_wins': 2, 'ties': 0, 'nearest_minus_trunc_rmse': [0.0011221650185342935, 0.007581317021061518, -0.010329139049890246, 0.0025379918913049915, 0.0009405685959653631, -0.009172888517377215], 'median': 0.0010313668072498283}
+
+EMPIRICAL_TONE_DG_PREFERENCE_SUPPORTED True
+criterion: >=4 valid pairs; tone-dg wins >=80% (minimum 4) under both rounding modes; median held-out RMSE advantage >0.05
+
+LIMITATIONS
+- oriented linear camera-space green is a proxy for the exact post-WB/post-CC B2Y scalar input.
+- output affine/gamma absorbs downstream YC/JPEG transfer.
+- scene detail/local processing is reduced by neutral flat-patch selection, not eliminated.
+- a consistent result can justify an empirical renderer-order freeze, but must be labeled separately from direct hardware routing proof.
