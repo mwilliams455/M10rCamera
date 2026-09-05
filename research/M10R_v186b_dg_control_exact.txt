@@ -1,0 +1,81 @@
+M10-R v1.86b EXACT DG CONTROL HELPER
+
+=== THUMB exact 0x420d15e8..0x420d1648 ===
+420d15e8: push       {r4, lr}
+420d15ea: movs       r2, r0
+420d15ec: cmp        r1, #0
+420d15ee: bne        #0x420d1624
+420d15f0: ldr        r0, [pc, #0x50] ; LIT 0x420d1644->0x20020800
+420d15f2: ldr        r0, [r0]
+420d15f4: movs       r3, #1
+420d15f6: lsls       r3, r3, #0x18
+420d15f8: bics       r0, r3
+420d15fa: ldrb       r3, [r2]
+420d15fc: lsls       r3, r3, #0x18
+420d15fe: movs       r4, #1
+420d1600: lsls       r4, r4, #0x18
+420d1602: ands       r3, r4
+420d1604: orrs       r0, r3
+420d1606: ldr        r3, [pc, #0x3c] ; LIT 0x420d1644->0x20020800
+420d1608: str        r0, [r3]
+420d160a: movs       r0, r3
+420d160c: ldr        r0, [r0]
+420d160e: lsls       r3, r4, #1
+420d1610: bics       r0, r3
+420d1612: ldrb       r3, [r2, #4]
+420d1614: lsls       r3, r3, #0x19
+420d1616: lsls       r4, r4, #1
+420d1618: ands       r3, r4
+420d161a: orrs       r0, r3
+420d161c: ldr        r3, [pc, #0x24] ; LIT 0x420d1644->0x20020800
+420d161e: str        r0, [r3]
+420d1620: movs       r0, #0
+420d1622: pop        {r4, pc}
+420d1624: ldr        r0, [pc, #0x1c] ; LIT 0x420d1644->0x20020800
+420d1626: ldr        r0, [r0]
+420d1628: movs       r3, #1
+420d162a: lsls       r3, r3, #0x18
+420d162c: bics       r0, r3
+420d162e: ldr        r3, [pc, #0x14] ; LIT 0x420d1644->0x20020800
+420d1630: str        r0, [r3]
+420d1632: movs       r0, r3
+420d1634: ldr        r0, [r0]
+420d1636: movs       r3, #1
+420d1638: lsls       r3, r3, #0x19
+420d163a: bics       r0, r3
+420d163c: ldr        r3, [pc, #4] ; LIT 0x420d1644->0x20020800
+420d163e: str        r0, [r3]
+420d1640: movs       r0, #1
+420d1642: b          #0x420d1622
+420d1644: lsrs       r0, r0, #0x20
+420d1646: movs       r0, #2
+
+=== ARM exact 0x420d15e8..0x420d1648 ===
+420d15e8: andeq      fp, r2, r0, lsl r5
+420d15ec: tstle      sb, r0, lsl #18
+420d15f0: stmdavs    r0, {r2, r4, fp, lr}
+420d15f4: ldreq      r2, [fp], -r1, lsl #6
+420d15f8: ldmdavc    r3, {r3, r4, r7, r8, sb, lr}
+420d15fc: strhs      r0, [r1], #-0x61b
+420d1600: eormi      r0, r3, r4, lsr #12
+420d1604: blmi       #0x424a226c
+420d1608: andseq     r6, r8, r8, lsl r0
+420d160c: rsbeq      r6, r3, r0, lsl #16
+420d1610: ldmdbvc    r3, {r3, r4, r7, r8, sb, lr}
+420d1614: rsbeq      r0, r4, fp, asr r6
+420d1618: tstmi      r8, #0x23
+420d161c: andsvs     r4, r8, sb, lsl #22
+420d1620: ldclt      p0, c2, [r0, #-0]
+420d1624: stmdavs    r0, {r0, r1, r2, fp, lr}
+420d1628: ldreq      r2, [fp], -r1, lsl #6
+420d162c: blmi       #0x42222494
+420d1630: andseq     r6, r8, r8, lsl r0
+420d1634: movwhs     r6, #0x1800
+420d1638: orrsmi     r0, r8, #0x5b00000
+420d163c: andsvs     r4, r8, r1, lsl #22
+420d1640: strb       r2, [lr, r1]!
+420d1644: andhs      r0, r2, r0, lsl #16
+
+raw 10b50200002919d11448006801231b06984313781b0601242406234018430f4b1860180000686300984313795b06640023401843094b1860002010bd0748006801231b069843054b18601800006801235b069843014b18600120eee700080220
+
+TARGET: choose correct instruction state by valid prologue/control flow and freeze how ID0B payload words +0/+4 map to 0x20020800 bit24/bit25.
