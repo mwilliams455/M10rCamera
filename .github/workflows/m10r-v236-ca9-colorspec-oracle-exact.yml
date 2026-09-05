@@ -1,0 +1,81 @@
+name: M10-R v2.36 exact CA9 ColorSpec oracle
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v236-ca9-colorspec-oracle-exact.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Unpack and trace exact ColorSpec helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v236_ca9_colorspec_oracle_exact.txt
+          from pathlib import Path
+          import struct, math
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_ARM,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_REG_PC
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes(); BASE=0x40000000; PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN); md.detail=True
+          def off(a): return PFX+a-BASE
+          def lit(i):
+              try:
+                  if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                      return i.address+8+i.operands[1].mem.disp
+              except: pass
+          def fmt(i):
+              s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+              la=lit(i)
+              if la is not None:
+                  o=off(la)
+                  if 0<=o<=len(b)-4:
+                      v=struct.unpack_from('<I',b,o)[0]; s+=f' ; LIT {la:08x}->{v:08x}'
+                      if 0<=o<=len(b)-8:
+                          d=struct.unpack_from('<d',b,o)[0]
+                          if math.isfinite(d) and abs(d)<1e12: s+=f' F64={d:.17g}'
+              return s
+          def dump(a,z,name):
+              print(f'=== {name} {a:08x}..{z:08x} ===')
+              o0,o1=off(a),off(z)
+              for i in md.disasm(b[o0:o1],a): print(fmt(i))
+              print()
+          print('M10-R v2.36 EXACT CA9 COLORSPEC ORACLE TRACE')
+          print('Bounded goal: close SetWhiteXY matrix products and rendered-CC rounding; no broad CA9 scan.')
+          print()
+          dump(0x40005980,0x40005a90,'SetWhiteXY matrix helpers 0x40005990 / 0x400059F8')
+          dump(0x40005d70,0x40005f30,'SetWhiteXY + FindXYZtoCamera')
+          dump(0x400060e0,0x40006280,'NeutralToXY bounded body')
+          dump(0x40012920,0x40012980,'integer rounding helper 0x40012940')
+          dump(0x40003a30,0x40003b20,'SelectScale and quantizer caller context')
+          print('=== REQUIRED DECISIONS ===')
+          print('1. Express helpers 0x40005990 and 0x400059F8 as explicit 3x3/xy formulas only from their dataflow.')
+          print('2. Confirm NeutralToXY iteration details already frozen in v2.26.')
+          print('3. Freeze 0x40012940 tie behavior if its instructions prove it; otherwise leave tie behavior explicitly unresolved.')
+          print('4. Do not replace missing semantics with generic DNG SDK assumptions.')
+          PY
+      - name: Commit v2.36 trace
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v236_ca9_colorspec_oracle_exact.txt
+          git commit -m 'research: record v2.36 exact CA9 ColorSpec oracle trace' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
