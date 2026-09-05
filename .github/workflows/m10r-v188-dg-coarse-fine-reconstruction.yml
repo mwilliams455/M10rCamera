@@ -1,0 +1,106 @@
+name: M10-R v1.88 differential gamma coarse fine reconstruction
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v188-dg-coarse-fine-reconstruction.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prove coarse anchor plus fine differential encoding
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v188_dg_coarse_fine_reconstruction.txt
+          from pathlib import Path
+          import struct,collections,statistics,math,hashlib
+          D=Path('/tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin').read_bytes();P=4
+          u32=lambda o:struct.unpack_from('<I',D,o)[0]
+          count=u32(P+8);rec0=P+0x10;stride=0xa90;base=rec0+count*stride
+          recs=[]
+          for i in range(count):
+            o=rec0+i*stride;recs.append((i,u32(o),u32(o+4),u32(o+8),base+u32(o+4)))
+          def get(rid):return [r for r in recs if r[1]==rid][0]
+          rm=get(0x1c); main=D[rm[4]:rm[4]+0x8000]
+          rf=get(0x1d); fl=list(struct.unpack('<2048H',D[rf[4]:rf[4]+0x1000]))
+          groups=[list(main[i*16:(i+1)*16]) for i in range(2048)]
+          print('M10-R v1.88 DG COARSE/FINE RECONSTRUCTION')
+          print('geometry main',len(main),'=',len(groups),'x16; FL',len(fl),'u16')
+          print('group_first_byte_zero',sum(g[0]==0 for g in groups),'of',len(groups))
+          print('group0',groups[0],'FL0/1',fl[0],fl[1],'delta',fl[1]-fl[0])
+          print('group1',groups[1],'FL1/2',fl[1],fl[2],'delta',fl[2]-fl[1])
+          print('group2',groups[2],'FL2/3',fl[2],fl[3],'delta',fl[3]-fl[2])
+          print('group3',groups[3],'FL3/4',fl[3],fl[4],'delta',fl[4]-fl[3])
+          residuals=[]; exact_qr=0; qr_miss=[]; all_expected=0
+          for i in range(2047):
+            d=fl[i+1]-fl[i]; q,r=divmod(d,16); g=groups[i]; s=sum(g[1:]); res=d-s; residuals.append(res)
+            allowed={q,q+1} if r else {q}
+            ok=all(x in allowed for x in g[1:]) and res in allowed and g[0]==0
+            if ok: exact_qr+=1
+            elif len(qr_miss)<30: qr_miss.append((i,d,q,r,g,res,fl[i],fl[i+1]))
+            all_expected += sum(x==q for x in g[1:]) + sum(x==q+1 for x in g[1:])
+          print('\n=== interval quotient/remainder test ===')
+          print('intervals_matching floor/ceil delta/16 including implicit final step',exact_qr,'of',2047)
+          print('residual_range',min(residuals),max(residuals),'residual_counts',sorted(collections.Counter(residuals).items()))
+          print('first_misses',qr_miss)
+          # For exact intervals, count how the 16 increments distribute q/q+1 vs Euclidean division remainder.
+          dist_ok=0;dist_miss=[]
+          for i in range(2047):
+            d=fl[i+1]-fl[i];q,r=divmod(d,16);incs=groups[i][1:]+[d-sum(groups[i][1:])]
+            if collections.Counter(incs)==collections.Counter({q:16-r, q+1:r} if r else {q:16}):dist_ok+=1
+            elif len(dist_miss)<20:dist_miss.append((i,d,q,r,incs,collections.Counter(incs)))
+          print('intervals_exact_q_remainder_distribution',dist_ok,'of',2047)
+          print('distribution_misses',dist_miss)
+          # Reconstruct all 15-bit input codes with coarse anchor plus cumulative fine increments.
+          y=[]
+          for x in range(32768):
+            c=x>>4; f=x&15
+            y.append(fl[c]+sum(groups[c][1:f+1]))
+          print('\n=== reconstructed 15-bit -> 14-bit curve ===')
+          print('len',len(y),'minmax',min(y),max(y),'monotone',all(y[i]<=y[i+1] for i in range(len(y)-1)),'unique',len(set(y)))
+          print('first64',y[:64])
+          print('last64',y[-64:])
+          print('coarse_anchor_exact',all(y[i<<4]==fl[i] for i in range(2048)))
+          # boundary jump equals the implicit residual from previous interval
+          bd=[]
+          for i in range(2047):bd.append(fl[i+1]-y[(i<<4)+15])
+          print('boundary_jump_range',min(bd),max(bd),'counts',sorted(collections.Counter(bd).items()))
+          print('boundary_jump_equals_residual',all(bd[i]==residuals[i] for i in range(2047)))
+          # Smoothness / gamma-fit diagnostics only; not semantic proof.
+          ds=[y[i+1]-y[i] for i in range(len(y)-1)]
+          print('fine_step_range',min(ds),max(ds),'fine_step_counts',sorted(collections.Counter(ds).items()))
+          # Compare reconstructed curve against simple power laws after normalizing endpoints, report best RMS gamma.
+          xmax=32767; ymax=16383
+          best=None
+          for gi in range(100,401):
+            gam=gi/100
+            se=0;n=0
+            for x in range(0,32768,16):
+              pred=ymax*((x/xmax)**gam);e=y[x]-pred;se+=e*e;n+=1
+            rms=(se/n)**0.5
+            if best is None or rms<best[0]:best=(rms,gam)
+          print('best_simple_power_gamma_coarse_samples',best,'diagnostic_only')
+          # Compare first zero/saturation points between main and FL.
+          last_nonzero_group=max((i for i,g in enumerate(groups) if any(g)),default=-1)
+          last_nonsat=max(i for i,v in enumerate(fl) if v!=0x3fff)
+          print('last_nonzero_main_group',last_nonzero_group,'last_non_saturated_FL',last_nonsat)
+          print('\nTARGET: validate exact 2048 coarse anchors + 16-byte fine-differential encoding, derive a renderer-ready formula if supported, and reject the 32^3 interpretation if this encoding explains the bytes exactly.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v188_dg_coarse_fine_reconstruction.txt
+          git commit -m 'research: record v1.88 DG coarse/fine reconstruction' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
