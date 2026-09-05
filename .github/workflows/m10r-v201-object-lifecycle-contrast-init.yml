@@ -1,0 +1,95 @@
+name: M10-R v2.01 object lifecycle contrast init
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v201-object-lifecycle-contrast-init.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace object lifecycle and contrast initialization
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v201_object_lifecycle_contrast_init.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;P=4
+          def off(a):return P+a-BASE
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def ops(i):
+            try:return i.operands
+            except:return []
+          def call(i):
+            try:
+              o=ops(i)
+              if i.mnemonic in ('bl','blx') and o and o[0].type==ARM_OP_IMM:return o[0].imm&~1
+            except:pass
+          def lit(i):
+            try:
+              o=ops(i)
+              if i.mnemonic.startswith('ldr') and len(o)>=2 and o[1].type==ARM_OP_MEM and o[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+o[1].mem.disp;fo=off(la)
+                if 0<=fo<=len(b)-4:return la,struct.unpack_from('<I',b,fo)[0]
+            except:pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i);c=call(i)
+            if q:s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'
+            if c is not None:s+=f' ; CALL {c:#x}'
+            return s
+          def dump(a,z):
+            for i in md.disasm(b[off(a):off(z)],a):print(fmt(i))
+          print('M10-R v2.01 OBJECT LIFECYCLE / CONTRAST INIT')
+          print('\n=== lifecycle neighborhood 0x42158540..0x42158940 ===')
+          dump(0x42158540,0x42158940)
+          print('\n=== bounded xrefs to lifecycle functions from 0x42157000..0x4215a000 ===')
+          ins=list(md.disasm(b[off(0x42157000):off(0x4215a000)],0x42157000))
+          targets={0x42158600,0x421586bc,0x421587a0,0x42158800,0x42158840,0x42158880}
+          for k,i in enumerate(ins):
+            c=call(i)
+            if c is not None and 0x42158540<=c<0x42158940:
+              print(f'\nCALL {c:#x} @ {i.address:#x}')
+              for j in ins[max(0,k-10):min(len(ins),k+5)]:print(fmt(j))
+          print('\n=== all direct +0xA8/+0xAC/+0xB0 accesses in lifecycle neighborhood ===')
+          for i in md.disasm(b[off(0x42158540):off(0x42158940)],0x42158540):
+            try:
+              for op in ops(i):
+                if op.type==ARM_OP_MEM and op.mem.disp in (0xa8,0xac,0xb0): print(fmt(i));break
+            except:pass
+          print('\n=== all memcpy/memset-like calls and setup in lifecycle neighborhood ===')
+          local=list(md.disasm(b[off(0x42158540):off(0x42158940)],0x42158540))
+          for k,i in enumerate(local):
+            c=call(i)
+            if c in (0x4204f2ec,0x4204efd4,0x4204f1f4,0x4204f218):
+              print(f'\nCALL {c:#x} @ {i.address:#x}')
+              for j in local[max(0,k-10):min(len(local),k+5)]:print(fmt(j))
+          print('\n=== stores of small immediates 1/2/3 near object-like bases ===')
+          for k,i in enumerate(local):
+            o=ops(i)
+            if i.mnemonic.startswith('mov') and len(o)>=2 and o[1].type==ARM_OP_IMM and o[1].imm in (1,2,3):
+              if any(j.mnemonic.startswith('str') for j in local[k+1:min(len(local),k+7)]):
+                print(f'\nIMM {fmt(i)}')
+                for j in local[max(0,k-4):min(len(local),k+9)]:print(fmt(j))
+          print('\nTARGET: identify the lifecycle/constructor counterpart to the 0x421586B2 table clear, establish how a non-null object pointer enters context+0x1D50, and detect any initialization of object+0xAC to contrast enum 1/2/3.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v201_object_lifecycle_contrast_init.txt
+          git commit -m 'research: record v2.01 object lifecycle contrast init' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
