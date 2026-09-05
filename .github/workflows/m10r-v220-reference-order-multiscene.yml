@@ -1,0 +1,148 @@
+name: M10-R v2.20 multi-scene reference order replication
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v220-reference-order-multiscene.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install analysis dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl >/dev/null
+          python3 -m pip install --quiet rawpy pillow numpy
+      - name: Extract exact firmware nonlinear assets once
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          rm -rf /tmp/m10r_b2y_assets
+          python3 tools/m10r_b2y_assets.py /tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin /tmp/m10r_b2y_assets >/dev/null
+      - name: Fit six independently verified JPEG/DNG pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/m10r_v220
+          for id in 01 02 03 04 05 06; do
+            echo "=== sample $id ==="
+            base="https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_${id}"
+            curl -L --fail --retry 3 --retry-delay 2 "$base.jpg" -o "/tmp/m10r_v220/${id}.jpg"
+            curl -L --fail --retry 3 --retry-delay 2 "$base.dng" -o "/tmp/m10r_v220/${id}.dng"
+            exiftool -j -n \
+              -Make -Model -SerialNumber -ImageUniqueID -DateTimeOriginal -CreateDate \
+              -ExposureTime -FNumber -ISO -FocalLength -ExposureCompensation \
+              -WhiteBalance -Contrast -Saturation -Sharpness \
+              "/tmp/m10r_v220/${id}.jpg" "/tmp/m10r_v220/${id}.dng" > "/tmp/m10r_v220/${id}_exif.json"
+            python3 tools/m10r_reference_order_fit.py \
+              --jpg "/tmp/m10r_v220/${id}.jpg" \
+              --dng "/tmp/m10r_v220/${id}.dng" \
+              --assets /tmp/m10r_b2y_assets \
+              --sample "$id" \
+              --metadata-json "/tmp/m10r_v220/${id}_exif.json" \
+              --out "/tmp/m10r_v220/${id}_fit.json" >/dev/null
+            rm -f "/tmp/m10r_v220/${id}.jpg" "/tmp/m10r_v220/${id}.dng"
+          done
+      - name: Aggregate independent scene results
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, statistics
+          from pathlib import Path
+
+          rows=[]
+          for p in sorted(Path('/tmp/m10r_v220').glob('*_fit.json')):
+            r=json.loads(p.read_text()); rows.append(r)
+
+          valid=[r for r in rows if r.get('metadata',{}).get('identity_supported') is True
+                 and r.get('metadata',{}).get('default_jpeg_controls') is True
+                 and r.get('fits')]
+
+          out=[]
+          out.append('M10-R v2.20 MULTI-SCENE PUBLIC REFERENCE ORDER REPLICATION')
+          out.append('source: Photography Blog M10-R review samples 01..06; each JPEG/DNG pair identity checked independently')
+          out.append('IMPORTANT: empirical replication, not direct hardware mux proof.')
+          out.append('')
+          out.append('=== per-sample verification and fits ===')
+          for r in rows:
+            m=r['metadata']; j=m.get('jpg',{}); a=r['alignment']; p=r['patches']
+            out.append(f"sample {r['sample']} identity={m.get('identity_supported')} defaults={m.get('default_jpeg_controls')} "
+                       f"ISO={j.get('ISO')} shutter={j.get('ExposureTime')} f={j.get('FNumber')} "
+                       f"align=({a['dx']},{a['dy']}) score={a['score']:.6f} patches={p['fit']}")
+            if r.get('fits'):
+              for rnd in ('trunc','nearest'):
+                dg=r['fits'][f'dg-tone|{rnd}']; td=r['fits'][f'tone-dg|{rnd}']; d=r['deltas'][rnd]
+                out.append(f"  {rnd}: dg-tone rmse={dg['test_rmse']:.6f} gamma={dg['output_gamma']:.3f} scale={dg['raw_scale']:.3f}; "
+                           f"tone-dg rmse={td['test_rmse']:.6f} gamma={td['output_gamma']:.3f} scale={td['raw_scale']:.3f}; delta={d:.6f}")
+            else:
+              out.append(f"  ERROR {r.get('error','no fit')}")
+
+          out.append('')
+          out.append('=== aggregate ===')
+          aggregate={"total":len(rows),"valid":len(valid),"rounding":{}}
+          for rnd in ('trunc','nearest'):
+            deltas=[r['deltas'][rnd] for r in valid]
+            wins=sum(d>0 for d in deltas)
+            losses=sum(d<0 for d in deltas)
+            ties=sum(d==0 for d in deltas)
+            td_gamma=[r['fits'][f'tone-dg|{rnd}']['output_gamma'] for r in valid]
+            dg_gamma=[r['fits'][f'dg-tone|{rnd}']['output_gamma'] for r in valid]
+            rec={
+              'wins_tone_dg':wins,'losses_tone_dg':losses,'ties':ties,
+              'deltas':deltas,
+              'median_delta':statistics.median(deltas) if deltas else None,
+              'mean_delta':statistics.mean(deltas) if deltas else None,
+              'tone_dg_gamma_median':statistics.median(td_gamma) if td_gamma else None,
+              'dg_tone_gamma_median':statistics.median(dg_gamma) if dg_gamma else None,
+            }
+            aggregate['rounding'][rnd]=rec
+            out.append(f"{rnd}: valid={len(deltas)} tone-dg wins={wins} losses={losses} ties={ties} "
+                       f"median_delta={rec['median_delta']} mean_delta={rec['mean_delta']} "
+                       f"median_gamma tone-dg={rec['tone_dg_gamma_median']} dg-tone={rec['dg_tone_gamma_median']}")
+            out.append('  deltas '+repr(deltas))
+
+          supported=False
+          if len(valid)>=4:
+            supported=all(aggregate['rounding'][rnd]['wins_tone_dg'] >= max(4, int(0.8*len(valid)+0.9999))
+                          and aggregate['rounding'][rnd]['median_delta'] is not None
+                          and aggregate['rounding'][rnd]['median_delta'] > 0.05
+                          for rnd in ('trunc','nearest'))
+          aggregate['empirical_tone_dg_preference_supported']=supported
+          out.append('')
+          out.append('EMPIRICAL_TONE_DG_PREFERENCE_SUPPORTED '+str(supported))
+          out.append('criterion: >=4 valid pairs; tone-dg wins >=80% (minimum 4) under both rounding modes; median held-out RMSE advantage >0.05')
+          out.append('')
+          out.append('LIMITATIONS')
+          out.append('- RAW green-site mean is still a proxy for the exact post-WB/post-CC B2Y scalar input.')
+          out.append('- output affine/gamma absorbs downstream YC/JPEG transfer.')
+          out.append('- scene detail/local processing is reduced by neutral flat-patch selection, not eliminated.')
+          out.append('- a consistent result can justify an empirical renderer-order freeze, but must be labeled separately from direct hardware routing proof.')
+
+          Path('research/M10R_v220_reference_order_multiscene.txt').write_text('\n'.join(out)+'\n')
+          Path('research/M10R_v220_reference_order_multiscene.json').write_text(json.dumps({'samples':rows,'aggregate':aggregate},indent=2,sort_keys=True)+'\n')
+          print('\n'.join(out))
+          PY
+      - name: Commit replication evidence
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v220_reference_order_multiscene.txt research/M10R_v220_reference_order_multiscene.json
+          git commit -m 'research: record v2.20 multi-scene order replication' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
