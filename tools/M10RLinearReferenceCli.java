@@ -5,7 +5,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 
-/** Host-side real-DNG validator for v0.5.1 plus the isolated v0.5.2 highlight A/B candidate. */
+/** Host-side real-DNG validator for the v0.5.3 2x2 highlight-boundary experiment. */
 public final class M10RLinearReferenceCli {
     private M10RLinearReferenceCli() {}
 
@@ -16,18 +16,25 @@ public final class M10RLinearReferenceCli {
             DngMetadataReader.DngInfo info = DngMetadataReader.read(channel);
             DngRawDecoder.RawImage raw = DngRawDecoder.decode(channel);
             SensorPreviewCore.PreviewResult sensor = SensorPreviewCore.render(raw, info);
-            M10RLinearReferenceRenderer.Result leica = M10RLinearReferenceRenderer.render(raw, info);
-            M10RNeutralClipReferenceRenderer.Result candidate =
-                    M10RNeutralClipReferenceRenderer.render(raw, info);
+            M10RLinearReferenceRenderer.Result a = M10RLinearReferenceRenderer.render(raw, info);
+            M10RHighlightFactorialRenderer.Result b = M10RHighlightFactorialRenderer.render(
+                    raw, info, M10RHighlightFactorialRenderer.Mode.WHITELEVEL_CLAMP_ONLY);
+            M10RHighlightFactorialRenderer.Result c = M10RHighlightFactorialRenderer.render(
+                    raw, info, M10RHighlightFactorialRenderer.Mode.HEADROOM_NEUTRAL_CLIP_ONLY);
+            M10RNeutralClipReferenceRenderer.Result d = M10RNeutralClipReferenceRenderer.render(raw, info);
 
             System.out.println(info.summary());
             System.out.println(raw.diagnosticSummary());
             System.out.println(sensor.diagnosticSummary());
             System.out.println("Sensor ARGB8 SHA-256 (A,R,G,B byte order): " + argbSha(sensor.argb));
-            System.out.println(leica.diagnosticSummary());
-            System.out.println("Leica linear ARGB8 SHA-256 (A,R,G,B byte order): " + argbSha(leica.argb));
-            System.out.println(candidate.diagnosticSummary());
-            System.out.println("CA9 neutral-clip ARGB8 SHA-256 (A,R,G,B byte order): " + argbSha(candidate.argb));
+            System.out.println("A — " + a.diagnosticSummary());
+            System.out.println("A ARGB8 SHA-256: " + argbSha(a.argb));
+            System.out.println("B — " + b.diagnosticSummary());
+            System.out.println("B ARGB8 SHA-256: " + argbSha(b.argb));
+            System.out.println("C — " + c.diagnosticSummary());
+            System.out.println("C ARGB8 SHA-256: " + argbSha(c.argb));
+            System.out.println("D — " + d.diagnosticSummary());
+            System.out.println("D ARGB8 SHA-256: " + argbSha(d.argb));
         }
     }
 
