@@ -1,0 +1,146 @@
+name: M10-R v2.27 CA9 rendered CC constructor wiring
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v227-ca9-rendered-cc-constructor-wiring.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Unpack canonical firmware and trace exact CA9 constructor wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v227_ca9_rendered_cc_constructor_wiring.txt
+          from pathlib import Path
+          import re, struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_ARM,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_REG_PC
+
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes(); BASE=0x40000000; PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN); md.detail=True
+          def off(a): return PFX+a-BASE
+          def va(o): return BASE+o-PFX
+          def string_at(a,lim=200):
+              o=off(a)
+              if not 0<=o<len(b): return None
+              e=b.find(b'\0',o,min(len(b),o+lim))
+              if e<0:return None
+              bb=b[o:e]
+              if len(bb)>=4 and all(32<=x<127 for x in bb): return bb.decode('ascii','replace')
+          def lit(i):
+              try:
+                  if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                      return i.address+8+i.operands[1].mem.disp
+              except:pass
+          def fmt(i):
+              s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+              la=lit(i)
+              if la is not None:
+                  o=off(la)
+                  if 0<=o<=len(b)-4:
+                      v=struct.unpack_from('<I',b,o)[0]; s+=f' ; LIT {la:08x}->{v:08x}'
+                      st=string_at(v) if BASE<=v<BASE+len(b)-PFX else None
+                      if st:s+=f' STRING={st!r}'
+              return s
+          def dis(a,z): return list(md.disasm(b[off(a):off(z)],a))
+          def u32(v):
+              n=struct.pack('<I',v); out=[]; q=0
+              while True:
+                  q=b.find(n,q)
+                  if q<0:break
+                  out.append(va(q));q+=1
+              return out
+          def refs_to(addr):
+              refs=[]
+              for i in md.disasm(b[PFX:],BASE):
+                  if i.mnemonic in ('bl','blx'):
+                      try:
+                          t=int(i.op_str.strip().lstrip('#'),16)
+                          if t==addr: refs.append(i.address)
+                      except: pass
+              return refs
+
+          print('M10-R v2.27 CA9 RENDERED-CC CONSTRUCTOR WIRING')
+          print('Scope: 099_IMG-CA9_System.bin; exact functions only.')
+          print('Frozen input boundary: DNG ASN recovers CA9 integer WB gains; MapWhiteMatrix/NeutralToXY/MatrixInterpolate core math frozen in v2.26.')
+          print()
+
+          # The helper called repeatedly by NeutralToXY. Determine exact role and dependency set.
+          print('=== helper 0x40005D80..0x40005E94 (NeutralToXY per-pass helper / candidate FindXYZtoCamera) ===')
+          for i in dis(0x40005d80,0x40005e94): print(fmt(i))
+          print()
+          print('calls into 0x40005D80:', [hex(x) for x in refs_to(0x40005d80)])
+          print('calls into MatrixInterpolate 0x40005C5C:', [hex(x) for x in refs_to(0x40005c5c)])
+          print('calls into MapWhiteMatrix 0x400058B8:', [hex(x) for x in refs_to(0x400058b8)])
+          print()
+
+          # Constructor from earlier trace, widened to include result placement and both CC branches.
+          print('=== high-level ColorSpec / rendered-CC constructor 0x40003B40..0x40004030 ===')
+          for i in dis(0x40003b40,0x40004030): print(fmt(i))
+          print()
+
+          # Small matrix primitives used by the above functions.
+          primitives=[
+              (0x40004370,0x400043e0,'matrix scalar multiply candidate'),
+              (0x400043e0,0x40004490,'matrix compare/copy candidate'),
+              (0x40004490,0x40004678,'matrix multiply candidate'),
+              (0x40004678,0x40004754,'matrix transform/multiply candidate'),
+              (0x40004754,0x400047e8,'matrix add candidate'),
+              (0x400047e8,0x4000492c,'white/vector transform candidate'),
+              (0x4000492c,0x40004a40,'XYZ-to-xy candidate'),
+          ]
+          for a,z,n in primitives:
+              print(f'=== primitive {n} {a:08x}..{z:08x} ===')
+              for i in dis(a,z): print(fmt(i))
+              print()
+
+          # Identify named strings around this exact library and references to matrix operation names.
+          print('=== nearby CA9 ColorSpec/matrix diagnostic strings ===')
+          for m in re.finditer(rb'[ -~]{5,}\x00',b):
+              s=m.group()[:-1].decode('ascii','replace')
+              if re.search(r'(?i)(ColorSpec|Matrix|XYZ|White|Neutral|CameraTo|PCSTo|Forward)',s):
+                  a=va(m.start())
+                  if 0x40013000<=a<=0x40015000:
+                      print(f'{a:08x} {s!r}')
+          print()
+
+          # Exact object-field reads in constructor; this makes hidden scene-varying inputs visible.
+          print('=== constructor object field accesses (r4/r4+8 and pointed profile object) ===')
+          for i in dis(0x40003b40,0x40004030):
+              txt=f'{i.mnemonic} {i.op_str}'
+              if re.search(r'\[r4(?:,|\])|\[r[0-9]+, #0x(?:20|24|28|38|40|68|70|98|e0)\]',txt):
+                  print(fmt(i))
+          print()
+
+          print('=== DECISION BOUNDARY ===')
+          print('PROVE only direct data-flow identities visible above.')
+          print('If 0x40005D80 consists solely of white->temperature plus MatrixInterpolate and matrix operations, then no additional live scene state enters FindXYZtoCamera.')
+          print('If constructor inputs are limited to the frozen profile object plus ASN-derived white point, the rendered-CC path is DNG-reconstructable in principle.')
+          print('Do not label CC0/CC1 formulas until their final destination buffers and matrix products are directly identified.')
+          PY
+      - name: Commit v2.27 trace
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v227_ca9_rendered_cc_constructor_wiring.txt
+          git commit -m 'research: record v2.27 CA9 rendered CC constructor wiring' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
