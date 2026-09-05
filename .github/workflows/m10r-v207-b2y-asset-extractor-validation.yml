@@ -1,0 +1,78 @@
+name: M10-R v2.07 B2Y asset extractor validation
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v207-b2y-asset-extractor-validation.yml']
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract firmware and validate reproducible B2Y assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          rm -rf /tmp/m10r_b2y_assets
+          python3 tools/m10r_b2y_assets.py /tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin /tmp/m10r_b2y_assets > /tmp/manifest.stdout.json
+          python3 - <<'PY' > research/M10R_v207_b2y_asset_extractor_validation.txt
+          from pathlib import Path
+          import json, hashlib, struct
+          p=Path('/tmp/m10r_b2y_assets')
+          m=json.loads((p/'manifest.json').read_text())
+          exp={
+            'low':'136b69127e73cc43c28c0aa7b511f1f3e9b29be139f4d491422f2eb574a49fb0',
+            'medium':'2fd6ca209f290c75aa96976b3d7692e55c41a55c0017a063aba9808da3b41a00',
+            'high':'0a764cf29d35cd4a4eb7f816e5d128bccaef81b4d5eca991d9b80ab207bd0101',
+          }
+          assert m['format']=='m10r-b2y-assets-v1'
+          assert m['default_still_contrast']=={'enum':2,'name':'MEDIUM','suffix':'_CONTRAST:MEDIUM','firmware_status':'frozen'}
+          assert m['tone']['active_entries']==10240
+          for k,h in exp.items():
+            assert m['tone']['tables'][k]['sha256']==h,(k,m['tone']['tables'][k]['sha256'])
+          assert m['tone']['tables']['low']['min']==0x8000==m['tone']['tables']['low']['max']
+          assert m['differential_gamma']['main_sha256']=='1678c7f99ab1fac958ffb068d20a0c24ab1677adf20a916335d0b2947fc8a1a1'
+          assert m['differential_gamma']['expanded_entries']==32768
+          assert m['differential_gamma']['expanded_min']==0
+          assert m['differential_gamma']['expanded_max']==16383
+          assert m['differential_gamma']['expanded_monotonic'] is True
+          raw=(p/'dg_expanded_u16le.bin').read_bytes()
+          assert len(raw)==65536
+          v=struct.unpack('<32768H',raw)
+          assert all(a<=b for a,b in zip(v,v[1:]))
+          for i in range(2048):
+            fl=struct.unpack_from('<H',(p/'dg_fl_u16le.bin').read_bytes(),i*2)[0]
+            assert v[i*16]==fl
+          print('M10-R v2.07 B2Y ASSET EXTRACTOR VALIDATION')
+          print('status PASS')
+          print('default_still_contrast',m['default_still_contrast'])
+          print('source_sha256',m['source_sha256'])
+          for k in ('low','medium','high'):
+            t=m['tone']['tables'][k]
+            print('tone',k,'sha256',t['sha256'],'min',t['min'],'max',t['max'],'unique',t['unique'])
+          d=m['differential_gamma']
+          print('dg_main_sha256',d['main_sha256'])
+          print('dg_fl_sha256',d['fl_sha256'])
+          print('dg_expanded_sha256',d['expanded_sha256'])
+          print('dg_expanded_entries/min/max',d['expanded_entries'],d['expanded_min'],d['expanded_max'])
+          print('dg_expanded_first32',list(v[:32]))
+          print('dg_expanded_last32',list(v[-32:]))
+          print('files',sorted(x.name for x in p.iterdir()))
+          print('implementation_boundary: assets are exact; tone live-domain normalization/rounding and inter-stage ordering remain separate questions.')
+          PY
+      - name: Commit validation result
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v207_b2y_asset_extractor_validation.txt
+          git commit -m 'research: validate v2.07 B2Y asset extractor' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
