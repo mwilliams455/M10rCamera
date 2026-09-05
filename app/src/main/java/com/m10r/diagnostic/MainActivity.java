@@ -34,7 +34,7 @@ public class MainActivity extends Activity {
         root.setPadding(pad, pad, pad, pad);
 
         TextView title = new TextView(this);
-        title.setText("M10-R DNG Diagnostic v0.2");
+        title.setText("M10-R RAW Diagnostic v0.3");
         title.setTextSize(22f);
         root.addView(title);
 
@@ -63,12 +63,12 @@ public class MainActivity extends Activity {
         root.addView(result);
 
         Button choose = new Button(this);
-        choose.setText("Choose M10-R DNG");
+        choose.setText("Choose M10-R DNG + Decode CFA");
         choose.setOnClickListener(v -> chooseDng());
         root.addView(choose);
 
         fileStatus = new TextView(this);
-        fileStatus.setText("No DNG selected. v0.2 reads TIFF/DNG metadata and feeds real AsShotNeutral into the Leica CA9 path.");
+        fileStatus.setText("No DNG selected. v0.3 parses Leica DNG metadata and pixel-exact decodes compression-7 SOF3 CFA data; demosaic remains intentionally disabled.");
         fileStatus.setPadding(0, pad / 2, 0, 0);
         fileStatus.setTextIsSelectable(true);
         root.addView(fileStatus);
@@ -132,32 +132,34 @@ public class MainActivity extends Activity {
         } catch (SecurityException ignored) {
             // A transient grant is sufficient for this immediate diagnostic read.
         }
-        fileStatus.setText("Reading DNG metadata…\n" + uri);
-        new Thread(() -> parseDng(uri), "m10r-dng-metadata").start();
+        fileStatus.setText("Reading DNG metadata and decoding lossless-JPEG CFA…\n" + uri);
+        new Thread(() -> parseAndDecodeDng(uri), "m10r-dng-raw").start();
     }
 
-    private void parseDng(Uri uri) {
+    private void parseAndDecodeDng(Uri uri) {
         try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r")) {
             if (pfd == null) throw new IllegalStateException("content provider returned no file descriptor");
             try (FileInputStream in = new FileInputStream(pfd.getFileDescriptor());
                  FileChannel channel = in.getChannel()) {
                 DngMetadataReader.DngInfo info = DngMetadataReader.read(channel);
-                final String seam;
+                final String rawDiagnostic;
                 if (info.isLosslessJpeg()) {
-                    seam = "Next decoder seam: DNG compression=7, so a lossless-JPEG RAW decoder is required before demosaic.";
+                    DngRawDecoder.RawImage raw = DngRawDecoder.decode(channel);
+                    rawDiagnostic = raw.diagnosticSummary() +
+                            "\n\nDECODER STATUS: PIXELS DECODED. Next seam is black/white normalization + Bayer demosaic.";
                 } else if (info.compression == 1) {
-                    seam = "Next decoder seam: uncompressed CFA payload; direct RAW unpack can be implemented next.";
+                    rawDiagnostic = "RAW decode not run: this file is uncompressed CFA; v0.3 currently targets the proven M10-R compression-7 path.";
                 } else {
-                    seam = "Next decoder seam: compression=" + info.compression + " is not decoded by v0.2.";
+                    rawDiagnostic = "RAW decode not run: unsupported compression=" + info.compression + ".";
                 }
-                runOnUiThread(() -> applyDngInfo(uri, info, seam));
+                runOnUiThread(() -> applyDngInfo(uri, info, rawDiagnostic));
             }
-        } catch (Exception ex) {
-            runOnUiThread(() -> fileStatus.setText("DNG parse failed: " + ex.getClass().getSimpleName() + ": " + ex.getMessage()));
+        } catch (Throwable ex) {
+            runOnUiThread(() -> fileStatus.setText("DNG RAW decode failed: " + ex.getClass().getSimpleName() + ": " + ex.getMessage()));
         }
     }
 
-    private void applyDngInfo(Uri uri, DngMetadataReader.DngInfo info, String seam) {
+    private void applyDngInfo(Uri uri, DngMetadataReader.DngInfo info, String rawDiagnostic) {
         if (info.asShotNeutral != null && info.asShotNeutral.length == 3) {
             neutralR.setText(String.format(Locale.US, "%.10f", info.asShotNeutral[0]));
             neutralG.setText(String.format(Locale.US, "%.10f", info.asShotNeutral[1]));
@@ -170,7 +172,7 @@ public class MainActivity extends Activity {
         } else {
             result.setText("AsShotNeutral was not found as a three-channel DNG field.");
         }
-        fileStatus.setText("Selected: " + uri + "\n\n" + info.summary() + "\n\n" + seam +
-                "\n\nBoundary: v0.2 parses metadata only; it does not yet decode, demosaic, tone-map, or render RAW pixels.");
+        fileStatus.setText("Selected: " + uri + "\n\n" + info.summary() + "\n\n" + rawDiagnostic +
+                "\n\nBoundary: v0.3 decodes the Bayer CFA exactly but does not yet demosaic or render it.");
     }
 }
