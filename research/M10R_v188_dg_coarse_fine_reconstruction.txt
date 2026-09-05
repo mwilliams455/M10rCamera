@@ -1,0 +1,27 @@
+M10-R v1.88 DG COARSE/FINE RECONSTRUCTION
+geometry main 32768 = 2048 x16; FL 2048 u16
+group_first_byte_zero 2048 of 2048
+group0 [0, 9, 10, 10, 10, 9, 10, 10, 10, 9, 10, 10, 10, 9, 10, 10] FL0/1 0 156 delta 156
+group1 [0, 9, 10, 10, 10, 9, 10, 10, 10, 9, 10, 10, 10, 9, 10, 10] FL1/2 156 312 delta 156
+group2 [0, 9, 10, 10, 10, 9, 10, 10, 10, 9, 10, 10, 10, 9, 10, 10] FL2/3 312 468 delta 156
+group3 [0, 11, 11, 12, 11, 11, 12, 11, 12, 11, 11, 12, 11, 11, 12, 11] FL3/4 468 650 delta 182
+
+=== interval quotient/remainder test ===
+intervals_matching floor/ceil delta/16 including implicit final step 2047 of 2047
+residual_range 0 12 residual_counts [(0, 1122), (1, 679), (2, 96), (3, 68), (4, 26), (5, 22), (6, 11), (7, 8), (8, 4), (9, 3), (10, 5), (11, 1), (12, 2)]
+first_misses []
+intervals_exact_q_remainder_distribution 2047 of 2047
+distribution_misses []
+
+=== reconstructed 15-bit -> 14-bit curve ===
+len 32768 minmax 0 16383 monotone True unique 8295
+first64 [0, 9, 19, 29, 39, 48, 58, 68, 78, 87, 97, 107, 117, 126, 136, 146, 156, 165, 175, 185, 195, 204, 214, 224, 234, 243, 253, 263, 273, 282, 292, 302, 312, 321, 331, 341, 351, 360, 370, 380, 390, 399, 409, 419, 429, 438, 448, 458, 468, 479, 490, 502, 513, 524, 536, 547, 559, 570, 581, 593, 604, 615, 627, 638]
+last64 [16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383]
+coarse_anchor_exact True
+boundary_jump_range 0 12 counts [(0, 1122), (1, 679), (2, 96), (3, 68), (4, 26), (5, 22), (6, 11), (7, 8), (8, 4), (9, 3), (10, 5), (11, 1), (12, 2)]
+boundary_jump_equals_residual True
+fine_step_range 0 12 fine_step_counts [(0, 24473), (1, 5060), (2, 1447), (3, 701), (4, 359), (5, 271), (6, 159), (7, 91), (8, 61), (9, 43), (10, 63), (11, 29), (12, 10)]
+best_simple_power_gamma_coarse_samples (7378.874493051569, 1.0) diagnostic_only
+last_nonzero_main_group 924 last_non_saturated_FL 924
+
+TARGET: validate exact 2048 coarse anchors + 16-byte fine-differential encoding, derive a renderer-ready formula if supported, and reject the 32^3 interpretation if this encoding explains the bytes exactly.
