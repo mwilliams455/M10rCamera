@@ -1,0 +1,155 @@
+name: M10-R v2.31 color-space enum and default provenance
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v231-colorspace-enum-default-provenance.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Unpack and trace color-space enum/default
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v231_colorspace_enum_default_provenance.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;P=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(a): return P+a-BASE
+          def va(o): return BASE+o-P
+          def ops(i):
+              try:return i.operands
+              except:return []
+          def call(i):
+              try:
+                  o=ops(i)
+                  if i.mnemonic in ('bl','blx') and o and o[0].type==ARM_OP_IMM:return o[0].imm&~1
+              except: pass
+          def lit(i):
+              try:
+                  o=ops(i)
+                  if i.mnemonic.startswith('ldr') and len(o)>=2 and o[1].type==ARM_OP_MEM and o[1].mem.base==ARM_REG_PC:
+                      la=((i.address+4)&~3)+o[1].mem.disp;fo=off(la)
+                      if 0<=fo<=len(b)-4:return la,struct.unpack_from('<I',b,fo)[0]
+              except:pass
+          def fmt(i):
+              s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i);c=call(i)
+              if q:s+=f' ; LIT {q[0]:08x}->{q[1]:08x}'
+              if c is not None:s+=f' ; CALL {c:08x}'
+              return s
+          def u32_hits(v):
+              n=struct.pack('<I',v);o=[];p=0
+              while True:
+                  p=b.find(n,p)
+                  if p<0:break
+                  o.append(p);p+=1
+              return o
+          def refs_to_pool(pool_addr,span=0x4000):
+              po=off(pool_addr);lo=max(P,po-span)&~1;hi=min(len(b)-2,po+0x20);out=[]
+              for o in range(lo,hi,2):
+                  ins=list(md.disasm(b[o:o+4],va(o),count=1))
+                  if ins and lit(ins[0]) and lit(ins[0])[0]==pool_addr:out.append(ins[0].address)
+              return sorted(set(out))
+          def dump(a,z):
+              for i in md.disasm(b[off(a):off(z)],a):print(fmt(i))
+          def func_window(ref,before=0x140,after=0x240):
+              a=max(BASE,(ref-before)&~1);z=min(BASE+len(b)-P,ref+after)
+              dump(a,z)
+          print('M10-R v2.31 COLOR-SPACE ENUM / DEFAULT PROVENANCE')
+          print('Targets: prove mode 0/1/2 labels and locate the initialized/default value feeding CA9 ColorSpec input +0x20.')
+          print()
+          targets=[]
+          for needle in [b'_COLORSPACE:SRGB\0',b'_COLORSPACE:ADOBERGB\0',b'_COLORSPACE:ECI\0']:
+              o=b.find(needle);a=va(o) if o>=0 else None
+              print(f'string {needle[:-1].decode()} off={o:#x} va={a:#x}' if a else f'MISSING {needle!r}')
+              if a:
+                  pools=u32_hits(a);print(' pointer pools=',[hex(va(x)) for x in pools])
+                  for po in pools:
+                      pa=va(po);refs=refs_to_pool(pa);print(f'  pool {pa:#x} refs={[hex(x) for x in refs]}');targets.extend(refs)
+          print()
+          print('=== bounded xref neighborhoods for _COLORSPACE suffixes ===')
+          for r in sorted(set(targets)):
+              print(f'-- ref {r:08x} --');func_window(r)
+          print()
+
+          # Exact generic color-space diagnostic string from v2.30.
+          for needle in [b'[in] color space:',b'ColorSpace',b'colorspace',b'COLORSPACE']:
+              print(f'=== occurrences/xrefs for {needle!r} ===')
+              p=0;count=0
+              while True:
+                  p=b.find(needle,p)
+                  if p<0:break
+                  # find asciiz start
+                  s=p
+                  while s>0 and 32<=b[s-1]<127:s-=1
+                  e=b.find(b'\0',p,min(len(b),p+300));e=e if e>=0 else p+len(needle)
+                  text=b[s:e].decode('ascii','replace');a=va(s)
+                  print(f' string@{a:08x} {text!r}')
+                  for po in u32_hits(a):
+                      pa=va(po);refs=refs_to_pool(pa);print(f'  pool {pa:08x} refs={[hex(x) for x in refs]}');
+                      for r in refs[:10]:print(f'   REF {r:08x}')
+                  p=e+1;count+=1
+                  if count>=30:break
+              print()
+
+          # Search compact enum-switch patterns near discovered refs: cmp #0,#1,#2 and table branches.
+          print('=== exact stores of immediate 0/1/2 near COLORSPACE xref functions ===')
+          for r in sorted(set(targets)):
+              a=max(BASE,(r-0x300)&~1);z=min(BASE+len(b)-P,r+0x500)
+              for i in md.disasm(b[off(a):off(z)],a):
+                  txt=f'{i.mnemonic} {i.op_str}'
+                  if (i.mnemonic.startswith('str') or i.mnemonic.startswith('mov') or i.mnemonic.startswith('cmp')) and re.search(r'(#0x?0\b|#0x?1\b|#0x?2\b)',txt):print(fmt(i))
+          print()
+
+          # Search for exact call to CA9 fill wrapper known at 0x420A591C; inspect its callers to identify source object +0x20 population.
+          print('=== direct callers of ca9_cm_fill_parameter 0x420A591C ===')
+          callers=[]
+          for i in md.disasm(b[P:],BASE):
+              c=call(i)
+              if c==0x420a591c:callers.append(i.address)
+          print([hex(x) for x in callers])
+          for r in callers[:20]:
+              print(f'-- caller {r:08x} --');func_window(r,0x300,0x400)
+          print()
+
+          # Global scan for initialization patterns that set a byte/word field +0x20 to small enum then soon call a ColorManagement/CA9 wrapper.
+          print('=== candidate +0x20 small-enum stores in IMG-System ===')
+          hits=[]
+          for i in md.disasm(b[P:],BASE):
+              try:
+                  oo=ops(i)
+                  if i.mnemonic.startswith('str') and len(oo)>=2 and oo[1].type==ARM_OP_MEM and oo[1].mem.disp==0x20:
+                      hits.append(i.address)
+              except:pass
+          print('count=',len(hits),'first=',[hex(x) for x in hits[:200]])
+          for r in hits[:120]:
+              print(f'-- +0x20 store {r:08x} --');func_window(r,0x50,0x90)
+          print()
+          print('=== DECISION ===')
+          print('Freeze mode labels only from suffix/string control flow or explicit profile names, not numeric matrix resemblance alone.')
+          print('Freeze default STILL color space only if a factory initializer/registration path supplies a stable enum before ca9_cm_fill_parameter consumes object+0x20.')
+          PY
+      - name: Commit v2.31 trace
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v231_colorspace_enum_default_provenance.txt
+          git commit -m 'research: record v2.31 color-space enum and default provenance' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
