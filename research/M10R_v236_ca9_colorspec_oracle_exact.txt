@@ -1,0 +1,366 @@
+M10-R v2.36 EXACT CA9 COLORSPEC ORACLE TRACE
+Bounded goal: close SetWhiteXY matrix products and rendered-CC rounding; no broad CA9 scan.
+
+=== SetWhiteXY matrix helpers 0x40005990 / 0x400059F8 40005980..40005a90 ===
+40005980: ldr        r0, [pc, #0x208] ; LIT 40005b90->400142b0 F64=3.1592924072911111e-152
+40005984: add        r2, sp, #0x48
+40005988: add        r1, sp, #0x170
+4000598c: bl         #0x40004678
+40005990: vldr       d0, [sp, #0x30]
+40005994: bl         #0x40012fd0
+40005998: vldr       d0, [sp, #0x38]
+4000599c: mov        r5, r0
+400059a0: bl         #0x40012fd0
+400059a4: vldr       d0, [sp, #0x40]
+400059a8: orr        r5, r5, r0
+400059ac: bl         #0x40012fd0
+400059b0: orr        r5, r5, r0
+400059b4: cmp        r5, #1
+400059b8: bne        #0x40005a0c
+400059bc: movw       r4, #0x401
+400059c0: mov        r1, #0xc8
+400059c4: add        r0, sp, #0xa8
+400059c8: bl         #0x4000fc6c
+400059cc: vldr       d0, [sp, #0x40]
+400059d0: add        r1, pc, #0x1bc
+400059d4: add        r0, sp, #0xa8
+400059d8: vstr       d0, [sp, #8]
+400059dc: vldr       d0, [sp, #0x38]
+400059e0: vstr       d0, [sp]
+400059e4: vldr       d0, [sp, #0x30]
+400059e8: vmov       r2, r3, d0
+400059ec: blx        #0x4000fa50
+400059f0: ldr        r2, [pc, #0x1c8] ; LIT 40005bc0->40014340 F64=3.1876206139845181e-28
+400059f4: add        r0, sp, #0xa8
+400059f8: str        r0, [sp]
+400059fc: mov        r3, #0xa1
+40005a00: add        r1, pc, #0x1bc
+40005a04: mov        r0, #4
+40005a08: bl         #0x4000ded4
+40005a0c: cmp        r5, #1
+40005a10: bne        #0x40005a64
+40005a14: mov        r4, #0x410
+40005a18: mov        r1, #0xc8
+40005a1c: add        r0, sp, #0xa8
+40005a20: bl         #0x4000fc6c
+40005a24: vldr       d0, [sp, #0x40]
+40005a28: add        r1, pc, #0x1a4
+40005a2c: add        r0, sp, #0xa8
+40005a30: vstr       d0, [sp, #8]
+40005a34: vldr       d0, [sp, #0x38]
+40005a38: vstr       d0, [sp]
+40005a3c: vldr       d0, [sp, #0x30]
+40005a40: vmov       r2, r3, d0
+40005a44: blx        #0x4000fa50
+40005a48: ldr        r2, [pc, #0x170] ; LIT 40005bc0->40014340 F64=3.1876206139845181e-28
+40005a4c: add        r0, sp, #0xa8
+40005a50: str        r0, [sp]
+40005a54: mov        r3, #0xb0
+40005a58: add        r1, pc, #0x164
+40005a5c: mov        r0, #4
+40005a60: bl         #0x4000ded4
+40005a64: vldr       d0, [sp, #0x48]
+40005a68: cmp        r5, #1
+40005a6c: beq        #0x40005b3c
+40005a70: cmp        r4, #0x400
+40005a74: bhs        #0x40005b2c
+40005a78: vldr       d1, [sp, #0x30]
+40005a7c: vldr       d8, [pc, #0x184]
+40005a80: vdiv.f64   d2, d0, d1
+40005a84: vstr       d2, [sp, #0x60]
+40005a88: vldr       d0, [sp, #0x50]
+40005a8c: vldr       d1, [sp, #0x38]
+
+=== SetWhiteXY + FindXYZtoCamera 40005d70..40005f30 ===
+40005d70: blo        #0x40e56284
+40005d74: ldmdahs    r3!, {r5, r8, sl, sp} ^
+40005d78: stclhs     p5, c2, [r4], #-0xa4
+40005d7c: rsbseq     r2, r3, r0, lsr #10
+40005d80: push       {r4, r5, r6, r7, lr}
+40005d84: mov        r5, r2
+40005d88: mov        r2, r1
+40005d8c: mov        r4, r0
+40005d90: mov        r7, r3
+40005d94: mov        r1, r3
+40005d98: vpush      {d8, d9}
+40005d9c: sub        sp, sp, #0x94
+40005da0: mov        r0, r2
+40005da4: bl         #0x40004d00
+40005da8: cmp        r0, #0x400
+40005dac: bhs        #0x40005e88
+40005db0: mov        r6, #0
+40005db4: vldr       d0, [r4]
+40005db8: bl         #0x40012fd0
+40005dbc: cmp        r0, #1
+40005dc0: beq        #0x40005df4
+40005dc4: vldr       d0, [r4, #8]
+40005dc8: bl         #0x40012fd0
+40005dcc: cmp        r0, #1
+40005dd0: beq        #0x40005df4
+40005dd4: vldr       d0, [r7]
+40005dd8: vldr       d2, [r4]
+40005ddc: vcmpe.f64  d0, d2
+40005de0: vmrs       apsr_nzcv, fpscr
+40005de4: bhi        #0x40005e18
+40005de8: mov        r1, r5
+40005dec: add        r0, r4, #0x10
+40005df0: b          #0x40005e30
+40005df4: ldr        r2, [pc, #-0x90] ; LIT 40005d6c->40014399 F64=3.1876206139845581e-28
+40005df8: sub        r0, pc, #0xa8
+40005dfc: str        r0, [sp]
+40005e00: mov        r3, #0x208
+40005e04: sub        r1, pc, #0x9c
+40005e08: mov        r0, #4
+40005e0c: bl         #0x4000ded4
+40005e10: movw       r6, #0x401
+40005e14: b          #0x40005e84
+40005e18: vldr       d1, [r4, #8]
+40005e1c: vcmpe.f64  d0, d1
+40005e20: vmrs       apsr_nzcv, fpscr
+40005e24: blt        #0x40005e38
+40005e28: mov        r1, r5
+40005e2c: add        r0, r4, #0x58
+40005e30: bl         #0x40012cf0
+40005e34: b          #0x40005e84
+40005e38: vmov.f64   d8, #1.000000e+00
+40005e3c: mov        r1, sp
+40005e40: add        r0, r4, #0x10
+40005e44: vdiv.f64   d3, d8, d2
+40005e48: vdiv.f64   d2, d8, d0
+40005e4c: vdiv.f64   d0, d8, d1
+40005e50: vsub.f64   d1, d2, d0
+40005e54: vsub.f64   d0, d3, d0
+40005e58: vdiv.f64   d9, d1, d0
+40005e5c: vmov.f64   d0, d9
+40005e60: bl         #0x40004370
+40005e64: vsub.f64   d0, d8, d9
+40005e68: add        r1, sp, #0x48
+40005e6c: add        r0, r4, #0x58
+40005e70: bl         #0x40004370
+40005e74: mov        r2, r5
+40005e78: add        r1, sp, #0x48
+40005e7c: mov        r0, sp
+40005e80: bl         #0x40004754
+40005e84: mov        r0, r6
+40005e88: add        sp, sp, #0x94
+40005e8c: vpop       {d8, d9}
+40005e90: pop        {r4, r5, r6, r7, pc}
+40005e94: push       {r4, r5, r6, r7, r8, sb, lr}
+40005e98: mov        r7, #0
+40005e9c: mov        r6, r1
+40005ea0: mov        r4, r0
+40005ea4: mov        r5, r3
+40005ea8: mov        sb, r2
+40005eac: vpush      {d8, d9}
+40005eb0: sub        sp, sp, #0x9c
+40005eb4: mov        r1, #0x48
+40005eb8: vmov.f64   d8, #1.000000e+00
+40005ebc: ldr        r8, [sp, #0xc8]
+40005ec0: add        r0, sp, #0x38
+40005ec4: str        r7, [sp, #0x28]
+40005ec8: str        r7, [sp, #0x2c]
+40005ecc: str        r7, [sp, #0x30]
+40005ed0: str        r7, [sp, #0x34]
+40005ed4: str        r7, [sp, #0x10]
+40005ed8: str        r7, [sp, #0x14]
+40005edc: str        r7, [sp, #0x18]
+40005ee0: str        r7, [sp, #0x1c]
+40005ee4: str        r7, [sp, #0x20]
+40005ee8: str        r7, [sp, #0x24]
+40005eec: bl         #0x4000fc6c
+40005ef0: str        r7, [sp, #0x80]
+40005ef4: cmp        r8, #0
+40005ef8: str        r7, [sp, #0x84]
+40005efc: str        r7, [sp, #0x88]
+40005f00: str        r7, [sp, #0x8c]
+40005f04: str        r7, [sp, #0x90]
+40005f08: str        r7, [sp, #0x94]
+40005f0c: vldr       d0, [r6]
+40005f10: vstr       d0, [r4]
+40005f14: vldr       d0, [r6, #8]
+40005f18: vstr       d0, [r4, #8]
+40005f1c: beq        #0x4000601c
+40005f20: mov        r0, r5
+40005f24: bl         #0x40013024
+40005f28: vdiv.f64   d1, d8, d0
+40005f2c: vldr       d2, [r5]
+
+=== NeutralToXY bounded body 400060e0..40006280 ===
+400060e0: stmdbvs    r0!, {r0, r1, r2, r3, r5, r6, sl, ip, sp, lr}
+400060e4: rsbvc      r7, r5, #0x6e00000
+400060e8: stclvs     p9, c6, [r2], #-0x1d0
+400060ec: andeq      r0, r0, r5, rrx
+400060f0: push       {r0, r1, r2, r3, r4, r5, r6, r7, r8, sb, sl, fp, lr}
+400060f4: mov        r5, #0
+400060f8: mov        fp, r1
+400060fc: mov        sl, r3
+40006100: mov        r8, r2
+40006104: mov        r6, r5
+40006108: vpush      {d8, d9, d10}
+4000610c: sub        sp, sp, #0x94
+40006110: mov        r1, #0x48
+40006114: add        r0, sp, #0x30
+40006118: ldr        sb, [sp, #0xe0]
+4000611c: str        r5, [sp, #0x24]
+40006120: str        r5, [sp, #0x28]
+40006124: str        r5, [sp, #0x2c]
+40006128: str        r5, [sp, #0x20]
+4000612c: str        r5, [sp, #0x10]
+40006130: str        r5, [sp, #0x14]
+40006134: str        r5, [sp, #0x18]
+40006138: str        r5, [sp, #0x1c]
+4000613c: bl         #0x4000fc6c
+40006140: add        r7, sp, #0x20
+40006144: mov        r0, r7
+40006148: bl         #0x400130c8
+4000614c: vmov.f64   d8, #5.000000e-01
+40006150: vldr       d9, [pc, #0x170]
+40006154: str        r5, [sp, #0x84]
+40006158: mov        r3, sl
+4000615c: ldr        r0, [sp, #0xac]
+40006160: mov        r2, sb
+40006164: str        r5, [sp, #0x78]
+40006168: add        r1, sp, #0x20
+4000616c: str        r5, [sp, #0x7c]
+40006170: str        r5, [sp, #0x80]
+40006174: str        r5, [sp, #0x88]
+40006178: str        r5, [sp, #0x8c]
+4000617c: bl         #0x40005d80
+40006180: cmp        r0, #0x400
+40006184: mov        r4, r0
+40006188: bhs        #0x400062a4
+4000618c: add        r1, sp, #0x30
+40006190: mov        r0, sb
+40006194: bl         #0x400043e0
+40006198: cmp        r0, #1
+4000619c: beq        #0x4000621c
+400061a0: add        r2, sp, #0x78
+400061a4: mov        r1, fp
+400061a8: add        r0, sp, #0x30
+400061ac: bl         #0x40004678
+400061b0: add        r1, sp, #0x10
+400061b4: add        r0, sp, #0x78
+400061b8: bl         #0x4000492c
+400061bc: cmp        r0, #0x400
+400061c0: mov        r4, r0
+400061c4: bhs        #0x400062a4
+400061c8: vldr       d0, [sp, #0x10]
+400061cc: vldr       d1, [sp, #0x20]
+400061d0: vsub.f64   d0, d0, d1
+400061d4: bl         #0x40012b18
+400061d8: vmov.f64   d10, d0
+400061dc: vldr       d0, [sp, #0x18]
+400061e0: vldr       d1, [sp, #0x28]
+400061e4: vsub.f64   d0, d0, d1
+400061e8: bl         #0x40012b18
+400061ec: vadd.f64   d0, d10, d0
+400061f0: vcmpe.f64  d9, d0
+400061f4: vmrs       apsr_nzcv, fpscr
+400061f8: ble        #0x40006240
+400061fc: ldr        r0, [sp, #0xac]
+40006200: add        r7, sp, #0x10
+40006204: mov        r3, sl
+40006208: mov        r2, sb
+4000620c: mov        r1, r7
+40006210: bl         #0x40005d80
+40006214: mov        r4, r0
+40006218: b          #0x400062a4
+4000621c: ldr        r2, [pc, #0xac] ; LIT 400062d0->4001437c F64=2.0456242561708091
+40006220: sub        r0, pc, #0x150
+40006224: ldr        r1, [pc, #0xa8] ; LIT 400062d4->40005d70
+40006228: movw       r3, #0x192
+4000622c: str        r0, [sp]
+40006230: mov        r0, #4
+40006234: bl         #0x4000ded4
+40006238: movw       r4, #0x402
+4000623c: b          #0x400062a4
+40006240: cmp        r6, #0xe
+40006244: bne        #0x40006288
+40006248: mov        r3, sl
+4000624c: vldr       d0, [sp, #0x20]
+40006250: vldr       d1, [sp, #0x10]
+40006254: mov        r2, sb
+40006258: add        r1, sp, #0x10
+4000625c: vadd.f64   d0, d0, d1
+40006260: vmul.f64   d0, d0, d8
+40006264: vstr       d0, [sp, #0x10]
+40006268: vldr       d0, [sp, #0x28]
+4000626c: vldr       d1, [sp, #0x18]
+40006270: vadd.f64   d0, d0, d1
+40006274: vmul.f64   d0, d0, d8
+40006278: vstr       d0, [sp, #0x18]
+4000627c: ldr        r0, [sp, #0xac]
+
+=== integer rounding helper 0x40012940 40012920..40012980 ===
+40012920: andeq      r0, r0, r0
+40012924: svclo      #0xe00000
+40012928: andeq      r0, r0, r0
+4001292c: andmi      r0, r0, r0
+
+=== SelectScale and quantizer caller context 40003a30..40003b20 ===
+40003a30: vcvt.s32.f64 s0, d0
+40003a34: vstr       s0, [r5, #0x28]
+40003a38: vpop       {d8}
+40003a3c: pop        {r4, r5, r6, r7, r8, pc}
+40003a40: push       {r4, r5, r6, r7, r8, sb, sl, lr}
+40003a44: mov        r8, r0
+40003a48: ldr        r4, [pc, #0x5e8] ; LIT 40004038->40013930 F64=5.3053855994853905e-315
+40003a4c: mov        sb, r1
+40003a50: mov        r7, #1
+40003a54: vpush      {d8, d9, d10}
+40003a58: ldr        r0, [r4, #0xc]
+40003a5c: ldr        r5, [r4, #8]
+40003a60: cmp        r5, r0
+40003a64: bge        #0x40003ae8
+40003a68: mov        r0, sb
+40003a6c: bl         #0x400041b8
+40003a70: vmov.f64   d10, d0
+40003a74: mov        r0, sb
+40003a78: bl         #0x40004150
+40003a7c: rsb        r0, r5, #9
+40003a80: vmov.f64   d9, d0
+40003a84: lsl        r0, r7, r0
+40003a88: vmov       s0, r0
+40003a8c: vcvt.f64.s32 d8, s0
+40003a90: vmul.f64   d0, d10, d8
+40003a94: blx        #0x40012940
+40003a98: vcvt.s32.f64 s0, d0
+40003a9c: ldr        r1, [r4]
+40003aa0: vmov       r0, s0
+40003aa4: vmul.f64   d0, d9, d8
+40003aa8: cmp        r0, r1
+40003aac: movge      r6, #1
+40003ab0: movlt      r6, #0
+40003ab4: blx        #0x40012940
+40003ab8: vcvt.s32.f64 s0, d0
+40003abc: ldr        r1, [r4, #4]
+40003ac0: vmov       r0, s0
+40003ac4: cmp        r0, r1
+40003ac8: movle      r0, #1
+40003acc: movgt      r0, #0
+40003ad0: tst        r0, r6
+40003ad4: bne        #0x40003ae8
+40003ad8: ldr        r0, [r4, #0xc]
+40003adc: add        r5, r5, #1
+40003ae0: cmp        r5, r0
+40003ae4: blt        #0x40003a68
+40003ae8: str        r5, [r8]
+40003aec: vpop       {d8, d9, d10}
+40003af0: pop        {r4, r5, r6, r7, r8, sb, sl, pc}
+40003af4: push       {r4, r5, r6, r7, r8, sb, sl, fp, lr}
+40003af8: mov        r7, #0
+40003afc: mov        r4, r0
+40003b00: mov        r1, #0x48
+40003b04: vpush      {d8, d9, d10}
+40003b08: sub        sp, sp, #0x324
+40003b0c: add        r0, sp, #0x2c8
+40003b10: str        r7, [sp, #0x120]
+40003b14: str        r7, [sp, #0x128]
+40003b18: str        r7, [sp, #0x12c]
+40003b1c: str        r7, [sp, #0x134]
+
+=== REQUIRED DECISIONS ===
+1. Express helpers 0x40005990 and 0x400059F8 as explicit 3x3/xy formulas only from their dataflow.
+2. Confirm NeutralToXY iteration details already frozen in v2.26.
+3. Freeze 0x40012940 tie behavior if its instructions prove it; otherwise leave tie behavior explicitly unresolved.
+4. Do not replace missing semantics with generic DNG SDK assumptions.
