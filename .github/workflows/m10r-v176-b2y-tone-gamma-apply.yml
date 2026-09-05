@@ -1,0 +1,89 @@
+name: M10-R v1.76 B2Y tone/gamma apply trace
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v176-b2y-tone-gamma-apply.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace B2Y deknee gamma interpolation-gamma tone apply helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v176_b2y_tone_gamma_apply.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;PFX=4;END=BASE+len(b)-PFX
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(a):return PFX+a-BASE
+          def dis(a,z):return list(md.disasm(b[off(max(BASE,a)):off(min(END,z))],max(BASE,a)))
+          def call(i):
+            try:
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm&~1
+            except:pass
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;o=off(la)
+                if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+            except:pass
+          def cstr(a,lim=300):
+            o=off(a)
+            if not 0<=o<len(b):return None
+            e=b.find(b'\0',o,min(len(b),o+lim));q=b[o:e]
+            if e>o and all(0x20<=x<=0x7e for x in q):return q.decode('ascii','replace')
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i);c=call(i)
+            if q:
+              s+=f' ; LIT {q[0]:#x}->{q[1]:#x}';st=cstr(q[1])
+              if st:s+=f' STRING={st!r}'
+            if c is not None:s+=f' ; CALL {c:#x}'
+            return s
+          print('M10-R v1.76 B2Y TONE/GAMMA APPLY HELPERS')
+          helpers=[
+            (0x420d1170,'deknee'),
+            (0x420d15e8,'differential_gamma_tbl'),
+            (0x420d1648,'differential_gamma_tbl0'),
+            (0x420d1690,'differential_gamma_tbl_fl'),
+            (0x420d25a4,'interpolation_gamma'),
+            (0x420d3c1c,'tone_control'),
+            (0x421a0fc0,'B2Y_record_lookup')]
+          for a,n in helpers:
+            print(f'\n=== {n} {a:#x} first 0x700 ===')
+            for i in dis(a,a+0x700):print(fmt(i))
+          print('\n=== live selector orchestration 0x42154f84..0x42155110 ===')
+          for i in dis(0x42154f84,0x42155110):print(fmt(i))
+          print('\n=== direct callers of helpers in B2Y selector region ===')
+          reg=dis(0x42153900,0x42155110)
+          for a,n in helpers:
+            hs=[i.address for i in reg if call(i)==a]
+            print(n,hex(a),[hex(x) for x in hs])
+          print('\n=== MMIO literals inside helper bodies ===')
+          for a,n in helpers[:-1]:
+            for i in dis(a,a+0x700):
+              q=lit(i)
+              if q and 0x20000000<=q[1]<0x21000000:print(n,fmt(i))
+          print('\nTARGET: derive record field layout and exact B2Y hardware destinations for deknee, differential gamma, interpolation gamma and tone control. Distinguish scalar controls from LUT/table uploads and identify required first-parity transforms.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v176_b2y_tone_gamma_apply.txt
+          git commit -m 'research: record v1.76 B2Y tone/gamma apply trace' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
