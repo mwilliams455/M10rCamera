@@ -28,10 +28,14 @@ public class MainActivity extends Activity {
     private TextView fileStatus;
     private ImageView sensorPreviewView;
     private ImageView leicaPreviewView;
-    private ImageView highlightPreviewView;
+    private ImageView whiteClampPreviewView;
+    private ImageView headroomNeutralPreviewView;
+    private ImageView compositePreviewView;
     private Bitmap sensorPreviewBitmap;
     private Bitmap leicaPreviewBitmap;
-    private Bitmap highlightPreviewBitmap;
+    private Bitmap whiteClampPreviewBitmap;
+    private Bitmap headroomNeutralPreviewBitmap;
+    private Bitmap compositePreviewBitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +47,7 @@ public class MainActivity extends Activity {
         root.setPadding(pad, pad, pad, pad);
 
         TextView title = new TextView(this);
-        title.setText("M10-R RAW Diagnostic v0.5.2");
+        title.setText("M10-R RAW Diagnostic v0.5.3");
         title.setTextSize(22f);
         root.addView(title);
 
@@ -52,7 +56,7 @@ public class MainActivity extends Activity {
                 "Boundary: full Leica xy→temperature / NeutralToXY and RAW/DNG decoding are not wired in this diagnostic build.",
                 "Boundary: ColorSpec self-check core only; RAW/DNG decoding and NeutralToXY are wired downstream.");
         status.setText(coreStatus +
-                "\n\nv0.5.2 A/B diagnostic: frozen v0.4 sensor sanity + unchanged v0.5.1 Leica linear reference + one EXPERIMENTAL CA9 neutral-domain highlight-clipping candidate. The candidate is not firmware-parity claimed. MEDIUM tone and Differential Gamma remain disabled.");
+                "\n\nv0.5.3 highlight factorial: frozen v0.4 sensor sanity + unchanged v0.5.1 headroom/no-neutral reference + WhiteLevel-clamp-only + headroom/neutral-clip-only + unchanged v0.5.2 composite. This separates the two variables changed together in v0.5.2. No candidate is firmware-parity claimed. MEDIUM tone and Differential Gamma remain disabled.");
         status.setTextSize(15f);
         status.setPadding(0, pad / 2, 0, pad);
         root.addView(status);
@@ -76,51 +80,27 @@ public class MainActivity extends Activity {
         root.addView(result);
 
         Button choose = new Button(this);
-        choose.setText("Choose M10-R DNG + Build v0.5.2 A/B References");
+        choose.setText("Choose M10-R DNG + Build v0.5.3 2x2 Highlight Test");
         choose.setOnClickListener(v -> chooseDng());
         root.addView(choose);
 
-        TextView sensorLabel = new TextView(this);
-        sensorLabel.setText("v0.4 SENSOR SANITY (frozen)");
-        sensorLabel.setTextSize(16f);
-        sensorLabel.setPadding(0, pad / 2, 0, pad / 4);
-        root.addView(sensorLabel);
+        TextView sensorLabel = addLabel(root, "v0.4 SENSOR SANITY (frozen)", pad);
+        sensorPreviewView = addPreview(root, "v0.4 M10-R sensor sanity preview");
 
-        sensorPreviewView = new ImageView(this);
-        sensorPreviewView.setAdjustViewBounds(true);
-        sensorPreviewView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        sensorPreviewView.setContentDescription("v0.4 M10-R sensor sanity preview");
-        root.addView(sensorPreviewView, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        addLabel(root, "A — v0.5.1 HEADROOM + NO NEUTRAL CLIP (unchanged reference)", pad);
+        leicaPreviewView = addPreview(root, "A v0.5.1 headroom no-neutral reference");
 
-        TextView leicaLabel = new TextView(this);
-        leicaLabel.setText("v0.5.1 LEICA LINEAR REFERENCE (unchanged; headroom-preserving diagnostic)");
-        leicaLabel.setTextSize(16f);
-        leicaLabel.setPadding(0, pad / 2, 0, pad / 4);
-        root.addView(leicaLabel);
+        addLabel(root, "B — v0.5.3 WHITELIMIT CLAMP ONLY (no neutral clip)", pad);
+        whiteClampPreviewView = addPreview(root, "B WhiteLevel clamp-only preview");
 
-        leicaPreviewView = new ImageView(this);
-        leicaPreviewView.setAdjustViewBounds(true);
-        leicaPreviewView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        leicaPreviewView.setContentDescription("v0.5.1 M10-R Leica linear reference preview");
-        root.addView(leicaPreviewView, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        addLabel(root, "C — v0.5.3 HEADROOM + CA9 NEUTRAL CLIP ONLY", pad);
+        headroomNeutralPreviewView = addPreview(root, "C headroom plus neutral-clip preview");
 
-        TextView highlightLabel = new TextView(this);
-        highlightLabel.setText("v0.5.2 EXPERIMENTAL CA9 NEUTRAL-CLIP CANDIDATE (A/B only)");
-        highlightLabel.setTextSize(16f);
-        highlightLabel.setPadding(0, pad / 2, 0, pad / 4);
-        root.addView(highlightLabel);
-
-        highlightPreviewView = new ImageView(this);
-        highlightPreviewView.setAdjustViewBounds(true);
-        highlightPreviewView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        highlightPreviewView.setContentDescription("v0.5.2 experimental CA9 neutral clip preview");
-        root.addView(highlightPreviewView, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        addLabel(root, "D — v0.5.2 WHITELIMIT + CA9 NEUTRAL CLIP (unchanged composite)", pad);
+        compositePreviewView = addPreview(root, "D unchanged v0.5.2 composite preview");
 
         fileStatus = new TextView(this);
-        fileStatus.setText("No DNG selected. This build preserves the validated v0.4 and v0.5.1 references and adds one isolated highlight-boundary experiment: DNG WhiteLevel clamp, then clipping in recovered CA9 gain/neutral space before the unchanged Leica ColorSpec transform. It is diagnostic only; MEDIUM tone and Differential Gamma remain disabled.");
+        fileStatus.setText("No DNG selected. The four ColorSpec images form a 2x2 test: A=headroom/no-neutral, B=WhiteLevel-clamp/no-neutral, C=headroom/neutral-clip, D=WhiteLevel-clamp/neutral-clip. This isolates which part of v0.5.2 removed the false highlight colors. Recovered firmware proves a direct 11-bit B2Y WB-gain path exists in parallel with ASN→CA9, but this build does not yet claim its exact arithmetic or stage order.");
         fileStatus.setPadding(0, pad / 2, 0, 0);
         fileStatus.setTextIsSelectable(true);
         root.addView(fileStatus);
@@ -128,6 +108,25 @@ public class MainActivity extends Activity {
         ScrollView scroll = new ScrollView(this);
         scroll.addView(root);
         setContentView(scroll);
+    }
+
+    private TextView addLabel(LinearLayout root, String text, int pad) {
+        TextView label = new TextView(this);
+        label.setText(text);
+        label.setTextSize(16f);
+        label.setPadding(0, pad / 2, 0, pad / 4);
+        root.addView(label);
+        return label;
+    }
+
+    private ImageView addPreview(LinearLayout root, String description) {
+        ImageView view = new ImageView(this);
+        view.setAdjustViewBounds(true);
+        view.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        view.setContentDescription(description);
+        root.addView(view, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        return view;
     }
 
     private EditText addNumberField(LinearLayout root, String value) {
@@ -185,8 +184,8 @@ public class MainActivity extends Activity {
             // A transient grant is sufficient for this immediate diagnostic read.
         }
         clearPreviews();
-        fileStatus.setText("Reading DNG and building frozen v0.4 + v0.5.1 + experimental v0.5.2 highlight A/B references…\n" + uri);
-        new Thread(() -> parseDecodeAndRenderDng(uri), "m10r-dng-v052").start();
+        fileStatus.setText("Reading DNG and building v0.5.3 2x2 highlight-boundary references…\n" + uri);
+        new Thread(() -> parseDecodeAndRenderDng(uri), "m10r-dng-v053").start();
     }
 
     private void parseDecodeAndRenderDng(Uri uri) {
@@ -198,28 +197,37 @@ public class MainActivity extends Activity {
                 final String rawDiagnostic;
                 final SensorPreviewCore.PreviewResult sensorPreview;
                 final M10RLinearReferenceRenderer.Result leicaPreview;
-                final M10RNeutralClipReferenceRenderer.Result highlightPreview;
+                final M10RHighlightFactorialRenderer.Result whiteClampPreview;
+                final M10RHighlightFactorialRenderer.Result headroomNeutralPreview;
+                final M10RNeutralClipReferenceRenderer.Result compositePreview;
                 if (info.isLosslessJpeg()) {
                     DngRawDecoder.RawImage raw = DngRawDecoder.decode(channel);
                     sensorPreview = SensorPreviewCore.render(raw, info);
                     leicaPreview = M10RLinearReferenceRenderer.render(raw, info);
-                    highlightPreview = M10RNeutralClipReferenceRenderer.render(raw, info);
+                    whiteClampPreview = M10RHighlightFactorialRenderer.render(raw, info,
+                            M10RHighlightFactorialRenderer.Mode.WHITELEVEL_CLAMP_ONLY);
+                    headroomNeutralPreview = M10RHighlightFactorialRenderer.render(raw, info,
+                            M10RHighlightFactorialRenderer.Mode.HEADROOM_NEUTRAL_CLIP_ONLY);
+                    compositePreview = M10RNeutralClipReferenceRenderer.render(raw, info);
                     rawDiagnostic = raw.diagnosticSummary() +
                             "\n\nLEGACY NOTE: the decoder summary's RGGB parity names are diagnostic-only; actual CFA is resolved separately." +
-                            "\n\nDECODER STATUS: PIXEL-EXACT CFA PRESERVED; frozen v0.4 + unchanged v0.5.1 + experimental v0.5.2 A/B BUILT.";
+                            "\n\nDECODER STATUS: PIXEL-EXACT CFA PRESERVED; v0.5.3 2x2 HIGHLIGHT FACTORIAL BUILT.";
                 } else {
                     sensorPreview = null;
                     leicaPreview = null;
-                    highlightPreview = null;
+                    whiteClampPreview = null;
+                    headroomNeutralPreview = null;
+                    compositePreview = null;
                     rawDiagnostic = "Reference render not run: this diagnostic intentionally preserves the proven M10-R compression-7 path; compression=" + info.compression + ".";
                 }
-                runOnUiThread(() -> applyDngInfo(uri, info, rawDiagnostic,
-                        sensorPreview, leicaPreview, highlightPreview));
+                runOnUiThread(() -> applyDngInfo(uri, info, rawDiagnostic, sensorPreview,
+                        leicaPreview, whiteClampPreview, headroomNeutralPreview, compositePreview));
             }
         } catch (Throwable ex) {
             runOnUiThread(() -> {
                 clearPreviews();
-                fileStatus.setText("DNG v0.5.2 A/B render failed: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+                fileStatus.setText("DNG v0.5.3 factorial render failed: " +
+                        ex.getClass().getSimpleName() + ": " + ex.getMessage());
             });
         }
     }
@@ -228,7 +236,9 @@ public class MainActivity extends Activity {
                               String rawDiagnostic,
                               SensorPreviewCore.PreviewResult sensorPreview,
                               M10RLinearReferenceRenderer.Result leicaPreview,
-                              M10RNeutralClipReferenceRenderer.Result highlightPreview) {
+                              M10RHighlightFactorialRenderer.Result whiteClampPreview,
+                              M10RHighlightFactorialRenderer.Result headroomNeutralPreview,
+                              M10RNeutralClipReferenceRenderer.Result compositePreview) {
         if (info.asShotNeutral != null && info.asShotNeutral.length == 3) {
             neutralR.setText(String.format(Locale.US, "%.10f", info.asShotNeutral[0]));
             neutralG.setText(String.format(Locale.US, "%.10f", info.asShotNeutral[1]));
@@ -242,64 +252,90 @@ public class MainActivity extends Activity {
             result.setText("AsShotNeutral was not found as a three-channel DNG field.");
         }
 
-        String sensorDiagnostic;
-        if (sensorPreview != null) {
-            Bitmap next = Bitmap.createBitmap(sensorPreview.argb, sensorPreview.width,
-                    sensorPreview.height, Bitmap.Config.ARGB_8888);
-            Bitmap old = sensorPreviewBitmap;
-            sensorPreviewBitmap = next;
-            sensorPreviewView.setImageBitmap(next);
-            if (old != null && old != next && !old.isRecycled()) old.recycle();
-            sensorDiagnostic = sensorPreview.diagnosticSummary();
-        } else {
-            sensorDiagnostic = "v0.4 sensor preview unavailable.";
+        String sensorDiagnostic = setSensorPreview(sensorPreview);
+        String leicaDiagnostic = setLinearPreview(leicaPreview);
+        String whiteClampDiagnostic = setFactorialPreview(whiteClampPreviewView,
+                whiteClampPreviewBitmap, whiteClampPreview, 0);
+        if (whiteClampPreview != null) {
+            whiteClampPreviewBitmap = bitmapFrom(whiteClampPreview.argb,
+                    whiteClampPreview.width, whiteClampPreview.height, whiteClampPreviewView,
+                    whiteClampPreviewBitmap);
         }
-
-        String leicaDiagnostic;
-        if (leicaPreview != null) {
-            Bitmap next = Bitmap.createBitmap(leicaPreview.argb, leicaPreview.width,
-                    leicaPreview.height, Bitmap.Config.ARGB_8888);
-            Bitmap old = leicaPreviewBitmap;
-            leicaPreviewBitmap = next;
-            leicaPreviewView.setImageBitmap(next);
-            if (old != null && old != next && !old.isRecycled()) old.recycle();
-            leicaDiagnostic = leicaPreview.diagnosticSummary();
+        String headroomNeutralDiagnostic;
+        if (headroomNeutralPreview != null) {
+            headroomNeutralPreviewBitmap = bitmapFrom(headroomNeutralPreview.argb,
+                    headroomNeutralPreview.width, headroomNeutralPreview.height,
+                    headroomNeutralPreviewView, headroomNeutralPreviewBitmap);
+            headroomNeutralDiagnostic = headroomNeutralPreview.diagnosticSummary();
         } else {
-            leicaDiagnostic = "v0.5.1 Leica linear reference unavailable.";
+            headroomNeutralDiagnostic = "C headroom + neutral-clip candidate unavailable.";
         }
-
-        String highlightDiagnostic;
-        if (highlightPreview != null) {
-            Bitmap next = Bitmap.createBitmap(highlightPreview.argb, highlightPreview.width,
-                    highlightPreview.height, Bitmap.Config.ARGB_8888);
-            Bitmap old = highlightPreviewBitmap;
-            highlightPreviewBitmap = next;
-            highlightPreviewView.setImageBitmap(next);
-            if (old != null && old != next && !old.isRecycled()) old.recycle();
-            highlightDiagnostic = highlightPreview.diagnosticSummary();
+        String compositeDiagnostic;
+        if (compositePreview != null) {
+            compositePreviewBitmap = bitmapFrom(compositePreview.argb, compositePreview.width,
+                    compositePreview.height, compositePreviewView, compositePreviewBitmap);
+            compositeDiagnostic = compositePreview.diagnosticSummary();
         } else {
-            highlightDiagnostic = "v0.5.2 experimental highlight candidate unavailable.";
+            compositeDiagnostic = "D unchanged v0.5.2 composite unavailable.";
         }
 
         fileStatus.setText("Selected: " + uri + "\n\n" + info.summary() + "\n\n" + rawDiagnostic +
-                "\n\n" + sensorDiagnostic + "\n\n" + leicaDiagnostic +
-                "\n\n" + highlightDiagnostic +
-                "\n\nBoundary: v0.5.2 is an A/B diagnostic only. A visible improvement in the experimental image would isolate the missing highlight/saturation boundary; it would not by itself prove firmware parity. MEDIUM tone and Differential Gamma remain disabled.");
+                "\n\n" + sensorDiagnostic +
+                "\n\nA — " + leicaDiagnostic +
+                "\n\nB — " + whiteClampDiagnostic +
+                "\n\nC — " + headroomNeutralDiagnostic +
+                "\n\nD — " + compositeDiagnostic +
+                "\n\nINTERPRETATION KEY: if B≈D visually, WhiteLevel clamp is dominant. If C≈D, CA9 neutral-domain clipping is dominant. If only D is clean, both are required. If B and C each partly improve A, both contribute. This is variable isolation only; exact Leica 11-bit front-end arithmetic/stage order remains to be recovered. MEDIUM tone and Differential Gamma remain disabled.");
+    }
+
+    private String setSensorPreview(SensorPreviewCore.PreviewResult preview) {
+        if (preview == null) return "v0.4 sensor preview unavailable.";
+        sensorPreviewBitmap = bitmapFrom(preview.argb, preview.width, preview.height,
+                sensorPreviewView, sensorPreviewBitmap);
+        return preview.diagnosticSummary();
+    }
+
+    private String setLinearPreview(M10RLinearReferenceRenderer.Result preview) {
+        if (preview == null) return "v0.5.1 Leica linear reference unavailable.";
+        leicaPreviewBitmap = bitmapFrom(preview.argb, preview.width, preview.height,
+                leicaPreviewView, leicaPreviewBitmap);
+        return preview.diagnosticSummary();
+    }
+
+    private String setFactorialPreview(ImageView view, Bitmap old,
+                                       M10RHighlightFactorialRenderer.Result preview,
+                                       int ignored) {
+        if (preview == null) return "B WhiteLevel-clamp-only candidate unavailable.";
+        return preview.diagnosticSummary();
+    }
+
+    private Bitmap bitmapFrom(int[] argb, int width, int height, ImageView view, Bitmap old) {
+        Bitmap next = Bitmap.createBitmap(argb, width, height, Bitmap.Config.ARGB_8888);
+        view.setImageBitmap(next);
+        if (old != null && old != next && !old.isRecycled()) old.recycle();
+        return next;
     }
 
     private void clearPreviews() {
         if (sensorPreviewView != null) sensorPreviewView.setImageDrawable(null);
         if (leicaPreviewView != null) leicaPreviewView.setImageDrawable(null);
-        if (highlightPreviewView != null) highlightPreviewView.setImageDrawable(null);
-        Bitmap oldSensor = sensorPreviewBitmap;
-        Bitmap oldLeica = leicaPreviewBitmap;
-        Bitmap oldHighlight = highlightPreviewBitmap;
+        if (whiteClampPreviewView != null) whiteClampPreviewView.setImageDrawable(null);
+        if (headroomNeutralPreviewView != null) headroomNeutralPreviewView.setImageDrawable(null);
+        if (compositePreviewView != null) compositePreviewView.setImageDrawable(null);
+        recycle(sensorPreviewBitmap);
+        recycle(leicaPreviewBitmap);
+        recycle(whiteClampPreviewBitmap);
+        recycle(headroomNeutralPreviewBitmap);
+        recycle(compositePreviewBitmap);
         sensorPreviewBitmap = null;
         leicaPreviewBitmap = null;
-        highlightPreviewBitmap = null;
-        if (oldSensor != null && !oldSensor.isRecycled()) oldSensor.recycle();
-        if (oldLeica != null && !oldLeica.isRecycled()) oldLeica.recycle();
-        if (oldHighlight != null && !oldHighlight.isRecycled()) oldHighlight.recycle();
+        whiteClampPreviewBitmap = null;
+        headroomNeutralPreviewBitmap = null;
+        compositePreviewBitmap = null;
+    }
+
+    private static void recycle(Bitmap bitmap) {
+        if (bitmap != null && !bitmap.isRecycled()) bitmap.recycle();
     }
 
     @Override
