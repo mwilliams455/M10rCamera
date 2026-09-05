@@ -1,0 +1,96 @@
+name: M10-R v1.90 tone control hardware ABI
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v190-tone-hardware-abi.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace active tone-control hardware ABI
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v190_tone_hardware_abi.txt
+          from pathlib import Path
+          import struct,hashlib,collections,statistics
+          from capstone import *
+          from capstone.arm import *
+          img=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;P=4
+          cal=Path('/tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin').read_bytes();CP=4
+          th=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);th.detail=True
+          ar=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);ar.detail=True
+          def off(a):return P+a-BASE
+          def u32(d,o):return struct.unpack_from('<I',d,o)[0]
+          def lit(i,mode):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((((i.address+4)&~3) if mode=='T' else i.address+8)+i.operands[1].mem.disp);o=off(la)
+                if 0<=o<=len(img)-4:return la,u32(img,o)
+            except:pass
+          def call(i):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm&~1
+          def fmt(i,mode):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i,mode);c=call(i)
+            if q:s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'
+            if c is not None:s+=f' ; CALL {c:#x}'
+            return s
+          print('M10-R v1.90 TONE CONTROL HARDWARE ABI')
+          print('\n=== tone selector THUMB 0x42154bb0..0x42154d20 ===')
+          for i in th.disasm(img[off(0x42154bb0):off(0x42154d20)],0x42154bb0):print(fmt(i,'T'))
+          print('\n=== tone helper ARM exact 0x420d3c1c..0x420d4260 ===')
+          for i in ar.disasm(img[off(0x420d3c1c):off(0x420d4260)],0x420d3c1c):print(fmt(i,'A'))
+          print('\n=== tone helper THUMB sanity ===')
+          for i in th.disasm(img[off(0x420d3c1c):off(0x420d3ca0)],0x420d3c1c):print(fmt(i,'T'))
+          # Calibration records
+          count=u32(cal,CP+8);rec0=CP+0x10;stride=0xa90;base=rec0+count*stride
+          recs=[]
+          for i in range(count):
+            o=rec0+i*stride;rid=u32(cal,o);rel=u32(cal,o+4);size=u32(cal,o+8);po=base+rel
+            keys=[]
+            for ko in range(o+0x10,o+0xa90,0x40):
+              raw=cal[ko:ko+0x40].split(b'\0',1)[0]
+              if raw:keys.append(raw.decode('ascii','replace'))
+            recs.append((i,rid,rel,size,po,keys))
+          def allid(rid):return [r for r in recs if r[1]==rid]
+          for rid,nm in [(8,'TONE_CONTROL'),(0x19,'TONE_TBL0'),(0x1a,'TONE_TBL1')]:
+            print(f'\n=== {nm} id={rid:#x} occurrences={len(allid(rid))} ===')
+            for occ,r in enumerate(allid(rid)):
+              i,_,rel,size,po,keys=r;blob=cal[po:po+size]
+              print('occ',occ,'rec',i,'rel',hex(rel),'size',hex(size),'fileoff',hex(po),'sha',hashlib.sha256(blob).hexdigest(),'keys',keys)
+              print('head128',blob[:128].hex())
+              if rid==8:
+                vals=list(struct.unpack('<%dI'%(len(blob)//4),blob[:len(blob)//4*4]))
+                print('u32_all',[(hex(j*4),hex(v),v) for j,v in enumerate(vals)])
+              else:
+                active=blob[:0xa000];vals=list(struct.unpack('<10240I',active))
+                print('active minmax',min(vals),max(vals),'unique',len(set(vals)),'first64',vals[:64],'last64',vals[-64:])
+                print('count_eq_0x8000',vals.count(0x8000),'first_not_8000',next((j for j,v in enumerate(vals) if v!=0x8000),None),'last_not_8000',max((j for j,v in enumerate(vals) if v!=0x8000),default=None))
+                # check bit width and Q15-like scale
+                print('all_fit_u16',all(v<=0xffff for v in vals),'normalized_minmax',min(vals)/32768,max(vals)/32768)
+          print('\n=== TBL0/TBL1 equality by contrast occurrence ===')
+          a=allid(0x19);bb=allid(0x1a)
+          for occ in range(min(len(a),len(bb))):
+            x=cal[a[occ][4]:a[occ][4]+0xa000];y=cal[bb[occ][4]:bb[occ][4]+0xa000]
+            print('occ',occ,'equal_active',x==y,'sha0',hashlib.sha256(x).hexdigest(),'sha1',hashlib.sha256(y).hexdigest())
+          print('\nTARGET: determine tone descriptor field meanings, table-bank arguments, active copy lengths, MMIO controls, whether table values are fixed-point gain or direct output, and whether TBL0/TBL1 are genuinely redundant for M10-R calibration.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v190_tone_hardware_abi.txt
+          git commit -m 'research: record v1.90 tone-control hardware ABI' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
