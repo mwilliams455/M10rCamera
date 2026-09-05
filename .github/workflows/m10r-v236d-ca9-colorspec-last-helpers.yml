@@ -1,0 +1,62 @@
+name: M10-R v2.36d final CA9 ColorSpec helpers
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v236d-ca9-colorspec-last-helpers.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace final bounded ColorSpec primitives
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v236d_ca9_colorspec_last_helpers.txt
+          from pathlib import Path
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes(); BASE=0x40000000; PFX=4
+          arm=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN); th=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN)
+          def off(a): return PFX+a-BASE
+          def dump(md,a,z,name):
+              print(f'=== {name} {a:08x}..{z:08x} ===')
+              for i in md.disasm(b[off(a):off(z)],a): print(f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}')
+              print()
+          print('M10-R v2.36d FINAL CA9 COLORSPEC HELPERS')
+          print('Bounded closure only; no broad CA9 scan.')
+          print()
+          dump(arm,0x400043d0,0x40004490,'3x3 inverse candidate complete')
+          dump(arm,0x400047d0,0x40004870,'xy to XYZ helper')
+          dump(arm,0x40004cc0,0x40004f20,'xy to temperature/TCP helper')
+          dump(arm,0x40013100,0x400131a0,'remaining vector/matrix helper')
+          dump(th,0x40012940,0x40012a10,'rendered-CC rounding wrapper Thumb')
+          dump(th,0x400133c0,0x40013460,'rounding primitive Thumb')
+          dump(arm,0x400038b0,0x40003930,'quantizer callsite and rounding selector')
+          dump(arm,0x40003ae0,0x40003d10,'constructor argument setup')
+          print('=== CLOSURE RULE ===')
+          print('Only instruction-proven formulas are eligible for the executable oracle. Any remaining ambiguity must be surfaced in oracle status metadata.')
+          PY
+      - name: Commit v2.36d trace
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v236d_ca9_colorspec_last_helpers.txt
+          git commit -m 'research: record v2.36d final ColorSpec helpers' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
