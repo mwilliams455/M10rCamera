@@ -1,0 +1,80 @@
+name: M10-R v1.77 B2Y calibration layout
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v177-b2y-calibration-layout.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse B2Y calibration selector table and target STILL records
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v177_b2y_calibration_layout.txt
+          from pathlib import Path
+          import struct,hashlib
+          p=Path('/tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin'); d=p.read_bytes()
+          u32=lambda o: struct.unpack_from('<I',d,o)[0]
+          def s64(o):
+            q=d[o:o+0x40].split(b'\0',1)[0]
+            return q.decode('ascii','replace')
+          print('M10-R v1.77 B2Y CALIBRATION LAYOUT')
+          print('size',hex(len(d)),'sha256',hashlib.sha256(d).hexdigest())
+          print('header words',[hex(u32(i)) for i in range(0,min(0x40,len(d)),4)])
+          magic=u32(0); count=u32(8); stride=0xA90; table0=0x10; payload_base=table0+count*stride
+          print('magic',hex(magic),'count',count,'stride',hex(stride),'payload_base',hex(payload_base))
+          print('magic_ok',magic==0xCA11BF11,'table_fits',payload_base<=len(d))
+          targets={1:'deknee',8:'tone_control',9:'interpolation_gamma',0x0b:'differential_gamma_control',0x19:'tone_tbl0',0x1a:'tone_tbl1',0x1c:'differential_gamma_tbl',0x1d:'differential_gamma_tbl_fl'}
+          recs={}
+          print('\n=== selector records ===')
+          for i in range(count):
+            o=table0+i*stride
+            rid=u32(o); rel=u32(o+4); x8=u32(o+8); nk=u32(o+0xc)
+            keys=[s64(o+0x10+j*0x40) for j in range(min(nk,42))]
+            abs_payload=payload_base+rel
+            recs[rid]=(i,o,rel,x8,nk,keys,abs_payload)
+            print(f'i={i:2d} id={rid:#x} rel={rel:#x} x8={x8:#x} keys={nk} payload={abs_payload:#x} name={targets.get(rid,"")}')
+            for j,k in enumerate(keys):
+              if k: print(f'  key[{j:2d}] {k!r}')
+          print('\n=== target selector summaries ===')
+          ids=sorted(targets)
+          # infer payload extents from sorted unique absolute payload starts
+          starts=[]
+          for rid,(i,o,rel,x8,nk,keys,ap) in recs.items():
+            if 0<=ap<len(d):starts.append((ap,rid))
+          starts=sorted(set(starts))
+          next_by={}
+          for n,(ap,rid) in enumerate(starts):next_by[(ap,rid)]=starts[n+1][0] if n+1<len(starts) else len(d)
+          for rid in ids:
+            if rid not in recs:
+              print(hex(rid),targets[rid],'MISSING');continue
+            i,o,rel,x8,nk,keys,ap=recs[rid]; end=next_by.get((ap,rid),len(d)); extent=max(0,end-ap)
+            blob=d[ap:end] if 0<=ap<=end<=len(d) else b''
+            print(f'{rid:#x} {targets[rid]} rec_index={i} payload={ap:#x} inferred_extent={extent:#x} sha256={hashlib.sha256(blob).hexdigest()}')
+            print('  payload_head',d[ap:ap+64].hex() if 0<=ap<len(d) else 'OOB')
+            for want in ('_B2YMODE:STILL_ISO:100','_B2YMODE:STILL_ISO:160','_B2YMODE:STILL_ISO:200'):
+              js=[j for j,k in enumerate(keys) if k==want]
+              print(' ',want,'slots',js)
+          print('\n=== raw payload starts ordered ===')
+          for ap,rid in starts: print(hex(ap),hex(rid),targets.get(rid,''))
+          print('\nTARGET: establish exact selector table/payload geometry and map target nonlinear records to STILL ISO keys for first-parity extraction.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v177_b2y_calibration_layout.txt
+          git commit -m 'research: record v1.77 B2Y calibration layout' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
