@@ -1,0 +1,118 @@
+name: M10-R v2.02 context table long store trace
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v202-context-table-long-store-trace.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Follow context plus 0x1D50 bases through longer local loops
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v202_context_table_long_store_trace.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;P=4
+          def off(a):return P+a-BASE
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def ops(i):
+            try:return i.operands
+            except:return []
+          def lit(i):
+            try:
+              o=ops(i)
+              if i.mnemonic.startswith('ldr') and len(o)>=2 and o[0].type==ARM_OP_REG and o[1].type==ARM_OP_MEM and o[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+o[1].mem.disp;fo=off(la)
+                if 0<=fo<=len(b)-4:return o[0].reg,la,struct.unpack_from('<I',b,fo)[0]
+            except:pass
+          def call(i):
+            try:
+              o=ops(i)
+              if i.mnemonic in ('bl','blx') and o and o[0].type==ARM_OP_IMM:return o[0].imm&~1
+            except:pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i);c=call(i)
+            if q:s+=f' ; LIT {q[1]:#x}->{q[2]:#x}'
+            if c is not None:s+=f' ; CALL {c:#x}'
+            return s
+          needle=struct.pack('<I',0x1d50);lits=[];p=0
+          while True:
+            x=b.find(needle,p)
+            if x<0:break
+            lits.append(BASE+x-P);p=x+1
+          events=[]
+          for la in lits:
+            a=max(BASE,(la-0x380)&~1);z=min(BASE+len(b)-P,la+0x100)
+            ins=list(md.disasm(b[off(a):off(z)],a))
+            for k,i in enumerate(ins):
+              q=lit(i)
+              if not q or q[1]!=la or q[2]!=0x1d50:continue
+              constreg=q[0]
+              # Search next 5 instructions for table base construction.
+              for kk in range(k+1,min(len(ins),k+6)):
+                j=ins[kk];o=ops(j)
+                if not j.mnemonic.startswith('add') or not o or o[0].type!=ARM_OP_REG:continue
+                regs=[x.reg for x in o if x.type==ARM_OP_REG]
+                if constreg not in regs:continue
+                table_reg=o[0].reg
+                aliases={table_reg}
+                # Walk up to 80 subsequent instructions, tracking simple MOV aliases and terminating on hard overwrite.
+                for nn in range(kk+1,min(len(ins),kk+81)):
+                  x=ins[nn];xo=ops(x)
+                  # Any memory access through table base/alias.
+                  for op in xo:
+                    if op.type==ARM_OP_MEM and op.mem.base in aliases:
+                      kind='STORE' if x.mnemonic.startswith('str') else 'LOAD' if x.mnemonic.startswith('ldr') else 'MEM'
+                      events.append((kind,la,i.address,j.address,x.address,fmt(x)))
+                  # Track mov alias dest <- source alias.
+                  if x.mnemonic.startswith('mov') and len(xo)>=2 and xo[0].type==ARM_OP_REG and xo[1].type==ARM_OP_REG and xo[1].reg in aliases:
+                    aliases.add(xo[0].reg)
+                  # Stop tracking a register on explicit overwrite not using itself as source.
+                  if xo and xo[0].type==ARM_OP_REG and xo[0].reg in aliases and x.mnemonic.startswith(('ldr','mov','add','sub','mul','and','orr','eor')):
+                    dst=xo[0].reg
+                    src_regs=[q.reg for q in xo[1:] if q.type==ARM_OP_REG]
+                    mem_base_uses=any(q.type==ARM_OP_MEM and q.mem.base==dst for q in xo[1:])
+                    if dst not in src_regs and not mem_base_uses and not (x.mnemonic.startswith('mov') and len(xo)>1 and xo[1].type==ARM_OP_REG and xo[1].reg in aliases):
+                      aliases.discard(dst)
+                  if not aliases:break
+          # dedup
+          seen=set();u=[]
+          for e in events:
+            key=(e[0],e[2],e[4],e[5])
+            if key not in seen:seen.add(key);u.append(e)
+          stores=[e for e in u if e[0]=='STORE'];loads=[e for e in u if e[0]=='LOAD']
+          print('M10-R v2.02 CONTEXT +0x1D50 LONG STORE TRACE')
+          print('stores',len(stores))
+          for e in stores:print(tuple(hex(x) if isinstance(x,int) else x for x in e))
+          print('\nloads',len(loads),'first80')
+          for e in loads[:80]:print(tuple(hex(x) if isinstance(x,int) else x for x in e))
+          print('\n=== STORE contexts ===')
+          for e in stores:
+            wa=e[4];print(f'\n--- {wa:#x} ---')
+            a=max(BASE,(wa-0x70)&~1);z=min(BASE+len(b)-P,wa+0xa0)
+            for i in md.disasm(b[off(a):off(z)],a):print(fmt(i))
+          print('\nTARGET: find pointer-table population that occurs after an initially computed context+0x1D50 base, including loop/post-index stores missed by v2.00. Distinguish null-clears from nonzero pointer stores and identify the stored pointer producer.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v202_context_table_long_store_trace.txt
+          git commit -m 'research: record v2.02 context table long store trace' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
