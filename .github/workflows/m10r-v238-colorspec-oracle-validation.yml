@@ -1,0 +1,18 @@
+name: M10-R v2.38 ColorSpec oracle validation
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths:
+      - 'tools/m10r_colorspec_oracle.py'
+      - 'tests/test_m10r_colorspec_oracle.py'
+      - '.github/workflows/m10r-v238-colorspec-oracle-validation.yml'
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ColorSpec oracle regression tests
+        run: python3 -m unittest -v tests/test_m10r_colorspec_oracle.py
+      - name: Run oracle self-check
+        run: python3 tools/m10r_colorspec_oracle.py
