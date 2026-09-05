@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Empirically rank the frozen M10-R DG/tone order candidates on a same-capture JPG/DNG pair.
 
-This is deliberately an empirical discriminator, not hardware proof.  It uses
-low-chroma/low-texture patches and a green-site RAW luminance proxy, then fits
-only nuisance scale + output transfer parameters around the exact firmware
-nonlinear assets.
+This is deliberately an empirical discriminator, not hardware proof. It uses
+low-chroma/low-texture patches and an oriented linear camera-space green proxy,
+then fits only nuisance scale + output-transfer parameters around the exact
+firmware nonlinear assets.
 """
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 import rawpy
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -76,6 +76,42 @@ def fit_candidate(curve: np.ndarray, G: np.ndarray, J: np.ndarray) -> dict:
             "x_min": int(xi.min()), "x_max": int(xi.max())}
 
 
+def alignment_search(raw_proxy: np.ndarray, jpg_u8: np.ndarray) -> tuple[np.ndarray, list[tuple[float,int,int,int]]]:
+    """Return best oriented raw proxy and scored (score,k,dx,dy) candidates.
+
+    k is np.rot90 count. We permit only near-full-frame geometries so arbitrary
+    rotations/crops cannot win by chance.
+    """
+    jh, jw = jpg_u8.shape[:2]
+    jf = jpg_u8.astype(np.float32) / 255.0
+    jpgg = np.log1p((0.2126 * jf[:, :, 0] + 0.7152 * jf[:, :, 1] + 0.0722 * jf[:, :, 2]) * 8.0)
+    del jf
+    stride = 16
+    j = jpgg[64:jh-64:stride, 64:jw-64:stride]
+    jx = np.diff(j, axis=1); jy = np.diff(j, axis=0)
+    all_scores: list[tuple[float,int,int,int]] = []
+    oriented: dict[int,np.ndarray] = {}
+    for k in range(4):
+        rp = np.rot90(raw_proxy, k)
+        rh, rw = rp.shape
+        if rw < jw or rh < jh or rw-jw > 96 or rh-jh > 96:
+            continue
+        oriented[k] = rp
+        rawg = np.log1p(rp.astype(np.float32) / 256.0)
+        for dy in range(rh-jh+1):
+            for dx in range(rw-jw+1):
+                rr = rawg[dy+64:dy+jh-64:stride, dx+64:dx+jw-64:stride]
+                if rr.shape != j.shape:
+                    continue
+                s = (corr(np.diff(rr, axis=1), jx) + corr(np.diff(rr, axis=0), jy)) / 2
+                all_scores.append((s, k, dx, dy))
+    all_scores.sort(reverse=True)
+    if not all_scores:
+        raise RuntimeError(f"no geometry-compatible raw/JPEG orientation: raw={raw_proxy.shape[::-1]} jpeg={(jw,jh)}")
+    best_k = all_scores[0][1]
+    return oriented[best_k], all_scores
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--jpg", type=Path, required=True)
@@ -87,42 +123,28 @@ def main() -> int:
     args = ap.parse_args()
 
     meta = metadata_status(args.metadata_json)
-    jpg_u8 = np.asarray(Image.open(args.jpg).convert("RGB"), dtype=np.uint8)
+    with Image.open(args.jpg) as im:
+        jim = ImageOps.exif_transpose(im).convert("RGB")
+        jpg_u8 = np.asarray(jim, dtype=np.uint8)
     jh, jw = jpg_u8.shape[:2]
+
     with rawpy.imread(str(args.dng)) as r:
+        # Camera-space RGB, camera WB, no auto-brightening, linear 16-bit output.
+        # Green is normalized back into approximate native raw-code units so the
+        # fitted input scale remains comparable across captures/orientations.
         rgb = r.postprocess(use_camera_wb=True, no_auto_bright=True, gamma=(1, 1),
-                            output_bps=8, output_color=rawpy.ColorSpace.raw)
-        bayer = r.raw_image_visible.copy()
-        pattern = r.raw_pattern.copy()
-        desc = bytes(r.color_desc)
+                            output_bps=16, output_color=rawpy.ColorSpace.raw)
         white = float(r.white_level)
-    rh, rw = rgb.shape[:2]
-
-    # Robust alignment from signed gradients after local log compression.
-    rawg = np.log1p(rgb.astype(np.float32).mean(axis=2) / 1.0)
+        pattern = None if r.raw_pattern is None else r.raw_pattern.copy()
+        desc = bytes(r.color_desc) if r.color_desc is not None else b""
+        raw_flip = int(r.sizes.flip)
+    raw_proxy = rgb[:, :, 1].astype(np.float32) * (white / 65535.0)
     del rgb
-    jf = jpg_u8.astype(np.float32) / 255.0
-    jpgg = np.log1p((0.2126 * jf[:, :, 0] + 0.7152 * jf[:, :, 1] + 0.0722 * jf[:, :, 2]) * 8.0)
-    del jf
-    stride = 16
-    j = jpgg[64:jh-64:stride, 64:jw-64:stride]
-    jx = np.diff(j, axis=1); jy = np.diff(j, axis=0)
-    scores = []
-    for dy in range(rh - jh + 1):
-        for dx in range(rw - jw + 1):
-            rr = rawg[dy+64:dy+jh-64:stride, dx+64:dx+jw-64:stride]
-            if rr.shape != j.shape:
-                continue
-            s = (corr(np.diff(rr, axis=1), jx) + corr(np.diff(rr, axis=0), jy)) / 2
-            scores.append((s, dx, dy))
-    scores.sort(reverse=True)
-    best_score, dx, dy = scores[0]
-    del rawg, jpgg, j, jx, jy
 
-    bcrop = bayer[dy:dy+jh, dx:dx+jw]
-    green_indices = {i for i, c in enumerate(desc) if chr(c) == "G"}
-    green_parities = [(yy, xx) for yy in range(pattern.shape[0]) for xx in range(pattern.shape[1])
-                      if int(pattern[yy, xx]) in green_indices]
+    oriented_proxy, scores = alignment_search(raw_proxy, jpg_u8)
+    best_score, rot_k, dx, dy = scores[0]
+    rh, rw = oriented_proxy.shape
+    rcrop = oriented_proxy[dy:dy+jh, dx:dx+jw]
 
     block = 64; step = 128; margin = 128
     patches = []
@@ -133,9 +155,7 @@ def main() -> int:
             chroma = float(meanrgb.max() - meanrgb.min())
             jlum = 0.2126*jb[:, :, 0] + 0.7152*jb[:, :, 1] + 0.0722*jb[:, :, 2]
             texture = float(jlum.std())
-            rb = bcrop[y:y+block, x:x+block]
-            vals = [rb[py::2, px::2].reshape(-1) for py, px in green_parities]
-            gv = np.concatenate(vals)
+            gv = rcrop[y:y+block, x:x+block]
             patches.append((float(gv.mean()), float(gv.std()), float(jlum.mean()), texture, chroma))
 
     thresholds = [(10, 8), (16, 10), (24, 14), (32, 18)]
@@ -155,10 +175,14 @@ def main() -> int:
     result = {
         "sample": args.sample,
         "metadata": meta,
-        "dimensions": {"raw": [rw, rh], "jpeg": [jw, jh], "difference": [rw-jw, rh-jh]},
-        "alignment": {"score": best_score, "dx": dx, "dy": dy,
-                      "top5": [{"score": s, "dx": x, "dy": y} for s, x, y in scores[:5]]},
-        "raw": {"white_level": white, "pattern": pattern.tolist(), "color_desc": desc.decode("ascii", "replace")},
+        "dimensions": {"raw_oriented": [rw, rh], "jpeg_oriented": [jw, jh], "difference": [rw-jw, rh-jh]},
+        "alignment": {"score": best_score, "rot90_k": rot_k, "dx": dx, "dy": dy,
+                      "rawpy_flip": raw_flip,
+                      "top5": [{"score": s, "rot90_k": k, "dx": x, "dy": y} for s, k, x, y in scores[:5]]},
+        "raw": {"white_level": white,
+                "pattern": None if pattern is None else pattern.tolist(),
+                "color_desc": desc.decode("ascii", "replace"),
+                "proxy": "rawpy linear camera-space green, normalized by white_level/65535"},
         "patches": {"total": len(patches), "chosen": len(chosen), "fit": int(len(G)),
                     "threshold_chroma_texture": list(threshold),
                     "rawG_range": [float(G.min()), float(G.max())] if len(G) else None,
