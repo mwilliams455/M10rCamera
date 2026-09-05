@@ -1,0 +1,104 @@
+name: M10-R v1.96 contrast field writers
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v196-contrast-field-writers.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Find writers and producers for B2Y contrast field
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v196_contrast_field_writers.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;P=4
+          def off(a):return P+a-BASE
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def ops(i):
+            try:return i.operands
+            except:return []
+          def call(i):
+            try:
+              o=ops(i)
+              if i.mnemonic in ('bl','blx') and o and o[0].type==ARM_OP_IMM:return o[0].imm&~1
+            except:pass
+          def fmt(i):
+            c=call(i);s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            if c is not None:s+=f' ; CALL {c:#x}'
+            return s
+          def dump(a,z):
+            for i in md.disasm(b[off(a):off(z)],a):print(fmt(i))
+          ins=list(md.disasm(b[4:],BASE))
+          print('M10-R v1.96 CONTRAST FIELD WRITERS')
+          print('\n=== exact enum map decoded from switch table ===')
+          print('1 LOW; 2 MEDIUM; 3 HIGH; 4 VIDEOLOW; 5 VIDEOMEDIUM; 6 VIDEOHIGH; 0/>=7 error')
+          print('\n=== direct memory accesses with displacement +0xAC across IMG-System ===')
+          direct=[]
+          for k,i in enumerate(ins):
+            try:
+              if any(op.type==ARM_OP_MEM and op.mem.disp==0xac for op in ops(i)):
+                direct.append((k,i)); print(fmt(i))
+            except:pass
+          print('direct_count',len(direct))
+          print('\n=== context for direct +0xAC STORES only ===')
+          for k,i in direct:
+            if not i.mnemonic.startswith('str'):continue
+            print(f'\n--- {i.address:#x} ---')
+            for j in ins[max(0,k-10):min(len(ins),k+11)]:print(fmt(j))
+          print('\n=== register-index patterns using immediate 0xAC then LDR/STR [index,base] ===')
+          hits=[]
+          for k,i in enumerate(ins):
+            o=ops(i)
+            if i.mnemonic not in ('movs','mov','mov.w') or len(o)<2 or o[0].type!=ARM_OP_REG or o[1].type!=ARM_OP_IMM or o[1].imm!=0xac:continue
+            reg=o[0].reg
+            for kk in range(k+1,min(len(ins),k+7)):
+              j=ins[kk]
+              if j.address-i.address>20:break
+              for op in ops(j):
+                if op.type==ARM_OP_MEM and (op.mem.base==reg or op.mem.index==reg):
+                  hits.append((k,kk,i,j));print('\n',fmt(i));print(fmt(j));break
+          print('indexed_hit_count',len(hits))
+          print('\n=== context for register-index +0xAC WRITERS ===')
+          for k,kk,i,j in hits:
+            if not j.mnemonic.startswith('str'):continue
+            print(f'\n--- writer {j.address:#x} ---')
+            for q in ins[max(0,k-10):min(len(ins),kk+11)]:print(fmt(q))
+          print('\n=== all callers of owner and pre-owner helper: concise argument setup ===')
+          for target in (0x42151f28,0x4215220c):
+            print(f'\nTARGET {target:#x}')
+            for k,i in enumerate(ins):
+              if call(i)==target:
+                print(f'\n--- call {i.address:#x} ---')
+                for j in ins[max(0,k-12):min(len(ins),k+3)]:print(fmt(j))
+          print('\n=== function 0x42151f28 first 0x180 bytes, looking for mutation of +0xAC ===')
+          dump(0x42151f28,0x421520a8)
+          print('\n=== ASCII references containing contrast/default/medium in IMG-System ===')
+          for m in re.finditer(rb'[ -~]{4,}',b):
+            s=m.group().decode('ascii','replace')
+            if any(x in s.upper() for x in ('CONTRAST','DEFAULT','MEDIUM')): print(hex(BASE+m.start()-P),repr(s[:160]))
+          print('\nTARGET: locate actual writers or source-copy sites for the structure field read as input+0xAC by 0x4215220C. Determine whether the still-photo default value 1/2/3 is initialized in IMG-System or only supplied from another subsystem. Do not infer MEDIUM without a producer/default write.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v196_contrast_field_writers.txt
+          git commit -m 'research: record v1.96 contrast field writers' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
