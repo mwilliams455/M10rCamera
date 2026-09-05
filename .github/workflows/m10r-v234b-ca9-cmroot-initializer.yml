@@ -1,0 +1,177 @@
+name: M10-R v2.34b cm_root initializer
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v234b-ca9-cmroot-initializer.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace exact cm_root initializer and callees
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v234b_ca9_cmroot_initializer.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import *
+
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); BASE=0x42000000; P=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+          memcpy=0x4204f2ec
+          wanted={0x38:'T1',0x40:'CM1_FIXED',0x68:'T2',0x70:'CM2_FIXED',0x98:'PROFILE1_DOUBLE',0xe0:'PROFILE2_DOUBLE'}
+          CFG=0x43705830
+
+          def off(a): return P+a-BASE
+          def u32(a):
+              o=off(a); return struct.unpack_from('<I',b,o)[0] if 0<=o<=len(b)-4 else None
+          def dis(a,z): return list(md.disasm(b[off(a):off(z)],a))
+          def ops(i):
+              try:return i.operands
+              except:return []
+          def call(i):
+              try:
+                  o=ops(i)
+                  if i.mnemonic in ('bl','blx') and o and o[0].type==ARM_OP_IMM:return o[0].imm&~1
+              except:pass
+          def lit(i):
+              try:
+                  o=ops(i)
+                  if i.mnemonic.startswith('ldr') and len(o)>=2 and o[1].type==ARM_OP_MEM and o[1].mem.base==ARM_REG_PC:
+                      la=((i.address+4)&~3)+o[1].mem.disp; return la,u32(la)
+              except:pass
+          def fmt(i):
+              s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+              q=lit(i); c=call(i)
+              if q:s+=f' ; LIT {q[0]:08x}->{q[1]:08x}' if q[1] is not None else f' ; LIT {q[0]:08x}'
+              if c is not None:s+=f' ; CALL {c:08x}'
+              return s
+          def memoffs(i):
+              out=[]
+              for o in ops(i):
+                  if o.type==ARM_OP_MEM:out.append((o.mem.base,o.mem.disp))
+              return out
+          def isret(i):
+              m=i.mnemonic
+              return (m.startswith('pop') and 'pc' in i.op_str) or (m=='bx' and i.op_str.strip()=='lr')
+          def function_body(start, maxlen=0x1800):
+              ins=dis(start,start+maxlen); out=[]
+              depth=0
+              for i in ins:
+                  out.append(i)
+                  # first explicit return after a plausible minimum body ends the function.
+                  if len(out)>4 and isret(i): break
+              return out
+          def show_fn(start):
+              ins=function_body(start)
+              print(f'-- function {start:08x}, decoded_to {ins[-1].address if ins else start:08x} --')
+              for i in ins:print(fmt(i))
+              return ins
+
+          print('M10-R v2.34b EXACT cm_root INITIALIZER TRACE')
+          print('Caller proof from v2.34: 0x420A5DE4 loads r0=0x43705830 and calls 0x420A4AAC.')
+          print('Tracked layout: +38 T1; +40 CM1 fixed rational; +68 T2; +70 CM2 fixed rational; +98/+E0 72-byte double profile matrices.')
+          print()
+
+          root=show_fn(0x420a4aac)
+          direct=[]
+          for i in root:
+              c=call(i)
+              if c is not None and c not in direct: direct.append(c)
+          print('\nDIRECT_CALLEES=',[hex(x) for x in direct])
+
+          print('\n=== exact relative-field accesses in root initializer ===')
+          for i in root:
+              hits=[wanted[d] for _,d in memoffs(i) if d in wanted]
+              if hits:print(fmt(i),'FIELDS=',hits)
+
+          print('\n=== memcpy calls in root initializer ===')
+          for i in root:
+              if call(i)==memcpy: print(fmt(i))
+
+          # Dump only direct callees that are inside the local CA9-CM module window.
+          local=[c for c in direct if 0x420a3000<=c<0x420a5de4]
+          print('\nLOCAL_DIRECT_CALLEES=',[hex(x) for x in local])
+          all_local={}
+          for c in local:
+              print(); ins=show_fn(c); all_local[c]=ins
+              print('  field_accesses:')
+              for i in ins:
+                  hits=[wanted[d] for _,d in memoffs(i) if d in wanted]
+                  if hits:print('   ',fmt(i),'FIELDS=',hits)
+              print('  memcpy_calls:')
+              for i in ins:
+                  if call(i)==memcpy: print('   ',fmt(i))
+
+          # One additional level, but only from local direct callees and only module-local functions.
+          lvl2=[]
+          for c,ins in all_local.items():
+              for i in ins:
+                  x=call(i)
+                  if x is not None and 0x420a3000<=x<0x420a5de4 and x!=c and x not in local and x not in lvl2:lvl2.append(x)
+          print('\nLOCAL_LEVEL2_CALLEES=',[hex(x) for x in lvl2])
+          for c in lvl2:
+              print(); ins=show_fn(c)
+              print('  field_accesses:')
+              for i in ins:
+                  hits=[wanted[d] for _,d in memoffs(i) if d in wanted]
+                  if hits:print('   ',fmt(i),'FIELDS=',hits)
+              print('  memcpy_calls:')
+              for i in ins:
+                  if call(i)==memcpy: print('   ',fmt(i))
+
+          # Search for exact absolute cm_root field addresses as literal data only; this is bounded evidence for direct writers.
+          print('\n=== exact absolute field-address literal pools and bounded xrefs ===')
+          vals={CFG+d:n for d,n in wanted.items()}
+          for o in range(P,len(b)-3,4):
+              v=struct.unpack_from('<I',b,o)[0]
+              if v not in vals:continue
+              pool=BASE+(o-P)
+              refs=[]
+              lo=max(BASE,pool-0x1000); hi=min(BASE+len(b)-P,pool+0x1000)
+              for i in dis(lo,hi):
+                  q=lit(i)
+                  if q and q[0]==pool:refs.append(i.address)
+              print(f'{vals[v]} abs={v:08x} pool={pool:08x} refs={[hex(x) for x in refs]}')
+              for r in refs:
+                  aa=max(BASE,(r-0x60)&~1); zz=r+0xa0
+                  for i in dis(aa,zz):print(' ',fmt(i))
+
+          print('\n=== compact decision scaffold ===')
+          print('CMROOT_INIT_FN: 0x420A4AAC')
+          print('T1_SOURCE: unresolved unless explicit dataflow above')
+          print('CM1_FIXED_SOURCE: unresolved unless explicit dataflow above')
+          print('T2_SOURCE: unresolved unless explicit dataflow above')
+          print('CM2_FIXED_SOURCE: unresolved unless explicit dataflow above')
+          print('PROFILE1_DOUBLE_SOURCE: unresolved unless explicit dataflow above')
+          print('PROFILE2_DOUBLE_SOURCE: unresolved unless explicit dataflow above')
+          print('PROFILE1_RELATION_TO_CM1: do not infer without explicit transform/copy')
+          print('PROFILE2_RELATION_TO_CM2: do not infer without explicit transform/copy')
+          print('DETERMINISTIC_FROM_DNG_VISIBLE_FIELDS: unresolved pending explicit dataflow')
+          PY
+      - name: Commit v2.34b trace
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v234b_ca9_cmroot_initializer.txt
+          git commit -m 'research: record v2.34b cm_root initializer' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
