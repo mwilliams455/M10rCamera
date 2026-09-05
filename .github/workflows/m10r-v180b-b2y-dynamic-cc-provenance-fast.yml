@@ -1,0 +1,88 @@
+name: M10-R v1.80b fast B2Y dynamic CC provenance
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v180b-b2y-dynamic-cc-provenance-fast.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace central B2Y callers and coefficient block
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v180b_b2y_dynamic_cc_provenance_fast.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;P=4;END=BASE+len(b)-P
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def off(a):return P+a-BASE
+          def dis(a,z):return list(md.disasm(b[off(max(BASE,a)):off(min(END,z))],max(BASE,a)))
+          def call(i):
+            try:
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm&~1
+            except:pass
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;o=off(la)
+                if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+            except:pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i);c=call(i)
+            if q:s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'
+            if c is not None:s+=f' ; CALL {c:#x}'
+            return s
+          # fast direct-call scan: no literal decoding, no materialized whole image
+          T=0x42154f84; callers=[]
+          for i in md.disasm(b[P:],BASE):
+            if call(i)==T:callers.append(i.address)
+          print('M10-R v1.80b FAST B2Y DYNAMIC CC PROVENANCE')
+          print('central',hex(T),'callers',[hex(x) for x in callers])
+          for a in callers:
+            print(f'\n=== caller neighborhood {a:#x} ===')
+            for i in dis(a-0x700,a+0x500):print(fmt(i))
+          # Search only plausible B2Y driver neighborhood for +0x100..0x150 stores and refs to dynamic rendered CC globals.
+          print('\n=== B2Y DRIVER REGION 0x42150000..0x42158000 offset stores ===')
+          reg=dis(0x42150000,0x42158000)
+          for i in reg:
+            hit=False
+            try:
+              if i.mnemonic.startswith('str'):
+                hit=any(op.type==ARM_OP_MEM and 0x0d0<=op.mem.disp<=0x160 for op in i.operands)
+            except:pass
+            q=lit(i)
+            if hit or (q and q[1] in (0x408fe124,0x408fe130,0x408fe15c)):
+              print(fmt(i))
+          print('\n=== direct calls in each caller neighborhood ===')
+          for a in callers:
+            cs=[]
+            for i in dis(a-0x700,a+0x500):
+              c=call(i)
+              if c is not None:cs.append((i.address,c))
+            for x,c in cs:print(hex(x),'->',hex(c))
+          print('\n=== central selector entry excerpt ===')
+          for i in dis(0x42154f84,0x42155120):print(fmt(i))
+          print('\nTARGET: identify the object passed to 0x42154F84 and provenance of its +0x100 dynamic CC coefficient block without whole-image expensive scans.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v180b_b2y_dynamic_cc_provenance_fast.txt
+          git commit -m 'research: record v1.80b fast B2Y dynamic CC provenance' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
