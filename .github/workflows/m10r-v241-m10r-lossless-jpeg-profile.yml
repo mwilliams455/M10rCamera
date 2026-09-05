@@ -1,0 +1,98 @@
+name: M10-R v2.41 lossless JPEG profile
+on:
+  push:
+    branches: [m10r-lossless-jpeg-v241]
+    paths:
+      - '.github/workflows/m10r-v241-m10r-lossless-jpeg-profile.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Python dependencies
+        run: python3 -m pip install --quiet tifffile rawpy numpy
+      - name: Download verified public M10-R DNG
+        run: |
+          curl -L --fail --retry 3 -o /tmp/m10r.dng 'https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_01.dng'
+          ls -lh /tmp/m10r.dng
+          sha256sum /tmp/m10r.dng
+      - name: Inspect DNG and first JPEG strip
+        shell: bash
+        run: |
+          python3 - <<'PY' | tee research/M10R_v241_lossless_jpeg_profile.txt
+          import hashlib, struct
+          import numpy as np
+          import tifffile, rawpy
+          p='/tmp/m10r.dng'
+          print('M10-R v2.41 LOSSLESS JPEG PROFILE')
+          print('file_sha256', hashlib.sha256(open(p,'rb').read()).hexdigest())
+          with tifffile.TiffFile(p) as tf:
+              pages=[]
+              def walk(page, depth=0):
+                  pages.append(page)
+                  for sub in getattr(page, 'pages', ()):
+                      walk(sub, depth+1)
+              for page in tf.pages: walk(page)
+              for i,page in enumerate(pages):
+                  tags=page.tags
+                  w=int(tags['ImageWidth'].value) if 'ImageWidth' in tags else 0
+                  h=int(tags['ImageLength'].value) if 'ImageLength' in tags else 0
+                  photo=int(tags['PhotometricInterpretation'].value) if 'PhotometricInterpretation' in tags else -1
+                  comp=int(tags['Compression'].value) if 'Compression' in tags else -1
+                  print(f'IFD[{i}] {w}x{h} photo={photo} compression={comp}')
+              raw=max((x for x in pages if int(x.tags.get(262).value if x.tags.get(262) else -1)==32803), key=lambda x:int(x.imagewidth)*int(x.imagelength))
+              tags=raw.tags
+              offsets=np.atleast_1d(tags['StripOffsets'].value).astype(np.uint64) if 'StripOffsets' in tags else np.atleast_1d(tags['TileOffsets'].value).astype(np.uint64)
+              counts=np.atleast_1d(tags['StripByteCounts'].value).astype(np.uint64) if 'StripByteCounts' in tags else np.atleast_1d(tags['TileByteCounts'].value).astype(np.uint64)
+              print('RAW', raw.imagewidth, raw.imagelength, 'bits', tags['BitsPerSample'].value, 'compression', tags['Compression'].value)
+              print('segments', len(offsets), 'rows_per_strip', tags.get('RowsPerStrip').value if tags.get('RowsPerStrip') else None)
+              print('first_offset', int(offsets[0]), 'first_count', int(counts[0]), 'total_payload', int(counts.sum()))
+          data=open(p,'rb').read()
+          strip=data[int(offsets[0]):int(offsets[0]+counts[0])]
+          print('first_32', strip[:32].hex())
+          if strip[:2] != b'\xff\xd8': raise SystemExit('first strip is not JPEG SOI')
+          pos=2
+          while pos < len(strip):
+              if strip[pos] != 0xff:
+                  print('entropy_at', pos); break
+              while pos < len(strip) and strip[pos]==0xff: pos+=1
+              marker=strip[pos]; pos+=1
+              if marker in (0xd8,0xd9) or 0xd0 <= marker <= 0xd7:
+                  print(f'MARKER FF{marker:02X}'); continue
+              if pos+2 > len(strip): break
+              L=struct.unpack('>H',strip[pos:pos+2])[0]
+              seg=strip[pos+2:pos+L]
+              print(f'MARKER FF{marker:02X} len={L}')
+              if marker in (0xc0,0xc1,0xc2,0xc3):
+                  P=seg[0]; Y=struct.unpack('>H',seg[1:3])[0]; X=struct.unpack('>H',seg[3:5])[0]; Nf=seg[5]
+                  print('SOF', f'FF{marker:02X}', 'precision',P,'width',X,'height',Y,'components',Nf,'component_bytes',seg[6:].hex())
+              elif marker==0xc4:
+                  q=0
+                  while q<len(seg):
+                      tc_th=seg[q]; q+=1; bits=list(seg[q:q+16]); q+=16; n=sum(bits); vals=list(seg[q:q+n]); q+=n
+                      print('DHT class',tc_th>>4,'id',tc_th&15,'bits',bits,'values',vals)
+              elif marker==0xda:
+                  Ns=seg[0]; q=1; comps=[]
+                  for _ in range(Ns): comps.append((seg[q],seg[q+1])); q+=2
+                  Ss,Se,AhAl=seg[q:q+3]
+                  print('SOS components',comps,'predictor_Ss',Ss,'Se',Se,'Ah',AhAl>>4,'Pt',AhAl&15)
+                  pos += L; print('entropy_at',pos); break
+              elif marker==0xdd:
+                  print('DRI',struct.unpack('>H',seg[:2])[0])
+              pos += L
+          with rawpy.imread(p) as r:
+              ref=r.raw_image.copy()
+              print('rawpy_shape',ref.shape,'dtype',ref.dtype,'min',int(ref.min()),'max',int(ref.max()),'mean',float(ref.mean()))
+              print('rawpy_sha256_le_u16',hashlib.sha256(ref.astype('<u2',copy=False).tobytes()).hexdigest())
+              print('rawpy_first32',ref.ravel()[:32].tolist())
+          PY
+      - name: Commit profile
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v241_lossless_jpeg_profile.txt
+          git commit -m 'research: record M10-R lossless JPEG profile v2.41' || exit 0
+          git push
