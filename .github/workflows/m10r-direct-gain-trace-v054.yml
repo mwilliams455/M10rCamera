@@ -2,8 +2,7 @@ name: M10-R v0.5.4 direct-gain firmware trace
 
 on:
   push:
-    branches:
-      - m10r-direct-gain-trace-v054
+    branches: [m10r-direct-gain-trace-v054]
     paths:
       - '.m10r-direct-gain-trace-trigger'
       - '.github/workflows/m10r-direct-gain-trace-v054.yml'
@@ -23,15 +22,26 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          curl -L --fail --retry 3 --retry-delay 2 \
-            'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' \
-            -o /tmp/M10-R.FW
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
           echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
-      - name: Decode and extract sections
+      - name: Fast decode and extract sections
         shell: bash
         run: |
           set -euo pipefail
-          python3 tools/m10r_unpack.py /tmp/M10-R.FW /tmp/M10R_unpacked.bin
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <string>
+          #include <vector>
+          using namespace std;
+          static uint32_t u32(const vector<uint8_t>& b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);}
+          struct BR{const uint8_t* p; size_t n,bit=0; int get(){if(bit>=n*8) throw runtime_error("eof"); int v=(p[bit>>3]>>(7-(bit&7)))&1; ++bit; return v;}};
+          static int cat(BR& r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;}
+          int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t> fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;if(fw.size()<C+0x160||string((char*)&fw[C],4)!="COMP")return 2;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t* tr=&fw[C+0x54];vector<uint8_t> out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}if(out.size()!=expected)return 3;ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          /tmp/unpack
           echo '859c936b6ac8efe0bc4ce7f05623013644fc5d8aee3c6835f09860f452adc2e0  /tmp/M10R_unpacked.bin' | sha256sum -c -
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/m10r_sections >/tmp/sections.txt
           cat /tmp/sections.txt
@@ -41,16 +51,11 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          import csv, re, struct
-          from capstone import Cs, CS_ARCH_ARM, CS_MODE_THUMB, CS_MODE_LITTLE_ENDIAN
-
-          root=Path('/tmp/m10r_sections')
-          rows=list(csv.DictReader((root/'sections.csv').open()))
-          targets=[0x2002008c,0x20020090]
-          page_lo,page_hi=0x20020000,0x20020100
+          import csv,re,struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
+          root=Path('/tmp/m10r_sections'); rows=list(csv.DictReader((root/'sections.csv').open()))
+          targets=[0x2002008c,0x20020090]; page_lo,page_hi=0x20020000,0x20020100
           print('TARGETS',*[hex(x) for x in targets])
-
-          # First pass: exact 32-bit little-endian literals and all page literals.
           exact=[]; page=[]
           for r in rows:
               p=root/r['file']; b=p.read_bytes(); base=int(r['image_base'],16)
@@ -62,54 +67,36 @@ jobs:
                       exact.append((r,p,base,pos,target)); pos+=1
               for pos in range(0,max(0,len(b)-3),2):
                   v=struct.unpack_from('<I',b,pos)[0]
-                  if page_lo <= v < page_hi:
-                      page.append((r,p,base,pos,v))
-
+                  if page_lo<=v<page_hi: page.append((r,p,base,pos,v))
           print('\n=== EXACT LITERAL HITS ===')
           if not exact: print('none')
-          for r,p,base,pos,v in exact:
-              print(f"section={r['index']} {r['name']} fileoff={pos:#x} image_base={base:#x} runtime~={base+pos:#010x} value={v:#010x}")
-
+          for r,p,base,pos,v in exact: print(f"section={r['index']} {r['name']} fileoff={pos:#x} image_base={base:#x} runtime~={base+pos:#010x} value={v:#010x}")
           print('\n=== 0x20020000 PAGE LITERALS ===')
           if not page: print('none')
-          for r,p,base,pos,v in page[:1000]:
-              print(f"section={r['index']} {r['name']} fileoff={pos:#x} image_base={base:#x} runtime~={base+pos:#010x} value={v:#010x}")
+          for r,p,base,pos,v in page[:1000]: print(f"section={r['index']} {r['name']} fileoff={pos:#x} image_base={base:#x} runtime~={base+pos:#010x} value={v:#010x}")
           print('page_literal_count',len(page))
-
-          # Second pass: Thumb disassembly around exact/page hits. This can reveal
-          # LDR literal consumers and nearby STR/STRH operations without assuming semantics.
-          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=False; md.skipdata=True
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=False;md.skipdata=True
           seen=set()
-          def dump_window(r,p,base,pos,label):
+          def dump(r,p,base,pos,label):
               key=(str(p),pos)
               if key in seen:return
-              seen.add(key)
-              b=p.read_bytes(); start=max(0,pos-96)&~1; end=min(len(b),pos+128)
-              va=base+start
+              seen.add(key);b=p.read_bytes();start=max(0,pos-128)&~1;end=min(len(b),pos+192)
               print(f'\n--- {label} {r["name"]} off={pos:#x} va~={base+pos:#010x} ---')
-              for ins in md.disasm(b[start:end],va):
-                  if ins.mnemonic!='.byte': print(f'{ins.address:08x}: {ins.mnemonic:8s} {ins.op_str}')
-          for r,p,base,pos,v in exact: dump_window(r,p,base,pos,f'EXACT {v:#010x}')
-          for r,p,base,pos,v in page[:100]: dump_window(r,p,base,pos,f'PAGE {v:#010x}')
-
-          # Third pass: raw halfword signatures for MOVW/MOVT immediate construction
-          # are not decoded manually here. Instead disassemble likely executable sections
-          # and print instructions mentioning 0x2002/0x008c/0x0090 immediates. This is
-          # intentionally broad and diagnostic-only.
+              for ins in md.disasm(b[start:end],base+start):
+                  if ins.mnemonic!='.byte':print(f'{ins.address:08x}: {ins.mnemonic:8s} {ins.op_str}')
+          for x in exact: dump(*x[:-1],f'EXACT {x[-1]:#010x}')
+          for x in page[:100]: dump(*x[:-1],f'PAGE {x[-1]:#010x}')
           print('\n=== THUMB IMMEDIATE TEXT CANDIDATES ===')
-          patterns=(re.compile(r'0x2002',re.I),re.compile(r'0x8c\b',re.I),re.compile(r'0x90\b',re.I))
-          count=0
+          pats=(re.compile(r'0x2002',re.I),re.compile(r'0x8c\b',re.I),re.compile(r'0x90\b',re.I)); n=0
           for r in rows:
               p=root/r['file']; b=p.read_bytes(); base=int(r['image_base'],16)
-              if base==0 or len(b)>80_000_000: continue
+              if base==0 or len(b)>80000000:continue
               for ins in md.disasm(b,base):
-                  s=ins.op_str
-                  if any(x.search(s) for x in patterns):
-                      print(f"{r['index']} {r['name']} {ins.address:08x}: {ins.mnemonic:8s} {s}")
-                      count+=1
-                      if count>=3000: break
-              if count>=3000: break
-          print('thumb_immediate_candidate_count',count)
+                  if any(q.search(ins.op_str) for q in pats):
+                      print(f"{r['index']} {r['name']} {ins.address:08x}: {ins.mnemonic:8s} {ins.op_str}");n+=1
+                      if n>=3000:break
+              if n>=3000:break
+          print('thumb_immediate_candidate_count',n)
           PY
-      - name: Save trace report marker
+      - name: Trace complete
         run: echo direct-gain-trace-v054-complete
