@@ -81,7 +81,9 @@ class InterpolationTest(unittest.TestCase):
         # Reciprocal midpoint of 3000 and 6000 is 4000 K, so g = 0.5.
         got = oracle.interpolate_matrix(3000.0, 6000.0, self.M1, self.M2, 4000.0)
         expected = ((2.0, 0.0, 0.0), (0.0, 3.0, 0.0), (0.0, 0.0, 4.0))
-        self.assertEqual(expected, got)
+        for r in range(3):
+            for c in range(3):
+                self.assertAlmostEqual(expected[r][c], got[r][c], places=14)
 
 
 class WorkingSpaceTest(unittest.TestCase):
