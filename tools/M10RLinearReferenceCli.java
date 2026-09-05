@@ -5,7 +5,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 
-/** Host-side real-DNG validator for the v0.5 Leica linear reference path. */
+/** Host-side real-DNG validator for v0.5.1 plus the isolated v0.5.2 highlight A/B candidate. */
 public final class M10RLinearReferenceCli {
     private M10RLinearReferenceCli() {}
 
@@ -17,6 +17,8 @@ public final class M10RLinearReferenceCli {
             DngRawDecoder.RawImage raw = DngRawDecoder.decode(channel);
             SensorPreviewCore.PreviewResult sensor = SensorPreviewCore.render(raw, info);
             M10RLinearReferenceRenderer.Result leica = M10RLinearReferenceRenderer.render(raw, info);
+            M10RNeutralClipReferenceRenderer.Result candidate =
+                    M10RNeutralClipReferenceRenderer.render(raw, info);
 
             System.out.println(info.summary());
             System.out.println(raw.diagnosticSummary());
@@ -24,6 +26,8 @@ public final class M10RLinearReferenceCli {
             System.out.println("Sensor ARGB8 SHA-256 (A,R,G,B byte order): " + argbSha(sensor.argb));
             System.out.println(leica.diagnosticSummary());
             System.out.println("Leica linear ARGB8 SHA-256 (A,R,G,B byte order): " + argbSha(leica.argb));
+            System.out.println(candidate.diagnosticSummary());
+            System.out.println("CA9 neutral-clip ARGB8 SHA-256 (A,R,G,B byte order): " + argbSha(candidate.argb));
         }
     }
 
