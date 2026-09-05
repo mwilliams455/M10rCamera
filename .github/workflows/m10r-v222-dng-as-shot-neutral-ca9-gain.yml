@@ -1,0 +1,190 @@
+name: M10-R v2.22 DNG AsShotNeutral to CA9 gain probe
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v222-dng-as-shot-neutral-ca9-gain.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install metadata tools
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl >/dev/null
+      - name: Download six verified Leica M10-R DNGs and inspect WB metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/m10r_v222
+          for id in 01 02 03 04 05 06; do
+            base="https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_${id}"
+            curl -L --fail --retry 3 --retry-delay 2 "$base.dng" -o "/tmp/m10r_v222/${id}.dng"
+            exiftool -j -n -a -G1 \
+              -Make -Model -SerialNumber -ImageUniqueID -DateTimeOriginal \
+              -AsShotNeutral -AnalogBalance -AsShotWhiteXY \
+              -ColorMatrix1 -ColorMatrix2 -CameraCalibration1 -CameraCalibration2 \
+              -ForwardMatrix1 -ForwardMatrix2 -CalibrationIlluminant1 -CalibrationIlluminant2 \
+              -WhiteBalance -ColorTemperature \
+              "/tmp/m10r_v222/${id}.dng" > "/tmp/m10r_v222/${id}_selected.json"
+            exiftool -G1 -a -s -n "/tmp/m10r_v222/${id}.dng" \
+              | grep -Ei 'AsShotNeutral|AsShotWhiteXY|WhiteBalance|WB|Neutral|ColorTemperature|RGGB|RedLevel|GreenLevel|BlueLevel' \
+              > "/tmp/m10r_v222/${id}_wb_tags.txt" || true
+          done
+      - name: Compute firmware-ABI gain candidates from AsShotNeutral
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, math, re
+          from pathlib import Path
+
+          def numeric_triplet(v):
+              if v is None:
+                  return None
+              if isinstance(v, (list, tuple)):
+                  vals=[]
+                  for x in v:
+                      try: vals.append(float(x))
+                      except Exception: pass
+                  return vals[:3] if len(vals)>=3 else None
+              if isinstance(v, (int,float)):
+                  return None
+              s=str(v).replace(',', ' ')
+              vals=[]
+              for tok in re.findall(r'[-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?(?:/\d+(?:\.\d+)?)?', s):
+                  try:
+                      if '/' in tok:
+                          a,b=tok.split('/',1); vals.append(float(a)/float(b))
+                      else: vals.append(float(tok))
+                  except Exception: pass
+              return vals[:3] if len(vals)>=3 else None
+
+          out=[]
+          summary=[]
+          out.append('M10-R v2.22 DNG AS-SHOT-NEUTRAL -> CA9 GAIN PROBE')
+          out.append('Evidence class: public same-capture DNG metadata + frozen firmware gain/ASN ABI.')
+          out.append('Firmware ABI under test: ASN[channel] = 256.0 / integer_gain[channel], with gain clamped [1,2000].')
+          out.append('Candidate DNG identity under test: DNG AsShotNeutral[channel] == firmware ASN[channel].')
+          out.append('')
+
+          for id in ('01','02','03','04','05','06'):
+              p=Path(f'/tmp/m10r_v222/{id}_selected.json')
+              arr=json.loads(p.read_text())
+              rec=arr[0] if arr else {}
+              # ExifTool -G1 may prefix keys, so locate by suffix.
+              asn=None
+              for k,v in rec.items():
+                  if k.split(':')[-1] == 'AsShotNeutral':
+                      asn=numeric_triplet(v); break
+              out.append(f'=== sample {id} ===')
+              out.append('selected_metadata='+json.dumps(rec, sort_keys=True))
+              wbtxt=Path(f'/tmp/m10r_v222/{id}_wb_tags.txt').read_text(errors='replace')
+              out.append('wb_related_tags:')
+              out.extend('  '+ln for ln in wbtxt.splitlines())
+              if not asn:
+                  out.append('AsShotNeutral parse: MISSING/UNPARSEABLE')
+                  summary.append({'sample':id,'asn':None})
+                  out.append('')
+                  continue
+              gains=[int(math.floor(256.0/x + 0.5)) if x>0 else None for x in asn]
+              reencoded=[256.0/g if g else None for g in gains]
+              abs_err=[abs(a-b) for a,b in zip(asn,reencoded)]
+              rel_err=[abs(a-b)/abs(a) if a else None for a,b in zip(asn,reencoded)]
+              in_range=all(g is not None and 1 <= g <= 2000 for g in gains)
+              out.append('AsShotNeutral=' + repr(asn))
+              out.append('candidate_integer_gain_round_256_over_ASN=' + repr(gains))
+              out.append('reencoded_256_over_gain=' + repr(reencoded))
+              out.append('abs_error=' + repr(abs_err))
+              out.append('rel_error=' + repr(rel_err))
+              out.append('all_candidate_gains_within_firmware_clamp=' + str(in_range))
+              summary.append({'sample':id,'asn':asn,'gains':gains,'reencoded':reencoded,'abs_err':abs_err,'rel_err':rel_err,'in_range':in_range})
+              out.append('')
+
+          valid=[r for r in summary if r.get('asn')]
+          max_abs=max((max(r['abs_err']) for r in valid), default=None)
+          max_rel=max((max(r['rel_err']) for r in valid), default=None)
+          all_range=bool(valid) and all(r['in_range'] for r in valid)
+          out.append('=== aggregate ===')
+          out.append(f'valid_AsShotNeutral_samples={len(valid)}/6')
+          out.append(f'all_candidate_gains_within_firmware_clamp={all_range}')
+          out.append(f'max_roundtrip_abs_error={max_abs}')
+          out.append(f'max_roundtrip_rel_error={max_rel}')
+          out.append('')
+          out.append('INTERPRETATION_BOUNDARY')
+          out.append('- Exact/near-exact numerical round-trip supports compatibility with the frozen firmware ASN representation.')
+          out.append('- It does NOT by itself prove that the firmware DNG writer copied the CA9 ASN triplet into tag 0xC628.')
+          out.append('- A direct firmware writer/tag trace is required before freezing AsShotNeutral == CA9 ASN as a firmware identity.')
+          Path('research/M10R_v222_dng_as_shot_neutral_ca9_gain.txt').write_text('\n'.join(out)+'\n')
+          Path('research/M10R_v222_dng_as_shot_neutral_ca9_gain.json').write_text(json.dumps({'samples':summary,'valid':len(valid),'max_abs':max_abs,'max_rel':max_rel,'all_range':all_range},indent=2,sort_keys=True)+'\n')
+          print('\n'.join(out))
+          PY
+      - name: Unpack firmware and scan for AsShotNeutral/tag 0xC628 references
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, struct
+          out=[]
+          out.append('')
+          out.append('=== firmware AsShotNeutral / DNG tag scan ===')
+          ascii_needles=[b'AsShotNeutral', b'As Shot Neutral', b'NeutralToXY', b'DNG']
+          files=sorted(p for p in Path('/tmp/sections').glob('*') if p.is_file())
+          for needle in ascii_needles:
+              hits=[]
+              for p in files:
+                  b=p.read_bytes(); pos=0
+                  while True:
+                      i=b.find(needle,pos)
+                      if i<0: break
+                      hits.append((p.name,i))
+                      pos=i+1
+              out.append(f'ASCII {needle!r} hits={len(hits)} '+repr(hits[:80]))
+
+          # DNG AsShotNeutral TIFF tag ID 50728 == 0xC628. Search both endian halfwords.
+          for label,needle in [('tag_C628_LE',struct.pack('<H',0xC628)),('tag_C628_BE',struct.pack('>H',0xC628))]:
+              hits=[]
+              for p in files:
+                  b=p.read_bytes(); pos=0
+                  while True:
+                      i=b.find(needle,pos)
+                      if i<0: break
+                      # bounded printable context, useful only for triage
+                      lo=max(0,i-64); hi=min(len(b),i+66)
+                      ctx=''.join(chr(x) if 32<=x<127 else '.' for x in b[lo:hi])
+                      hits.append((p.name,i,ctx))
+                      pos=i+1
+                      if len(hits)>=300: break
+                  if len(hits)>=300: break
+              out.append(f'{label} hits={len(hits)}')
+              for h in hits[:120]: out.append('  '+repr(h))
+
+          path=Path('research/M10R_v222_dng_as_shot_neutral_ca9_gain.txt')
+          path.write_text(path.read_text()+ '\n'.join(out)+'\n')
+          print('\n'.join(out))
+          PY
+      - name: Commit v2.22 evidence
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v222_dng_as_shot_neutral_ca9_gain.txt research/M10R_v222_dng_as_shot_neutral_ca9_gain.json
+          git commit -m 'research: record v2.22 DNG AsShotNeutral CA9 gain evidence' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
