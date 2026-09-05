@@ -1,0 +1,130 @@
+name: M10-R v2.04 bounded contrast +0xAC writers
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v204-contrast-ac-writers-bounded.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Find direct and indexed writes to B2Y object contrast field
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v204_contrast_ac_writers_bounded.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;P=4
+          def off(a): return P+a-BASE
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def ops(i):
+            try:return i.operands
+            except:return []
+          def call(i):
+            try:
+              o=ops(i)
+              if i.mnemonic in ('bl','blx') and o and o[0].type==ARM_OP_IMM:return o[0].imm&~1
+            except:pass
+          def lit(i):
+            try:
+              o=ops(i)
+              if i.mnemonic.startswith('ldr') and len(o)>=2 and o[1].type==ARM_OP_MEM and o[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+o[1].mem.disp;fo=off(la)
+                if 0<=fo<=len(b)-4:return la,struct.unpack_from('<I',b,fo)[0]
+            except:pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i);c=call(i)
+            if q:s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'
+            if c is not None:s+=f' ; CALL {c:#x}'
+            return s
+          A=0x42150000;Z=0x42170000
+          ins=list(md.disasm(b[off(A):off(Z)],A)); byaddr={i.address:k for k,i in enumerate(ins)}
+          print('M10-R v2.04 BOUNDED CONTRAST +0xAC WRITERS')
+          print('region',hex(A),hex(Z),'ins',len(ins))
+          direct=[]
+          for k,i in enumerate(ins):
+            try:
+              if not i.mnemonic.startswith('str'):continue
+              for op in ops(i):
+                if op.type==ARM_OP_MEM and op.mem.disp==0xac:
+                  direct.append((k,i));break
+            except:pass
+          print('\n=== direct STR [base,#0xAC] ===',len(direct))
+          for k,i in direct:
+            print(f'\nHIT {fmt(i)}')
+            for j in ins[max(0,k-18):min(len(ins),k+19)]:print(fmt(j))
+          print('\n=== indexed offset synthesis 0xAC then STR through that register ===')
+          indexed=[]
+          for k,i in enumerate(ins):
+            o=ops(i)
+            if i.mnemonic not in ('movs','mov','mov.w','movw') or len(o)<2 or o[0].type!=ARM_OP_REG or o[1].type!=ARM_OP_IMM or o[1].imm!=0xac:continue
+            idx=o[0].reg
+            for n in range(k+1,min(len(ins),k+10)):
+              j=ins[n]
+              if j.address-i.address>28:break
+              try:
+                if j.mnemonic.startswith('str') and any(op.type==ARM_OP_MEM and (op.mem.base==idx or op.mem.index==idx) for op in ops(j)):
+                  indexed.append((k,n,i,j));break
+              except:pass
+          print('indexed_count',len(indexed))
+          for k,n,i,j in indexed:
+            print(f'\nINDEX {fmt(i)} -> {fmt(j)}')
+            for q in ins[max(0,k-14):min(len(ins),n+15)]:print(fmt(q))
+          print('\n=== object pointer loaded from context+0x1D50 followed by stores near +0xA8..+0xB8 ===')
+          # Look for literal 0x1d50, base add, indexed pointer load, then within 24 instructions any STR with disp in neighborhood.
+          for k,i in enumerate(ins):
+            q=lit(i)
+            if not q or q[1]!=0x1d50:continue
+            for n in range(k+1,min(len(ins),k+8)):
+              j=ins[n]; jo=ops(j)
+              if not j.mnemonic.startswith('ldr') or not jo or jo[0].type!=ARM_OP_REG:continue
+              ptrreg=jo[0].reg
+              found=[]
+              for m in range(n+1,min(len(ins),n+25)):
+                x=ins[m]
+                try:
+                  for op in ops(x):
+                    if x.mnemonic.startswith('str') and op.type==ARM_OP_MEM and op.mem.base==ptrreg and 0xa0<=op.mem.disp<=0xb8:
+                      found.append((m,x))
+                except:pass
+              if found:
+                print(f'\nPOINTER LOAD {fmt(j)}')
+                for m,x in found: print('  STORE',fmt(x))
+                for x in ins[max(0,n-8):min(len(ins),max(m for m,_ in found)+9)]:print(fmt(x))
+          print('\n=== immediate enum 1/2/3 reaching any store within 8 instructions ===')
+          for k,i in enumerate(ins):
+            o=ops(i)
+            if not i.mnemonic.startswith('mov') or len(o)<2 or o[0].type!=ARM_OP_REG or o[1].type!=ARM_OP_IMM or o[1].imm not in (1,2,3):continue
+            reg=o[0].reg
+            for n in range(k+1,min(len(ins),k+9)):
+              j=ins[n];jo=ops(j)
+              if j.mnemonic.startswith('str') and jo and jo[0].type==ARM_OP_REG and jo[0].reg==reg:
+                # report only stores whose address resembles object-field access (non-SP or large disp)
+                mem=[x.mem for x in jo if x.type==ARM_OP_MEM]
+                if mem and (mem[0].base!=ARM_REG_SP or mem[0].disp>=0x80):
+                  print(f'\nENUM {o[1].imm} {fmt(i)} -> {fmt(j)}')
+                  for x in ins[max(0,k-10):min(len(ins),n+11)]:print(fmt(x))
+                  break
+          print('\nTARGET: locate actual writes to the full B2Y object contrast field at +0xAC within the 0x42150000..0x42170000 slot/B2Y subsystem. Distinguish true object+0xAC writes from unrelated structures and establish whether enum 2 (MEDIUM) is assigned as a default anywhere on the still path.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v204_contrast_ac_writers_bounded.txt
+          git commit -m 'research: record v2.04 bounded contrast +0xAC writers' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
