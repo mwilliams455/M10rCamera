@@ -1,0 +1,109 @@
+name: M10-R v1.87 differential gamma 32-cube hypothesis
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v187-dg-32cube-hypothesis.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test 32x32x32 DG cube hypothesis
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v187_dg_32cube_hypothesis.txt
+          from pathlib import Path
+          import struct,collections,statistics,math,hashlib
+          D=Path('/tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin').read_bytes();P=4
+          u32=lambda o:struct.unpack_from('<I',D,o)[0]
+          count=u32(P+8);rec0=P+0x10;stride=0xa90;base=rec0+count*stride
+          recs=[]
+          for i in range(count):
+            o=rec0+i*stride;recs.append((i,u32(o),u32(o+4),u32(o+8),base+u32(o+4)))
+          def get(rid):return [r for r in recs if r[1]==rid][0]
+          m=get(0x1c); cube=D[m[4]:m[4]+0x8000]
+          f=get(0x1d); fl=list(struct.unpack('<2048H',D[f[4]:f[4]+0x1000]))
+          print('M10-R v1.87 DG 32-CUBE HYPOTHESIS')
+          print('main bytes',len(cube),'32^3',32**3,'exact',len(cube)==32**3,'range',min(cube),max(cube),'unique',sorted(set(cube)))
+          def v(a,b,c): return cube[(a*32+b)*32+c]
+          # Per-plane and per-axis summaries for all three possible axis identities.
+          print('\n=== first-axis planes (32 planes of 32x32) ===')
+          for a in range(32):
+            p=[v(a,b,c) for b in range(32) for c in range(32)]
+            print(a,'minmax',min(p),max(p),'mean',round(statistics.mean(p),4),'unique',len(set(p)),'zero',p.count(0),'sha',hashlib.sha256(bytes(p)).hexdigest()[:16])
+          print('\n=== axis-line summary ===')
+          for axis in range(3):
+            lines=[]; mono_inc=mono_dec=const=0
+            for i in range(32):
+              for j in range(32):
+                if axis==0: line=[v(k,i,j) for k in range(32)]
+                elif axis==1: line=[v(i,k,j) for k in range(32)]
+                else: line=[v(i,j,k) for k in range(32)]
+                lines.append(tuple(line))
+                mono_inc+=all(line[k]<=line[k+1] for k in range(31))
+                mono_dec+=all(line[k]>=line[k+1] for k in range(31))
+                const+=len(set(line))==1
+            print('axis',axis,'unique_lines',len(set(lines)),'mono_inc',mono_inc,'mono_dec',mono_dec,'const',const)
+          print('\n=== cube diagonals / neutral axis candidates ===')
+          for expr,name in [
+            (lambda k:v(k,k,k),'diag RGB'),
+            (lambda k:v(k,k,0),'a=b,c=0'),
+            (lambda k:v(k,0,k),'a=c,b=0'),
+            (lambda k:v(0,k,k),'b=c,a=0'),
+            (lambda k:v(k,31,31),'a,31,31'),
+            (lambda k:v(31,k,31),'31,b,31'),
+            (lambda k:v(31,31,k),'31,31,c')]:
+            arr=[expr(k) for k in range(32)];print(name,arr)
+          print('\n=== permutation symmetry mismatch counts ===')
+          perms=[((0,2,1),'swap12'),((1,0,2),'swap01'),((2,1,0),'swap02'),((1,2,0),'cycle120'),((2,0,1),'cycle201')]
+          for perm,nm in perms:
+            mism=0;absd=0;maxd=0
+            for a in range(32):
+              for b in range(32):
+                for c in range(32):
+                  xyz=(a,b,c);q=(xyz[perm[0]],xyz[perm[1]],xyz[perm[2]])
+                  d=abs(v(a,b,c)-v(*q));mism+=d!=0;absd+=d;maxd=max(maxd,d)
+            print(nm,'mismatch',mism,'of',32**3,'mean_abs',absd/(32**3),'max_abs',maxd)
+          print('\n=== adjacent-difference statistics by axis ===')
+          for axis in range(3):
+            ds=[]
+            for a in range(32):
+              for b in range(32):
+                for c in range(31):
+                  if axis==0: x=v(c,a,b);y=v(c+1,a,b)
+                  elif axis==1: x=v(a,c,b);y=v(a,c+1,b)
+                  else:x=v(a,b,c);y=v(a,b,c+1)
+                  ds.append(y-x)
+            C=collections.Counter(ds);print('axis',axis,'diff_range',min(ds),max(ds),'mean_abs',statistics.mean(abs(x) for x in ds),'counts',sorted(C.items()))
+          print('\n=== selected 32x32 slices: row heads ===')
+          for a in (0,1,2,4,8,16,24,31):
+            print('plane',a)
+            for b in (0,1,2,4,8,16,24,31):print(' row',b,[v(a,b,c) for c in range(32)])
+          print('\n=== FL curve relation probes ===')
+          last_ns=max(i for i,x in enumerate(fl) if x!=0x3fff)
+          print('FL len',len(fl),'range',min(fl),max(fl),'last_non_sat',last_ns,'first32',fl[:32],'around_sat',fl[max(0,last_ns-16):min(len(fl),last_ns+17)])
+          # normalized sample positions at 0..31 over the full nonsaturated input interval
+          samp=[]
+          for k in range(32):
+            idx=round(k*last_ns/31);samp.append((idx,fl[idx]))
+          print('FL 32-point samples over active span',samp)
+          print('\nTARGET: test whether the exact 0x8000-byte DG main payload is structurally consistent with a 32x32x32 1-byte LUT, identify axis behavior/symmetry, and assess whether FL plausibly supplies a scalar transfer curve used with the cube. Size equality alone is not proof.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v187_dg_32cube_hypothesis.txt
+          git commit -m 'research: record v1.87 DG 32-cube hypothesis test' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
