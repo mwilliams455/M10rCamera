@@ -1,0 +1,171 @@
+name: M10-R v2.25 CA9 DNG ColorSpec signature
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v225-ca9-dng-colorspec-signature.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Unpack firmware and fingerprint CA9 ColorSpec implementation
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v225_ca9_dng_colorspec_signature.txt
+          from pathlib import Path
+          import re, struct, math
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_ARM,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_REG_PC
+
+          p=Path('/tmp/sections/099_IMG-CA9_System.bin'); b=p.read_bytes(); BASE=0x40000000; PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN); md.detail=True
+          def va(o): return BASE+(o-PFX)
+          def off(a): return PFX+a-BASE
+          def s_at_addr(a,limit=180):
+              o=off(a)
+              if not 0<=o<len(b): return None
+              e=b.find(b'\0',o,min(len(b),o+limit))
+              if e<0:return None
+              bb=b[o:e]
+              if len(bb)>=4 and all(32<=x<127 for x in bb):return bb.decode('ascii','replace')
+          def u32_hits(v):
+              n=struct.pack('<I',v); out=[]; q=0
+              while True:
+                  q=b.find(n,q)
+                  if q<0:break
+                  out.append(q);q+=1
+              return out
+          def arm_lit(i):
+              try:
+                  if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                      return i.address+8+i.operands[1].mem.disp
+              except:pass
+          def fmt(i):
+              s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+              la=arm_lit(i)
+              if la is not None:
+                  o=off(la)
+                  if 0<=o<=len(b)-4:
+                      v=struct.unpack_from('<I',b,o)[0];s+=f' ; LIT {la:08x}->{v:08x}'
+                      st=s_at_addr(v) if BASE<=v<BASE+len(b)-PFX else None
+                      if st:s+=f' STRING={st!r}'
+              return s
+          def dis(a,z): return list(md.disasm(b[off(a):off(z)],a))
+          def string_entries(pattern):
+              out=[]
+              for m in re.finditer(rb'[ -~]{4,}\x00',b):
+                  s=m.group()[:-1].decode('ascii','replace')
+                  if re.search(pattern,s,re.I): out.append((m.start(),s))
+              return out
+          def refs_to_pool(pool_addr,span=0x3000):
+              po=off(pool_addr); lo=max(PFX,po-span)&~3; hi=min(len(b)-4,po+0x20)
+              refs=[]
+              for o in range(lo,hi,4):
+                  ins=list(md.disasm(b[o:o+4],va(o),count=1))
+                  if ins and arm_lit(ins[0])==pool_addr: refs.append(ins[0].address)
+              return refs
+          def f64_at(a,n=9):
+              o=off(a);return [struct.unpack_from('<d',b,o+8*i)[0] for i in range(n)]
+          def find_f64(x):
+              n=struct.pack('<d',x);out=[];q=0
+              while True:
+                  q=b.find(n,q)
+                  if q<0:break
+                  out.append(va(q));q+=1
+              return out
+
+          print('M10-R v2.25 CA9 DNG COLORSPEC SIGNATURE')
+          print('Firmware-only proof target: determine whether named CA9 color-spec functions carry the same constants/control signatures as the public Adobe DNG SDK algorithm.')
+          print('Public comparison reference: Adobe DNG SDK 1.4 dng_color_spec.cpp (2012), where MapWhiteMatrix uses linearized Bradford and NeutralToXY iterates max 30 with 1e-7 xy convergence.')
+          print()
+
+          print('=== named ColorSpec/white-point strings and ARM literal xrefs ===')
+          strings=string_entries(r'NeutralToXY|SetWhiteXY|FindXYZtoCamera|MapWhiteMatrix|ColorSpec|CameraWhite|WhiteXY')
+          for o,s in strings:
+              a=va(o); print(f'{a:08x} {s!r}')
+              for po in u32_hits(a):
+                  pa=va(po); refs=refs_to_pool(pa)
+                  print(f'  pool {pa:08x} refs={[hex(x) for x in refs]}')
+                  for r in refs[:8]:
+                      aa=max(BASE,(r-0x60)&~3);zz=min(BASE+len(b)-PFX,r+0x90)
+                      for i in dis(aa,zz): print('   ',fmt(i))
+          print()
+
+          print('=== exact MapWhiteMatrix 0x400058B8..0x40005B3C ===')
+          for i in dis(0x400058b8,0x40005b3c): print(fmt(i))
+          print()
+
+          # Matrices referenced by v1.33 MapWhiteMatrix.
+          expected=[0.8951,0.2664,-0.1614,-0.7502,1.7135,0.0367,0.0389,-0.0685,1.0296]
+          print('=== firmware matrix at 0x400142B0 ===')
+          m=f64_at(0x400142b0,9)
+          for r in range(3): print(' '.join(f'{x:.15g}' for x in m[r*3:r*3+3]))
+          dif=[abs(a-e) for a,e in zip(m,expected)]
+          print('Bradford_reference=',expected)
+          print('abs_diff=',dif)
+          print('max_abs_diff=',max(dif))
+          print('exact_python_float_equality=',all(a==e for a,e in zip(m,expected)))
+          print()
+          print('=== firmware matrix at 0x400142F8 ===')
+          mi=f64_at(0x400142f8,9)
+          for r in range(3): print(' '.join(f'{x:.15g}' for x in mi[r*3:r*3+3]))
+          # product m*mi
+          prod=[]
+          for r in range(3):
+              for c in range(3): prod.append(sum(m[3*r+k]*mi[3*k+c] for k in range(3)))
+          print('M_times_candidate_inverse=')
+          for r in range(3): print(' '.join(f'{x:.15g}' for x in prod[r*3:r*3+3]))
+          print('max_identity_error=',max(abs(prod[3*r+c]-(1.0 if r==c else 0.0)) for r in range(3) for c in range(3)))
+          print()
+
+          print('=== signature constants ===')
+          for x in [1e-7,0.5,30.0,0.3457,0.3585,0.9642,1.0,0.8251]:
+              hs=find_f64(x)
+              print(f'f64 {x!r}: {[hex(a) for a in hs[:40]]} count={len(hs)}')
+          # Integer 30 literals/immediates are too common; named xrefs above establish local control context.
+          print()
+
+          # Known higher-level bridge and likely SetWhiteXY/FindXYZtoCamera context.
+          print('=== higher-level rendered-CC constructor bridge 0x40003C10..0x40003D50 ===')
+          for i in dis(0x40003c10,0x40003d50): print(fmt(i))
+          print()
+          print('=== SetWhiteXY 0x40005E94..0x400060C4 ===')
+          for i in dis(0x40005e94,0x400060c4): print(fmt(i))
+          print()
+          print('=== adjacent color-spec function 0x400060F0..0x40006480 ===')
+          for i in dis(0x400060f0,0x40006480): print(fmt(i))
+          print()
+
+          print('=== DECISION ===')
+          if max(dif) < 1e-15:
+              print('PROVEN: firmware 0x400142B0 is numerically the canonical linearized Bradford matrix used by Adobe DNG SDK MapWhiteMatrix.')
+          else:
+              print('UNRESOLVED: firmware matrix does not exactly equal the canonical Bradford constants; inspect differences before adopting SDK source semantics.')
+          print('Do not freeze the full CA9 ColorSpec implementation solely from name similarity. Freeze each source-level rule only where firmware constants/control flow agree.')
+          print('If NeutralToXY/FindXYZtoCamera signatures also align, next step is an offline reconstruction using DNG ColorMatrix1/2, CalibrationIlluminant1/2 and v2.24 AsShotNeutral-derived gains.')
+          PY
+      - name: Commit v2.25 trace
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v225_ca9_dng_colorspec_signature.txt
+          git commit -m 'research: record v2.25 CA9 DNG ColorSpec signature' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
