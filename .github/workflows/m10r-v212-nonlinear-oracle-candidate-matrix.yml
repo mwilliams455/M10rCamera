@@ -1,0 +1,100 @@
+name: M10-R v2.12 nonlinear oracle candidate matrix
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v212-nonlinear-oracle-candidate-matrix.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract firmware assets and evaluate candidate matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          rm -rf /tmp/m10r_b2y_assets
+          python3 tools/m10r_b2y_assets.py /tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin /tmp/m10r_b2y_assets >/dev/null
+          python3 - <<'PY' > research/M10R_v212_nonlinear_oracle_candidate_matrix.txt
+          import sys, json
+          from pathlib import Path
+          sys.path.insert(0,'tools')
+          import m10r_b2y_nonlinear_oracle as o
+
+          assets=o.load_assets(Path('/tmp/m10r_b2y_assets'),'medium')
+          configs=[]; curves={}
+          for order in ('dg-tone','tone-dg'):
+            for rounding in ('trunc','nearest'):
+              for clamp in ('none','14bit-each','14bit-final'):
+                key=f'{order}|{rounding}|{clamp}'
+                curve=o.evaluate_curve(assets,order=order,rounding=rounding,clamp_policy=clamp)
+                curves[key]=curve
+                configs.append((key,o.curve_summary(curve)))
+
+          print('M10-R v2.12 NONLINEAR ORACLE CANDIDATE MATRIX')
+          print('source: exact v2.07 extracted assets; default MEDIUM tone')
+          print('domain 0..0x4fff = 20480 scalar candidate coordinates')
+          print('\n=== candidate summaries ===')
+          for key,s in configs:
+            print(key)
+            print(' entries',s['entries'],'min',s['min'],'max',s['max'],'monotonic',s['monotonic'])
+            print(' sha256_u16le',s['sha256_u16le'])
+            print(' first32',s['first32'])
+            print(' last32',s['last32'])
+
+          print('\n=== rounding sensitivity within same order/clamp ===')
+          for order in ('dg-tone','tone-dg'):
+            for clamp in ('none','14bit-each','14bit-final'):
+              a=curves[f'{order}|trunc|{clamp}']; b=curves[f'{order}|nearest|{clamp}']
+              c=o.compare_curves(a,b)
+              print(order,clamp,'different',c['different_entries'],'max_delta',c['max_abs_delta'],'first',c['first_difference_indices'][:16])
+
+          print('\n=== stage-order sensitivity within same rounding/clamp ===')
+          for rounding in ('trunc','nearest'):
+            for clamp in ('none','14bit-each','14bit-final'):
+              a=curves[f'dg-tone|{rounding}|{clamp}']; b=curves[f'tone-dg|{rounding}|{clamp}']
+              c=o.compare_curves(a,b)
+              print(rounding,clamp,'different',c['different_entries'],'max_delta',c['max_abs_delta'],'first',c['first_difference_indices'][:16])
+              print(' samples',c['first_difference_samples'][:8])
+
+          print('\n=== clamp-policy sensitivity ===')
+          for order in ('dg-tone','tone-dg'):
+            for rounding in ('trunc','nearest'):
+              base=curves[f'{order}|{rounding}|none']
+              for clamp in ('14bit-each','14bit-final'):
+                c=o.compare_curves(base,curves[f'{order}|{rounding}|{clamp}'])
+                print(order,rounding,'none_vs_'+clamp,'different',c['different_entries'],'max_delta',c['max_abs_delta'],'first',c['first_difference_indices'][:16])
+
+          # Unit-level invariants on exact assets.
+          low=o.load_assets(Path('/tmp/m10r_b2y_assets'),'low')
+          for rounding in ('trunc','nearest'):
+            lowcurve=o.evaluate_curve(low,order='tone-only',rounding=rounding,clamp_policy='none')
+            assert lowcurve==list(range(o.TONE_COORD_MAX+1)),rounding
+          assert assets.dg[0]==0 and max(assets.dg)==0x3fff
+          assert all(a<=b for a,b in zip(assets.dg,assets.dg[1:]))
+          print('\nINVARIANTS PASS')
+          print('LOW tone-only is exact identity for trunc and nearest candidates')
+          print('DG expanded curve monotonic with range 0..0x3fff')
+          print('\nINTERPRETATION RULE: large stage-order deltas make order a high-value empirical validation target; small 1-code rounding deltas make rounding secondary. Neither result proves the hardware choice.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v212_nonlinear_oracle_candidate_matrix.txt
+          git commit -m 'research: record v2.12 nonlinear oracle candidate matrix' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
