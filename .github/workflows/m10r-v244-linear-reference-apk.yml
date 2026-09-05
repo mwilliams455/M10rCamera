@@ -1,7 +1,7 @@
-name: M10-R v2.46 Highlight Boundary A-B APK
+name: M10-R v2.47 Highlight Boundary Factorial APK
 on:
   push:
-    branches: [m10r-highlight-guard-v052]
+    branches: [m10r-highlight-factorial-v053]
     paths:
       - 'app/**'
       - 'tools/M10RLinearReferenceCli.java'
@@ -20,28 +20,29 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Verify frozen decode, v0.4 sensor, and unchanged v0.5.1 reference
+      - name: Verify frozen decoder, v0.4, v0.5.1, and v0.5.2 composite
         shell: bash
         run: |
           test "$(git hash-object app/src/main/java/com/m10r/diagnostic/DngRawDecoder.java)" = '843dd16a36b16cda81d4a9d29d1e11b3d0943a9d'
           test "$(git hash-object app/src/main/java/com/m10r/diagnostic/LosslessJpegDecoder.java)" = '06bff56fbeb7c7d13e7d7c0b8768c92b9e520cd6'
           test "$(git hash-object app/src/main/java/com/m10r/diagnostic/SensorPreviewCore.java)" = '4e463bc5ad2c33b4ad6bc65a6df61a9b086e90a2'
           test "$(git hash-object app/src/main/java/com/m10r/diagnostic/M10RLinearReferenceRenderer.java)" = '827c71a4cd1d72f63341d5f56685577e83a304e5'
-          echo 'Frozen decoder/v0.4 and v0.5.1 reference source blobs unchanged.'
+          test "$(git hash-object app/src/main/java/com/m10r/diagnostic/M10RNeutralClipReferenceRenderer.java)" = '0866e3128754459b4950d55ba82220737be043d9'
+          echo 'A and D reference implementations are byte-identical to v0.5.1/v0.5.2.'
 
-      - name: Verify v0.5.2 A-B build identity
+      - name: Verify v0.5.3 build identity
         shell: bash
         run: |
-          grep -F 'versionCode = 7' app/build.gradle.kts
-          grep -F 'versionName = "0.5.2-highlight-ab"' app/build.gradle.kts
-          grep -F 'M10-R RAW Diagnostic v0.5.2' app/src/main/java/com/m10r/diagnostic/MainActivity.java
-          grep -F 'EXPERIMENTAL CA9 NEUTRAL-CLIP CANDIDATE' app/src/main/java/com/m10r/diagnostic/MainActivity.java
-          grep -F 'Candidate only; NOT firmware-parity claimed.' app/src/main/java/com/m10r/diagnostic/M10RNeutralClipReferenceRenderer.java
+          grep -F 'versionCode = 8' app/build.gradle.kts
+          grep -F 'versionName = "0.5.3-highlight-factorial"' app/build.gradle.kts
+          grep -F 'M10-R RAW Diagnostic v0.5.3' app/src/main/java/com/m10r/diagnostic/MainActivity.java
+          grep -F 'WHITELEVEL_CLAMP_ONLY' app/src/main/java/com/m10r/diagnostic/M10RHighlightFactorialRenderer.java
+          grep -F 'HEADROOM_NEUTRAL_CLIP_ONLY' app/src/main/java/com/m10r/diagnostic/M10RHighlightFactorialRenderer.java
 
       - name: Download verified public M10-R DNG
         run: curl -L --fail --retry 3 -o /tmp/m10r.dng 'https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_01.dng'
 
-      - name: Validate real DNG through v0.5.1 plus v0.5.2 A-B candidate
+      - name: Validate public DNG through all four highlight-factor cells
         shell: bash
         run: |
           mkdir -p /tmp/classes
@@ -54,19 +55,19 @@ jobs:
             app/src/main/java/com/m10r/diagnostic/M10RReferenceColorCore.java \
             app/src/main/java/com/m10r/diagnostic/M10RLinearReferenceRenderer.java \
             app/src/main/java/com/m10r/diagnostic/M10RNeutralClipReferenceRenderer.java \
+            app/src/main/java/com/m10r/diagnostic/M10RHighlightFactorialRenderer.java \
             tools/M10RLinearReferenceCli.java
           java -Xmx1024m -cp /tmp/classes com.m10r.diagnostic.M10RLinearReferenceCli /tmp/m10r.dng | tee /tmp/reference.txt
           grep -F 'Decoded CFA: 7872x5208' /tmp/reference.txt
           grep -F 'SOF3: precision=14, predictor=1, Pt=0' /tmp/reference.txt
           grep -F 'CFA SHA-256 (LE u16): 27814cbc80f92d23d7b975d4833f70525f35bc52917d992b35d0a899829a097a' /tmp/reference.txt
-          grep -F 'v0.4 SENSOR PREVIEW:' /tmp/reference.txt
-          grep -F 'v0.5.1 LINEAR IMAGE:' /tmp/reference.txt
-          grep -F 'v0.5.2 EXPERIMENTAL CA9 NEUTRAL-CLIP IMAGE:' /tmp/reference.txt
-          grep -F 'Neutral-domain clip counts:' /tmp/reference.txt
-          grep -F 'Linear sRGB <0 counts after candidate:' /tmp/reference.txt
-          grep -F 'Linear sRGB >1 counts after candidate:' /tmp/reference.txt
-          grep -F 'Leica linear ARGB8 SHA-256 (A,R,G,B byte order):' /tmp/reference.txt
-          grep -F 'CA9 neutral-clip ARGB8 SHA-256 (A,R,G,B byte order):' /tmp/reference.txt
+          grep -F 'A — v0.5.1 LINEAR IMAGE:' /tmp/reference.txt
+          grep -F 'B — v0.5.3 FACTORIAL WHITELEVEL_CLAMP_ONLY:' /tmp/reference.txt
+          grep -F 'C — v0.5.3 FACTORIAL HEADROOM_NEUTRAL_CLIP_ONLY:' /tmp/reference.txt
+          grep -F 'D — v0.5.2 EXPERIMENTAL CA9 NEUTRAL-CLIP IMAGE:' /tmp/reference.txt
+          grep -F 'B ARGB8 SHA-256:' /tmp/reference.txt
+          grep -F 'C ARGB8 SHA-256:' /tmp/reference.txt
+          grep -F 'D ARGB8 SHA-256:' /tmp/reference.txt
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
@@ -85,7 +86,7 @@ jobs:
       - name: Run Android unit tests
         run: gradle --no-daemon :app:testDebugUnitTest
 
-      - name: Build v0.5.2 A-B diagnostic debug APK
+      - name: Build v0.5.3 factorial diagnostic debug APK
         run: gradle --no-daemon :app:assembleDebug
 
       - name: Verify APK
@@ -95,9 +96,9 @@ jobs:
           sha256sum app/build/outputs/apk/debug/app-debug.apk | tee /tmp/apk-sha256.txt
           ls -lh app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Upload v0.5.2 A-B diagnostic APK
+      - name: Upload v0.5.3 factorial diagnostic APK
         uses: actions/upload-artifact@v4
         with:
-          name: M10RDiagnostic-v0.5.2-highlight-ab-debug-apk
+          name: M10RDiagnostic-v0.5.3-highlight-factorial-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
