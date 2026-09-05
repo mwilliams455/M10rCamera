@@ -1,0 +1,61 @@
+name: M10-R v2.15 contrast order clamp discriminator
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v215-contrast-order-clamp-discriminator.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Evaluate clamp activation by contrast and order
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          rm -rf /tmp/m10r_b2y_assets
+          python3 tools/m10r_b2y_assets.py /tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin /tmp/m10r_b2y_assets >/dev/null
+          python3 - <<'PY' > research/M10R_v215_contrast_order_clamp_discriminator.txt
+          import sys
+          from pathlib import Path
+          sys.path.insert(0,'tools')
+          import m10r_b2y_nonlinear_oracle as o
+          print('M10-R v2.15 CONTRAST / ORDER / CLAMP DISCRIMINATOR')
+          print('domain 0..0x4fff; exact extracted LOW/MEDIUM/HIGH assets')
+          for tone in ('low','medium','high'):
+            a=o.load_assets(Path('/tmp/m10r_b2y_assets'),tone)
+            print('\n===',tone.upper(),'===')
+            # Tone-alone headroom shows whether this profile can generate >14-bit values.
+            for rounding in ('trunc','nearest'):
+              t=o.evaluate_curve(a,order='tone-only',rounding=rounding,clamp_policy='none')
+              over=[i for i,v in enumerate(t) if v>0x3fff]
+              print('tone-only',rounding,'max',max(t),'over14_count',len(over),'first_over14',over[:8])
+            for order in ('dg-tone','tone-dg'):
+              for rounding in ('trunc','nearest'):
+                none=o.evaluate_curve(a,order=order,rounding=rounding,clamp_policy='none')
+                each=o.evaluate_curve(a,order=order,rounding=rounding,clamp_policy='14bit-each')
+                final=o.evaluate_curve(a,order=order,rounding=rounding,clamp_policy='14bit-final')
+                ce=o.compare_curves(none,each);cf=o.compare_curves(none,final);ef=o.compare_curves(each,final)
+                print(order,rounding,'none[min,max]',min(none),max(none),'monotonic',all(x<=y for x,y in zip(none,none[1:])))
+                print(' none_vs_each',ce['different_entries'],'maxdelta',ce['max_abs_delta'],'first',ce['first_difference_indices'][:12])
+                print(' none_vs_final',cf['different_entries'],'maxdelta',cf['max_abs_delta'],'first',cf['first_difference_indices'][:12])
+                print(' each_vs_final',ef['different_entries'],'maxdelta',ef['max_abs_delta'],'first',ef['first_difference_indices'][:12])
+          print('\nINTERPRETATION RULE: clamp activation can show where 14-bit limits matter mathematically, but it does not by itself prove physical stage order.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v215_contrast_order_clamp_discriminator.txt
+          git commit -m 'research: record v2.15 contrast/order clamp discriminator' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
