@@ -1,0 +1,135 @@
+M10-R v1.83 B2Y CC PREP FUNCTION TRACE
+
+=== prepA 0x420cf488 reachable=48 range=0x420cf488..0x420cf4e8 ===
+420cf488: push       {r4, r5, r6, lr}
+420cf48a: movs       r4, r0
+420cf48c: movs       r5, r1
+420cf48e: ldrb       r0, [r4, #1]
+420cf490: cmp        r0, #0
+420cf492: bne        #0x420cf4ac
+420cf494: ldrb       r0, [r4]
+420cf496: cmp        r0, #0
+420cf498: bne        #0x420cf4ac
+420cf49a: ldrb       r0, [r4, #2]
+420cf49c: cmp        r0, #0
+420cf49e: bne        #0x420cf4ac
+420cf4a0: ldrb       r0, [r4, #3]
+420cf4a2: cmp        r0, #0
+420cf4a4: bne        #0x420cf4ac
+420cf4a6: movs       r0, #0xc
+420cf4a8: str        r0, [r5]
+420cf4aa: b          #0x420cf4e8
+420cf4ac: ldrb       r0, [r4, #1]
+420cf4ae: cmp        r0, #1
+420cf4b0: bne        #0x420cf4c8
+420cf4b2: ldrb       r0, [r4]
+420cf4b4: cmp        r0, #1
+420cf4b6: bne        #0x420cf4c8
+420cf4b8: ldrb       r0, [r4, #2]
+420cf4ba: cmp        r0, #0
+420cf4bc: bne        #0x420cf4c8
+420cf4be: ldrb       r0, [r4, #3]
+420cf4c0: cmp        r0, #0
+420cf4c2: bne        #0x420cf4c8
+420cf4c4: str        r0, [r5]
+420cf4c6: b          #0x420cf4e8
+420cf4c8: ldrb       r0, [r4, #1]
+420cf4ca: cmp        r0, #1
+420cf4cc: bne        #0x420cf4e0
+420cf4ce: ldrb       r0, [r4]
+420cf4d0: cmp        r0, #0
+420cf4d2: bne        #0x420cf4e0
+420cf4d4: ldrb       r0, [r4, #2]
+420cf4d6: cmp        r0, #0
+420cf4d8: bne        #0x420cf4e0
+420cf4da: movs       r0, #4
+420cf4dc: str        r0, [r5]
+420cf4de: b          #0x420cf4e8
+420cf4e0: adr        r1, #8
+420cf4e2: movs       r0, #4
+420cf4e4: bl         #0x42140150 ; CALL 0x42140150
+420cf4e8: pop        {r4, r5, r6, pc}
+
+--- prepA memory accesses using r0/r1/r2/r3 ---
+
+--- prepA calls ---
+0x420cf4e4 -> 0x42140150
+
+=== prepB 0x420d3434 reachable=62 range=0x420d3434..0x420d34b0 ===
+420d3434: push       {r4, lr}
+420d3436: movs       r4, r0
+420d3438: ldrb       r0, [r4, #1]
+420d343a: cmp        r0, #0
+420d343c: bne        #0x420d345e
+420d343e: ldrb       r0, [r4]
+420d3440: cmp        r0, #0
+420d3442: bne        #0x420d345e
+420d3444: ldrb       r0, [r4, #2]
+420d3446: cmp        r0, #0
+420d3448: bne        #0x420d345e
+420d344a: ldrb       r0, [r4, #3]
+420d344c: cmp        r0, #0
+420d344e: bne        #0x420d345e
+420d3450: ldr        r0, [pc, #0x60] ; LIT 0x420d34b4->0x20022000
+420d3452: ldr        r0, [r0, #0x58]
+420d3454: lsrs       r0, r0, #4
+420d3456: lsls       r0, r0, #4
+420d3458: ldr        r1, [pc, #0x58] ; LIT 0x420d34b4->0x20022000
+420d345a: str        r0, [r1, #0x58]
+420d345c: b          #0x420d34b0
+420d345e: ldrb       r0, [r4, #1]
+420d3460: cmp        r0, #1
+420d3462: bne        #0x420d3486
+420d3464: ldrb       r0, [r4]
+420d3466: cmp        r0, #1
+420d3468: bne        #0x420d3486
+420d346a: ldrb       r0, [r4, #2]
+420d346c: cmp        r0, #0
+420d346e: bne        #0x420d3486
+420d3470: ldrb       r0, [r4, #3]
+420d3472: cmp        r0, #0
+420d3474: bne        #0x420d3486
+420d3476: ldr        r0, [pc, #0x3c] ; LIT 0x420d34b4->0x20022000
+420d3478: ldr        r0, [r0, #0x58]
+420d347a: lsrs       r0, r0, #4
+420d347c: lsls       r0, r0, #4
+420d347e: adds       r0, r0, #3
+420d3480: ldr        r1, [pc, #0x30] ; LIT 0x420d34b4->0x20022000
+420d3482: str        r0, [r1, #0x58]
+420d3484: b          #0x420d34b0
+420d3486: ldrb       r0, [r4, #1]
+420d3488: cmp        r0, #1
+420d348a: bne        #0x420d34a8
+420d348c: ldrb       r0, [r4]
+420d348e: cmp        r0, #0
+420d3490: bne        #0x420d34a8
+420d3492: ldrb       r0, [r4, #2]
+420d3494: cmp        r0, #0
+420d3496: bne        #0x420d34a8
+420d3498: ldr        r0, [pc, #0x18] ; LIT 0x420d34b4->0x20022000
+420d349a: ldr        r0, [r0, #0x58]
+420d349c: lsrs       r0, r0, #4
+420d349e: lsls       r0, r0, #4
+420d34a0: adds       r0, r0, #2
+420d34a2: ldr        r1, [pc, #0x10] ; LIT 0x420d34b4->0x20022000
+420d34a4: str        r0, [r1, #0x58]
+420d34a6: b          #0x420d34b0
+420d34a8: adr        r1, #0xc
+420d34aa: movs       r0, #4
+420d34ac: bl         #0x42140150 ; CALL 0x42140150
+420d34b0: pop        {r4, pc}
+
+--- prepB memory accesses using r0/r1/r2/r3 ---
+420d3452: ldr        r0, [r0, #0x58] BASE r0 DISP 0x58
+420d345a: str        r0, [r1, #0x58] BASE r1 DISP 0x58
+420d3478: ldr        r0, [r0, #0x58] BASE r0 DISP 0x58
+420d3482: str        r0, [r1, #0x58] BASE r1 DISP 0x58
+420d349a: ldr        r0, [r0, #0x58] BASE r0 DISP 0x58
+420d34a4: str        r0, [r1, #0x58] BASE r1 DISP 0x58
+
+--- prepB calls ---
+0x420d34ac -> 0x42140150
+
+=== all direct BL/BLX refs in IMG-System to prepA/prepB ===
+
+TARGET: determine what prepA/prepB do to the SP+0x104 B2Y parameter object, especially coefficient fields +0x0c..+0x58, and whether they import CA9 rendered CC matrices or derive independent coefficients.
