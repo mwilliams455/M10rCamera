@@ -1,0 +1,189 @@
+name: M10-R v2.34 CA9 profile matrix provenance
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v234-ca9-profile-matrix-provenance.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace shared cm_root and rendered profile matrices
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v234_ca9_profile_matrix_provenance.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import *
+
+          CFG=0x43705830
+          fields={
+            'T1':CFG+0x38,
+            'CM1_FIXED':CFG+0x40,
+            'T2':CFG+0x68,
+            'CM2_FIXED':CFG+0x70,
+            'PROFILE1_DOUBLE':CFG+0x98,
+            'PROFILE2_DOUBLE':CFG+0xe0,
+          }
+          seeds=[0x43705760,CFG,0x43705950,*fields.values()]
+
+          def load(path,base,mode):
+              b=Path(path).read_bytes(); pfx=4
+              md=Cs(CS_ARCH_ARM,mode|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+              return b,base,pfx,md
+          img,IB,IP,imt=load('/tmp/sections/092_IMG-System.bin',0x42000000,CS_MODE_THUMB)
+          ca9,CB,CP,cam=load('/tmp/sections/099_IMG-CA9_System.bin',0x40000000,CS_MODE_ARM)
+
+          def off(base,pfx,a): return pfx+a-base
+          def va(base,pfx,o): return base+(o-pfx)
+          def u32(b,o): return struct.unpack_from('<I',b,o)[0]
+          def lits(b,base,pfx,lo=None,hi=None):
+              out=[]
+              for o in range(pfx,len(b)-3,4):
+                  v=u32(b,o)
+                  if v in seeds or (lo is not None and lo<=v<=hi): out.append((va(base,pfx,o),v))
+              return out
+          def arm_lit(i,thumb):
+              try:
+                  ops=i.operands
+                  if i.mnemonic.startswith('ldr') and len(ops)>=2 and ops[1].type==ARM_OP_MEM and ops[1].mem.base==ARM_REG_PC:
+                      return (((i.address+4)&~3) if thumb else (i.address+8))+ops[1].mem.disp
+              except: pass
+          def call(i):
+              try:
+                  o=i.operands
+                  if i.mnemonic in ('bl','blx') and o and o[0].type==ARM_OP_IMM:return o[0].imm&~1
+              except: pass
+          def fmt(i,b,base,pfx,thumb):
+              s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+              la=arm_lit(i,thumb)
+              if la is not None:
+                  oo=off(base,pfx,la)
+                  if 0<=oo<=len(b)-4:
+                      v=u32(b,oo); s+=f' ; LIT {la:08x}->{v:08x}'
+                      if v in seeds or CFG<=v<=0x43705958:s+=' CMROOT_ANCHOR'
+              c=call(i)
+              if c is not None:s+=f' ; CALL {c:08x}'
+              return s
+          def dis(b,base,pfx,md,a,z):
+              o=off(base,pfx,a); e=off(base,pfx,z)
+              return list(md.disasm(b[max(pfx,o):min(len(b),e)],a))
+          def refs_to_pool(b,base,pfx,md,pool,thumb,span=0x2000):
+              po=off(base,pfx,pool); lo=max(pfx,po-span); hi=min(len(b),po+span)
+              if thumb: lo &= ~1
+              else: lo &= ~3
+              refs=[]
+              for i in md.disasm(b[lo:hi],va(base,pfx,lo)):
+                  if arm_lit(i,thumb)==pool:refs.append(i.address)
+              return refs
+          def dump_around(b,base,pfx,md,a,thumb,pre=0x80,post=0x100):
+              aa=max(base,(a-pre)&(~1 if thumb else ~3)); zz=a+post
+              for i in dis(b,base,pfx,md,aa,zz):print(fmt(i,b,base,pfx,thumb))
+          def prologue_start(b,base,pfx,md,a,thumb,back=0x180):
+              aa=max(base,(a-back)&(~1 if thumb else ~3)); ins=dis(b,base,pfx,md,aa,a+4)
+              starts=[]
+              for i in ins:
+                  if i.mnemonic.startswith('push') or (not thumb and i.mnemonic=='stmdb' and 'sp!' in i.op_str): starts.append(i.address)
+              return starts[-1] if starts else aa
+
+          print('M10-R v2.34 CA9 PROFILE MATRIX PROVENANCE')
+          print('Known shared cm_root = 0x43705830 (CA9 request +0x24).')
+          print('v1.26 already freezes: +0x38 T1, +0x40 fixed-rational CM1, +0x68 T2, +0x70 fixed-rational CM2.')
+          print('Rendered constructor reads same T1/T2 but 72-byte double matrices at +0x98/+0xE0.')
+          print('v2.28 proves 0x40012E24 is memcpy(dest,src,0x48), so +0x98/+0xE0 are pre-materialized doubles.')
+          print()
+          print('=== exact shared cm_root addresses ===')
+          for k,v in fields.items():print(f'{k}: {v:08x}')
+          print()
+
+          for label,b,base,pfx,md,thumb in [('IMG-System',img,IB,IP,imt,True),('IMG-CA9',ca9,CB,CP,cam,False)]:
+              print(f'=== {label} literal pools into shared CM region ===')
+              hs=lits(b,base,pfx,0x43705760,0x43705958)
+              print('pool_hits=',[(hex(p),hex(v)) for p,v in hs])
+              shown=set()
+              for p,v in hs:
+                  refs=refs_to_pool(b,base,pfx,md,p,thumb)
+                  print(f'pool {p:08x}->{v:08x} refs={[hex(x) for x in refs]}')
+                  for r in refs:
+                      st=prologue_start(b,base,pfx,md,r,thumb)
+                      key=(st,r)
+                      if key in shown:continue
+                      shown.add(key)
+                      print(f'-- ref {r:08x} probable_function_start {st:08x} --')
+                      dump_around(b,base,pfx,md,r,thumb,0xa0,0x140)
+              print()
+
+          print('=== bounded ARM926 CA9 parameter bridge / selector 0x420A58F0..0x420A60A0 ===')
+          for i in dis(img,IB,IP,imt,0x420a58f0,0x420a60a0):print(fmt(i,img,IB,IP,True))
+          print()
+          print('=== CA9 rendered constructor profile reads 0x40003C70..0x40003CD8 ===')
+          for i in dis(ca9,CB,CP,cam,0x40003c70,0x40003cd8):print(fmt(i,ca9,CB,CP,False))
+          print()
+          print('=== CA9 72-byte matrix copy helper 0x40012E20..0x40012E38 ===')
+          for i in dis(ca9,CB,CP,cam,0x40012e20,0x40012e38):print(fmt(i,ca9,CB,CP,False))
+          print()
+
+          # Search only near known CM command family for structure-relative +0x40/+0x70/+0x98/+0xe0 accesses.
+          print('=== bounded IMG CM command family structure accesses (0x420A3000..0x420A6800) ===')
+          wanted={0x38,0x40,0x68,0x70,0x98,0xe0}
+          ins=dis(img,IB,IP,imt,0x420a3000,0x420a6800)
+          for i in ins:
+              hit=False
+              try:
+                  for op in i.operands:
+                      if op.type==ARM_OP_MEM and op.mem.disp in wanted: hit=True
+              except:pass
+              if hit:print(fmt(i,img,IB,IP,True))
+          print()
+
+          # Find calls to memcpy in same bounded command family and show context. This catches bulk population even if offsets are pointer-derived.
+          print('=== bounded IMG calls to memcpy 0x4204F2EC in CM command family ===')
+          for i in ins:
+              if call(i)==0x4204f2ec:
+                  print(f'-- memcpy call {i.address:08x} --');dump_around(img,IB,IP,imt,i.address,True,0x50,0x30)
+          print()
+
+          # CA9 accesses to these relative offsets, bounded to ColorSpec/core region.
+          print('=== bounded CA9 ColorSpec/core accesses to profile offsets (0x40003AF4..0x40006500) ===')
+          cins=dis(ca9,CB,CP,cam,0x40003af4,0x40006500)
+          for i in cins:
+              hit=False
+              try:
+                  for op in i.operands:
+                      if op.type==ARM_OP_MEM and op.mem.disp in wanted:hit=True
+              except:pass
+              if hit:print(fmt(i,ca9,CB,CP,False))
+          print()
+
+          print('=== DECISION BOUNDARY ===')
+          print('PROFILE_+98: classify only if an explicit writer/copy/transform from CM1(+0x40) or another named source is visible above.')
+          print('PROFILE_+E0: classify only if an explicit writer/copy/transform from CM2(+0x70) or another named source is visible above.')
+          print('T1/T2 are already proven identical DNG-visible fields because constructor and DNG exporter read the same cm_root offsets +0x38/+0x68.')
+          print('Do not infer matrix equivalence from adjacency, dimensions, or DNG SDK naming alone.')
+          PY
+      - name: Commit v2.34 trace
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v234_ca9_profile_matrix_provenance.txt
+          git commit -m 'research: record v2.34 CA9 profile matrix provenance' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
