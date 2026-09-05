@@ -1,0 +1,91 @@
+name: M10-R v2.03 slot select object population
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v203-slot-select-object-population.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Decode pre-acquire slot selector and object population
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v203_slot_select_object_population.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;P=4
+          def off(a): return P+a-BASE
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True;md.skipdata=True
+          def ops(i):
+            try:return i.operands
+            except:return []
+          def call(i):
+            try:
+              o=ops(i)
+              if i.mnemonic in ('bl','blx') and o and o[0].type==ARM_OP_IMM:return o[0].imm&~1
+            except:pass
+          def lit(i):
+            try:
+              o=ops(i)
+              if i.mnemonic.startswith('ldr') and len(o)>=2 and o[1].type==ARM_OP_MEM and o[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+o[1].mem.disp;fo=off(la)
+                if 0<=fo<=len(b)-4:return la,struct.unpack_from('<I',b,fo)[0]
+            except:pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i);c=call(i)
+            if q:s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'
+            if c is not None:s+=f' ; CALL {c:#x}'
+            return s
+          def dump(a,z):
+            for i in md.disasm(b[off(a):off(z)],a):print(fmt(i))
+          print('M10-R v2.03 SLOT SELECT / OBJECT POPULATION')
+          print('\n=== exact pre-acquire helper 0x42160ae0..0x42160d40 ===')
+          dump(0x42160ae0,0x42160d40)
+          print('\n=== calls made by helper with +/-12 instructions ===')
+          ins=list(md.disasm(b[off(0x42160ae0):off(0x42160d40)],0x42160ae0))
+          for k,i in enumerate(ins):
+            c=call(i)
+            if c is not None:
+              print(f'\nCALL {c:#x} @ {i.address:#x}')
+              for j in ins[max(0,k-12):min(len(ins),k+13)]:print(fmt(j))
+          print('\n=== constants/field accesses relevant to slot layout ===')
+          for i in ins:
+            q=lit(i)
+            hit=q and q[1] in (0x1d50,0x12c,0xac)
+            try:
+              hit=hit or any(op.type==ARM_OP_MEM and op.mem.disp in (0xac,0x1d50,0x12c) for op in ops(i))
+            except:pass
+            if hit:print(fmt(i))
+          print('\n=== all stores in helper ===')
+          for i in ins:
+            if i.mnemonic.startswith('str'):print(fmt(i))
+          print('\n=== candidate callees in local 0x42160000..0x42160ae0 referenced by helper ===')
+          calls=sorted({call(i) for i in ins if call(i) is not None and 0x42160000<=call(i)<0x42160ae0})
+          print([hex(x) for x in calls])
+          for c in calls:
+            print(f'\n--- callee around {c:#x} ---')
+            dump(c,min(c+0x180,0x42160ae0))
+          print('\nTARGET: determine whether 0x42160AE0 creates/selects/populates context+0x1D50 entries before 0x42160D40 reads them. If not, identify the exact earlier producer/callee and preserve object+0xAC default contrast as unresolved.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v203_slot_select_object_population.txt
+          git commit -m 'research: record v2.03 slot select object population' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
