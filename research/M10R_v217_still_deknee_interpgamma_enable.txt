@@ -1,0 +1,310 @@
+M10-R v2.17 STILL DE-KNEE / INTERPOLATION-GAMMA ENABLE PROOF
+record_count 168 payload_base 0x6ee94
+
+record deknee id 0x1 index 125 size 0x60 sha256 2ea9ab9198d1638007400cd2c3bef1cc745b864b76011a0e1bc52180ac6452d4
+all_zero True nonzero_count 0
+head64 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+u32_0_1 (0, 0)
+
+record interpolation_gamma id 0x9 index 140 size 0x18 sha256 9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0
+all_zero True nonzero_count 0
+head64 000000000000000000000000000000000000000000000000
+u32_0_1 (0, 0)
+
+record differential_gamma_control id 0xb index 142 size 0x8 sha256 64ed86b909d6d0502b64b28db0ea1272ffb358e20e9b1d88b63ccb07fa900cf5
+all_zero False nonzero_count 2
+head64 0100000001000000
+u32_0_1 (1, 1)
+
+=== de-knee helper head 0x420d1170 ARM ===
+420d1170: push       {r4, r5, r6, r7, lr}
+420d1174: cmp        r1, #0
+420d1178: bne        #0x420d15c0
+420d117c: ldr        r2, [pc, #0x454] ; LIT 0x420d15d8->0x20020000
+420d1180: ldr        r2, [r2, #0x40]
+420d1184: bic        r2, r2, #1
+420d1188: ldrb       r3, [r0]
+420d118c: and        r3, r3, #1
+420d1190: orr        r2, r2, r3
+420d1194: ldr        r3, [pc, #0x43c] ; LIT 0x420d15d8->0x20020000
+420d1198: str        r2, [r3, #0x40]
+420d119c: add        r2, r3, #0
+420d11a0: ldr        r2, [r2, #0x50]
+420d11a4: lsr        r2, r2, #0xc
+420d11a8: lsl        r2, r2, #0xc
+420d11ac: ldrh       r3, [r0, #4]
+420d11b0: lsl        r3, r3, #0x14
+420d11b4: lsr        r3, r3, #0x14
+420d11b8: orr        r2, r2, r3
+420d11bc: ldr        r3, [pc, #0x414] ; LIT 0x420d15d8->0x20020000
+420d11c0: str        r2, [r3, #0x50]
+420d11c4: add        r2, r3, #0
+
+=== interpolation-gamma helper 0x420d25a4 decode candidates ===
+-- mode T --
+420d25a4: push       {r4, r5, r6, lr}
+420d25a6: movs       r4, r0
+420d25a8: movs       r5, r1
+420d25aa: cmp        r5, #0
+420d25ac: bne        #0x420d2608
+420d25ae: ldr        r0, [pc, #0x78] ; LIT 0x420d2628->0x20020000
+420d25b0: ldr        r0, [r0, #4]
+420d25b2: lsls       r0, r0, #0x1a
+420d25b4: lsrs       r0, r0, #0x1f
+420d25b6: cmp        r0, #0
+420d25b8: bne        #0x420d2608
+420d25ba: ldr        r0, [pc, #0x70] ; LIT 0x420d262c->0x20020800
+420d25bc: ldr        r0, [r0]
+420d25be: movs       r1, #1
+420d25c0: lsls       r1, r1, #0x10
+420d25c2: bics       r0, r1
+420d25c4: ldrh       r1, [r4]
+420d25c6: lsls       r1, r1, #0x10
+420d25c8: movs       r2, #1
+420d25ca: lsls       r2, r2, #0x10
+420d25cc: ands       r1, r2
+420d25ce: orrs       r0, r1
+420d25d0: ldr        r1, [pc, #0x58] ; LIT 0x420d262c->0x20020800
+420d25d2: str        r0, [r1]
+420d25d4: movs       r0, r1
+420d25d6: ldr        r0, [r0]
+420d25d8: lsls       r1, r2, #1
+420d25da: bics       r0, r1
+420d25dc: ldrh       r1, [r4, #4]
+420d25de: lsls       r1, r1, #0x11
+420d25e0: lsls       r2, r2, #1
+420d25e2: ands       r1, r2
+420d25e4: orrs       r0, r1
+420d25e6: ldr        r1, [pc, #0x44] ; LIT 0x420d262c->0x20020800
+420d25e8: str        r0, [r1]
+420d25ea: ldr        r0, [r4, #8]
+420d25ec: cmp        r0, #0
+420d25ee: beq        #0x420d2604
+420d25f0: ldr        r0, [r4, #0xc]
+420d25f2: lsls       r2, r0, #2
+420d25f4: ldr        r0, [pc, #0x38] ; LIT 0x420d2630->0x20a00000
+420d25f6: ldr        r1, [r4, #8]
+420d25f8: blx        #0x4204f2ec
+420d25fc: ldr        r1, [pc, #0x34] ; LIT 0x420d2634->0x428336b8
+420d25fe: movs       r0, #4
+420d2600: bl         #0x42140150
+420d2604: movs       r0, #0
+420d2606: pop        {r4, r5, r6, pc}
+420d2608: ldr        r0, [pc, #0x20] ; LIT 0x420d262c->0x20020800
+420d260a: ldr        r0, [r0]
+420d260c: movs       r1, #1
+420d260e: lsls       r1, r1, #0x10
+420d2610: bics       r0, r1
+420d2612: ldr        r1, [pc, #0x18] ; LIT 0x420d262c->0x20020800
+420d2614: str        r0, [r1]
+420d2616: movs       r0, r1
+420d2618: ldr        r0, [r0]
+420d261a: movs       r1, #1
+420d261c: lsls       r1, r1, #0x11
+420d261e: bics       r0, r1
+420d2620: ldr        r1, [pc, #8] ; LIT 0x420d262c->0x20020800
+420d2622: str        r0, [r1]
+420d2624: movs       r0, #1
+420d2626: b          #0x420d2606
+420d2628: movs       r0, r0
+420d262a: movs       r0, #2
+420d262c: lsrs       r0, r0, #0x20
+420d262e: movs       r0, #2
+420d2630: movs       r0, r0
+420d2632: movs       r0, #0xa0
+420d2634: adds       r6, #0xb8
+420d2636: cmp        r3, r0
+420d2638: push       {r4, lr}
+420d263a: cmp        r1, #0
+420d263c: bne        #0x420d273c
+420d263e: ldr        r2, [pc, #0x3f8] ; LIT 0x420d2a38->0x20020c00
+420d2640: ldr        r2, [r2]
+420d2642: lsrs       r2, r2, #1
+420d2644: lsls       r2, r2, #1
+420d2646: ldrb       r3, [r0]
+420d2648: lsls       r3, r3, #0x1f
+420d264a: lsrs       r3, r3, #0x1f
+420d264c: orrs       r2, r3
+420d264e: ldr        r3, [pc, #0x3e8] ; LIT 0x420d2a38->0x20020c00
+420d2650: str        r2, [r3]
+420d2652: movs       r2, r3
+420d2654: ldr        r2, [r2]
+420d2656: movs       r3, #3
+420d2658: lsls       r3, r3, #8
+420d265a: bics       r2, r3
+420d265c: ldr        r3, [r0, #4]
+420d265e: lsls       r3, r3, #8
+420d2660: movs       r4, #3
+420d2662: lsls       r4, r4, #8
+420d2664: ands       r3, r4
+420d2666: orrs       r2, r3
+420d2668: ldr        r3, [pc, #0x3cc] ; LIT 0x420d2a38->0x20020c00
+420d266a: str        r2, [r3]
+420d266c: movs       r2, r3
+420d266e: ldr        r2, [r2]
+420d2670: lsls       r3, r4, #4
+420d2672: bics       r2, r3
+420d2674: ldr        r3, [r0, #8]
+420d2676: lsls       r3, r3, #0xc
+420d2678: lsls       r4, r4, #4
+420d267a: ands       r3, r4
+420d267c: orrs       r2, r3
+420d267e: ldr        r3, [pc, #0x3b8] ; LIT 0x420d2a38->0x20020c00
+420d2680: str        r2, [r3]
+420d2682: movs       r2, r3
+420d2684: ldr        r2, [r2]
+420d2686: lsls       r3, r4, #2
+420d2688: bics       r2, r3
+420d268a: ldr        r3, [r0, #0xc]
+420d268c: lsls       r3, r3, #0xe
+420d268e: lsls       r4, r4, #2
+420d2690: ands       r3, r4
+420d2692: orrs       r2, r3
+420d2694: ldr        r3, [pc, #0x3a0] ; LIT 0x420d2a38->0x20020c00
+420d2696: str        r2, [r3]
+420d2698: movs       r2, r3
+420d269a: ldr        r2, [r2]
+420d269c: lsls       r3, r4, #2
+420d269e: bics       r2, r3
+420d26a0: ldrh       r3, [r0, #0x10]
+420d26a2: lsls       r3, r3, #0x10
+420d26a4: lsls       r4, r4, #2
+420d26a6: ands       r3, r4
+420d26a8: orrs       r2, r3
+420d26aa: ldr        r3, [pc, #0x38c] ; LIT 0x420d2a38->0x20020c00
+420d26ac: str        r2, [r3]
+420d26ae: movs       r2, r3
+420d26b0: ldr        r2, [r2]
+420d26b2: movs       r3, #1
+420d26b4: lsls       r3, r3, #0x14
+420d26b6: bics       r2, r3
+420d26b8: ldrh       r3, [r0, #0x14]
+420d26ba: lsls       r3, r3, #0x14
+420d26bc: movs       r4, #1
+420d26be: lsls       r4, r4, #0x14
+420d26c0: ands       r3, r4
+420d26c2: orrs       r2, r3
+420d26c4: ldr        r3, [pc, #0x370] ; LIT 0x420d2a38->0x20020c00
+420d26c6: str        r2, [r3]
+420d26c8: movs       r2, r3
+420d26ca: ldr        r2, [r2]
+420d26cc: movs       r3, #3
+420d26ce: lsls       r3, r3, #0x15
+420d26d0: bics       r2, r3
+420d26d2: ldrh       r3, [r0, #0x18]
+420d26d4: lsls       r3, r3, #0x15
+420d26d6: movs       r4, #3
+420d26d8: lsls       r4, r4, #0x15
+420d26da: ands       r3, r4
+420d26dc: orrs       r2, r3
+420d26de: ldr        r3, [pc, #0x358] ; LIT 0x420d2a38->0x20020c00
+420d26e0: str        r2, [r3]
+420d26e2: movs       r2, r3
+420d26e4: ldr        r2, [r2]
+420d26e6: lsls       r3, r4, #2
+420d26e8: bics       r2, r3
+420d26ea: ldrh       r3, [r0, #0x1c]
+420d26ec: lsls       r3, r3, #0x17
+420d26ee: lsls       r4, r4, #2
+420d26f0: ands       r3, r4
+420d26f2: orrs       r2, r3
+420d26f4: ldr        r3, [pc, #0x340] ; LIT 0x420d2a38->0x20020c00
+420d26f6: str        r2, [r3]
+420d26f8: movs       r2, r3
+420d26fa: ldr        r2, [r2]
+420d26fc: lsls       r3, r4, #5
+420d26fe: bics       r2, r3
+-- mode A --
+420d25a4: andeq      fp, r4, r0, ror r5
+420d25a8: stchs      p0, c0, [r0, #-0x34]
+420d25ac: ldmdami    lr, {r2, r3, r5, r8, ip, lr, pc}
+420d25b0: streq      r6, [r0], r0, asr #16
+420d25b4: stmdahs    r0, {r6, r7, r8, sb, sl, fp}
+420d25b8: ldmdami    ip, {r1, r2, r5, r8, ip, lr, pc}
+420d25bc: mrshs      r6, apsr
+420d25c0: orrmi      r0, r8, #0x9000000
+420d25c4: streq      r8, [sb], #-0x821
+420d25c8: ldreq      r2, [r2], #-0x201
+420d25cc: movwmi     r4, #0x8011
+420d25d0: andvs      r4, r8, r6, lsl sb
+420d25d4: stmdavs    r0, {r3}
+420d25d8: orrmi      r0, r8, #0x51
+420d25dc: strbeq     r8, [sb], #-0x8a1
+420d25e0: andsmi     r0, r1, r2, asr r0
+420d25e4: ldmdbmi    r1, {r3, r8, sb, lr}
+420d25e8: stmvs      r0!, {r3, sp, lr}
+420d25ec: andle      r2, sb, r0, lsl #16
+420d25f0: addeq      r6, r2, r0, ror #17
+420d25f4: stmvs      r1!, {r1, r2, r3, fp, lr}
+420d25f8: mrc        p7, #3, apsr_nzcv, c8, c12, #3
+420d25fc: andhs      r4, r4, sp, lsl #18
+420d2600: stc2       p0, c15, [r6, #0x1b4]!
+420d2604: ldcllt     p0, c2, [r0, #-0]!
+420d2608: stmdavs    r0, {r3, fp, lr}
+420d260c: streq      r2, [sb], #-0x101
+420d2610: stmdbmi    r6, {r3, r7, r8, sb, lr}
+420d2614: andeq      r6, r8, r8
+420d2618: mrshs      r6, apsr
+420d261c: orrmi      r0, r8, #0x49000000
+420d2620: andvs      r4, r8, r2, lsl #18
+420d2624: strb       r2, [lr, r1]!
+420d2628: andhs      r0, r2, r0
+420d262c: andhs      r0, r2, r0, lsl #16
+420d2630: adchs      r0, r0, r0
+420d2634: addmi      r3, r3, #184, #12
+420d2638: stmdbhs    r0, {r4, r8, sl, ip, sp, pc}
+420d263c: bmi        #0x42086c3c
+420d2640: ldmdaeq    r2, {r1, r4, fp, sp, lr} ^
+420d2644: stmdavc    r3, {r1, r4, r6}
+420d2648: svceq      #0xdb07db
+420d264c: blmi       #0x41f632bc
+420d2650: andseq     r6, sl, sl, lsl r0
+420d2654: movwhs     r6, #0x3812
+420d2658: orrsmi     r0, sl, #0xb0000001
+420d265c: andseq     r6, fp, #0x430000
+420d2660: eoreq      r2, r4, #0x3000000
+420d2664: tstmi      sl, #0x23
+420d2668: ldrshvs    r4, [sl], -r3
+420d266c: ldmdavs    r2, {r1, r3, r4}
+420d2670: orrsmi     r0, sl, #0xc0000008
+420d2674: tsteq      fp, #0x830000
+420d2678: eormi      r0, r3, r4, lsr #2
+420d267c: blmi       #0x41c632ec
+420d2680: andseq     r6, sl, sl, lsl r0
+420d2684: adceq      r6, r3, r2, lsl r8
+420d2688: stmvs      r3, {r1, r3, r4, r7, r8, sb, lr} ^
+420d268c: umlaleq    r0, r4, fp, r3
+420d2690: tstmi      sl, #0x23
+420d2694: andsvs     r4, sl, r8, ror #23
+420d2698: ldmdavs    r2, {r1, r3, r4}
+420d269c: orrsmi     r0, sl, #0xa3
+420d26a0: ldreq      r8, [fp], #-0xa03
+420d26a4: eormi      r0, r3, r4, lsr #1
+420d26a8: blmi       #0x419a3318
+420d26ac: andseq     r6, sl, sl, lsl r0
+420d26b0: movwhs     r6, #0x1812
+420d26b4: orrsmi     r0, sl, #0x6c00000
+420d26b8: ldreq      r8, [fp, #-0xa83]
+420d26bc: streq      r2, [r4, #-0x401]!
+420d26c0: tstmi      sl, #0x23
+420d26c4: ldrsbvs    r4, [sl], -ip
+420d26c8: ldmdavs    r2, {r1, r3, r4}
+420d26cc: ldrbeq     r2, [fp, #-0x303]
+420d26d0: blhi       #0x421a3540
+420d26d4: strhs      r0, [r3], #-0x55b
+420d26d8: eormi      r0, r3, r4, ror #10
+420d26dc: blmi       #0x4166334c
+420d26e0: andseq     r6, sl, sl, lsl r0
+420d26e4: adceq      r6, r3, r2, lsl r8
+420d26e8: blhi       #0x401a3558
+420d26ec: .byte      0xdb, 0x05, 0xa4, 0x00
+420d26f0: tstmi      sl, #0x23
+420d26f4: ldrsbvs    r4, [sl], -r0
+420d26f8: ldmdavs    r2, {r1, r3, r4}
+420d26fc: orrsmi     r0, sl, #0xc0000018
+
+=== control signature ===
+deknee_record_byte0 0 expected helper reads [r0] bit0 -> 0x20020040 bit0
+interpgamma_record_byte0 0
+dg_record_u32_0_1 (1, 1)
+TARGET: prove whether zero default records disable de-knee/interpolation gamma while DG remains enabled; only report interpolation result if helper code directly maps record +0 to an enable bit.
