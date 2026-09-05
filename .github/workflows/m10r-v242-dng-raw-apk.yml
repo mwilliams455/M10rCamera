@@ -1,0 +1,60 @@
+name: M10-R v2.42 DNG RAW diagnostic APK
+on:
+  push:
+    branches: [m10r-lossless-jpeg-v241]
+    paths:
+      - 'app/**'
+      - 'tools/M10RDngRawCli.java'
+      - '.github/workflows/m10r-v242-dng-raw-apk.yml'
+  workflow_dispatch:
+jobs:
+  validate-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Download verified public M10-R DNG
+        run: curl -L --fail --retry 3 -o /tmp/m10r.dng 'https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_01.dng'
+      - name: Validate full Java DNG to CFA path
+        shell: bash
+        run: |
+          mkdir -p /tmp/classes
+          javac -encoding UTF-8 -d /tmp/classes \
+            app/src/main/java/com/m10r/diagnostic/LosslessJpegDecoder.java \
+            app/src/main/java/com/m10r/diagnostic/DngRawDecoder.java \
+            tools/M10RDngRawCli.java
+          java -Xmx768m -cp /tmp/classes com.m10r.diagnostic.M10RDngRawCli /tmp/m10r.dng | tee /tmp/raw.txt
+          grep -F 'Decoded CFA: 7872x5208' /tmp/raw.txt
+          grep -F 'SOF3: precision=14, predictor=1, Pt=0' /tmp/raw.txt
+          grep -F 'CFA SHA-256 (LE u16): 27814cbc80f92d23d7b975d4833f70525f35bc52917d992b35d0a899829a097a' /tmp/raw.txt
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Install Android 36 SDK
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - name: Set up Gradle 9.6
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+      - name: Run Android unit tests
+        run: gradle --no-daemon :app:testDebugUnitTest
+      - name: Build v0.3 diagnostic debug APK
+        run: gradle --no-daemon :app:assembleDebug
+      - name: Verify APK
+        shell: bash
+        run: |
+          test -f app/build/outputs/apk/debug/app-debug.apk
+          sha256sum app/build/outputs/apk/debug/app-debug.apk
+          ls -lh app/build/outputs/apk/debug/app-debug.apk
+      - name: Upload v0.3 diagnostic APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: M10RDiagnostic-v0.3-cfa-decode-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
