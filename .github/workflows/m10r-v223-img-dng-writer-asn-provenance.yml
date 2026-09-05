@@ -1,0 +1,227 @@
+name: M10-R v2.23 IMG DNG writer ASN provenance
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v223-img-dng-writer-asn-provenance.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Unpack canonical firmware
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+      - name: Bounded IMG-System DNG writer/tag/xref trace
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > research/M10R_v223_img_dng_writer_asn_provenance.txt
+          from pathlib import Path
+          import re, struct
+          from collections import defaultdict
+          from capstone import Cs, CS_ARCH_ARM, CS_MODE_THUMB, CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM, ARM_REG_PC
+
+          path=Path('/tmp/sections/092_IMG-System.bin')
+          b=path.read_bytes(); BASE=0x42000000; PFX=4
+          md=Cs(CS_ARCH_ARM, CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True
+
+          def va(off): return BASE + (off-PFX)
+          def off(addr): return PFX + addr-BASE
+          def printable(lo,hi):
+              bb=b[max(0,lo):min(len(b),hi)]
+              return ''.join(chr(x) if 32<=x<127 else '.' for x in bb)
+          def asciiz_at(o,limit=220):
+              if not (0<=o<len(b)): return None
+              e=b.find(b'\0',o,min(len(b),o+limit))
+              if e<0: return None
+              bb=b[o:e]
+              if len(bb)>=5 and all(32<=x<127 for x in bb): return bb.decode('ascii','replace')
+              return None
+          def u32_hits(v):
+              needle=struct.pack('<I',v); out=[]; p=0
+              while True:
+                  p=b.find(needle,p)
+                  if p<0: break
+                  out.append(p); p+=1
+              return out
+          def h16_hits(v):
+              needle=struct.pack('<H',v); out=[]; p=0
+              while True:
+                  p=b.find(needle,p)
+                  if p<0: break
+                  out.append(p); p+=1
+              return out
+          def thumb16_ldr_refs(target_off, span=0x1000):
+              target_va=va(target_off); refs=[]
+              lo=max(PFX,target_off-span); hi=min(len(b)-2,target_off+0x20)
+              for o in range(lo,hi,2):
+                  hw=struct.unpack_from('<H',b,o)[0]
+                  if (hw & 0xF800)==0x4800: # LDR Rt,[PC,#imm8*4]
+                      insn_va=va(o); lit=((insn_va+4)&~3)+((hw&0xff)*4)
+                      if lit==target_va: refs.append(insn_va)
+              return refs
+          def dis_window(addr, before=0x60, after=0xc0):
+              start=max(BASE,(addr-before)&~1); end=min(BASE+len(b)-PFX,addr+after)
+              oo=off(start)
+              return list(md.disasm(b[oo:off(end)],start))
+          def fmt(i):
+              s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+              try:
+                  if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                      lit=((i.address+4)&~3)+i.operands[1].mem.disp
+                      oo=off(lit)
+                      if 0<=oo<=len(b)-4:
+                          val=struct.unpack_from('<I',b,oo)[0]
+                          s+=f' ; LIT {lit:08x}->{val:08x}'
+                          st=asciiz_at(off(val)) if BASE<=val<BASE+len(b)-PFX else None
+                          if st: s+=f' STRING={st!r}'
+              except Exception: pass
+              return s
+
+          print('M10-R v2.23 IMG-SYSTEM DNG WRITER / ASN PROVENANCE')
+          print('Scope: 092_IMG-System.bin only. No cross-section raw 0xC628 scan.')
+          print('Goal: identify a real DNG tag table/writer neighborhood and test whether AsShotNeutral is sourced from the same per-frame WB/ASN state frozen in v1.45.')
+          print()
+
+          # 1) Enumerate meaningful DNG/TIFF/RAW strings in IMG-System only.
+          strings=[]
+          for m in re.finditer(rb'[ -~]{5,}\x00',b):
+              s=m.group()[:-1].decode('ascii','replace')
+              if re.search(r'(?i)(dng|tiff|ifd|raw image|rawimage|color matrix|white balance|neutral)',s):
+                  strings.append((m.start(),s))
+          print('=== IMG-System DNG/TIFF/RAW strings ===')
+          for o,s in strings:
+              print(f'{va(o):08x} off={o:#x} {s!r}')
+              # literal pointer words to string + bounded 16-bit LDR xrefs to those pools
+              ptrs=u32_hits(va(o))
+              for po in ptrs[:24]:
+                  refs=thumb16_ldr_refs(po)
+                  print(f'  pointer_pool {va(po):08x} refs={[hex(x) for x in refs[:24]]}')
+          print()
+
+          # 2) Search known DNG tag IDs as 32-bit and 16-bit values, then find multi-tag clusters.
+          tags={
+              0xC612:'DNGVersion',0xC613:'DNGBackwardVersion',0xC614:'UniqueCameraModel',
+              0xC621:'ColorMatrix1',0xC622:'ColorMatrix2',0xC628:'AsShotNeutral',
+              0xC65A:'CalibrationIlluminant1',0xC65B:'CalibrationIlluminant2',
+              0xC623:'CameraCalibration1',0xC624:'CameraCalibration2',0xC625:'ReductionMatrix1',0xC626:'ReductionMatrix2',
+              0xC627:'AnalogBalance',0xC629:'AsShotWhiteXY'
+          }
+          hits32=defaultdict(list); hits16=defaultdict(list)
+          for t,n in tags.items():
+              hits32[t]=u32_hits(t); hits16[t]=h16_hits(t)
+          print('=== known DNG tag raw occurrence counts in IMG-System ===')
+          for t,n in tags.items(): print(f'{t:04x} {n:24s} u32={len(hits32[t])} u16={len(hits16[t])}')
+          print()
+
+          # Build clusters from 32-bit hits first (far less noisy). Accept >=3 distinct DNG tags within 0x600 bytes.
+          events=sorted((o,t,'u32') for t,hs in hits32.items() for o in hs)
+          clusters=[]; seen=set()
+          for idx,(o,t,k) in enumerate(events):
+              lo=o-0x300; hi=o+0x300
+              local=[e for e in events if lo<=e[0]<=hi]
+              distinct={e[1] for e in local}
+              if len(distinct)>=3:
+                  key=(min(e[0] for e in local)//0x100, max(e[0] for e in local)//0x100)
+                  if key not in seen:
+                      seen.add(key); clusters.append(local)
+          print('=== multi-tag u32 clusters (>=3 distinct tags / 0x600) ===')
+          if not clusters: print('NONE')
+          for ci,cl in enumerate(clusters):
+              lo=min(x[0] for x in cl); hi=max(x[0] for x in cl)
+              print(f'-- cluster {ci} {va(lo):08x}..{va(hi):08x} --')
+              for o,t,k in cl: print(f'  {va(o):08x} {t:04x} {tags[t]}')
+              print('  context',printable(lo-96,hi+160))
+              # references to literal words located in the cluster
+              refs=[]
+              for o,t,k in cl: refs.extend(thumb16_ldr_refs(o,0x1800))
+              refs=sorted(set(refs))
+              print('  thumb16_literal_refs', [hex(x) for x in refs])
+              for r in refs[:20]:
+                  print(f'  DISASM around {r:08x}')
+                  for ins in dis_window(r,0x50,0xb0): print('   ',fmt(ins))
+          print()
+
+          # 3) If no u32 table, look for unusually coherent u16 clusters with >=5 distinct known tags in 0x300 bytes.
+          events16=sorted((o,t) for t,hs in hits16.items() for o in hs)
+          clusters16=[]; seen=set()
+          for o,t in events16:
+              local=[e for e in events16 if o-0x180<=e[0]<=o+0x180]
+              distinct={e[1] for e in local}
+              if len(distinct)>=5:
+                  lo=min(e[0] for e in local); hi=max(e[0] for e in local); key=(lo//0x80,hi//0x80)
+                  if key not in seen:
+                      seen.add(key); clusters16.append(local)
+          print('=== coherent u16 DNG-tag clusters (>=5 distinct / 0x300) ===')
+          for ci,cl in enumerate(clusters16[:20]):
+              lo=min(x[0] for x in cl); hi=max(x[0] for x in cl)
+              print(f'-- u16 cluster {ci} {va(lo):08x}..{va(hi):08x} --')
+              for o,t in cl[:80]: print(f'  {va(o):08x} {t:04x} {tags[t]}')
+              print('  context',printable(lo-64,hi+96))
+          if not clusters16: print('NONE')
+          print()
+
+          # 4) Exact absolute per-frame color-state addresses known from previous freezes.
+          addrs={
+              0x43705760:'CA9 ASN shared block base',0x43705768:'ASN R double',0x43705770:'ASN G double',0x43705778:'ASN B double',
+              0x408FE130:'rendered CC0 global',0x408FE15C:'rendered CC1 global'
+          }
+          print('=== exact IMG-System literal occurrences of frozen color-state addresses ===')
+          for a,n in addrs.items():
+              hs=u32_hits(a)
+              print(f'{a:08x} {n}: pools={[hex(va(o)) for o in hs]}')
+              for po in hs[:20]:
+                  refs=thumb16_ldr_refs(po,0x1800)
+                  print(f'  pool {va(po):08x} thumb16_refs={[hex(x) for x in refs]}')
+                  for r in refs[:8]:
+                      for ins in dis_window(r,0x30,0x70): print('   ',fmt(ins))
+          print()
+
+          # 5) Search instruction text in bounded neighborhoods discovered above for WB input offsets.
+          candidate_refs=[]
+          for cl in clusters:
+              for o,t,k in cl: candidate_refs.extend(thumb16_ldr_refs(o,0x1800))
+          for o,s in strings:
+              for po in u32_hits(va(o)): candidate_refs.extend(thumb16_ldr_refs(po,0x1800))
+          candidate_refs=sorted(set(candidate_refs))
+          print('=== candidate DNG-writer neighborhoods: WB-offset/control hints ===')
+          for r in candidate_refs[:120]:
+              insns=dis_window(r,0x100,0x180)
+              text='\n'.join(fmt(i) for i in insns)
+              if any(tok in text.lower() for tok in ('#0xf4','#0xf6','#0xf8','437057','408fe1')):
+                  print(f'-- candidate {r:08x} --')
+                  print(text)
+          if not candidate_refs: print('NO DNG writer xrefs discovered')
+          print()
+
+          print('=== DECISION BOUNDARY ===')
+          print('PROVEN_V222_NUMERICAL_IDENTITY: AsShotNeutral == 256/integer_gain to decimal-export precision across six verified M10-R DNGs.')
+          print('DO_NOT_FREEZE_DIRECT_WRITER_IDENTITY unless this trace exposes an actual DNG tag writer/table and a source dependency on the frozen WB/ASN state.')
+          print('If writer provenance remains hidden, retain AsShotNeutral->gain as an empirical first-parity reconstruction rule and move renderer reconstruction forward without overstating firmware ownership.')
+          PY
+      - name: Commit v2.23 trace
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v223_img_dng_writer_asn_provenance.txt
+          git commit -m 'research: record v2.23 IMG DNG writer ASN provenance trace' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
