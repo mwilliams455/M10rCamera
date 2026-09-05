@@ -4,13 +4,15 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
+import android.os.ParcelFileDescriptor;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import java.io.FileInputStream;
+import java.nio.channels.FileChannel;
 import java.util.Locale;
 
 public class MainActivity extends Activity {
@@ -32,7 +34,7 @@ public class MainActivity extends Activity {
         root.setPadding(pad, pad, pad, pad);
 
         TextView title = new TextView(this);
-        title.setText("M10-R ColorSpec Diagnostic v0.1");
+        title.setText("M10-R DNG Diagnostic v0.2");
         title.setTextSize(22f);
         root.addView(title);
 
@@ -66,8 +68,9 @@ public class MainActivity extends Activity {
         root.addView(choose);
 
         fileStatus = new TextView(this);
-        fileStatus.setText("No DNG selected. v0.1 validates the Leica core; RAW decode is the next seam.");
+        fileStatus.setText("No DNG selected. v0.2 reads TIFF/DNG metadata and feeds real AsShotNeutral into the Leica CA9 path.");
         fileStatus.setPadding(0, pad / 2, 0, 0);
+        fileStatus.setTextIsSelectable(true);
         root.addView(fileStatus);
 
         ScrollView scroll = new ScrollView(this);
@@ -93,14 +96,18 @@ public class MainActivity extends Activity {
                     Double.parseDouble(neutralG.getText().toString().trim()),
                     Double.parseDouble(neutralB.getText().toString().trim())
             };
-            int[] gains = M10RColorSpecCore.recoverCa9Gains(neutral);
-            double[] rebuilt = M10RColorSpecCore.gainsToFirmwareNeutral(gains);
-            result.setText(String.format(Locale.US,
-                    "CA9 gains = [%d, %d, %d]\nFirmware neutral = [%.10f, %.10f, %.10f]",
-                    gains[0], gains[1], gains[2], rebuilt[0], rebuilt[1], rebuilt[2]));
+            showRecoveredGains(neutral);
         } catch (RuntimeException ex) {
             result.setText("Input error: " + ex.getMessage());
         }
+    }
+
+    private void showRecoveredGains(double[] neutral) {
+        int[] gains = M10RColorSpecCore.recoverCa9Gains(neutral);
+        double[] rebuilt = M10RColorSpecCore.gainsToFirmwareNeutral(gains);
+        result.setText(String.format(Locale.US,
+                "CA9 gains = [%d, %d, %d]\nFirmware neutral = [%.10f, %.10f, %.10f]",
+                gains[0], gains[1], gains[2], rebuilt[0], rebuilt[1], rebuilt[2]));
     }
 
     private void chooseDng() {
@@ -123,8 +130,47 @@ public class MainActivity extends Activity {
         try {
             getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
         } catch (SecurityException ignored) {
-            // Some providers grant only the transient read permission; the diagnostic can still report the URI.
+            // A transient grant is sufficient for this immediate diagnostic read.
         }
-        fileStatus.setText("Selected: " + uri + "\nDNG decode/render is intentionally not active in v0.1.");
+        fileStatus.setText("Reading DNG metadata…\n" + uri);
+        new Thread(() -> parseDng(uri), "m10r-dng-metadata").start();
+    }
+
+    private void parseDng(Uri uri) {
+        try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r")) {
+            if (pfd == null) throw new IllegalStateException("content provider returned no file descriptor");
+            try (FileInputStream in = new FileInputStream(pfd.getFileDescriptor());
+                 FileChannel channel = in.getChannel()) {
+                DngMetadataReader.DngInfo info = DngMetadataReader.read(channel);
+                final String seam;
+                if (info.isLosslessJpeg()) {
+                    seam = "Next decoder seam: DNG compression=7, so a lossless-JPEG RAW decoder is required before demosaic.";
+                } else if (info.compression == 1) {
+                    seam = "Next decoder seam: uncompressed CFA payload; direct RAW unpack can be implemented next.";
+                } else {
+                    seam = "Next decoder seam: compression=" + info.compression + " is not decoded by v0.2.";
+                }
+                runOnUiThread(() -> applyDngInfo(uri, info, seam));
+            }
+        } catch (Exception ex) {
+            runOnUiThread(() -> fileStatus.setText("DNG parse failed: " + ex.getClass().getSimpleName() + ": " + ex.getMessage()));
+        }
+    }
+
+    private void applyDngInfo(Uri uri, DngMetadataReader.DngInfo info, String seam) {
+        if (info.asShotNeutral != null && info.asShotNeutral.length == 3) {
+            neutralR.setText(String.format(Locale.US, "%.10f", info.asShotNeutral[0]));
+            neutralG.setText(String.format(Locale.US, "%.10f", info.asShotNeutral[1]));
+            neutralB.setText(String.format(Locale.US, "%.10f", info.asShotNeutral[2]));
+            try {
+                showRecoveredGains(info.asShotNeutral);
+            } catch (RuntimeException ex) {
+                result.setText("AsShotNeutral found, but CA9 recovery failed: " + ex.getMessage());
+            }
+        } else {
+            result.setText("AsShotNeutral was not found as a three-channel DNG field.");
+        }
+        fileStatus.setText("Selected: " + uri + "\n\n" + info.summary() + "\n\n" + seam +
+                "\n\nBoundary: v0.2 parses metadata only; it does not yet decode, demosaic, tone-map, or render RAW pixels.");
     }
 }
