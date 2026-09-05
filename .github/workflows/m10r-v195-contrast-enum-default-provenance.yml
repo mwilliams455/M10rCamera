@@ -33,13 +33,20 @@ jobs:
           def mk(mode):
             m=Cs(CS_ARCH_ARM,mode|CS_MODE_LITTLE_ENDIAN);m.detail=True;m.skipdata=True;return m
           th=mk(CS_MODE_THUMB); ar=mk(CS_MODE_ARM)
+          def ops(i):
+            try:return i.operands
+            except:return []
           def call(i):
-            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm&~1
+            try:
+              o=ops(i)
+              if i.mnemonic in ('bl','blx') and o and o[0].type==ARM_OP_IMM:return o[0].imm&~1
+            except:pass
           def lit(i):
             try:
-              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
-                la=((i.address+4)&~3)+i.operands[1].mem.disp;o=off(la)
-                if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+              o=ops(i)
+              if i.mnemonic.startswith('ldr') and len(o)>=2 and o[1].type==ARM_OP_MEM and o[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+o[1].mem.disp;fo=off(la)
+                if 0<=fo<=len(b)-4:return la,struct.unpack_from('<I',b,fo)[0]
             except: pass
           def fmt(i):
             s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';q=lit(i);c=call(i)
@@ -48,6 +55,9 @@ jobs:
             return s
           def dump(md,a,z):
             for i in md.disasm(b[off(a):off(z)],a): print(fmt(i))
+          def hasdisp(i,d):
+            try:return any(op.type==ARM_OP_MEM and op.mem.disp==d for op in ops(i))
+            except:return False
           print('M10-R v1.95 CONTRAST ENUM + DEFAULT PROVENANCE')
           print('\n=== switch helper 0x4209f940..0x4209fa20 THUMB ===');dump(th,0x4209f940,0x4209fa20)
           print('\n=== switch helper same ARM sanity ===');dump(ar,0x4209f940,0x4209fa20)
@@ -68,14 +78,11 @@ jobs:
             dump(th,start,end)
           print('\n=== all +0xAC memory accesses in caller region ===')
           for i in th.disasm(b[off(0x42169000):off(0x4216c000)],0x42169000):
-            hit=False
-            for op in i.operands:
-              if op.type==ARM_OP_MEM and op.mem.disp==0xac:hit=True
-            if hit: print(fmt(i))
-          print('\n=== stores of immediate-ish 0/1/2/3 near +0xAC accesses (+/-40) ===')
-          ins=list(th.disasm(b[off(0x42169000):off(0x4216c000)],0x42169000));by={i.address:k for k,i in enumerate(ins)}
+            if hasdisp(i,0xac): print(fmt(i))
+          print('\n=== context around +0xAC accesses ===')
+          ins=list(th.disasm(b[off(0x42169000):off(0x4216c000)],0x42169000))
           for k,i in enumerate(ins):
-            if any(op.type==ARM_OP_MEM and op.mem.disp==0xac for op in i.operands):
+            if hasdisp(i,0xac):
               print(f'\n--- around {i.address:#x} ---')
               for j in ins[max(0,k-18):min(len(ins),k+19)]:print(fmt(j))
           print('\nTARGET: recover exact numeric contrast enum -> _CONTRAST suffix mapping from the switch helper/table; then identify the producer/default value feeding owner input +0xAC at the four live 0x4215220C call sites. If default cannot be proven, state precisely what remains unresolved.')
