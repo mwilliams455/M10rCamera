@@ -33,7 +33,7 @@ jobs:
               pages=[]
               def walk(page, depth=0):
                   pages.append(page)
-                  for sub in getattr(page, 'pages', ()):
+                  for sub in (getattr(page, 'pages', None) or ()):
                       walk(sub, depth+1)
               for page in tf.pages: walk(page)
               for i,page in enumerate(pages):
