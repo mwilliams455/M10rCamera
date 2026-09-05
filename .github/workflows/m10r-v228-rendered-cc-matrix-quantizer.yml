@@ -1,0 +1,98 @@
+name: M10-R v2.28 rendered CC matrix quantizer
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v228-rendered-cc-matrix-quantizer.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Unpack and disassemble exact matrix/record helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v228_rendered_cc_matrix_quantizer.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_ARM,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_REG_PC
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes();BASE=0x40000000;PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);md.detail=True
+          def off(a):return PFX+a-BASE
+          def sat(a):
+              o=off(a)
+              if not 0<=o<len(b):return None
+              e=b.find(b'\0',o,min(len(b),o+180))
+              if e<0:return None
+              bb=b[o:e]
+              if len(bb)>3 and all(32<=x<127 for x in bb):return bb.decode('ascii','replace')
+          def lit(i):
+              try:
+                  if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:return i.address+8+i.operands[1].mem.disp
+              except:pass
+          def fmt(i):
+              s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+              la=lit(i)
+              if la is not None:
+                  o=off(la)
+                  if 0<=o<=len(b)-4:
+                      v=struct.unpack_from('<I',b,o)[0];s+=f' ; LIT {la:08x}->{v:08x}'
+                      st=sat(v) if BASE<=v<BASE+len(b)-PFX else None
+                      if st:s+=f' STRING={st!r}'
+                      # also decode f64 if aligned/in range and finite-looking
+                      if 0<=o<=len(b)-8:
+                          try:
+                              d=struct.unpack_from('<d',b,o)[0]
+                              if abs(d)<1e12:s+=f' F64={d:.17g}'
+                          except:pass
+              return s
+          def dis(a,z):return list(md.disasm(b[off(a):off(z)],a))
+          def dump(a,z,name):
+              print(f'=== {name} {a:08x}..{z:08x} ===')
+              for i in dis(a,z):print(fmt(i))
+              print()
+          print('M10-R v2.28 RENDERED-CC MATRIX / QUANTIZER TRACE')
+          print('Goal: label the exact matrices supplied to the two 0x2C rendered-CC records and freeze their fixed-point conversion.')
+          print()
+          dump(0x400038b0,0x40003b20,'rendered-CC record builder / quantizer')
+          dump(0x40004130,0x40004220,'matrix extrema helpers used for scale-code search')
+          dump(0x40012e00,0x40013140,'CA9 matrix/vector wrapper helpers around 12E24/12FB8/1308C/130C8/130F0/13118')
+          dump(0x40003cf0,0x40003eb0,'constructor final matrix formation and CC0/CC1 record copies')
+
+          print('=== SetWhiteXY object layout from direct stores/calls ===')
+          print('object base in caller = SP+0x68')
+          print('+0x00/+0x08 : WhiteXY doubles (direct SetWhiteXY stores)')
+          print('+0x10..+0x20: CameraWhite vector (direct SetWhiteXY stores)')
+          print('+0x28..+0x68: 3x3 matrix used by caller at SP+0x90')
+          print('+0x70..+0xB0: second 3x3 matrix populated by SetWhiteXY matrix operations')
+          print('Public DNG ColorSpec names these positions CameraToPCS and PCStoCamera; firmware dataflow must be used to confirm semantics before freezing the labels.')
+          print()
+          print('=== DECISION ===')
+          print('Freeze CC0/CC1 formula only if the builder input pointers can be tied to the above two matrices without relying on API-name analogy.')
+          print('Freeze quantization only from explicit coefficient scaling/rounding/scale-code instructions in 0x400038B0.')
+          PY
+      - name: Commit v2.28 trace
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v228_rendered_cc_matrix_quantizer.txt
+          git commit -m 'research: record v2.28 rendered CC matrix quantizer' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
