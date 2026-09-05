@@ -1,0 +1,15 @@
+M10-R v2.07 B2Y ASSET EXTRACTOR VALIDATION
+status PASS
+default_still_contrast {'enum': 2, 'firmware_status': 'frozen', 'name': 'MEDIUM', 'suffix': '_CONTRAST:MEDIUM'}
+source_sha256 ea935a8006ea3b0a765660bd1d89f6a52c9f60508ee5ba76650005d80372335b
+tone low sha256 136b69127e73cc43c28c0aa7b511f1f3e9b29be139f4d491422f2eb574a49fb0 min 32768 max 32768 unique 1
+tone medium sha256 2fd6ca209f290c75aa96976b3d7692e55c41a55c0017a063aba9808da3b41a00 min 19431 max 35130 unique 2664
+tone high sha256 0a764cf29d35cd4a4eb7f816e5d128bccaef81b4d5eca991d9b80ab207bd0101 min 16190 max 37812 unique 4063
+dg_main_sha256 1678c7f99ab1fac958ffb068d20a0c24ab1677adf20a916335d0b2947fc8a1a1
+dg_fl_sha256 e1a997633d1be1d82c89feac40f4feccfa058fad4b3d87cadf08d385f83953e6
+dg_expanded_sha256 9e65de24d52271be0783f4e2728f20f482c0ba43b63159b75033b4a4fc75457d
+dg_expanded_entries/min/max 32768 0 16383
+dg_expanded_first32 [0, 9, 19, 29, 39, 48, 58, 68, 78, 87, 97, 107, 117, 126, 136, 146, 156, 165, 175, 185, 195, 204, 214, 224, 234, 243, 253, 263, 273, 282, 292, 302]
+dg_expanded_last32 [16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383, 16383]
+files ['dg_expanded_u16le.bin', 'dg_fl_u16le.bin', 'dg_main_u8.bin', 'manifest.json', 'tone_high_q15.u32le', 'tone_low_q15.u32le', 'tone_medium_q15.u32le']
+implementation_boundary: assets are exact; tone live-domain normalization/rounding and inter-stage ordering remain separate questions.
