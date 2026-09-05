@@ -1,0 +1,173 @@
+M10-R v2.30 OUTPUT COLOR-SPACE MODE MATRICES
+Each getter is ARM `ldr r0,[pc]; bx lr`; target word lives at getter+8.
+
+getter 40012db8 literal@40012dc0 -> 40013b18
+  matrix target=40013b18
+  1.3895 -0.1693 -0.2202
+  -0.2288 1.2317 -0.0029
+  -0.0176 -0.0963 1.1139
+getter 40012dc4 literal@40012dcc -> 40013b60
+  matrix target=40013b60
+  1.2789 -0.1128 -0.1661
+  -0.2042 1.2569 -0.0527
+  0.0183 -0.1126 1.0943
+getter 40012dd0 literal@40012dd8 -> 40013a40
+  matrix target=40013a40
+  0.7977 0.1352 0.0313
+  0.288 0.7119 0.0001
+  0 0 0.8249
+getter 40012ddc literal@40012de4 -> 40013ad0
+  matrix target=40013ad0
+  2.0341 -0.7273 -0.3067
+  -0.2288 1.2317 -0.0029
+  -0.0086 -0.1533 1.1619
+getter 40012fa0 literal@40012fa8 -> 40013ba8
+  matrix target=40013ba8
+  3.1338561 -1.6168667 -0.4906146
+  -0.9787684 1.9161415 0.033454
+  0.0719453 -0.2289914 1.4052427
+getter 40012fac literal@40012fb4 -> 40013c38
+  matrix target=40013c38
+  1.7827618 -0.4969847 -0.2690101
+  -0.9593623 1.9477962 -0.0275807
+  0.0859317 -0.1744674 1.3228273
+getter 40012fb8 literal@40012fc0 -> 400139f8
+  matrix target=400139f8
+  1.346 -0.2556 -0.0511
+  -0.5446 1.5082 0.0205
+  0 0 1.2123
+getter 40012fc4 literal@40012fcc -> 40013bf0
+  matrix target=40013bf0
+  1.9624274 -0.6105343 -0.3413404
+  -0.9787684 1.9161415 0.033454
+  0.0286869 -0.1406752 1.3487655
+
+=== three constructor rows ===
+mode=0 encoded_index=0 field1_getter=40012ddc->40013ad0 field2_getter=40012fc4->40013bf0
+ field1/CC1-source matrix target=40013ad0
+  2.0341 -0.7273 -0.3067
+  -0.2288 1.2317 -0.0029
+  -0.0086 -0.1533 1.1619
+ field2 companion matrix target=40013bf0
+  1.9624274 -0.6105343 -0.3413404
+  -0.9787684 1.9161415 0.033454
+  0.0286869 -0.1406752 1.3487655
+field1*field2 max_identity_error= 3.69483355943
+field2*field1 max_identity_error= 3.1343993496199998
+
+mode=1 encoded_index=1 field1_getter=40012db8->40013b18 field2_getter=40012fa0->40013ba8
+ field1/CC1-source matrix target=40013b18
+  1.3895 -0.1693 -0.2202
+  -0.2288 1.2317 -0.0029
+  -0.0176 -0.0963 1.1139
+ field2 companion matrix target=40013ba8
+  3.1338561 -1.6168667 -0.4906146
+  -0.9787684 1.9161415 0.033454
+  0.0719453 -0.2289914 1.4052427
+field1*field2 max_identity_error= 3.50435618601
+field2*field1 max_identity_error= 3.7330669688699993
+
+mode=2 encoded_index=2 field1_getter=40012dc4->40013b60 field2_getter=40012fac->40013c38
+ field1/CC1-source matrix target=40013b60
+  1.2789 -0.1128 -0.1661
+  -0.2042 1.2569 -0.0527
+  0.0183 -0.1126 1.0943
+ field2 companion matrix target=40013c38
+  1.7827618 -0.4969847 -0.2690101
+  -0.9593623 1.9477962 -0.0275807
+  0.0859317 -0.1744674 1.3228273
+field1*field2 max_identity_error= 1.5743910350199999
+field2*field1 max_identity_error= 1.62517315632
+
+=== closest reference for every resolved matrix ===
+40012db8->40013b18: best=[(0.3157989, 'ProPhoto_XYZ_to_RGB_D50'), (0.5918251, 'ProPhoto_RGB_to_XYZ_D50'), (0.7305623, 'ECI_XYZ_to_RGB_D50')]
+40012dc4->40013b60: best=[(0.3403989, 'ProPhoto_XYZ_to_RGB_D50'), (0.5450259, 'ProPhoto_RGB_to_XYZ_D50'), (0.6548288999999999, 'ECI_RGB_to_XYZ_D50')]
+40012dd0->40013a40: best=[(0.00031000000000003247, 'ProPhoto_RGB_to_XYZ_D50'), (0.1474957, 'ECI_RGB_to_XYZ_D50'), (0.18794409999999995, 'AdobeRGB_RGB_to_XYZ_D50')]
+40012ddc->40013ad0: best=[(0.6881567, 'ProPhoto_XYZ_to_RGB_D50'), (0.7305623, 'ECI_XYZ_to_RGB_D50'), (0.7499684, 'AdobeRGB_XYZ_to_RGB_D50')]
+40012fa0->40013ba8: best=[(0.0, 'sRGB_XYZ_to_RGB_D50'), (1.1714287, 'AdobeRGB_XYZ_to_RGB_D50'), (1.3510943, 'ECI_XYZ_to_RGB_D50')]
+40012fac->40013c38: best=[(0.0, 'ECI_XYZ_to_RGB_D50'), (0.17966559999999987, 'AdobeRGB_XYZ_to_RGB_D50'), (0.4396289, 'ProPhoto_XYZ_to_RGB_D50')]
+40012fb8->400139f8: best=[(0.00048720000000002095, 'ProPhoto_XYZ_to_RGB_D50'), (0.4395962, 'ECI_XYZ_to_RGB_D50'), (0.6164273999999998, 'AdobeRGB_XYZ_to_RGB_D50')]
+40012fc4->40013bf0: best=[(0.0, 'AdobeRGB_XYZ_to_RGB_D50'), (0.17966559999999987, 'ECI_XYZ_to_RGB_D50'), (0.6164840999999999, 'ProPhoto_XYZ_to_RGB_D50')]
+
+=== color-space strings in CA9/IMG sections ===
+-- 099_IMG-CA9_System.bin --
+-- 092_IMG-System.bin --
+  off=0xa4140 'CA9: %s(), %d - [in] color space: %d'
+  off=0xa5288 'CA9: Matrix_DT DecimalPointPos: %i  Temp:%iK'
+  off=0x151888 '_COLORSPACE:SRGB'
+  off=0x15189c '_COLORSPACE:ADOBERGB'
+  off=0x1518b4 '_COLORSPACE:ECI'
+  off=0x166750 'img_iza_setAfnUnitInfSpecific(): Unknown scale mode: %d'
+  off=0x1678dc 'img_iza_setMonUnitInfSpecific(): Invalid HistogramCnt: %d'
+  off=0x16791b 'Bimg_iza_setMonUnitInfSpecific(): Unknown resource: %d'
+  off=0x167954 'img_iza_setMonUnitInfSpecific(): _p_mon_unit_inf == NULL'
+  off=0x167b54 'img_iza_setSlUnitInfSpecific(): Unknown resource: %d'
+  off=0x167ee4 'img_iza_setSpfUnitInfSpecific(): Unknown spatial mode: %d'
+  off=0x167f30 'img_iza_setSpfUnitInfSpecific(): Unknown SPF usage: %d'
+  off=0x1e7af4 'FMGFGHIJICICCDEDEDBJBCDEDFECICCDDDECBJCCDEDEDBJCCEEDECBJCDEFEEDCJCDEFEFCBJDDEFEGDBJDDEFEFDBKDDFFFFDCKEDFGFGDFNIHIJJKH'
+  off=0x7f74a4 'img_iza_setFrectUnitInfSpecific'
+  off=0x83397c 'img_JPEG:  drv_jpeg_config_DecodeImage() - img_JPEG_SetDecImage failed (errCode = 0x%X)'
+  off=0x8339d4 'img_JPEG: drv_jpeg_config_DEC_HeaderCallbackFunction() - img_JPEG_SetDecImage failed (errCode = 0x%X)'
+  off=0x837bc8 'CtrlCPU (simulator) set date time - 16.04.2014 is an arbitrary decision'
+  off=0x83cbe8 'IMG: ----ERROR----  img_b2y_fill_T_IMG_B2Y_FB2Y7A_STRINGS ColorSpace'
+  off=0x83d2f8 'img_iza_setFrectUnitInfSpecific(): Unknown interpolation mode: %d'
+  off=0x83d33c "img_iza_setMonUnitInfSpecific(): This resource doesn't need the Monitor Unit: %d"
+  off=0x8560d0 'USB(PTP): SendObjectInfo - Parent Object handle must be specified'
+  off=0x960698 'Adobe RGB (1998)'
+  off=0x9607bc 'IEC sRGB'
+  off=0x96091c 'sRGB IEC61966-2.1'
+  off=0x960939 'sRGB IEC61966-2.1'
+  off=0x960a5b '.IEC 61966-2.1 Default RGB colour space - sRGB'
+  off=0x960a94 '.IEC 61966-2.1 Default RGB colour space - sRGB'
+  off=0x9614cc 'Copyright (C) 2007 by Color Solutions, All Rights Reserved. License details can be found on: http://www.eci.org/eci/en/eciRGB.php'
+  off=0x96155c 'eciRGB v2'
+  off=0x961585 'eciRGB v2'
+  off=0x961d60 'Adobe RGB (1998)'
+  off=0x961e84 'IEC sRGB'
+  off=0x961fe4 'sRGB IEC61966-2.1'
+  off=0x962001 'sRGB IEC61966-2.1'
+  off=0x962123 '.IEC 61966-2.1 Default RGB colour space - sRGB'
+  off=0x96215c '.IEC 61966-2.1 Default RGB colour space - sRGB'
+  off=0x962b94 'Copyright (C) 2007 by Color Solutions, All Rights Reserved. License details can be found on: http://www.eci.org/eci/en/eciRGB.php'
+  off=0x962c24 'eciRGB v2'
+  off=0x962c4d 'eciRGB v2'
+  off=0x96345c 'Adobe RGB (1998)'
+  off=0x963580 'IEC sRGB'
+  off=0x9636e0 'sRGB IEC61966-2.1'
+  off=0x9636fd 'sRGB IEC61966-2.1'
+  off=0x96381f '.IEC 61966-2.1 Default RGB colour space - sRGB'
+  off=0x963858 '.IEC 61966-2.1 Default RGB colour space - sRGB'
+  off=0x964290 'Copyright (C) 2007 by Color Solutions, All Rights Reserved. License details can be found on: http://www.eci.org/eci/en/eciRGB.php'
+  off=0x964320 'eciRGB v2'
+  off=0x964349 'eciRGB v2'
+  off=0x964b14 'Adobe RGB (1998)'
+  off=0x964c38 'IEC sRGB'
+  off=0x964d98 'sRGB IEC61966-2.1'
+  off=0x964db5 'sRGB IEC61966-2.1'
+  off=0x964ed7 '.IEC 61966-2.1 Default RGB colour space - sRGB'
+  off=0x964f10 '.IEC 61966-2.1 Default RGB colour space - sRGB'
+  off=0x965948 'Copyright (C) 2007 by Color Solutions, All Rights Reserved. License details can be found on: http://www.eci.org/eci/en/eciRGB.php'
+  off=0x9659d8 'eciRGB v2'
+  off=0x965a01 'eciRGB v2'
+  off=0x966220 'Adobe RGB (1998)'
+  off=0x966344 'IEC sRGB'
+  off=0x9664a4 'sRGB IEC61966-2.1'
+  off=0x9664c1 'sRGB IEC61966-2.1'
+  off=0x9665e3 '.IEC 61966-2.1 Default RGB colour space - sRGB'
+  off=0x96661c '.IEC 61966-2.1 Default RGB colour space - sRGB'
+  off=0x967054 'Copyright (C) 2007 by Color Solutions, All Rights Reserved. License details can be found on: http://www.eci.org/eci/en/eciRGB.php'
+  off=0x9670e4 'eciRGB v2'
+  off=0x96710d 'eciRGB v2'
+  off=0x9678dc 'Adobe RGB (1998)'
+  off=0x967a00 'IEC sRGB'
+  off=0x967b60 'sRGB IEC61966-2.1'
+  off=0x967b7d 'sRGB IEC61966-2.1'
+  off=0x967c9f '.IEC 61966-2.1 Default RGB colour space - sRGB'
+  off=0x967cd8 '.IEC 61966-2.1 Default RGB colour space - sRGB'
+  off=0x968710 'Copyright (C) 2007 by Color Solutions, All Rights Reserved. License details can be found on: http://www.eci.org/eci/en/eciRGB.php'
+  off=0x9687a0 'eciRGB v2'
+  off=0x9687c9 'eciRGB v2'
+
+=== DECISION ===
+If field1 and field2 form inverse standard-space pairs, field1 is directly the selected RGB->PCS matrix serialized as CC1 while field2 is its PCS->RGB companion.
+If not inverse pairs, preserve their raw role and do not impose standard-space semantics.
