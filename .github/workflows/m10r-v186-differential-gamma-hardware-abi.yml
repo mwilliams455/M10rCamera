@@ -1,0 +1,125 @@
+name: M10-R v1.86 differential gamma hardware ABI
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v186-differential-gamma-hardware-abi.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace active differential-gamma hardware ABI
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v186_differential_gamma_hardware_abi.txt
+          from pathlib import Path
+          import struct,hashlib
+          from capstone import *
+          from capstone.arm import *
+
+          img=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); BASE=0x42000000; P=4
+          cal=Path('/tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin').read_bytes(); CP=4
+          thumb=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); thumb.detail=True
+          arm=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN); arm.detail=True
+          def off(a): return P+a-BASE
+          def u32(d,o): return struct.unpack_from('<I',d,o)[0]
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                if i._cs.mode & CS_MODE_THUMB: la=((i.address+4)&~3)+i.operands[1].mem.disp
+                else: la=i.address+8+i.operands[1].mem.disp
+                o=off(la)
+                if 0<=o<=len(img)-4:return la,u32(img,o)
+            except: pass
+          def call(i):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm & ~1
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            try:q=lit(i)
+            except:q=None
+            c=call(i)
+            if q:s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'
+            if c is not None:s+=f' ; CALL {c:#x}'
+            return s
+          def dump(lo,hi,mode='thumb'):
+            md=thumb if mode=='thumb' else arm
+            for i in md.disasm(img[off(lo):off(hi)],lo): print(fmt(i))
+          print('M10-R v1.86 DIFFERENTIAL GAMMA HARDWARE ABI')
+          print('\n=== selector 0x42153f40..0x42154030 THUMB ==='); dump(0x42153f40,0x42154030)
+          for lo,hi,name in [(0x420d1540,0x420d1648,'control/helper-A'),(0x420d1648,0x420d1690,'main-table/helper-B'),(0x420d1690,0x420d1718,'FL/helper-C')]:
+            print(f'\n=== {name} {lo:#x}..{hi:#x} THUMB ==='); dump(lo,hi,'thumb')
+          print('\n=== same helper region ARM sanity decode ==='); dump(0x420d1540,0x420d1718,'arm')
+
+          count=u32(cal,CP+8); rec0=CP+0x10; stride=0xa90; payload_base=rec0+count*stride
+          recs=[]
+          for i in range(count):
+            o=rec0+i*stride; rid=u32(cal,o); rel=u32(cal,o+4); size=u32(cal,o+8); po=payload_base+rel
+            keys=[]
+            for ko in range(o+0x10,o+0xa90,0x40):
+              raw=cal[ko:ko+0x40].split(b'\0',1)[0]
+              if raw:
+                try: keys.append(raw.decode('ascii','replace'))
+                except: pass
+            recs.append((i,rid,rel,size,po,keys))
+          for rid,nm in [(0x0b,'DG_CONTROL'),(0x1c,'DG_MAIN'),(0x1d,'DG_FL')]:
+            rs=[r for r in recs if r[1]==rid]
+            print(f'\n=== CALIBRATION {nm} id={rid:#x} occurrences={len(rs)} ===')
+            for r in rs:
+              i,_,rel,size,po,keys=r; blob=cal[po:po+size]
+              print('record',i,'rel',hex(rel),'size',hex(size),'payload_fileoff',hex(po),'sha256',hashlib.sha256(blob).hexdigest())
+              print('keys',keys)
+              print('head128',blob[:128].hex())
+              if len(blob)>=4:
+                vals=list(struct.unpack('<%dI'%(min(len(blob),0x100)//4),blob[:min(len(blob),0x100)//4*4]))
+                print('u32_head',[(hex(j*4),hex(v),v) for j,v in enumerate(vals)])
+              if rid==0x1c:
+                active=blob[:0x8000]; print('active_main unique_u8',sorted(set(active)),'active_sha',hashlib.sha256(active).hexdigest())
+                # frequency + run info helps determine packed/index table behavior
+                from collections import Counter
+                c=Counter(active); print('active_u8_counts',sorted(c.items()))
+                runs=[]
+                if active:
+                  cur=active[0]; n=0
+                  for x in active:
+                    if x==cur:n+=1
+                    else:runs.append((cur,n));cur=x;n=1
+                  runs.append((cur,n))
+                print('first_runs',runs[:80]); print('run_count',len(runs),'max_run',max((n for _,n in runs),default=0))
+              if rid==0x1d:
+                active=blob[:0x1000]; vv=list(struct.unpack('<2048H',active));
+                print('FL first64',vv[:64]); print('FL last64',vv[-64:]);
+                nz=[i for i,v in enumerate(vv) if v!=0x3fff]; print('FL last_non_saturated_index',max(nz) if nz else None)
+
+          # Collect only data-memory/MMIO literals from helper region, plus memory operand offsets from arguments.
+          print('\n=== helper memory operands and MMIO/data literals ===')
+          for i in thumb.disasm(img[off(0x420d1540):off(0x420d1718)],0x420d1540):
+            q=lit(i)
+            mem=[]
+            try:
+              for op in i.operands:
+                if op.type==ARM_OP_MEM:
+                  mem.append((thumb.reg_name(op.mem.base),op.mem.disp))
+            except: pass
+            if mem or (q and (0x20000000<=q[1]<0x21000000)):
+              print(fmt(i),'MEM',[(r,hex(d)) for r,d in mem])
+          print('\nTARGET: identify exact mapping ID0B/1C/1D -> helpers, DG control fields and MMIO bits, table byte/word width, any hardware dimensions/stride/index metadata, and software-emulation implications. Do not infer LUT dimensionality solely from file size.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v186_differential_gamma_hardware_abi.txt
+          git commit -m 'research: record v1.86 differential-gamma hardware ABI' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
