@@ -1,0 +1,206 @@
+M10-R v2.36b CA9 COLORSPEC TAIL / ROUNDING TRACE
+Bounded follow-up only: complete 0x40005E94 white-construction routine and decode BLX target 0x40012940 in Thumb state.
+
+=== white-construction routine complete 40005e94..400060f0 ===
+40005e94: push       {r4, r5, r6, r7, r8, sb, lr}
+40005e98: mov        r7, #0
+40005e9c: mov        r6, r1
+40005ea0: mov        r4, r0
+40005ea4: mov        r5, r3
+40005ea8: mov        sb, r2
+40005eac: vpush      {d8, d9}
+40005eb0: sub        sp, sp, #0x9c
+40005eb4: mov        r1, #0x48
+40005eb8: vmov.f64   d8, #1.000000e+00
+40005ebc: ldr        r8, [sp, #0xc8]
+40005ec0: add        r0, sp, #0x38
+40005ec4: str        r7, [sp, #0x28]
+40005ec8: str        r7, [sp, #0x2c]
+40005ecc: str        r7, [sp, #0x30]
+40005ed0: str        r7, [sp, #0x34]
+40005ed4: str        r7, [sp, #0x10]
+40005ed8: str        r7, [sp, #0x14]
+40005edc: str        r7, [sp, #0x18]
+40005ee0: str        r7, [sp, #0x1c]
+40005ee4: str        r7, [sp, #0x20]
+40005ee8: str        r7, [sp, #0x24]
+40005eec: bl         #0x4000fc6c
+40005ef0: str        r7, [sp, #0x80]
+40005ef4: cmp        r8, #0
+40005ef8: str        r7, [sp, #0x84]
+40005efc: str        r7, [sp, #0x88]
+40005f00: str        r7, [sp, #0x8c]
+40005f04: str        r7, [sp, #0x90]
+40005f08: str        r7, [sp, #0x94]
+40005f0c: vldr       d0, [r6]
+40005f10: vstr       d0, [r4]
+40005f14: vldr       d0, [r6, #8]
+40005f18: vstr       d0, [r4, #8]
+40005f1c: beq        #0x4000601c
+40005f20: mov        r0, r5
+40005f24: bl         #0x40013024
+40005f28: vdiv.f64   d1, d8, d0
+40005f2c: vldr       d2, [r5]
+40005f30: vldr       d9, [pc, #0x190]
+40005f34: vmul.f64   d2, d2, d1
+40005f38: vstr       d2, [r4, #0x10]
+40005f3c: vldr       d0, [r5, #8]
+40005f40: vmul.f64   d0, d0, d1
+40005f44: vstr       d0, [r4, #0x18]
+40005f48: vldr       d0, [r5, #0x10]
+40005f4c: vmul.f64   d0, d0, d1
+40005f50: vmov.f64   d1, #1.000000e+00
+40005f54: vstr       d0, [r4, #0x20]
+40005f58: vmov.f64   d0, d9
+40005f5c: bl         #0x40012cc8
+40005f60: vmov.f64   d1, #1.000000e+00
+40005f64: vldr       d2, [r4, #0x18]
+40005f68: vmov.f64   d0, d9
+40005f6c: mov        r5, r0
+40005f70: bl         #0x40012cc8
+40005f74: vmov.f64   d1, #1.000000e+00
+40005f78: vldr       d2, [r4, #0x20]
+40005f7c: vmov.f64   d0, d9
+40005f80: and        r5, r5, r0
+40005f84: bl         #0x40012cc8
+40005f88: and        r0, r0, r5
+40005f8c: cmp        r0, #0
+40005f90: beq        #0x40006070
+40005f94: add        r0, sp, #0x28
+40005f98: bl         #0x400130f0
+40005f9c: add        r2, sp, #0x38
+40005fa0: mov        r1, r4
+40005fa4: add        r0, sp, #0x28
+40005fa8: bl         #0x400058b8
+40005fac: cmp        r0, #0x400
+40005fb0: mov        r5, r0
+40005fb4: bhs        #0x400060b4
+40005fb8: add        r2, r4, #0x70
+40005fbc: add        r1, sp, #0x38
+40005fc0: mov        r0, sb
+40005fc4: bl         #0x40004490
+40005fc8: cmp        r8, #0
+40005fcc: beq        #0x40006004
+40005fd0: add        r0, sp, #0x10
+40005fd4: bl         #0x40013118
+40005fd8: add        r2, sp, #0x80
+40005fdc: add        r1, sp, #0x10
+40005fe0: add        r0, r4, #0x70
+40005fe4: bl         #0x40004678
+40005fe8: add        r0, sp, #0x80
+40005fec: bl         #0x40013024
+40005ff0: vmov.f64   d1, d0
+40005ff4: add        r1, r4, #0x70
+40005ff8: mov        r0, r1
+40005ffc: vdiv.f64   d0, d8, d1
+40006000: bl         #0x40004370
+40006004: add        r1, r4, #0x28
+40006008: add        r0, r4, #0x70
+4000600c: bl         #0x400043e0
+40006010: cmp        r0, #1
+40006014: bne        #0x400060b4
+40006018: b          #0x40006094
+4000601c: add        r1, r4, #0x10
+40006020: mov        r0, r5
+40006024: bl         #0x40012ffc
+40006028: vldr       d0, [r4, #0x10]
+4000602c: vcmpe.f64  d0, #0
+40006030: vmrs       apsr_nzcv, fpscr
+40006034: vldr       d0, [r4, #0x18]
+40006038: movgt      r0, #1
+4000603c: movle      r0, #0
+40006040: vcmpe.f64  d0, #0
+40006044: vmrs       apsr_nzcv, fpscr
+40006048: vldr       d0, [r4, #0x20]
+4000604c: movgt      r1, #1
+40006050: movle      r1, #0
+40006054: vcmpe.f64  d0, #0
+40006058: and        r0, r0, r1
+4000605c: vmrs       apsr_nzcv, fpscr
+40006060: movgt      r1, #1
+40006064: movle      r1, #0
+40006068: and        r0, r0, r1
+4000606c: b          #0x40005f8c
+40006070: ldr        r0, [pc, #0x58]
+40006074: movw       r3, #0x136
+40006078: ldr        r2, [pc, #0x54]
+4000607c: sub        r1, pc, #0x314
+40006080: str        r0, [sp]
+40006084: mov        r0, #4
+40006088: bl         #0x4000ded4
+4000608c: mov        r5, #0x410
+40006090: b          #0x400060b4
+40006094: ldr        r2, [pc, #0x38]
+40006098: add        r0, pc, #0x38
+4000609c: str        r0, [sp]
+400060a0: mov        r3, #0x160
+400060a4: sub        r1, pc, #0x33c
+400060a8: mov        r0, #4
+400060ac: bl         #0x4000ded4
+400060b0: movw       r5, #0x402
+400060b4: add        sp, sp, #0x9c
+400060b8: mov        r0, r5
+400060bc: vpop       {d8, d9}
+400060c0: pop        {r4, r5, r6, r7, r8, sb, pc}
+400060c4: andeq      r0, r0, r0
+400060c8: rscsle     sl, r1, #252, #18
+400060cc: svclo      #0x50624d
+400060d0: andmi      r5, r0, r0, lsl ip
+400060d4: andmi      r4, r1, r0, ror #6
+400060d8: rsbsvc     r6, r4, #0x4000001b
+400060dc: cdpvs      p8, #2, c7, c0, c9, #3
+400060e0: stmdbvs    r0!, {r0, r1, r2, r3, r5, r6, sl, ip, sp, lr}
+400060e4: rsbvc      r7, r5, #0x6e00000
+400060e8: stclvs     p9, c6, [r2], #-0x1d0
+400060ec: andeq      r0, r0, r5, rrx
+
+=== rendered-CC rounding helper in Thumb state 40012940..400129a0 ===
+40012940: push       {r4, lr}
+40012942: vpush      {d0}
+40012946: sub        sp, #0x10
+40012948: vldr       d0, [sp, #0x10]
+4001294c: vmov       r0, r1, d0
+40012950: bl         #0x400133d0
+40012954: vmov       d0, r0, r1
+40012958: vldr       d1, [sp, #0x10]
+4001295c: ldr        r0, [sp, #0x14]
+4001295e: vldr       d2, [pc, #0x68]
+40012962: vldr       d3, [pc, #0x6c]
+40012966: vldr       d4, [pc, #0x70]
+4001296a: tst.w      r0, #-0x80000000
+4001296e: vsub.f64   d1, d1, d0
+40012972: beq        #0x4001298a
+40012974: vcmpe.f64  d1, d4
+40012978: vmrs       apsr_nzcv, fpscr
+4001297c: bls        #0x40012994
+4001297e: vcmpe.f64  d1, d3
+40012982: vmrs       apsr_nzcv, fpscr
+40012986: ble        #0x400129a8
+40012988: b          #0x400129a4
+4001298a: vcmpe.f64  d1, d4
+4001298e: vmrs       apsr_nzcv, fpscr
+40012992: bhs        #0x4001299a
+40012994: vsub.f64   d0, d0, d2
+40012998: b          #0x400129a8
+4001299a: vcmpe.f64  d1, d3
+
+=== rendered-CC clamp helper 40012b40..40012b80 ===
+40012b40: vmrs       apsr_nzcv, fpscr
+40012b44: vmovgt.f64 d0, d3
+40012b48: bx         lr
+40012b4c: cmp        r1, r2
+40012b50: mov        r3, r0
+40012b54: movlt      r0, r1
+40012b58: movge      r0, r2
+40012b5c: cmp        r3, r0
+40012b60: movgt      r0, r3
+40012b64: bx         lr
+40012b68: vcmpe.f64  d0, d1
+40012b6c: vmrs       apsr_nzcv, fpscr
+40012b70: vmovle.f64 d0, d1
+40012b74: bx         lr
+40012b78: cmp        r0, r1
+40012b7c: movle      r0, r1
+
+=== DECISION BOUNDARY ===
+Freeze only formulas directly expressed by these bodies. Preserve any remaining helper as unresolved rather than importing SDK behavior.
