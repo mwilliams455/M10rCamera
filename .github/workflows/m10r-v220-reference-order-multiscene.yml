@@ -34,7 +34,7 @@ jobs:
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
           rm -rf /tmp/m10r_b2y_assets
           python3 tools/m10r_b2y_assets.py /tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin /tmp/m10r_b2y_assets >/dev/null
-      - name: Fit six independently verified JPEG/DNG pairs
+      - name: Fit six independently verified JPEG/DNG pairs with orientation search
         shell: bash
         run: |
           set -euo pipefail
@@ -68,7 +68,7 @@ jobs:
 
           rows=[]
           for p in sorted(Path('/tmp/m10r_v220').glob('*_fit.json')):
-            r=json.loads(p.read_text()); rows.append(r)
+            rows.append(json.loads(p.read_text()))
 
           valid=[r for r in rows if r.get('metadata',{}).get('identity_supported') is True
                  and r.get('metadata',{}).get('default_jpeg_controls') is True
@@ -77,6 +77,7 @@ jobs:
           out=[]
           out.append('M10-R v2.20 MULTI-SCENE PUBLIC REFERENCE ORDER REPLICATION')
           out.append('source: Photography Blog M10-R review samples 01..06; each JPEG/DNG pair identity checked independently')
+          out.append('proxy: rawpy-oriented linear camera-space green normalized back to DNG raw-code scale')
           out.append('IMPORTANT: empirical replication, not direct hardware mux proof.')
           out.append('')
           out.append('=== per-sample verification and fits ===')
@@ -84,7 +85,7 @@ jobs:
             m=r['metadata']; j=m.get('jpg',{}); a=r['alignment']; p=r['patches']
             out.append(f"sample {r['sample']} identity={m.get('identity_supported')} defaults={m.get('default_jpeg_controls')} "
                        f"ISO={j.get('ISO')} shutter={j.get('ExposureTime')} f={j.get('FNumber')} "
-                       f"align=({a['dx']},{a['dy']}) score={a['score']:.6f} patches={p['fit']}")
+                       f"rot90={a.get('rot90_k')} align=({a['dx']},{a['dy']}) score={a['score']:.6f} patches={p['fit']}")
             if r.get('fits'):
               for rnd in ('trunc','nearest'):
                 dg=r['fits'][f'dg-tone|{rnd}']; td=r['fits'][f'tone-dg|{rnd}']; d=r['deltas'][rnd]
@@ -98,9 +99,7 @@ jobs:
           aggregate={"total":len(rows),"valid":len(valid),"rounding":{}}
           for rnd in ('trunc','nearest'):
             deltas=[r['deltas'][rnd] for r in valid]
-            wins=sum(d>0 for d in deltas)
-            losses=sum(d<0 for d in deltas)
-            ties=sum(d==0 for d in deltas)
+            wins=sum(d>0 for d in deltas); losses=sum(d<0 for d in deltas); ties=sum(d==0 for d in deltas)
             td_gamma=[r['fits'][f'tone-dg|{rnd}']['output_gamma'] for r in valid]
             dg_gamma=[r['fits'][f'dg-tone|{rnd}']['output_gamma'] for r in valid]
             rec={
@@ -117,9 +116,25 @@ jobs:
                        f"median_gamma tone-dg={rec['tone_dg_gamma_median']} dg-tone={rec['dg_tone_gamma_median']}")
             out.append('  deltas '+repr(deltas))
 
+          # Secondary empirical rounding comparison after selecting tone->DG.
+          round_deltas=[]
+          for r in valid:
+            tr=r['fits']['tone-dg|trunc']['test_rmse']; nr=r['fits']['tone-dg|nearest']['test_rmse']
+            round_deltas.append(nr-tr)  # positive => trunc lower RMSE
+          aggregate['tone_dg_rounding']={
+            'trunc_wins':sum(d>0 for d in round_deltas),
+            'nearest_wins':sum(d<0 for d in round_deltas),
+            'ties':sum(d==0 for d in round_deltas),
+            'nearest_minus_trunc_rmse':round_deltas,
+            'median':statistics.median(round_deltas) if round_deltas else None,
+          }
+          out.append('')
+          out.append('tone-dg rounding: '+repr(aggregate['tone_dg_rounding']))
+
           supported=False
           if len(valid)>=4:
-            supported=all(aggregate['rounding'][rnd]['wins_tone_dg'] >= max(4, int(0.8*len(valid)+0.9999))
+            required_wins=max(4, int(0.8*len(valid)+0.9999))
+            supported=all(aggregate['rounding'][rnd]['wins_tone_dg'] >= required_wins
                           and aggregate['rounding'][rnd]['median_delta'] is not None
                           and aggregate['rounding'][rnd]['median_delta'] > 0.05
                           for rnd in ('trunc','nearest'))
@@ -129,7 +144,7 @@ jobs:
           out.append('criterion: >=4 valid pairs; tone-dg wins >=80% (minimum 4) under both rounding modes; median held-out RMSE advantage >0.05')
           out.append('')
           out.append('LIMITATIONS')
-          out.append('- RAW green-site mean is still a proxy for the exact post-WB/post-CC B2Y scalar input.')
+          out.append('- oriented linear camera-space green is a proxy for the exact post-WB/post-CC B2Y scalar input.')
           out.append('- output affine/gamma absorbs downstream YC/JPEG transfer.')
           out.append('- scene detail/local processing is reduced by neutral flat-patch selection, not eliminated.')
           out.append('- a consistent result can justify an empirical renderer-order freeze, but must be labeled separately from direct hardware routing proof.')
