@@ -1,0 +1,119 @@
+name: M10-R v2.16 public reference pair verify
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v216-public-reference-pair-verify.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download one published camera JPEG/DNG pair
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_01'
+          curl -L --fail --retry 3 --retry-delay 2 "$base.jpg" -o /tmp/m10r_01.jpg
+          curl -L --fail --retry 3 --retry-delay 2 "$base.dng" -o /tmp/m10r_01.dng
+          ls -lh /tmp/m10r_01.jpg /tmp/m10r_01.dng
+          sha256sum /tmp/m10r_01.jpg /tmp/m10r_01.dng
+      - name: Install metadata/raw readers
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl >/dev/null
+          python3 -m pip install --quiet rawpy pillow numpy
+      - name: Verify metadata identity and raw geometry
+        shell: bash
+        run: |
+          set -euo pipefail
+          exiftool -j -n \
+            -FileName -FileSize# -Make -Model -SerialNumber -ImageUniqueID -RawDataUniqueID \
+            -DateTimeOriginal -CreateDate -ModifyDate -SubSecTimeOriginal \
+            -ExposureTime -ShutterSpeedValue -FNumber -ApertureValue -ISO -FocalLength \
+            -ExposureCompensation -ExposureMode -MeteringMode -WhiteBalance -Contrast -Saturation -Sharpness \
+            -ImageWidth -ImageHeight -ExifImageWidth -ExifImageHeight -Orientation \
+            -DNGVersion -DNGBackwardVersion -CFARepeatPatternDim -CFAPattern -BlackLevel -WhiteLevel \
+            -AsShotNeutral -ColorMatrix1 -ColorMatrix2 -CameraCalibration1 -CameraCalibration2 \
+            /tmp/m10r_01.jpg /tmp/m10r_01.dng > /tmp/exif.json
+          python3 - <<'PY' > research/M10R_v216_public_reference_pair_verify.txt
+          import json, hashlib, os
+          from pathlib import Path
+          import numpy as np
+          from PIL import Image
+          import rawpy
+
+          jp=Path('/tmp/m10r_01.jpg'); dp=Path('/tmp/m10r_01.dng')
+          ex=json.loads(Path('/tmp/exif.json').read_text())
+          by={Path(x['SourceFile']).suffix.lower():x for x in ex}
+          j=by['.jpg']; d=by['.dng']
+
+          print('M10-R v2.16 PUBLIC REFERENCE PAIR VERIFICATION')
+          print('source Photography Blog Leica M10-R review sample #01')
+          for p in (jp,dp):
+            print('file',p.name,'bytes',p.stat().st_size,'sha256',hashlib.sha256(p.read_bytes()).hexdigest())
+
+          keys=['Make','Model','SerialNumber','ImageUniqueID','RawDataUniqueID','DateTimeOriginal','CreateDate','SubSecTimeOriginal',
+                'ExposureTime','ShutterSpeedValue','FNumber','ApertureValue','ISO','FocalLength','ExposureCompensation',
+                'ExposureMode','MeteringMode','WhiteBalance','Contrast','Saturation','Sharpness','ImageWidth','ImageHeight',
+                'ExifImageWidth','ExifImageHeight','Orientation','DNGVersion','DNGBackwardVersion','CFARepeatPatternDim',
+                'CFAPattern','BlackLevel','WhiteLevel','AsShotNeutral','ColorMatrix1','ColorMatrix2','CameraCalibration1','CameraCalibration2']
+          print('\n=== EXIF/TIFF metadata ===')
+          for k in keys:
+            if k in j or k in d:
+              print(k,'JPG=',repr(j.get(k)),'DNG=',repr(d.get(k)))
+
+          compare_keys=['Make','Model','SerialNumber','DateTimeOriginal','CreateDate','ExposureTime','ISO','FocalLength','ExposureCompensation']
+          print('\n=== exact metadata equality checks ===')
+          eq={}
+          for k in compare_keys:
+            if k in j and k in d:
+              eq[k]=j[k]==d[k]
+              print(k,eq[k],repr(j[k]),repr(d[k]))
+
+          with Image.open(jp) as im:
+            print('\nJPEG mode/size',im.mode,im.size)
+            # Decimated statistics only; no source image is retained in repository.
+            a=np.asarray(im)[::64,::64,:].astype(np.float64)
+            print('JPEG decimated RGB min',a.reshape(-1,3).min(0).tolist())
+            print('JPEG decimated RGB max',a.reshape(-1,3).max(0).tolist())
+            print('JPEG decimated RGB mean',a.reshape(-1,3).mean(0).tolist())
+
+          with rawpy.imread(str(dp)) as r:
+            print('\n=== LibRaw/rawpy geometry ===')
+            print('raw_image_shape',tuple(r.raw_image.shape))
+            print('raw_image_visible_shape',tuple(r.raw_image_visible.shape))
+            print('sizes_raw',r.sizes.raw_width,r.sizes.raw_height)
+            print('sizes_visible',r.sizes.width,r.sizes.height)
+            print('sizes_margins',r.sizes.left_margin,r.sizes.top_margin)
+            print('white_level',r.white_level)
+            print('black_level_per_channel',list(r.black_level_per_channel))
+            print('raw_pattern',None if r.raw_pattern is None else r.raw_pattern.tolist())
+            print('color_desc',bytes(r.color_desc).decode('ascii','replace') if r.color_desc is not None else None)
+            print('camera_whitebalance',None if r.camera_whitebalance is None else [float(x) for x in r.camera_whitebalance])
+            print('daylight_whitebalance',None if r.daylight_whitebalance is None else [float(x) for x in r.daylight_whitebalance])
+            vis=r.raw_image_visible
+            s=vis[::64,::64].astype(np.float64)
+            print('RAW decimated min/max/mean',float(s.min()),float(s.max()),float(s.mean()))
+            qs=np.percentile(s,[0.1,1,5,25,50,75,95,99,99.9])
+            print('RAW decimated percentiles',qs.tolist())
+
+          # Same numbered source + matching camera/exposure/timestamp metadata is the acceptance criterion.
+          required=['Make','Model','DateTimeOriginal','ExposureTime','ISO','FocalLength']
+          supported=all((k in j and k in d and j[k]==d[k]) for k in required)
+          print('\npair_identity_supported',supported)
+          print('criterion: same numbered source plus exact Make/Model/time/exposure/ISO/focal-length metadata')
+          print('copyright_boundary: source JPEG/DNG were used transiently for analysis and are not committed.')
+          PY
+      - name: Commit verification only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v216_public_reference_pair_verify.txt
+          git commit -m 'research: verify v2.16 public M10-R reference pair' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
