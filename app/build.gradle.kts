@@ -10,8 +10,8 @@ android {
         applicationId = "com.m10r.diagnostic"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0-diagnostic"
+        versionCode = 4
+        versionName = "0.4.0-sensor-preview"
 
         testInstrumentationRunner = "android.test.InstrumentationTestRunner"
     }
