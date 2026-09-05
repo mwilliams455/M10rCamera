@@ -41,13 +41,16 @@ public class MainActivity extends Activity {
         root.setPadding(pad, pad, pad, pad);
 
         TextView title = new TextView(this);
-        title.setText("M10-R RAW Diagnostic v0.5");
+        title.setText("M10-R RAW Diagnostic v0.5.1");
         title.setTextSize(22f);
         root.addView(title);
 
         TextView status = new TextView(this);
-        status.setText(M10RColorSpecCore.selfCheckReport() +
-                "\n\nv0.5: Leica locus / NeutralToXY / interpolated CM / CC0 / default sRGB CC1 are wired as a linear reference. MEDIUM tone and Differential Gamma remain disabled.");
+        String coreStatus = M10RColorSpecCore.selfCheckReport().replace(
+                "Boundary: full Leica xy→temperature / NeutralToXY and RAW/DNG decoding are not wired in this diagnostic build.",
+                "Boundary: ColorSpec self-check core only; RAW/DNG decoding and NeutralToXY are wired downstream in v0.5.1.");
+        status.setText(coreStatus +
+                "\n\nv0.5.1: Leica locus / NeutralToXY / interpolated CM / CC0 / default sRGB CC1 are wired as a linear reference. Positive CFA headroom above DNG WhiteLevel is preserved until the final diagnostic display clamp. MEDIUM tone and Differential Gamma remain disabled.");
         status.setTextSize(15f);
         status.setPadding(0, pad / 2, 0, pad);
         root.addView(status);
@@ -71,7 +74,7 @@ public class MainActivity extends Activity {
         root.addView(result);
 
         Button choose = new Button(this);
-        choose.setText("Choose M10-R DNG + Build v0.5 References");
+        choose.setText("Choose M10-R DNG + Build v0.5.1 References");
         choose.setOnClickListener(v -> chooseDng());
         root.addView(choose);
 
@@ -89,7 +92,7 @@ public class MainActivity extends Activity {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         TextView leicaLabel = new TextView(this);
-        leicaLabel.setText("v0.5 LEICA LINEAR REFERENCE (no MEDIUM tone / DG yet)");
+        leicaLabel.setText("v0.5.1 LEICA LINEAR REFERENCE (headroom preserved; no MEDIUM tone / DG yet)");
         leicaLabel.setTextSize(16f);
         leicaLabel.setPadding(0, pad / 2, 0, pad / 4);
         root.addView(leicaLabel);
@@ -97,12 +100,12 @@ public class MainActivity extends Activity {
         leicaPreviewView = new ImageView(this);
         leicaPreviewView.setAdjustViewBounds(true);
         leicaPreviewView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        leicaPreviewView.setContentDescription("v0.5 M10-R Leica linear reference preview");
+        leicaPreviewView.setContentDescription("v0.5.1 M10-R Leica linear reference preview");
         root.addView(leicaPreviewView, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         fileStatus = new TextView(this);
-        fileStatus.setText("No DNG selected. v0.5 preserves the proven pixel-exact decoder and v0.4 sensor preview, then adds the recovered Leica linear ColorSpec path. The validated M10-R illuminant pair 17/21 uses an explicitly-labelled first-parity nominal A/D65 temperature bridge; nonlinear MEDIUM tone and Differential Gamma remain disabled.");
+        fileStatus.setText("No DNG selected. v0.5.1 preserves the proven pixel-exact decoder and frozen v0.4 sensor preview, then runs the recovered Leica linear ColorSpec path without clipping positive CFA headroom at DNG WhiteLevel. The M10-R illuminant pair 17/21 still uses the explicitly-labelled first-parity nominal A/D65 temperature bridge; MEDIUM tone and Differential Gamma remain disabled.");
         fileStatus.setPadding(0, pad / 2, 0, 0);
         fileStatus.setTextIsSelectable(true);
         root.addView(fileStatus);
@@ -167,8 +170,8 @@ public class MainActivity extends Activity {
             // A transient grant is sufficient for this immediate diagnostic read.
         }
         clearPreviews();
-        fileStatus.setText("Reading DNG, preserving v0.4 sensor path, and building v0.5 Leica linear reference…\n" + uri);
-        new Thread(() -> parseDecodeAndRenderDng(uri), "m10r-dng-v050").start();
+        fileStatus.setText("Reading DNG, preserving v0.4 sensor path, and building v0.5.1 headroom-preserving Leica linear reference…\n" + uri);
+        new Thread(() -> parseDecodeAndRenderDng(uri), "m10r-dng-v051").start();
     }
 
     private void parseDecodeAndRenderDng(Uri uri) {
@@ -186,18 +189,18 @@ public class MainActivity extends Activity {
                     leicaPreview = M10RLinearReferenceRenderer.render(raw, info);
                     rawDiagnostic = raw.diagnosticSummary() +
                             "\n\nLEGACY NOTE: the decoder summary's RGGB parity names are diagnostic-only; actual CFA is resolved separately." +
-                            "\n\nDECODER STATUS: PIXEL-EXACT CFA PRESERVED; v0.4 SENSOR + v0.5 LEICA LINEAR REFERENCES BUILT.";
+                            "\n\nDECODER STATUS: PIXEL-EXACT CFA PRESERVED; frozen v0.4 SENSOR + v0.5.1 LEICA LINEAR REFERENCES BUILT.";
                 } else {
                     sensorPreview = null;
                     leicaPreview = null;
-                    rawDiagnostic = "Reference render not run: v0.5 intentionally preserves the proven M10-R compression-7 path; compression=" + info.compression + ".";
+                    rawDiagnostic = "Reference render not run: v0.5.1 intentionally preserves the proven M10-R compression-7 path; compression=" + info.compression + ".";
                 }
                 runOnUiThread(() -> applyDngInfo(uri, info, rawDiagnostic, sensorPreview, leicaPreview));
             }
         } catch (Throwable ex) {
             runOnUiThread(() -> {
                 clearPreviews();
-                fileStatus.setText("DNG v0.5 reference render failed: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+                fileStatus.setText("DNG v0.5.1 reference render failed: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
             });
         }
     }
@@ -242,12 +245,12 @@ public class MainActivity extends Activity {
             if (old != null && old != next && !old.isRecycled()) old.recycle();
             leicaDiagnostic = leicaPreview.diagnosticSummary();
         } else {
-            leicaDiagnostic = "v0.5 Leica linear reference unavailable.";
+            leicaDiagnostic = "v0.5.1 Leica linear reference unavailable.";
         }
 
         fileStatus.setText("Selected: " + uri + "\n\n" + info.summary() + "\n\n" + rawDiagnostic +
                 "\n\n" + sensorDiagnostic + "\n\n" + leicaDiagnostic +
-                "\n\nBoundary: v0.5 adds the recovered linear Leica color stage while keeping v0.4 frozen. MEDIUM tone and Differential Gamma remain the next nonlinear seam.");
+                "\n\nBoundary: v0.5.1 preserves Leica positive sensor headroom through the recovered linear color stage while keeping v0.4 frozen. MEDIUM tone and Differential Gamma remain the next nonlinear seam.");
     }
 
     private void clearPreviews() {
