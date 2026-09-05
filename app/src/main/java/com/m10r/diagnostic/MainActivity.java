@@ -2,11 +2,14 @@ package com.m10r.diagnostic;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -23,6 +26,8 @@ public class MainActivity extends Activity {
     private EditText neutralB;
     private TextView result;
     private TextView fileStatus;
+    private ImageView previewView;
+    private Bitmap previewBitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +39,7 @@ public class MainActivity extends Activity {
         root.setPadding(pad, pad, pad, pad);
 
         TextView title = new TextView(this);
-        title.setText("M10-R RAW Diagnostic v0.3");
+        title.setText("M10-R RAW Diagnostic v0.4");
         title.setTextSize(22f);
         root.addView(title);
 
@@ -63,12 +68,19 @@ public class MainActivity extends Activity {
         root.addView(result);
 
         Button choose = new Button(this);
-        choose.setText("Choose M10-R DNG + Decode CFA");
+        choose.setText("Choose M10-R DNG + Build Sensor Preview");
         choose.setOnClickListener(v -> chooseDng());
         root.addView(choose);
 
+        previewView = new ImageView(this);
+        previewView.setAdjustViewBounds(true);
+        previewView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        previewView.setContentDescription("v0.4 M10-R sensor sanity preview");
+        root.addView(previewView, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
         fileStatus = new TextView(this);
-        fileStatus.setText("No DNG selected. v0.3 parses Leica DNG metadata and pixel-exact decodes compression-7 SOF3 CFA data; demosaic remains intentionally disabled.");
+        fileStatus.setText("No DNG selected. v0.4 preserves the pixel-exact compression-7 SOF3 decoder, then resolves the actual DNG Bayer pattern, normalizes against DNG black/white levels, bilinear demosaics a bounded sensor preview, applies diagnostic AsShotNeutral WB, and encodes to sRGB. Full Leica rendering remains disabled.");
         fileStatus.setPadding(0, pad / 2, 0, 0);
         fileStatus.setTextIsSelectable(true);
         root.addView(fileStatus);
@@ -132,34 +144,45 @@ public class MainActivity extends Activity {
         } catch (SecurityException ignored) {
             // A transient grant is sufficient for this immediate diagnostic read.
         }
-        fileStatus.setText("Reading DNG metadata and decoding lossless-JPEG CFA…\n" + uri);
-        new Thread(() -> parseAndDecodeDng(uri), "m10r-dng-raw").start();
+        clearPreview();
+        fileStatus.setText("Reading DNG metadata, decoding lossless-JPEG CFA, and building v0.4 sensor preview…\n" + uri);
+        new Thread(() -> parseDecodeAndPreviewDng(uri), "m10r-dng-preview").start();
     }
 
-    private void parseAndDecodeDng(Uri uri) {
+    private void parseDecodeAndPreviewDng(Uri uri) {
         try (ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(uri, "r")) {
             if (pfd == null) throw new IllegalStateException("content provider returned no file descriptor");
             try (FileInputStream in = new FileInputStream(pfd.getFileDescriptor());
                  FileChannel channel = in.getChannel()) {
                 DngMetadataReader.DngInfo info = DngMetadataReader.read(channel);
                 final String rawDiagnostic;
+                final SensorPreviewCore.PreviewResult preview;
                 if (info.isLosslessJpeg()) {
                     DngRawDecoder.RawImage raw = DngRawDecoder.decode(channel);
+                    preview = SensorPreviewCore.render(raw, info);
                     rawDiagnostic = raw.diagnosticSummary() +
-                            "\n\nDECODER STATUS: PIXELS DECODED. Next seam is black/white normalization + Bayer demosaic.";
+                            "\n\nLEGACY NOTE: the v0.3 decoder summary names parity planes as RGGB. " +
+                            "Those labels are diagnostic-only; v0.4 resolves the actual DNG CFA below and does not alter decoded samples." +
+                            "\n\nDECODER STATUS: PIXEL-EXACT CFA PRESERVED; SENSOR PREVIEW BUILT.";
                 } else if (info.compression == 1) {
-                    rawDiagnostic = "RAW decode not run: this file is uncompressed CFA; v0.3 currently targets the proven M10-R compression-7 path.";
+                    preview = null;
+                    rawDiagnostic = "RAW decode not run: this file is uncompressed CFA; v0.4 preserves the proven M10-R compression-7 path.";
                 } else {
+                    preview = null;
                     rawDiagnostic = "RAW decode not run: unsupported compression=" + info.compression + ".";
                 }
-                runOnUiThread(() -> applyDngInfo(uri, info, rawDiagnostic));
+                runOnUiThread(() -> applyDngInfo(uri, info, rawDiagnostic, preview));
             }
         } catch (Throwable ex) {
-            runOnUiThread(() -> fileStatus.setText("DNG RAW decode failed: " + ex.getClass().getSimpleName() + ": " + ex.getMessage()));
+            runOnUiThread(() -> {
+                clearPreview();
+                fileStatus.setText("DNG v0.4 preview failed: " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+            });
         }
     }
 
-    private void applyDngInfo(Uri uri, DngMetadataReader.DngInfo info, String rawDiagnostic) {
+    private void applyDngInfo(Uri uri, DngMetadataReader.DngInfo info,
+                              String rawDiagnostic, SensorPreviewCore.PreviewResult preview) {
         if (info.asShotNeutral != null && info.asShotNeutral.length == 3) {
             neutralR.setText(String.format(Locale.US, "%.10f", info.asShotNeutral[0]));
             neutralG.setText(String.format(Locale.US, "%.10f", info.asShotNeutral[1]));
@@ -172,7 +195,35 @@ public class MainActivity extends Activity {
         } else {
             result.setText("AsShotNeutral was not found as a three-channel DNG field.");
         }
+
+        String previewDiagnostic;
+        if (preview != null) {
+            Bitmap next = Bitmap.createBitmap(preview.argb, preview.width, preview.height, Bitmap.Config.ARGB_8888);
+            Bitmap old = previewBitmap;
+            previewBitmap = next;
+            previewView.setImageBitmap(next);
+            if (old != null && old != next && !old.isRecycled()) old.recycle();
+            previewDiagnostic = preview.diagnosticSummary();
+        } else {
+            clearPreview();
+            previewDiagnostic = "v0.4 sensor preview not available for this DNG.";
+        }
+
         fileStatus.setText("Selected: " + uri + "\n\n" + info.summary() + "\n\n" + rawDiagnostic +
-                "\n\nBoundary: v0.3 decodes the Bayer CFA exactly but does not yet demosaic or render it.");
+                "\n\n" + previewDiagnostic +
+                "\n\nBoundary: v0.4 proves CFA interpretation, normalization, demosaic geometry, and diagnostic WB only. Full Leica CA9/CC0/MEDIUM-tone/DG/CC1 rendering remains intentionally disabled.");
+    }
+
+    private void clearPreview() {
+        if (previewView != null) previewView.setImageDrawable(null);
+        Bitmap old = previewBitmap;
+        previewBitmap = null;
+        if (old != null && !old.isRecycled()) old.recycle();
+    }
+
+    @Override
+    protected void onDestroy() {
+        clearPreview();
+        super.onDestroy();
     }
 }
