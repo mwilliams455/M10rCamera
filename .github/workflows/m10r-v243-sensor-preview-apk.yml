@@ -1,0 +1,92 @@
+name: M10-R v2.43 Sensor Preview diagnostic APK
+on:
+  push:
+    branches: [m10r-sensor-preview-v040]
+    paths:
+      - 'app/**'
+      - 'tools/M10RSensorPreviewCli.java'
+      - '.github/workflows/m10r-v243-sensor-preview-apk.yml'
+  workflow_dispatch:
+
+jobs:
+  validate-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Verify frozen pixel decoder sources
+        shell: bash
+        run: |
+          test "$(git hash-object app/src/main/java/com/m10r/diagnostic/DngRawDecoder.java)" = '843dd16a36b16cda81d4a9d29d1e11b3d0943a9d'
+          test "$(git hash-object app/src/main/java/com/m10r/diagnostic/LosslessJpegDecoder.java)" = '06bff56fbeb7c7d13e7d7c0b8768c92b9e520cd6'
+          echo 'Frozen SOF3/DNG decoder source blobs unchanged.'
+
+      - name: Verify v0.4 build identity
+        shell: bash
+        run: |
+          grep -F 'versionCode = 4' app/build.gradle.kts
+          grep -F 'versionName = "0.4.0-sensor-preview"' app/build.gradle.kts
+          grep -F 'M10-R RAW Diagnostic v0.4' app/src/main/java/com/m10r/diagnostic/MainActivity.java
+
+      - name: Download verified public M10-R DNG
+        run: curl -L --fail --retry 3 -o /tmp/m10r.dng 'https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_01.dng'
+
+      - name: Validate real DNG through v0.4 sensor-preview core
+        shell: bash
+        run: |
+          mkdir -p /tmp/classes
+          javac -encoding UTF-8 -d /tmp/classes \
+            app/src/main/java/com/m10r/diagnostic/DngMetadataReader.java \
+            app/src/main/java/com/m10r/diagnostic/LosslessJpegDecoder.java \
+            app/src/main/java/com/m10r/diagnostic/DngRawDecoder.java \
+            app/src/main/java/com/m10r/diagnostic/SensorPreviewCore.java \
+            tools/M10RSensorPreviewCli.java
+          java -Xmx1024m -cp /tmp/classes com.m10r.diagnostic.M10RSensorPreviewCli /tmp/m10r.dng | tee /tmp/preview.txt
+          grep -F 'Decoded CFA: 7872x5208' /tmp/preview.txt
+          grep -F 'SOF3: precision=14, predictor=1, Pt=0' /tmp/preview.txt
+          grep -F 'CFA SHA-256 (LE u16): 27814cbc80f92d23d7b975d4833f70525f35bc52917d992b35d0a899829a097a' /tmp/preview.txt
+          grep -F 'Resolved CFA:' /tmp/preview.txt
+          grep -F 'Normalization:' /tmp/preview.txt
+          grep -F 'Preview transform: bilinear Bayer demosaic -> diagnostic WB -> sRGB gamma' /tmp/preview.txt
+          grep -F 'Preview ARGB8 SHA-256 (A,R,G,B byte order):' /tmp/preview.txt
+          grep -F 'RENDER BOUNDARY: sensor-sanity preview only; no CA9/CC0/tone/DG/CC1.' /tmp/preview.txt
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android 36 SDK
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+
+      - name: Set up Gradle 9.6
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+
+      - name: Run Android unit tests
+        run: gradle --no-daemon :app:testDebugUnitTest
+
+      - name: Build v0.4 diagnostic debug APK
+        run: gradle --no-daemon :app:assembleDebug
+
+      - name: Verify APK
+        shell: bash
+        run: |
+          test -f app/build/outputs/apk/debug/app-debug.apk
+          sha256sum app/build/outputs/apk/debug/app-debug.apk | tee /tmp/apk-sha256.txt
+          ls -lh app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload v0.4 diagnostic APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: M10RDiagnostic-v0.4-sensor-preview-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
