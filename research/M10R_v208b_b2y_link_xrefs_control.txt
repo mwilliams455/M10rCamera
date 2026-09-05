@@ -1,0 +1,215 @@
+M10-R v2.08b EXACT B2Y LINK/CONTROL XREFS
+scope: exact named-string xrefs plus their local functions only
+
+=== string addresses from firmware bytes ===
+drv_img_b2y_set_operation_mode ['0x420d34cd']
+drv_img_b2y_set_tone_control1 ['0x420d42bd']
+drv_img_b2y_set_wbgain1 ['0x420d4424']
+drv_img_b2y_set_wbgain2 ['0x420d445c']
+drv_img_b2y_start_link_mode_clk() ['0x420d4851']
+drv_img_b2y_start_sdram_mode_clk() ['0x420d48f1']
+_B2YMODE:STILL ['0x42151e20', '0x42151e30']
+_B2YMODE:STILLLINK ['0x42151e30']
+LV_MAGNI B2Y LINK ['0x421616ad']
+LV_SLIVE B2Y LINK ['0x42161a9d']
+
+=== exact/±1 named xrefs ===
+b2y_state T 0x42151c64 -> 0x42151e20 _B2YMODE:STILL :: 42151c64: adr        r1, #0x1b8 ; ADR->0x42151e20
+b2y_state T 0x42151c6e -> 0x42151e30 _B2YMODE:STILLLINK :: 42151c6e: adr        r1, #0x1c0 ; ADR->0x42151e30
+
+=== named local functions and MMIO ===
+
+--- _B2YMODE:STILL xref=0x42151c64 mode=T local=0x42151be4..0x42151cc4 ---
+42151be4: adr        r1, #0x178 ; ADR->0x42151d60
+42151be6: movs       r0, r4
+42151be8: adds       r0, #0xb4
+42151bea: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151bee: b          #0x42151c1e
+42151bf0: adr        r1, #0x178 ; ADR->0x42151d6c
+42151bf2: movs       r0, r4
+42151bf4: adds       r0, #0xb4
+42151bf6: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151bfa: b          #0x42151c1e
+42151bfc: adr        r1, #0x178 ; ADR->0x42151d78
+42151bfe: movs       r0, r4
+42151c00: adds       r0, #0xb4
+42151c02: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c06: b          #0x42151c1e
+42151c08: adr        r1, #0x178 ; ADR->0x42151d84
+42151c0a: movs       r0, r4
+42151c0c: adds       r0, #0xb4
+42151c0e: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c12: b          #0x42151c1e
+42151c14: adr        r1, #0x178 ; ADR->0x42151d90
+42151c16: movs       r0, #4
+42151c18: bl         #0x42140150 ; CALL 0x42140150
+42151c1c: mov        r8, r8
+42151c1e: mov        r8, r8
+42151c20: ldrh       r0, [r4]
+42151c22: movs       r3, r0
+42151c24: blx        #0x4209f988 ; CALL 0x4209f988
+42151c28: cmp        r0, #8
+42151c2a: lsrs       r5, r0, #8
+42151c2c: asrs       r7, r1, #0x10
+42151c2e: subs       r1, r3, #0
+42151c30: cmp        r0, #0x23
+42151c32: adr        r1, #0x19c ; ADR->0x42151dd0
+42151c34: adds       r0, r4, #2
+42151c36: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c3a: b          #0x42151c82
+42151c3c: adr        r1, #0x19c ; ADR->0x42151ddc
+42151c3e: adds       r0, r4, #2
+42151c40: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c44: b          #0x42151c82
+42151c46: adr        r1, #0x1a8 ; ADR->0x42151df0
+42151c48: adds       r0, r4, #2
+42151c4a: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c4e: b          #0x42151c82
+42151c50: adr        r1, #0x1ac ; ADR->0x42151e00
+42151c52: adds       r0, r4, #2
+42151c54: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c58: b          #0x42151c82
+42151c5a: adr        r1, #0x1b4 ; ADR->0x42151e10
+42151c5c: adds       r0, r4, #2
+42151c5e: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c62: b          #0x42151c82
+42151c64: adr        r1, #0x1b8 ; ADR->0x42151e20
+42151c66: adds       r0, r4, #2
+42151c68: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c6c: b          #0x42151c82
+42151c6e: adr        r1, #0x1c0 ; ADR->0x42151e30
+42151c70: adds       r0, r4, #2
+42151c72: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c76: b          #0x42151c82
+42151c78: ldr        r1, [pc, #0x1c8] ; LIT 0x42151e44->0x4283cc2c
+42151c7a: movs       r0, #4
+42151c7c: bl         #0x42140150 ; CALL 0x42140150
+42151c80: mov        r8, r8
+42151c82: mov        r8, r8
+42151c84: movs       r0, #0xff
+42151c86: adds       r0, #0x31
+42151c88: ldr        r0, [r0, r4]
+42151c8a: cmp        r0, #4
+42151c8c: beq        #0x42151c94
+42151c8e: cmp        r0, #5
+42151c90: bne        #0x42151cb0
+42151c92: b          #0x42151ca2
+42151c94: adr        r1, #0x1b0 ; ADR->0x42151e48
+42151c96: movs       r0, r4
+42151c98: adds       r0, #0xff
+42151c9a: adds       r0, #0x35
+42151c9c: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151ca0: b          #0x42151cbe
+42151ca2: adr        r1, #0x1bc ; ADR->0x42151e60
+42151ca4: movs       r0, r4
+42151ca6: adds       r0, #0xff
+42151ca8: adds       r0, #0x35
+42151caa: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151cae: b          #0x42151cbe
+42151cb0: adr        r1, #0x1c8 ; ADR->0x42151e7c
+42151cb2: movs       r0, r4
+42151cb4: adds       r0, #0xff
+42151cb6: adds       r0, #0x35
+42151cb8: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151cbc: mov        r8, r8
+42151cbe: mov        r8, r8
+42151cc0: pop        {r4, pc}
+42151cc2: movs       r0, r0
+MMIO_EFFECTIVE
+
+--- _B2YMODE:STILLLINK xref=0x42151c6e mode=T local=0x42151bee..0x42151cc4 ---
+42151bee: b          #0x42151c1e
+42151bf0: adr        r1, #0x178 ; ADR->0x42151d6c
+42151bf2: movs       r0, r4
+42151bf4: adds       r0, #0xb4
+42151bf6: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151bfa: b          #0x42151c1e
+42151bfc: adr        r1, #0x178 ; ADR->0x42151d78
+42151bfe: movs       r0, r4
+42151c00: adds       r0, #0xb4
+42151c02: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c06: b          #0x42151c1e
+42151c08: adr        r1, #0x178 ; ADR->0x42151d84
+42151c0a: movs       r0, r4
+42151c0c: adds       r0, #0xb4
+42151c0e: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c12: b          #0x42151c1e
+42151c14: adr        r1, #0x178 ; ADR->0x42151d90
+42151c16: movs       r0, #4
+42151c18: bl         #0x42140150 ; CALL 0x42140150
+42151c1c: mov        r8, r8
+42151c1e: mov        r8, r8
+42151c20: ldrh       r0, [r4]
+42151c22: movs       r3, r0
+42151c24: blx        #0x4209f988 ; CALL 0x4209f988
+42151c28: cmp        r0, #8
+42151c2a: lsrs       r5, r0, #8
+42151c2c: asrs       r7, r1, #0x10
+42151c2e: subs       r1, r3, #0
+42151c30: cmp        r0, #0x23
+42151c32: adr        r1, #0x19c ; ADR->0x42151dd0
+42151c34: adds       r0, r4, #2
+42151c36: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c3a: b          #0x42151c82
+42151c3c: adr        r1, #0x19c ; ADR->0x42151ddc
+42151c3e: adds       r0, r4, #2
+42151c40: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c44: b          #0x42151c82
+42151c46: adr        r1, #0x1a8 ; ADR->0x42151df0
+42151c48: adds       r0, r4, #2
+42151c4a: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c4e: b          #0x42151c82
+42151c50: adr        r1, #0x1ac ; ADR->0x42151e00
+42151c52: adds       r0, r4, #2
+42151c54: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c58: b          #0x42151c82
+42151c5a: adr        r1, #0x1b4 ; ADR->0x42151e10
+42151c5c: adds       r0, r4, #2
+42151c5e: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c62: b          #0x42151c82
+42151c64: adr        r1, #0x1b8 ; ADR->0x42151e20
+42151c66: adds       r0, r4, #2
+42151c68: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c6c: b          #0x42151c82
+42151c6e: adr        r1, #0x1c0 ; ADR->0x42151e30
+42151c70: adds       r0, r4, #2
+42151c72: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151c76: b          #0x42151c82
+42151c78: ldr        r1, [pc, #0x1c8] ; LIT 0x42151e44->0x4283cc2c
+42151c7a: movs       r0, #4
+42151c7c: bl         #0x42140150 ; CALL 0x42140150
+42151c80: mov        r8, r8
+42151c82: mov        r8, r8
+42151c84: movs       r0, #0xff
+42151c86: adds       r0, #0x31
+42151c88: ldr        r0, [r0, r4]
+42151c8a: cmp        r0, #4
+42151c8c: beq        #0x42151c94
+42151c8e: cmp        r0, #5
+42151c90: bne        #0x42151cb0
+42151c92: b          #0x42151ca2
+42151c94: adr        r1, #0x1b0 ; ADR->0x42151e48
+42151c96: movs       r0, r4
+42151c98: adds       r0, #0xff
+42151c9a: adds       r0, #0x35
+42151c9c: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151ca0: b          #0x42151cbe
+42151ca2: adr        r1, #0x1bc ; ADR->0x42151e60
+42151ca4: movs       r0, r4
+42151ca6: adds       r0, #0xff
+42151ca8: adds       r0, #0x35
+42151caa: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151cae: b          #0x42151cbe
+42151cb0: adr        r1, #0x1c8 ; ADR->0x42151e7c
+42151cb2: movs       r0, r4
+42151cb4: adds       r0, #0xff
+42151cb6: adds       r0, #0x35
+42151cb8: bl         #0x4204efd4 ; CALL 0x4204efd4
+42151cbc: mov        r8, r8
+42151cbe: mov        r8, r8
+42151cc0: pop        {r4, pc}
+42151cc2: movs       r0, r0
+MMIO_EFFECTIVE
+
+EVIDENCE RULE: a named link/operation routine that only manipulates clock/status registers does not establish a pixel-stage edge.
+TARGET: determine whether STILLLINK/link-mode or operation-mode code contains an explicit B2Y source/mux selector; otherwise keep pixel-stage order unresolved.
