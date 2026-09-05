@@ -1,0 +1,295 @@
+M10-R v2.29 CA9 CC0/CC1 FIXED MATRIX IDENTIFICATION
+v2.28 direct formula boundary: CC0 candidate matrix = getter(0x40012FB8)->0x400139F8 * SetWhiteXY object +0x28 matrix * diag(returned gains).
+
+=== getter 0x40012FB8 fixed matrix @ 400139f8 ===
+1.346 -0.2556 -0.0511
+-0.5446 1.5082 0.0205
+0 0 1.2123
+row_sums= [1.0393000000000001, 0.9841, 1.2123]
+det= 2.292262228512
+
+=== getter 0x40012FC4 fixed matrix @ 40013bf0 ===
+1.9624274 -0.6105343 -0.3413404
+-0.9787684 1.9161415 0.033454
+0.0286869 -0.1406752 1.3487655
+row_sums= [1.0105526999999999, 0.9708270999999999, 1.2367772000000001]
+det= 4.24617721928187
+
+=== getter 0x40012FAC fixed matrix @ 40013c38 ===
+1.7827618 -0.4969847 -0.2690101
+-0.9593623 1.9477962 -0.0275807
+0.0859317 -0.1744674 1.3228273
+row_sums= [1.0167670000000002, 0.9608532, 1.2342916]
+det= 3.9553511249228976
+
+=== numerical reference comparisons for 0x400139F8 ===
+XYZ_D50_to_sRGB_D50 max_abs_diff= 1.7878561
+XYZ_D50_to_ProPhoto max_abs_diff= 0.00048720000000002095
+sRGB_D50_to_XYZ_D50 max_abs_diff= 0.9099253
+ProPhoto_to_XYZ_D50 max_abs_diff= 0.8326401999999999
+Boundary: reference matching is semantic support, not firmware provenance by itself.
+
+=== raw mode/quantization table at 0x40013930 ===
+40013930: fffff800
+40013934: 000007ff
+40013938: 00000000
+4001393c: 00000003
+40013940: 00000000
+40013944: 40012ddc CA9_PTR
+40013948: 40012fc4 CA9_PTR
+4001394c: 00000001
+40013950: 40012db8 CA9_PTR
+40013954: 40012fa0 CA9_PTR
+40013958: 00000002
+4001395c: 40012dc4 CA9_PTR
+40013960: 40012fac CA9_PTR
+40013964: 00000000
+40013968: 00000000
+4001396c: 00000000
+40013970: 00000000
+40013974: 00000000
+40013978: 00000000
+4001397c: 00000000
+40013980: 00000000
+40013984: 00000000
+40013988: 00000000
+4001398c: 00000000
+40013990: 00000000
+40013994: 00000000
+40013998: 00000000
+4001399c: 00000000
+400139a0: 00000000
+400139a4: 00000000
+400139a8: 00000000
+400139ac: 00000000
+400139b0: 00000000
+400139b4: 3ff00000
+400139b8: 00000000
+400139bc: 00000000
+400139c0: 00000000
+400139c4: 00000000
+400139c8: 00000000
+400139cc: 00000000
+400139d0: 00000000
+400139d4: 3ff00000
+400139d8: 00000000
+400139dc: 00000000
+400139e0: 00000000
+400139e4: 00000000
+400139e8: 00000000
+400139ec: 00000000
+400139f0: 00000000
+400139f4: 3ff00000
+
+=== constructor-selected table rows: base 0x40013940 + mode*12 ===
+mode=0 row=40013940: ['0x0', '0x40012ddc', '0x40012fc4']
+  field1 target 40012ddc disasm:
+40012ddc: ldr        r0, [pc]
+40012de0: bx         lr
+40012de4: ldrdmi     r3, r4, [r1], -r0
+40012de8: push       {r4, r5, r6, lr}
+40012dec: mov        r5, r0
+40012df0: mov        r4, r1
+40012df4: mov        r0, r1
+40012df8: ldr        r1, [pc, #0x20]
+40012dfc: mov        r2, #0x48
+40012e00: bl         #0x4000fdb4
+40012e04: vldr       d0, [r5]
+40012e08: vstr       d0, [r4]
+40012e0c: vldr       d0, [r5, #8]
+40012e10: vstr       d0, [r4, #0x20]
+40012e14: vldr       d0, [r5, #0x10]
+40012e18: vstr       d0, [r4, #0x40]
+40012e1c: pop        {r4, r5, r6, pc}
+40012e20: andmi      r3, r1, r8, ror #18
+40012e24: mov        r3, r1
+40012e28: mov        r1, r0
+  field2 target 40012fc4 disasm:
+40012fc4: ldr        r0, [pc]
+40012fc8: bx         lr
+40012fcc: strdmi     r3, r4, [r1], -r0
+40012fd0: vcmpe.f64  d0, #0
+40012fd4: ldr        r0, [pc, #0x1c]
+40012fd8: vmrs       apsr_nzcv, fpscr
+40012fdc: vldr       d1, [r0]
+40012fe0: vnegle.f64 d0, d0
+40012fe4: vcmpe.f64  d0, d1
+40012fe8: vmrs       apsr_nzcv, fpscr
+40012fec: movls      r0, #1
+40012ff0: movhi      r0, #0
+40012ff4: bx         lr
+40012ff8: andmi      r3, r1, r0, lsl #25
+40012ffc: push       {r4, r5}
+40013000: ldm        r0, {r0, r2, r3, r4, r5, ip}
+40013004: stm        r1, {r0, r2, r3, r4, r5, ip}
+40013008: pop        {r4, r5}
+4001300c: bx         lr
+40013010: push       {r4, r5}
+mode=1 row=4001394c: ['0x1', '0x40012db8', '0x40012fa0']
+  field1 target 40012db8 disasm:
+40012db8: ldr        r0, [pc]
+40012dbc: bx         lr
+40012dc0: andmi      r3, r1, r8, lsl fp
+40012dc4: ldr        r0, [pc]
+40012dc8: bx         lr
+40012dcc: andmi      r3, r1, r0, ror #22
+40012dd0: ldr        r0, [pc]
+40012dd4: bx         lr
+40012dd8: andmi      r3, r1, r0, asr #20
+40012ddc: ldr        r0, [pc]
+40012de0: bx         lr
+40012de4: ldrdmi     r3, r4, [r1], -r0
+40012de8: push       {r4, r5, r6, lr}
+40012dec: mov        r5, r0
+40012df0: mov        r4, r1
+40012df4: mov        r0, r1
+40012df8: ldr        r1, [pc, #0x20]
+40012dfc: mov        r2, #0x48
+40012e00: bl         #0x4000fdb4
+40012e04: vldr       d0, [r5]
+  field2 target 40012fa0 disasm:
+40012fa0: ldr        r0, [pc]
+40012fa4: bx         lr
+40012fa8: andmi      r3, r1, r8, lsr #23
+40012fac: ldr        r0, [pc]
+40012fb0: bx         lr
+40012fb4: andmi      r3, r1, r8, lsr ip
+40012fb8: ldr        r0, [pc]
+40012fbc: bx         lr
+40012fc0: strdmi     r3, r4, [r1], -r8
+40012fc4: ldr        r0, [pc]
+40012fc8: bx         lr
+40012fcc: strdmi     r3, r4, [r1], -r0
+40012fd0: vcmpe.f64  d0, #0
+40012fd4: ldr        r0, [pc, #0x1c]
+40012fd8: vmrs       apsr_nzcv, fpscr
+40012fdc: vldr       d1, [r0]
+40012fe0: vnegle.f64 d0, d0
+40012fe4: vcmpe.f64  d0, d1
+40012fe8: vmrs       apsr_nzcv, fpscr
+40012fec: movls      r0, #1
+mode=2 row=40013958: ['0x2', '0x40012dc4', '0x40012fac']
+  field1 target 40012dc4 disasm:
+40012dc4: ldr        r0, [pc]
+40012dc8: bx         lr
+40012dcc: andmi      r3, r1, r0, ror #22
+40012dd0: ldr        r0, [pc]
+40012dd4: bx         lr
+40012dd8: andmi      r3, r1, r0, asr #20
+40012ddc: ldr        r0, [pc]
+40012de0: bx         lr
+40012de4: ldrdmi     r3, r4, [r1], -r0
+40012de8: push       {r4, r5, r6, lr}
+40012dec: mov        r5, r0
+40012df0: mov        r4, r1
+40012df4: mov        r0, r1
+40012df8: ldr        r1, [pc, #0x20]
+40012dfc: mov        r2, #0x48
+40012e00: bl         #0x4000fdb4
+40012e04: vldr       d0, [r5]
+40012e08: vstr       d0, [r4]
+40012e0c: vldr       d0, [r5, #8]
+40012e10: vstr       d0, [r4, #0x20]
+  field2 target 40012fac disasm:
+40012fac: ldr        r0, [pc]
+40012fb0: bx         lr
+40012fb4: andmi      r3, r1, r8, lsr ip
+40012fb8: ldr        r0, [pc]
+40012fbc: bx         lr
+40012fc0: strdmi     r3, r4, [r1], -r8
+40012fc4: ldr        r0, [pc]
+40012fc8: bx         lr
+40012fcc: strdmi     r3, r4, [r1], -r0
+40012fd0: vcmpe.f64  d0, #0
+40012fd4: ldr        r0, [pc, #0x1c]
+40012fd8: vmrs       apsr_nzcv, fpscr
+40012fdc: vldr       d1, [r0]
+40012fe0: vnegle.f64 d0, d0
+40012fe4: vcmpe.f64  d0, d1
+40012fe8: vmrs       apsr_nzcv, fpscr
+40012fec: movls      r0, #1
+40012ff0: movhi      r0, #0
+40012ff4: bx         lr
+40012ff8: andmi      r3, r1, r0, lsl #25
+mode=3 row=40013964: ['0x0', '0x0', '0x0']
+mode=4 row=40013970: ['0x0', '0x0', '0x0']
+mode=5 row=4001397c: ['0x0', '0x0', '0x0']
+mode=6 row=40013988: ['0x0', '0x0', '0x0']
+mode=7 row=40013994: ['0x0', '0x0', '0x0']
+
+=== exact constant getters 0x40012F60..0x40013020 ===
+40012f60: vldr       s1, [r6, #4]
+40012f64: add        r5, r5, #8
+40012f68: vcvt.f64.s32 d2, s1
+40012f6c: vcvt.f64.s32 d1, s0
+40012f70: vdiv.f64   d0, d2, d1
+40012f74: blx        #0x40012940
+40012f78: vstr       d0, [r5, #8]
+40012f7c: pop        {r4, r5, r6, r7, r8, pc}
+40012f80: ldr        r1, [pc, #4]
+40012f84: mov        r2, #0x48
+40012f88: b          #0x4000fdb4
+40012f8c: strhmi     r3, [r1], -r0
+40012f90: ldr        r1, [pc, #4]
+40012f94: mov        r2, #0x48
+40012f98: b          #0x4000fdb4
+40012f9c: andmi      r3, r1, r8, ror #18
+40012fa0: ldr        r0, [pc]
+40012fa4: bx         lr
+40012fa8: andmi      r3, r1, r8, lsr #23
+40012fac: ldr        r0, [pc]
+40012fb0: bx         lr
+40012fb4: andmi      r3, r1, r8, lsr ip
+40012fb8: ldr        r0, [pc]
+40012fbc: bx         lr
+40012fc0: strdmi     r3, r4, [r1], -r8
+40012fc4: ldr        r0, [pc]
+40012fc8: bx         lr
+40012fcc: strdmi     r3, r4, [r1], -r0
+40012fd0: vcmpe.f64  d0, #0
+40012fd4: ldr        r0, [pc, #0x1c]
+40012fd8: vmrs       apsr_nzcv, fpscr
+40012fdc: vldr       d1, [r0]
+40012fe0: vnegle.f64 d0, d0
+40012fe4: vcmpe.f64  d0, d1
+40012fe8: vmrs       apsr_nzcv, fpscr
+40012fec: movls      r0, #1
+40012ff0: movhi      r0, #0
+40012ff4: bx         lr
+40012ff8: andmi      r3, r1, r0, lsl #25
+40012ffc: push       {r4, r5}
+40013000: ldm        r0, {r0, r2, r3, r4, r5, ip}
+40013004: stm        r1, {r0, r2, r3, r4, r5, ip}
+40013008: pop        {r4, r5}
+4001300c: bx         lr
+40013010: push       {r4, r5}
+40013014: ldm        r0, {r0, r2, r3, r4, r5, ip}
+40013018: stm        r1, {r0, r2, r3, r4, r5, ip}
+4001301c: pop        {r4, r5}
+
+=== output-mode selector context 0x40003BC0..0x40003C10 ===
+40003bc0: str        r7, [sp, #0x15c]
+40003bc4: str        r7, [sp, #0x160]
+40003bc8: str        r7, [sp, #0x164]
+40003bcc: ldrb       r0, [r4, #0x20]
+40003bd0: ldr        r5, [pc, #0x460]
+40003bd4: add        r6, r5, #0x10
+40003bd8: add        r0, r0, r0, lsl #1
+40003bdc: ldr        fp, [r5, #8]
+40003be0: add        r0, r6, r0, lsl #2
+40003be4: ldr        r0, [r0, #4]
+40003be8: blx        r0
+40003bec: str        r0, [sp, #4]
+40003bf0: ldrb       r0, [r4, #0x20]
+40003bf4: add        r0, r0, r0, lsl #1
+40003bf8: add        r0, r6, r0, lsl #2
+40003bfc: ldr        r0, [r0, #8]
+40003c00: blx        r0
+40003c04: str        r7, [sp, #0x310]
+40003c08: str        r7, [sp, #0x314]
+40003c0c: str        r7, [sp, #0x318]
+
+=== DECISION ===
+If 0x400139F8 numerically identifies a standard PCS->output transform, CC0 can be labeled as that output-space transform only after the constructor dataflow is retained.
+CC1 source is the mode-row field1 getter returned into SP+4; enumerate row targets before assigning semantics.
+Do not assume mode enum meanings without a string/owner trace.
