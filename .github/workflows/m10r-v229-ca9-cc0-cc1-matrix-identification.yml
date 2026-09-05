@@ -1,0 +1,104 @@
+name: M10-R v2.29 CA9 CC0 CC1 matrix identification
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v229-ca9-cc0-cc1-matrix-identification.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Unpack and identify fixed/mode matrices
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text(); a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n"); z=p.index("\n          CPP",a); Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v229_ca9_cc0_cc1_matrix_identification.txt
+          from pathlib import Path
+          import struct,math,re
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_ARM,CS_MODE_LITTLE_ENDIAN
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes();BASE=0x40000000;PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN)
+          def off(a):return PFX+a-BASE
+          def f64mat(a):return [struct.unpack_from('<d',b,off(a)+8*i)[0] for i in range(9)]
+          def showmat(a,label):
+              m=f64mat(a); print(f'=== {label} @ {a:08x} ===')
+              for r in range(3):print(' '.join(f'{x:.15g}' for x in m[3*r:3*r+3]))
+              print('row_sums=',[sum(m[3*r:3*r+3]) for r in range(3)])
+              print('det=',m[0]*(m[4]*m[8]-m[5]*m[7])-m[1]*(m[3]*m[8]-m[5]*m[6])+m[2]*(m[3]*m[7]-m[4]*m[6]))
+              print(); return m
+          def maxdiff(a,c):return max(abs(x-y) for x,y in zip(a,c))
+          def u32(a,n):return [struct.unpack_from('<I',b,off(a)+4*i)[0] for i in range(n)]
+          def dis(a,z):
+              for i in md.disasm(b[off(a):off(z)],a):print(f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}')
+          print('M10-R v2.29 CA9 CC0/CC1 FIXED MATRIX IDENTIFICATION')
+          print('v2.28 direct formula boundary: CC0 candidate matrix = getter(0x40012FB8)->0x400139F8 * SetWhiteXY object +0x28 matrix * diag(returned gains).')
+          print()
+          m139=showmat(0x400139f8,'getter 0x40012FB8 fixed matrix')
+          showmat(0x40013bf0,'getter 0x40012FC4 fixed matrix')
+          showmat(0x40013c38,'getter 0x40012FAC fixed matrix')
+
+          # Common D50 PCS output transforms for numerical identification only.
+          refs={
+            'XYZ_D50_to_sRGB_D50':[3.1338561,-1.6168667,-0.4906146,-0.9787684,1.9161415,0.0334540,0.0719453,-0.2289914,1.4052427],
+            'XYZ_D50_to_ProPhoto':[1.3459433,-0.2556075,-0.0511118,-0.5445989,1.5081673,0.0205351,0.0,0.0,1.2118128],
+            'sRGB_D50_to_XYZ_D50':[0.4360747,0.3850649,0.1430804,0.2225045,0.7168786,0.0606169,0.0139322,0.0971045,0.7141733],
+            'ProPhoto_to_XYZ_D50':[0.7976749,0.1351917,0.0313534,0.2880402,0.7118741,0.0000857,0.0,0.0,0.8252100],
+          }
+          print('=== numerical reference comparisons for 0x400139F8 ===')
+          for n,r in refs.items():print(n,'max_abs_diff=',maxdiff(m139,r))
+          print('Boundary: reference matching is semantic support, not firmware provenance by itself.')
+          print()
+
+          print('=== raw mode/quantization table at 0x40013930 ===')
+          words=u32(0x40013930,50)
+          for i,v in enumerate(words):
+              a=0x40013930+4*i
+              suffix=''
+              if BASE<=v<BASE+len(b)-PFX:suffix=' CA9_PTR'
+              print(f'{a:08x}: {v:08x}{suffix}')
+          print()
+
+          print('=== constructor-selected table rows: base 0x40013940 + mode*12 ===')
+          for mode in range(8):
+              a=0x40013940+12*mode; vals=u32(a,3)
+              print(f'mode={mode} row={a:08x}: {[hex(x) for x in vals]}')
+              for j,v in enumerate(vals):
+                  if BASE<=v<BASE+len(b)-PFX:
+                      print(f'  field{j} target {v:08x} disasm:')
+                      dis(v,min(v+0x50,BASE+len(b)-PFX))
+          print()
+
+          # Emit every tiny getter in local wrapper region, exposing constant-return mappings.
+          print('=== exact constant getters 0x40012F60..0x40013020 ===')
+          dis(0x40012f60,0x40013020)
+          print()
+
+          print('=== output-mode selector context 0x40003BC0..0x40003C10 ===')
+          dis(0x40003bc0,0x40003c10)
+          print()
+
+          print('=== DECISION ===')
+          print('If 0x400139F8 numerically identifies a standard PCS->output transform, CC0 can be labeled as that output-space transform only after the constructor dataflow is retained.')
+          print('CC1 source is the mode-row field1 getter returned into SP+4; enumerate row targets before assigning semantics.')
+          print('Do not assume mode enum meanings without a string/owner trace.')
+          PY
+      - name: Commit v2.29 trace
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v229_ca9_cc0_cc1_matrix_identification.txt
+          git commit -m 'research: record v2.29 CA9 CC0 CC1 matrix identification' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
