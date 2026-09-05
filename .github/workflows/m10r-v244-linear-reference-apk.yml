@@ -1,0 +1,98 @@
+name: M10-R v2.44 Leica Linear Reference APK
+on:
+  push:
+    branches: [m10r-reference-render-v050]
+    paths:
+      - 'app/**'
+      - 'tools/M10RLinearReferenceCli.java'
+      - '.github/workflows/m10r-v244-linear-reference-apk.yml'
+  workflow_dispatch:
+
+jobs:
+  validate-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Verify frozen v0.4 decode boundary
+        shell: bash
+        run: |
+          test "$(git hash-object app/src/main/java/com/m10r/diagnostic/DngRawDecoder.java)" = '843dd16a36b16cda81d4a9d29d1e11b3d0943a9d'
+          test "$(git hash-object app/src/main/java/com/m10r/diagnostic/LosslessJpegDecoder.java)" = '06bff56fbeb7c7d13e7d7c0b8768c92b9e520cd6'
+          test "$(git hash-object app/src/main/java/com/m10r/diagnostic/SensorPreviewCore.java)" = '4e463bc5ad2c33b4ad6bc65a6df61a9b086e90a2'
+          echo 'Frozen decoder and v0.4 sensor-preview source blobs unchanged.'
+
+      - name: Verify v0.5 build identity
+        shell: bash
+        run: |
+          grep -F 'versionCode = 5' app/build.gradle.kts
+          grep -F 'versionName = "0.5.0-leica-linear-reference"' app/build.gradle.kts
+          grep -F 'M10-R RAW Diagnostic v0.5' app/src/main/java/com/m10r/diagnostic/MainActivity.java
+          grep -F 'MEDIUM tone and Differential Gamma remain disabled' app/src/main/java/com/m10r/diagnostic/MainActivity.java
+
+      - name: Download verified public M10-R DNG
+        run: curl -L --fail --retry 3 -o /tmp/m10r.dng 'https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_01.dng'
+
+      - name: Validate real DNG through v0.5 Leica linear reference
+        shell: bash
+        run: |
+          mkdir -p /tmp/classes
+          javac -encoding UTF-8 -d /tmp/classes \
+            app/src/main/java/com/m10r/diagnostic/DngMetadataReader.java \
+            app/src/main/java/com/m10r/diagnostic/LosslessJpegDecoder.java \
+            app/src/main/java/com/m10r/diagnostic/DngRawDecoder.java \
+            app/src/main/java/com/m10r/diagnostic/SensorPreviewCore.java \
+            app/src/main/java/com/m10r/diagnostic/M10RColorSpecCore.java \
+            app/src/main/java/com/m10r/diagnostic/M10RReferenceColorCore.java \
+            app/src/main/java/com/m10r/diagnostic/M10RLinearReferenceRenderer.java \
+            tools/M10RLinearReferenceCli.java
+          java -Xmx1024m -cp /tmp/classes com.m10r.diagnostic.M10RLinearReferenceCli /tmp/m10r.dng | tee /tmp/reference.txt
+          grep -F 'Decoded CFA: 7872x5208' /tmp/reference.txt
+          grep -F 'SOF3: precision=14, predictor=1, Pt=0' /tmp/reference.txt
+          grep -F 'CFA SHA-256 (LE u16): 27814cbc80f92d23d7b975d4833f70525f35bc52917d992b35d0a899829a097a' /tmp/reference.txt
+          grep -F 'v0.4 SENSOR PREVIEW:' /tmp/reference.txt
+          grep -F 'v0.5 LEICA LINEAR REFERENCE' /tmp/reference.txt
+          grep -F 'NeutralToXY:' /tmp/reference.txt
+          grep -F 'Color path: interpolated Leica CM -> Bradford source/D50 -> CC0 internal RGB -> CC1 sRGB' /tmp/reference.txt
+          grep -F 'Leica linear ARGB8 SHA-256 (A,R,G,B byte order):' /tmp/reference.txt
+          grep -F 'NONLINEAR BOUNDARY: MEDIUM tone + Differential Gamma are not applied' /tmp/reference.txt
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android 36 SDK
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+
+      - name: Set up Gradle 9.6
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+
+      - name: Run Android unit tests
+        run: gradle --no-daemon :app:testDebugUnitTest
+
+      - name: Build v0.5 diagnostic debug APK
+        run: gradle --no-daemon :app:assembleDebug
+
+      - name: Verify APK
+        shell: bash
+        run: |
+          test -f app/build/outputs/apk/debug/app-debug.apk
+          sha256sum app/build/outputs/apk/debug/app-debug.apk | tee /tmp/apk-sha256.txt
+          ls -lh app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload v0.5 diagnostic APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: M10RDiagnostic-v0.5-leica-linear-reference-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
