@@ -1,0 +1,191 @@
+name: M10-R v2.19 reference alignment and order fit
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v219-reference-alignment-order-fit.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet rawpy pillow numpy
+      - name: Download public pair and firmware assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_01'
+          curl -L --fail --retry 3 --retry-delay 2 "$base.jpg" -o /tmp/m10r_01.jpg
+          curl -L --fail --retry 3 --retry-delay 2 "$base.dng" -o /tmp/m10r_01.dng
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          rm -rf /tmp/m10r_b2y_assets
+          python3 tools/m10r_b2y_assets.py /tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin /tmp/m10r_b2y_assets >/dev/null
+      - name: Align and fit neutral-patch scalar candidates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > research/M10R_v219_reference_alignment_order_fit.txt
+          import sys, math
+          from pathlib import Path
+          import numpy as np
+          from PIL import Image
+          import rawpy
+          sys.path.insert(0,'tools')
+          import m10r_b2y_nonlinear_oracle as oracle
+
+          print('M10-R v2.19 PUBLIC REFERENCE ALIGNMENT / ORDER FIT')
+          print('reference: Photography Blog sample #01 verified same-capture JPEG+DNG in v2.16')
+          print('IMPORTANT: candidate fit is diagnostic evidence, not a hardware stage-order freeze.')
+
+          jpg=np.asarray(Image.open('/tmp/m10r_01.jpg').convert('RGB'),dtype=np.float32)
+          jh,jw=jpg.shape[:2]
+          with rawpy.imread('/tmp/m10r_01.dng') as r:
+            # Camera-space RGB, camera WB, no auto-brightening, linear output.
+            rgb=r.postprocess(use_camera_wb=True,no_auto_bright=True,gamma=(1,1),
+                              output_bps=16,output_color=rawpy.ColorSpace.raw)
+            bayer=r.raw_image_visible.copy().astype(np.float32)
+            pattern=r.raw_pattern.copy()
+            desc=bytes(r.color_desc)
+            white=float(r.white_level)
+          rh,rw=rgb.shape[:2]
+          print('dimensions raw_rgb',rw,rh,'jpeg',jw,jh,'difference',rw-jw,rh-jh)
+          print('raw_pattern',pattern.tolist(),'color_desc',desc.decode('ascii','replace'),'white',white)
+
+          # Monotone-remap-robust alignment: correlate signed x/y gradients after local log compression.
+          rawg=np.log1p(rgb.astype(np.float32).mean(axis=2)/256.0)
+          jpg_lin=jpg.astype(np.float32)/255.0
+          jpgg=np.log1p((0.2126*jpg_lin[:,:,0]+0.7152*jpg_lin[:,:,1]+0.0722*jpg_lin[:,:,2])*8.0)
+          stride=16
+          j=jpgg[64:jh-64:stride,64:jw-64:stride]
+          jx=np.diff(j,axis=1); jy=np.diff(j,axis=0)
+          def corr(a,b):
+            aa=a.ravel().astype(np.float64);bb=b.ravel().astype(np.float64)
+            aa-=aa.mean();bb-=bb.mean();den=np.linalg.norm(aa)*np.linalg.norm(bb)
+            return float(np.dot(aa,bb)/den) if den else -1.0
+          scores=[]
+          for dy in range(rh-jh+1):
+            for dx in range(rw-jw+1):
+              rr=rawg[dy+64:dy+jh-64:stride,dx+64:dx+jw-64:stride]
+              if rr.shape!=j.shape:continue
+              s=(corr(np.diff(rr,axis=1),jx)+corr(np.diff(rr,axis=0),jy))/2
+              scores.append((s,dx,dy))
+          scores.sort(reverse=True)
+          print('\n=== alignment top20 ===')
+          for s,dx,dy in scores[:20]:print('score',s,'dx',dx,'dy',dy)
+          best=scores[0];_,dx,dy=best
+          print('best_crop_offset',dx,dy,'expected_symmetric', (rw-jw)//2,(rh-jh)//2)
+
+          # Work directly on aligned Bayer for neutral-patch sensor luminance proxy.
+          bcrop=bayer[dy:dy+jh,dx:dx+jw]
+          # Color index positions tagged G in RGBG; construct mask by Bayer parity.
+          green_indices={i for i,c in enumerate(desc) if chr(c)=='G'}
+          green_parities=[]
+          for yy in range(pattern.shape[0]):
+            for xx in range(pattern.shape[1]):
+              if int(pattern[yy,xx]) in green_indices:green_parities.append((yy,xx))
+          print('green_indices',sorted(green_indices),'green_parities',green_parities)
+
+          # Grid blocks; low chroma + low JPEG texture approximates neutral/flat patches where
+          # matrix/chroma and sharpening confounds are minimized.
+          block=64; step=128; margin=128
+          patches=[]
+          for y in range(margin,jh-margin-block+1,step):
+            for x in range(margin,jw-margin-block+1,step):
+              jb=jpg[y:y+block,x:x+block].astype(np.float32)
+              meanrgb=jb.reshape(-1,3).mean(0)
+              chroma=float(meanrgb.max()-meanrgb.min())
+              jlum=0.2126*jb[:,:,0]+0.7152*jb[:,:,1]+0.0722*jb[:,:,2]
+              texture=float(jlum.std())
+              # Bayer green mean over both green parities.
+              vals=[]
+              rb=bcrop[y:y+block,x:x+block]
+              for py,px in green_parities: vals.append(rb[py::2,px::2].reshape(-1))
+              gv=np.concatenate(vals)
+              gmean=float(gv.mean()); gstd=float(gv.std())
+              patches.append((x,y,gmean,gstd,float(jlum.mean()),texture,chroma,*map(float,meanrgb)))
+
+          thresholds=[(10,8),(16,10),(24,14),(32,18)]
+          chosen=[];th=None
+          for cmax,tmax in thresholds:
+            chosen=[p for p in patches if p[6]<=cmax and p[5]<=tmax and p[2]>50 and p[4]>2 and p[4]<253]
+            if len(chosen)>=40:
+              th=(cmax,tmax);break
+          if not chosen:
+            chosen=patches;th=('fallback','fallback')
+          print('\npatch_total',len(patches),'chosen',len(chosen),'threshold_chroma_texture',th)
+          chosen=sorted(chosen,key=lambda p:(p[5],p[6]))
+          print('best_neutral_patches x y rawG rawStd jpgY jpgStd chroma meanRGB')
+          for p in chosen[:80]:print(p[:7],p[7:])
+
+          G=np.array([p[2] for p in chosen],dtype=np.float64)
+          J=np.array([p[4] for p in chosen],dtype=np.float64)
+          # Exclude raw saturation and near-JPEG clipping for tonal model fit.
+          mask=(G<white*0.985)&(J>4)&(J<250)
+          G=G[mask];J=J[mask]
+          print('fit_patch_count',len(G),'rawG_range',float(G.min()),float(G.max()),'jpgY_range',float(J.min()),float(J.max()))
+
+          assets=oracle.load_assets(Path('/tmp/m10r_b2y_assets'),'medium')
+          # Precompute full curves for the four high-value candidates.
+          curves={}
+          for order in ('dg-tone','tone-dg'):
+            for rounding in ('trunc','nearest'):
+              curves[(order,rounding)]=np.asarray(oracle.evaluate_curve(assets,order=order,rounding=rounding,clamp_policy='none'),dtype=np.float64)
+
+          # Fit nuisance mapping conservatively: x = rawG * scale; JPEG Y = b + a*(candidate/16383)^gamma.
+          # Use alternating held-out spatial split to report validation, not just training fit.
+          idx=np.arange(len(G)); train=(idx%2)==0; test=~train
+          scales=np.linspace(0.35,3.0,266)
+          gammas=np.linspace(0.55,1.8,126)
+          def fit_candidate(curve):
+            best=None
+            for sc in scales:
+              xi=np.clip(np.rint(G*sc),0,oracle.TONE_COORD_MAX).astype(np.int32)
+              yy=curve[xi]/16383.0
+              # gamma loop; two-parameter output affine solved on train.
+              for gm in gammas:
+                z=np.power(np.clip(yy,0,1),gm)
+                A=np.column_stack([np.ones(train.sum()),z[train]])
+                coef=np.linalg.lstsq(A,J[train],rcond=None)[0]
+                pred=coef[0]+coef[1]*z
+                tr=float(np.sqrt(np.mean((pred[train]-J[train])**2)))
+                te=float(np.sqrt(np.mean((pred[test]-J[test])**2))) if test.any() else tr
+                score=te
+                if best is None or score<best[0]:best=(score,tr,sc,gm,float(coef[0]),float(coef[1]),pred,xi)
+            return best
+
+          print('\n=== diagnostic candidate fits ===')
+          fits={}
+          for key,curve in curves.items():
+            best=fit_candidate(curve);fits[key]=best
+            score,tr,sc,gm,b0,b1,pred,xi=best
+            mae=float(np.mean(np.abs(pred[test]-J[test]))) if test.any() else float(np.mean(np.abs(pred-J)))
+            print(key,'test_rmse',score,'train_rmse',tr,'test_mae',mae,'raw_scale',sc,'output_gamma',gm,'b0',b0,'b1',b1,'x_range',int(xi.min()),int(xi.max()))
+
+          # Direct order comparison at each rounding after nuisance fitting.
+          print('\n=== order fit deltas (positive means tone-dg lower RMSE) ===')
+          for rnd in ('trunc','nearest'):
+            a=fits[('dg-tone',rnd)][0];b=fits[('tone-dg',rnd)][0]
+            print(rnd,'dg-tone_rmse',a,'tone-dg_rmse',b,'delta_dg_minus_tone',a-b)
+
+          print('\nLIMITATIONS')
+          print('- raw green is a neutral-patch luminance proxy, not the exact post-WB/post-CC B2Y input')
+          print('- fitted output gamma/affine absorbs unknown YC/JPEG transfer')
+          print('- local/detail processing is minimized by patch selection but not mathematically removed')
+          print('- therefore this run may rank candidates but cannot alone freeze stage order')
+          PY
+      - name: Commit diagnostics only
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v219_reference_alignment_order_fit.txt
+          git commit -m 'research: record v2.19 public reference order diagnostic' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
