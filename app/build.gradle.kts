@@ -10,8 +10,8 @@ android {
         applicationId = "com.m10r.diagnostic"
         minSdk = 26
         targetSdk = 36
-        versionCode = 5
-        versionName = "0.5.0-leica-linear-reference"
+        versionCode = 6
+        versionName = "0.5.1-leica-linear-headroom"
 
         testInstrumentationRunner = "android.test.InstrumentationTestRunner"
     }
