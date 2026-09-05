@@ -1,0 +1,90 @@
+name: M10-R v2.41b lossless JPEG pixel parity
+on:
+  push:
+    branches: [m10r-lossless-jpeg-v241]
+    paths:
+      - 'app/src/main/java/com/m10r/diagnostic/LosslessJpegDecoder.java'
+      - 'tools/M10RLosslessJpegCli.java'
+      - '.github/workflows/m10r-v241b-lossless-jpeg-pixel-parity.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install reference decoder
+        run: python3 -m pip install --quiet rawpy numpy tifffile
+      - name: Download verified M10-R DNG
+        run: curl -L --fail --retry 3 -o /tmp/m10r.dng 'https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_01.dng'
+      - name: Extract Leica SOF3 strip and rawpy reference
+        run: |
+          python3 - <<'PY'
+          import numpy as np, rawpy, tifffile, hashlib
+          p='/tmp/m10r.dng'
+          with tifffile.TiffFile(p) as tf:
+              page=tf.pages[0]
+              tags=page.tags
+              assert int(tags['PhotometricInterpretation'].value)==32803
+              assert int(tags['Compression'].value)==7
+              offsets=np.atleast_1d(tags['StripOffsets'].value).astype(np.uint64)
+              counts=np.atleast_1d(tags['StripByteCounts'].value).astype(np.uint64)
+              assert len(offsets)==1, (len(offsets), offsets[:8])
+          data=open(p,'rb').read()
+          strip=data[int(offsets[0]):int(offsets[0]+counts[0])]
+          assert strip[:2]==b'\xff\xd8'
+          open('/tmp/m10r-strip.jpg','wb').write(strip)
+          with rawpy.imread(p) as r:
+              ref=r.raw_image.copy().astype('<u2',copy=False)
+          ref.tofile('/tmp/ref.u16le')
+          print('reference_shape',ref.shape)
+          print('reference_minmax',int(ref.min()),int(ref.max()))
+          print('reference_sha256',hashlib.sha256(ref.tobytes()).hexdigest())
+          PY
+      - name: Compile bounded Java decoder
+        run: |
+          mkdir -p /tmp/classes
+          javac -encoding UTF-8 -d /tmp/classes \
+            app/src/main/java/com/m10r/diagnostic/LosslessJpegDecoder.java \
+            tools/M10RLosslessJpegCli.java
+      - name: Decode Leica strip
+        run: java -Xmx768m -cp /tmp/classes com.m10r.diagnostic.M10RLosslessJpegCli /tmp/m10r-strip.jpg /tmp/java.u16le | tee /tmp/java.txt
+      - name: Require pixel-exact parity
+        shell: bash
+        run: |
+          python3 - <<'PY' | tee research/M10R_v241b_lossless_jpeg_pixel_parity.txt
+          import hashlib, numpy as np
+          shape=(5208,7872)
+          ref=np.fromfile('/tmp/ref.u16le',dtype='<u2').reshape(shape)
+          got=np.fromfile('/tmp/java.u16le',dtype='<u2').reshape(shape)
+          diff=got.astype(np.int32)-ref.astype(np.int32)
+          mismatch=np.flatnonzero(diff)
+          print('M10-R v2.41b LOSSLESS JPEG PIXEL PARITY')
+          print('shape',shape)
+          print('reference_sha256',hashlib.sha256(ref.tobytes()).hexdigest())
+          print('java_sha256',hashlib.sha256(got.tobytes()).hexdigest())
+          print('mismatch_count',int(mismatch.size))
+          print('max_abs_diff',int(np.abs(diff).max()))
+          print('reference_minmax',int(ref.min()),int(ref.max()))
+          print('java_minmax',int(got.min()),int(got.max()))
+          print('reference_mean',float(ref.mean()))
+          print('java_mean',float(got.mean()))
+          print('java_first32',got.ravel()[:32].tolist())
+          if mismatch.size:
+              idx=mismatch[:16]
+              print('first_mismatches',[(int(i),int(got.ravel()[i]),int(ref.ravel()[i])) for i in idx])
+              raise SystemExit('PIXEL PARITY FAILED')
+          print('DECISION=PIXEL_EXACT')
+          PY
+      - name: Commit parity evidence
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v241b_lossless_jpeg_pixel_parity.txt
+          git commit -m 'research: freeze M10-R SOF3 pixel parity v2.41b' || exit 0
+          git push
