@@ -1,0 +1,57 @@
+name: M10-R v2.40 DNG metadata diagnostic APK
+on:
+  push:
+    branches: [m10r-dng-diagnostic-v240]
+    paths:
+      - 'settings.gradle.kts'
+      - 'build.gradle.kts'
+      - 'gradle.properties'
+      - 'app/**'
+      - '.github/workflows/m10r-v240-dng-metadata-apk.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android 36 SDK
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+
+      - name: Set up Gradle 9.6
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+
+      - name: Run ColorSpec and DNG parser unit tests
+        run: gradle --no-daemon :app:testDebugUnitTest
+
+      - name: Build v0.2 diagnostic debug APK
+        run: gradle --no-daemon :app:assembleDebug
+
+      - name: Verify APK
+        shell: bash
+        run: |
+          test -f app/build/outputs/apk/debug/app-debug.apk
+          sha256sum app/build/outputs/apk/debug/app-debug.apk
+          ls -lh app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload v0.2 diagnostic APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: M10RDiagnostic-v0.2-dng-metadata-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
