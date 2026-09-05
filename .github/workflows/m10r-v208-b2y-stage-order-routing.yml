@@ -1,0 +1,218 @@
+name: M10-R v2.08 B2Y stage-order routing
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v208-b2y-stage-order-routing.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Bounded B2Y routing and link-mode probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v208_b2y_stage_order_routing.txt
+          from pathlib import Path
+          import struct, collections
+          from capstone import *
+          from capstone.arm import *
+
+          img=Path('/tmp/sections/092_IMG-System.bin').read_bytes()
+          BASE=0x42000000; PFX=4; END=BASE+len(img)-PFX
+          th=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); th.detail=True; th.skipdata=True
+          ar=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN); ar.detail=True; ar.skipdata=True
+
+          def off(a): return PFX+a-BASE
+          def u32(o): return struct.unpack_from('<I',img,o)[0]
+          def ops(i):
+            try: return i.operands
+            except: return []
+          def lit(i,mode):
+            oo=ops(i)
+            try:
+              if i.mnemonic.startswith('ldr') and len(oo)>=2 and oo[1].type==ARM_OP_MEM and oo[1].mem.base==ARM_REG_PC:
+                la=((((i.address+4)&~3) if mode=='T' else i.address+8)+oo[1].mem.disp)
+                o=off(la)
+                if 0<=o<=len(img)-4: return la,u32(o)
+            except: pass
+          def adr(i):
+            oo=ops(i)
+            try:
+              if i.mnemonic=='adr' and len(oo)>=2 and oo[1].type==ARM_OP_IMM: return oo[1].imm
+            except: pass
+          def call(i):
+            oo=ops(i)
+            try:
+              if i.mnemonic in ('bl','blx') and oo and oo[0].type==ARM_OP_IMM: return oo[0].imm & ~1
+            except: pass
+          def branch(i):
+            oo=ops(i)
+            try:
+              if i.mnemonic.startswith('b') and i.mnemonic not in ('bic','bics','bkpt','bl','blx') and oo and oo[0].type==ARM_OP_IMM: return oo[0].imm & ~1
+            except: pass
+          def dis(lo,hi,mode):
+            md=th if mode=='T' else ar
+            lo=max(BASE,lo); hi=min(END,hi)
+            return list(md.disasm(img[off(lo):off(hi)],lo))
+          def fmt(i,mode):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            q=lit(i,mode); a=adr(i); c=call(i); b=branch(i)
+            if q: s+=f' ; LIT {q[0]:#x}->{q[1]:#x}'
+            if a is not None: s+=f' ; ADR->{a:#x}'
+            if c is not None: s+=f' ; CALL {c:#x}'
+            elif b is not None: s+=f' ; BR {b:#x}'
+            return s
+
+          # Deliberately bounded windows: known B2Y programmers, DG/tone helpers,
+          # operation/link-mode driver territory, mode getter/string area, and link interrupts.
+          windows=[
+            ('programmer_A',0x42152f8c,0x421533a0,'T'),
+            ('programmer_B',0x421536bc,0x42153ad0,'T'),
+            ('dg_selector',0x42153f40,0x42154050,'T'),
+            ('tone_selector',0x42154bb0,0x42154d30,'T'),
+            ('b2y_mode_getter',0x42151d80,0x42152240,'T'),
+            ('b2y_link_interrupts',0x42161580,0x42161b20,'T'),
+            ('dg_driver',0x420d1540,0x420d1718,'T'),
+            ('operation_mode_driver_T',0x420d3300,0x420d35c0,'T'),
+            ('operation_mode_driver_A',0x420d3300,0x420d35c0,'A'),
+            ('tone_driver_A',0x420d3c1c,0x420d4260,'A'),
+            ('wb_driver_A',0x420d4300,0x420d44a0,'A'),
+            ('link_clock_driver_A',0x420d4700,0x420d4a40,'A'),
+            ('link_clock_driver_T',0x420d4700,0x420d4a40,'T'),
+          ]
+
+          print('M10-R v2.08 B2Y STAGE-ORDER ROUTING PROBE')
+          print('scope: bounded known B2Y/link/control windows only; no whole-IMG disassembly')
+          print('firmware_sha256 ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498')
+
+          # Exact strings known from prior traces. Find pointer-literal and ADR references only in bounded windows.
+          string_targets={
+            0x420d34b7:'drv_img_b2y_set_operation_mode',
+            0x420d42a7:'drv_img_b2y_set_tone_control1',
+            0x420d4404:'drv_img_b2y_set_wbgain1',
+            0x420d443c:'drv_img_b2y_set_wbgain2',
+            0x420d484c:'drv_img_b2y_start_link_mode_clk',
+            0x420d48ec:'drv_img_b2y_start_sdram_mode_clk',
+            0x42151e20:'_B2YMODE:STILL',
+            0x42151e30:'_B2YMODE:STILLLINK',
+            0x421616a8:'LV_MAGNI B2Y LINK',
+            0x42161a98:'LV_SLIVE B2Y LINK',
+          }
+          print('\n=== exact string xrefs inside bounded windows ===')
+          for name,lo,hi,mode in windows:
+            hits=[]
+            for i in dis(lo,hi,mode):
+              q=lit(i,mode); a=adr(i)
+              vals=[]
+              if q: vals.append(q[1])
+              if a is not None: vals.append(a)
+              for v in vals:
+                if v in string_targets: hits.append((i,string_targets[v],v))
+            if hits:
+              print(f'-- {name} {lo:#x}..{hi:#x} {mode} --')
+              for i,n,v in hits: print(fmt(i,mode),'STRING',n,hex(v))
+
+          # Full disassembly only for those narrow windows.
+          for name,lo,hi,mode in windows:
+            print(f'\n=== {name} {lo:#x}..{hi:#x} mode={mode} ===')
+            for i in dis(lo,hi,mode): print(fmt(i,mode))
+
+          # Lightweight constant propagation sufficient to recover effective MMIO addresses
+          # for literal-base register accesses without pretending to recover pixel dataflow.
+          def mmio_accesses(lo,hi,mode):
+            md=th if mode=='T' else ar
+            regs={}; out=[]
+            for i in dis(lo,hi,mode):
+              oo=ops(i); q=lit(i,mode)
+              if q and oo and oo[0].type==ARM_OP_REG:
+                regs[oo[0].reg]=q[1]
+              # effective memory refs before clobbering destination
+              for op in oo:
+                if op.type==ARM_OP_MEM and op.mem.base in regs:
+                  ea=(regs[op.mem.base]+op.mem.disp)&0xffffffff
+                  if 0x20020000<=ea<0x20021000:
+                    out.append((i.address,i.mnemonic,i.op_str,ea,fmt(i,mode)))
+              # small safe subset of constant-preserving transforms
+              if i.mnemonic in ('mov','movs') and len(oo)>=2 and oo[0].type==ARM_OP_REG:
+                if oo[1].type==ARM_OP_REG and oo[1].reg in regs: regs[oo[0].reg]=regs[oo[1].reg]
+                elif oo[1].type==ARM_OP_IMM: regs[oo[0].reg]=oo[1].imm & 0xffffffff
+                else: regs.pop(oo[0].reg,None)
+              elif i.mnemonic in ('add','adds','sub','subs') and len(oo)>=2 and oo[0].type==ARM_OP_REG:
+                dst=oo[0].reg
+                # two-operand Thumb forms: dst is also lhs; three-operand forms handled when source const known
+                if len(oo)==2 and oo[1].type==ARM_OP_IMM and dst in regs:
+                  regs[dst]=(regs[dst]+(oo[1].imm if i.mnemonic.startswith('add') else -oo[1].imm))&0xffffffff
+                elif len(oo)>=3 and oo[1].type==ARM_OP_REG and oo[1].reg in regs and oo[2].type==ARM_OP_IMM:
+                  regs[dst]=(regs[oo[1].reg]+(oo[2].imm if i.mnemonic.startswith('add') else -oo[2].imm))&0xffffffff
+                else: regs.pop(dst,None)
+              else:
+                # instructions that definitely overwrite first register operand
+                if oo and oo[0].type==ARM_OP_REG and i.mnemonic not in ('str','strb','strh','stm','cmp','cmn','tst','teq','b','bl','blx','bx','push'):
+                  if not q: regs.pop(oo[0].reg,None)
+            return out
+
+          print('\n=== effective 0x20020xxx MMIO accesses by bounded window ===')
+          shared=collections.defaultdict(set)
+          allacc={}
+          for name,lo,hi,mode in windows:
+            aa=mmio_accesses(lo,hi,mode); allacc[name]=aa
+            if aa:
+              print(f'-- {name} --')
+              for a,m,o,ea,s in aa:
+                print(f'{a:#x} {m:8s} EA={ea:#010x} :: {o}')
+                shared[ea].add(name)
+          print('\n=== shared MMIO addresses touched by >1 labeled window ===')
+          for ea,names in sorted(shared.items()):
+            if len(names)>1: print(hex(ea),sorted(names))
+
+          # Print call edges only inside bounded windows. This is programming/control call structure,
+          # explicitly NOT treated as pixel-stage order.
+          print('\n=== bounded call edges ===')
+          for name,lo,hi,mode in windows:
+            cs=[]
+            for i in dis(lo,hi,mode):
+              c=call(i)
+              if c is not None: cs.append((i.address,c))
+            if cs:
+              print('--',name,'--')
+              for a,c in cs: print(hex(a),'->',hex(c))
+
+          # Candidate routing evidence: only RMW/branch neighborhoods around effective shared MMIO.
+          print('\n=== candidate routing/control neighborhoods ===')
+          for name,lo,hi,mode in windows:
+            ins=dis(lo,hi,mode); aa=allacc.get(name,[])
+            addrs={a for a,_,_,_,_ in aa}
+            if not addrs: continue
+            for idx,i in enumerate(ins):
+              if i.address not in addrs: continue
+              loidx=max(0,idx-8); hiidx=min(len(ins),idx+9)
+              print(f'-- {name} around {i.address:#x} --')
+              for j in ins[loidx:hiidx]: print(fmt(j,mode))
+
+          print('\nEVIDENCE RULE: programming/call order is not pixel order. Freeze a stage edge only if a mux/source/link/bypass field directly identifies producer/consumer semantics.')
+          print('TARGET: constrain direct-WB, CC0/CC1, differential-gamma, tone, de-knee/gamma, and YC/output stage order from explicit routing/control evidence.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v208_b2y_stage_order_routing.txt
+          git commit -m 'research: record v2.08 B2Y stage-order routing probe' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
