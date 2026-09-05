@@ -1,0 +1,201 @@
+M10-R v2.13 TONE TABLE BANK SELECT
+bounded Thumb window 0x420d0300 0x420d0460
+
+=== disassembly ===
+420d0300: blx        #0x42051b64 ; CALL 0x42051b64
+420d0304: movs       r5, r0
+420d0306: ldrb       r0, [r4, #1]
+420d0308: cmp        r0, #0
+420d030a: bne        #0x420d0322
+420d030c: lsls       r0, r6, #0x10
+420d030e: ldr        r1, [r4, #4]
+420d0310: orrs       r0, r1
+420d0312: ldr        r1, [pc, #0x58] ; LIT 0x420d036c->0x20022500
+420d0314: str        r0, [r1, #0x10]
+420d0316: lsls       r0, r5, #0x10
+420d0318: ldr        r1, [r4, #0x10]
+420d031a: orrs       r0, r1
+420d031c: ldr        r1, [pc, #0x4c] ; LIT 0x420d036c->0x20022500
+420d031e: str        r0, [r1, #0x14]
+420d0320: b          #0x420d0368
+420d0322: ldrb       r0, [r4, #1]
+420d0324: cmp        r0, #1
+420d0326: bne        #0x420d033e
+420d0328: lsls       r0, r6, #0x10
+420d032a: ldr        r1, [r4, #4]
+420d032c: orrs       r0, r1
+420d032e: ldr        r1, [pc, #0x3c] ; LIT 0x420d036c->0x20022500
+420d0330: str        r0, [r1, #0x18]
+420d0332: lsls       r0, r5, #0x10
+420d0334: ldr        r1, [r4, #0x10]
+420d0336: orrs       r0, r1
+420d0338: ldr        r1, [pc, #0x30] ; LIT 0x420d036c->0x20022500
+420d033a: str        r0, [r1, #0x1c]
+420d033c: b          #0x420d0368
+420d033e: adr        r1, #0x30 ; ADR->0x420d0370
+420d0340: movs       r0, #4
+420d0342: bl         #0x42140150 ; CALL 0x42140150
+420d0346: b          #0x420d0368
+420d0348: ldrb       r0, [r4, #1]
+420d034a: cmp        r0, #0
+420d034c: bne        #0x420d035a
+420d034e: movs       r0, #1
+420d0350: lsls       r0, r0, #0x1c
+420d0352: ldr        r1, [pc, #0x18] ; LIT 0x420d036c->0x20022500
+420d0354: str        r0, [r1, #0x10]
+420d0356: str        r0, [r1, #0x14]
+420d0358: b          #0x420d0368
+420d035a: movs       r1, #1
+420d035c: lsls       r1, r1, #0x1c
+420d035e: ldr        r0, [pc, #0xc] ; LIT 0x420d036c->0x20022500
+420d0360: str        r1, [r0, #0x18]
+420d0362: movs       r0, r1
+420d0364: ldr        r1, [pc, #4] ; LIT 0x420d036c->0x20022500
+420d0366: str        r0, [r1, #0x1c]
+420d0368: pop        {r4, r5, r6, pc}
+420d036a: movs       r0, r0
+420d036c: movs       r5, #0
+420d036e: movs       r0, #2
+420d0370: ldr        r5, [pc, #0x124] ; LIT 0x420d0498->0x6843439a
+420d0372: subs       r2, #0x47
+420d0374: str        r0, [r4, #0x40]
+420d0376: strb       r2, [r6, #0x19]
+420d0378: ldr        r7, [r3, #0x14]
+420d037a: str        r5, [r5, #0x74]
+420d037c: str        r7, [r3, #0x24]
+420d037e: ldrb       r2, [r6, #4]
+420d0380: strb       r7, [r3, #9]
+420d0382: strb       r5, [r4, #0xd]
+420d0384: ldrb       r1, [r5, #9]
+420d0386: adds       r2, #0x65
+420d0388: movs       r0, r0
+420d038a: movs       r0, r0
+420d038c: push       {r4, lr}
+420d038e: movs       r4, r0
+420d0390: ldr        r0, [pc, #0x64] ; LIT 0x420d03f8->0x20020000
+420d0392: ldr        r0, [r0, #4]
+420d0394: lsls       r0, r0, #0x1b
+420d0396: lsrs       r0, r0, #0x1f
+420d0398: cmp        r0, #0
+420d039a: bne        #0x420d03ee
+420d039c: ldr        r0, [pc, #0x5c] ; LIT 0x420d03fc->0x20020800
+420d039e: ldr        r0, [r0, #4]
+420d03a0: lsls       r0, r0, #0x1e
+420d03a2: lsrs       r0, r0, #0x1e
+420d03a4: cmp        r0, #0
+420d03a6: bne        #0x420d03b6
+420d03a8: ldr        r0, [pc, #0x50] ; LIT 0x420d03fc->0x20020800
+420d03aa: ldr        r0, [r0, #4]
+420d03ac: movs       r1, #0x30
+420d03ae: bics       r0, r1
+420d03b0: ldr        r1, [pc, #0x48] ; LIT 0x420d03fc->0x20020800
+420d03b2: str        r0, [r1, #4]
+420d03b4: b          #0x420d03f6
+420d03b6: ldr        r0, [pc, #0x44] ; LIT 0x420d03fc->0x20020800
+420d03b8: ldr        r0, [r0, #4]
+420d03ba: lsls       r0, r0, #0x1e
+420d03bc: lsrs       r0, r0, #0x1e
+420d03be: cmp        r0, #1
+420d03c0: bne        #0x420d03e4
+420d03c2: cmp        r4, #0x64
+420d03c4: bne        #0x420d03d6
+420d03c6: ldr        r0, [pc, #0x34] ; LIT 0x420d03fc->0x20020800
+420d03c8: ldr        r0, [r0, #4]
+420d03ca: movs       r1, #0x30
+420d03cc: bics       r0, r1
+420d03ce: adds       r0, #0x10
+420d03d0: ldr        r1, [pc, #0x28] ; LIT 0x420d03fc->0x20020800
+420d03d2: str        r0, [r1, #4]
+420d03d4: b          #0x420d03f6
+420d03d6: ldr        r0, [pc, #0x24] ; LIT 0x420d03fc->0x20020800
+420d03d8: ldr        r0, [r0, #4]
+420d03da: movs       r1, #0x30
+420d03dc: bics       r0, r1
+420d03de: ldr        r1, [pc, #0x1c] ; LIT 0x420d03fc->0x20020800
+420d03e0: str        r0, [r1, #4]
+420d03e2: b          #0x420d03f6
+420d03e4: adr        r1, #0x18 ; ADR->0x420d0400
+420d03e6: movs       r0, #4
+420d03e8: bl         #0x42140150 ; CALL 0x42140150
+420d03ec: b          #0x420d03f6
+420d03ee: adr        r1, #0x4c ; ADR->0x420d043c
+420d03f0: movs       r0, #4
+420d03f2: bl         #0x42140150 ; CALL 0x42140150
+420d03f6: pop        {r4, pc}
+420d03f8: movs       r0, r0
+420d03fa: movs       r0, #2
+420d03fc: lsrs       r0, r0, #0x20
+420d03fe: movs       r0, #2
+420d0400: cmp        r5, #0x2d
+420d0402: cmp        r5, #0x2d
+420d0404: cmp        r5, #0x2d
+420d0406: strh       r5, [r0, r1]
+420d0408: ldr        r7, [pc, #0x148] ; LIT 0x420d0554->0x4b2d431a
+420d040a: cmp        r5, #0x52
+420d040c: cmp        r5, #0x2d
+420d040e: cmp        r5, #0x2d
+420d0410: movs       r0, #0x2d
+420d0412: str        r0, [r4, #0x40]
+420d0414: strb       r2, [r6, #0x19]
+420d0416: ldr        r7, [r3, #0x14]
+420d0418: str        r5, [r5, #0x74]
+420d041a: str        r7, [r3, #0x24]
+420d041c: ldrb       r2, [r6, #4]
+420d041e: strb       r7, [r3, #0xd]
+420d0420: ldr        r5, [r4, #0x44]
+420d0422: str        r5, [r4, #0x34]
+420d0424: ldrsh      r4, [r6, r5]
+420d0426: strb       r3, [r6, #0x11]
+420d0428: strb       r1, [r4, #9]
+420d042a: ldrsh      r4, [r6, r5]
+420d042c: ldr        r4, [r6, #0x74]
+420d042e: str        r6, [r5, #0x54]
+420d0430: strb       r7, [r3, #0x11]
+420d0432: str        r1, [r4, #0x24]
+420d0434: str        r4, [r5, #0x54]
+420d0436: movs       r0, #0x32
+420d0438: movs       r0, r0
+420d043a: movs       r0, r0
+420d043c: cmp        r5, #0x2d
+420d043e: cmp        r5, #0x2d
+420d0440: cmp        r5, #0x2d
+420d0442: strh       r5, [r0, r1]
+420d0444: ldr        r7, [pc, #0x148] ; LIT 0x420d0590->0xcdb04db
+420d0446: cmp        r5, #0x52
+420d0448: cmp        r5, #0x2d
+420d044a: cmp        r5, #0x2d
+420d044c: movs       r0, #0x2d
+420d044e: str        r0, [r4, #0x40]
+420d0450: strb       r2, [r6, #0x19]
+420d0452: ldr        r7, [r3, #0x14]
+420d0454: str        r5, [r5, #0x74]
+420d0456: str        r7, [r3, #0x24]
+420d0458: ldrb       r2, [r6, #4]
+420d045a: strb       r7, [r3, #0xd]
+420d045c: ldr        r5, [r4, #0x44]
+420d045e: str        r5, [r4, #0x34]
+
+=== strings in local binary window ===
+drv_img_b2y_select_start_tone_table1 0x420d044f
+drv_img_b2y_select_start_tone_table2 0x420d0413
+
+=== effective MMIO ===
+0x420d0314 str 0x20022510 r0, [r1, #0x10]
+0x420d031e str 0x20022514 r0, [r1, #0x14]
+0x420d0330 str 0x20022518 r0, [r1, #0x18]
+0x420d033a str 0x2002251c r0, [r1, #0x1c]
+0x420d0354 str 0x20022510 r0, [r1, #0x10]
+0x420d0356 str 0x20022514 r0, [r1, #0x14]
+0x420d0360 str 0x20022518 r1, [r0, #0x18]
+0x420d0366 str 0x2002251c r0, [r1, #0x1c]
+0x420d0392 ldr 0x20020004 r0, [r0, #4]
+0x420d039e ldr 0x20020804 r0, [r0, #4]
+0x420d03aa ldr 0x20020804 r0, [r0, #4]
+0x420d03b2 str 0x20020804 r0, [r1, #4]
+0x420d03b8 ldr 0x20020804 r0, [r0, #4]
+0x420d03c8 ldr 0x20020804 r0, [r0, #4]
+0x420d03d2 str 0x20020804 r0, [r1, #4]
+0x420d03d8 ldr 0x20020804 r0, [r0, #4]
+0x420d03e0 str 0x20020804 r0, [r1, #4]
+
+QUESTION: are table1/table2 selectors alternate start-bank selectors for one tone stage, or evidence of sequential tone stages? Only direct register semantics may answer this.
