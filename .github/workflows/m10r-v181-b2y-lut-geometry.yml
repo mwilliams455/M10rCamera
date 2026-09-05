@@ -1,0 +1,101 @@
+name: M10-R v1.81 B2Y LUT geometry
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v181-b2y-lut-geometry.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Analyze active tone and differential-gamma LUT geometry
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v181_b2y_lut_geometry.txt
+          from pathlib import Path
+          import struct,math,statistics,hashlib
+          D=Path('/tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin').read_bytes();P=4
+          u32=lambda o:struct.unpack_from('<I',D,o)[0]
+          count=u32(P+8); rec0=P+0x10; stride=0xa90; base=rec0+count*stride
+          recs=[]
+          for i in range(count):
+            o=rec0+i*stride; recs.append((i,u32(o),u32(o+4),u32(o+8),base+u32(o+4)))
+          def get(rid,occ=0):
+            a=[r for r in recs if r[1]==rid];return a[occ]
+          def vals32(blob): return list(struct.unpack('<%dI'%(len(blob)//4),blob[:len(blob)//4*4]))
+          def vals16(blob): return list(struct.unpack('<%dH'%(len(blob)//2),blob[:len(blob)//2*2]))
+          def row_metrics(vals,rowlen):
+            if len(vals)%rowlen:return None
+            rows=[vals[i:i+rowlen] for i in range(0,len(vals),rowlen)]
+            uniq_rows=len({tuple(r) for r in rows})
+            mono_inc=sum(all(r[j]<=r[j+1] for j in range(len(r)-1)) for r in rows)
+            mono_dec=sum(all(r[j]>=r[j+1] for j in range(len(r)-1)) for r in rows)
+            const=sum(len(set(r))==1 for r in rows)
+            same_adj=sum(rows[i]==rows[i-1] for i in range(1,len(rows)))
+            boundaries=[(r[0],r[-1],min(r),max(r),len(set(r))) for r in rows[:min(8,len(rows))]]
+            return len(rows),uniq_rows,mono_inc,mono_dec,const,same_adj,boundaries
+          print('M10-R v1.81 B2Y LUT GEOMETRY')
+          # MEDIUM tone is occurrence 1 of id 0x19; HIGH occurrence 2
+          for occ,nm in ((0,'LOW'),(1,'MEDIUM'),(2,'HIGH')):
+            r=get(0x19,occ); blob=D[r[4]:r[4]+0xa000]; v=vals32(blob)
+            print(f'\n=== TONE {nm} active 0xA000 ===')
+            print('count_u32',len(v),'sha',hashlib.sha256(blob).hexdigest(),'minmax',hex(min(v)),hex(max(v)),'unique',len(set(v)))
+            # run lengths at start
+            runs=[];cur=v[0];n=0
+            for x in v:
+              if x==cur:n+=1
+              else:runs.append((cur,n));cur=x;n=1
+            runs.append((cur,n));print('first_runs',[(hex(x),n) for x,n in runs[:20]],'run_count',len(runs))
+            for rowlen in (32,40,64,80,128,160,256,320,512,640,1024,1280,2048,2560):
+              m=row_metrics(v,rowlen)
+              if m: print('rowlen',rowlen,'rows',m[0],'uniq_rows',m[1],'mono_inc',m[2],'mono_dec',m[3],'const',m[4],'same_adj',m[5],'sample',m[6])
+            # transposed-column monotonicity for plausible 40x256 and 10x1024 layouts
+            for rows,cols in ((40,256),(20,512),(10,1024),(80,128),(160,64)):
+              if rows*cols!=len(v):continue
+              mat=[v[i*cols:(i+1)*cols] for i in range(rows)]
+              colinc=sum(all(mat[i][j]<=mat[i+1][j] for i in range(rows-1)) for j in range(cols))
+              coldec=sum(all(mat[i][j]>=mat[i+1][j] for i in range(rows-1)) for j in range(cols))
+              print('shape',rows,'x',cols,'monotone_columns_inc/dec',colinc,coldec,'of',cols)
+          # main differential gamma: active first 0x8000 bytes; inspect u8/u16/u32
+          r=get(0x1c); blob=D[r[4]:r[4]+0x8000]
+          print('\n=== DIFFERENTIAL GAMMA MAIN active 0x8000 ===')
+          print('sha',hashlib.sha256(blob).hexdigest(),'u8_minmax_unique',min(blob),max(blob),len(set(blob)))
+          for width in (64,128,256,512,1024):
+            if len(blob)%width==0:
+              rows=[blob[i:i+width] for i in range(0,len(blob),width)]
+              print('u8_width',width,'rows',len(rows),'uniq_rows',len(set(rows)),'same_adj',sum(rows[i]==rows[i-1] for i in range(1,len(rows))),
+                    'row0_head',list(rows[0][:16]),'rowlast_head',list(rows[-1][:16]))
+          v16=vals16(blob)
+          for rowlen in (64,128,256,512,1024):
+            m=row_metrics(v16,rowlen)
+            if m:print('u16 rowlen',rowlen,'rows',m[0],'uniq_rows',m[1],'mono_inc',m[2],'mono_dec',m[3],'const',m[4],'same_adj',m[5])
+          # FL active first 0x1000, likely u16 curve banks
+          r=get(0x1d); blob=D[r[4]:r[4]+0x1000]; v=vals16(blob)
+          print('\n=== DIFFERENTIAL GAMMA FL active 0x1000 ===')
+          print('sha',hashlib.sha256(blob).hexdigest(),'count_u16',len(v),'minmax',hex(min(v)),hex(max(v)),'unique',len(set(v)))
+          for rowlen in (64,128,256,512,1024):
+            m=row_metrics(v,rowlen)
+            if m: print('rowlen',rowlen,'rows',m[0],'uniq_rows',m[1],'mono_inc',m[2],'mono_dec',m[3],'const',m[4],'same_adj',m[5],'sample',m[6])
+          for rows,cols in ((8,256),(16,128),(4,512),(2,1024)):
+            mat=[v[i*cols:(i+1)*cols] for i in range(rows)]
+            print('FL shape',rows,'x',cols,'row_starts',[hex(r[0]) for r in mat], 'row_ends',[hex(r[-1]) for r in mat], 'rows_monotone',[all(r[j]<=r[j+1] for j in range(cols-1)) for r in mat])
+          print('\nTARGET: infer practical LUT dimensionality/curve-bank organization for CPU/GPU emulation from active upload regions only.')
+          PY
+      - name: Commit result
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v181_b2y_lut_geometry.txt
+          git commit -m 'research: record v1.81 B2Y LUT geometry' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
