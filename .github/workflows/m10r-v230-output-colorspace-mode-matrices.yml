@@ -1,0 +1,101 @@
+name: M10-R v2.30 output color-space mode matrices
+on:
+  push:
+    branches: [m10r-color-science-trace]
+    paths: ['.github/workflows/m10r-v230-output-colorspace-mode-matrices.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unpack and resolve exact getter targets
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text(); a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n"); z=p.index("\n          CPP",a); Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v230_output_colorspace_mode_matrices.txt
+          from pathlib import Path
+          import struct,re,math
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes();BASE=0x40000000;PFX=4
+          def off(a):return PFX+a-BASE
+          def u32(a):return struct.unpack_from('<I',b,off(a))[0]
+          def mat(a):return [struct.unpack_from('<d',b,off(a)+8*i)[0] for i in range(9)]
+          def pm(a,name):
+              m=mat(a);print(f'{name} target={a:08x}')
+              for r in range(3):print('  '+' '.join(f'{x:.15g}' for x in m[3*r:3*r+3]))
+              return m
+          getters=[0x40012db8,0x40012dc4,0x40012dd0,0x40012ddc,0x40012fa0,0x40012fac,0x40012fb8,0x40012fc4]
+          print('M10-R v2.30 OUTPUT COLOR-SPACE MODE MATRICES')
+          print('Each getter is ARM `ldr r0,[pc]; bx lr`; target word lives at getter+8.')
+          print()
+          resolved={}
+          for g in getters:
+              t=u32(g+8); resolved[g]=t
+              print(f'getter {g:08x} literal@{g+8:08x} -> {t:08x}')
+              if BASE<=t<BASE+len(b)-PFX and off(t)+72<=len(b):
+                  try:pm(t,'  matrix')
+                  except:pass
+          print()
+          print('=== three constructor rows ===')
+          for mode,row in enumerate([0x40013940,0x4001394c,0x40013958]):
+              idx=u32(row); g1=u32(row+4); g2=u32(row+8); t1=resolved.get(g1,u32(g1+8));t2=resolved.get(g2,u32(g2+8))
+              print(f'mode={mode} encoded_index={idx} field1_getter={g1:08x}->{t1:08x} field2_getter={g2:08x}->{t2:08x}')
+              m1=pm(t1,' field1/CC1-source matrix')
+              m2=pm(t2,' field2 companion matrix')
+              # product both ways: determine inverse-pair relation if any.
+              def mul(a,c):return [sum(a[3*r+k]*c[3*k+j] for k in range(3)) for r in range(3) for j in range(3)]
+              for label,p in [('field1*field2',mul(m1,m2)),('field2*field1',mul(m2,m1))]:
+                  err=max(abs(p[3*r+j]-(1 if r==j else 0)) for r in range(3) for j in range(3))
+                  print(label,'max_identity_error=',err)
+              print()
+
+          # Reference matrices for exact semantic matches.
+          refs={
+           'AdobeRGB_RGB_to_XYZ_D50':[0.6097559,0.2052401,0.1492240,0.3111242,0.6256560,0.0632197,0.0194811,0.0608902,0.7448387],
+           'AdobeRGB_XYZ_to_RGB_D50':[1.9624274,-0.6105343,-0.3413404,-0.9787684,1.9161415,0.0334540,0.0286869,-0.1406752,1.3487655],
+           'sRGB_RGB_to_XYZ_D50':[0.4360747,0.3850649,0.1430804,0.2225045,0.7168786,0.0606169,0.0139322,0.0971045,0.7141733],
+           'sRGB_XYZ_to_RGB_D50':[3.1338561,-1.6168667,-0.4906146,-0.9787684,1.9161415,0.0334540,0.0719453,-0.2289914,1.4052427],
+           'ECI_RGB_to_XYZ_D50':[0.6502043,0.1780774,0.1359384,0.3202499,0.6020711,0.0776791,0.0,0.0678390,0.7573710],
+           'ECI_XYZ_to_RGB_D50':[1.7827618,-0.4969847,-0.2690101,-0.9593623,1.9477962,-0.0275807,0.0859317,-0.1744674,1.3228273],
+           'ProPhoto_RGB_to_XYZ_D50':[0.7976749,0.1351917,0.0313534,0.2880402,0.7118741,0.0000857,0.0,0.0,0.8252100],
+           'ProPhoto_XYZ_to_RGB_D50':[1.3459433,-0.2556075,-0.0511118,-0.5445989,1.5081673,0.0205351,0.0,0.0,1.2118128],
+          }
+          def err(m,r):return max(abs(x-y) for x,y in zip(m,r))
+          print('=== closest reference for every resolved matrix ===')
+          for g,t in resolved.items():
+              try:m=mat(t)
+              except:continue
+              scores=sorted((err(m,r),n) for n,r in refs.items())
+              print(f'{g:08x}->{t:08x}: best={scores[:3]}')
+          print()
+
+          print('=== color-space strings in CA9/IMG sections ===')
+          for fname in ['099_IMG-CA9_System.bin','092_IMG-System.bin']:
+              bb=Path('/tmp/sections/'+fname).read_bytes()
+              print('--',fname,'--')
+              for m in re.finditer(rb'[ -~]{4,}\x00',bb):
+                  s=m.group()[:-1].decode('ascii','replace')
+                  if re.search(r'(?i)(sRGB|Adobe\s*RGB|AdobeRGB|ECI|ProPhoto|color.?space)',s):print(f'  off={m.start():#x} {s!r}')
+          print()
+          print('=== DECISION ===')
+          print('If field1 and field2 form inverse standard-space pairs, field1 is directly the selected RGB->PCS matrix serialized as CC1 while field2 is its PCS->RGB companion.')
+          print('If not inverse pairs, preserve their raw role and do not impose standard-space semantics.')
+          PY
+      - name: Commit v2.30 trace
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v230_output_colorspace_mode_matrices.txt
+          git commit -m 'research: record v2.30 output color-space mode matrices' || exit 0
+          git pull --rebase origin m10r-color-science-trace
+          git push
