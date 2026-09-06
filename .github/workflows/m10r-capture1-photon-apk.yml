@@ -1,21 +1,24 @@
-name: M10-R CAPTURE1 Photon Single-RAW APK
+name: M10-R CAPTURE1B Native Source Promoted-C APK
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - m10r-capture1
+      - m10r-capture1b
 
 jobs:
-  build-capture1:
+  build-capture1b:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - name: Checkout M10-R repo
         uses: actions/checkout@v4
 
-      - name: Verify CAPTURE1 patch syntax
-        run: python3 -m py_compile patches/apply-m10r-capture1-foundation.py
+      - name: Verify CAPTURE1B patch syntax
+        run: |
+          python3 -m py_compile patches/apply-m10r-capture1-foundation.py
+          python3 -m py_compile patches/apply-m10r-capture1b-renderer.py
+          python3 -m py_compile patches/verify-m10r-capture1b.py
 
       - name: Clone exact Photon baseline proven by current M9 project
         run: |
@@ -32,17 +35,15 @@ jobs:
           set -euo pipefail
           python3 "$GITHUB_WORKSPACE/patches/apply-m10r-capture1-foundation.py" "$GITHUB_WORKSPACE/PhotonCamera"
 
-      - name: Verify CAPTURE1 invariants
+      - name: Apply CAPTURE1B native-source renderer
         run: |
           set -euo pipefail
-          ROOT="$GITHUB_WORKSPACE/PhotonCamera"
-          grep -F "applicationId 'com.m10rproject.m10rcam.photon'" "$ROOT/app/build.gradle"
-          grep -F "versionName '0.97-m10rcapture1'" "$ROOT/app/build.gradle"
-          grep -F "M10R CAPTURE1: one physical exposure only" "$ROOT/app/src/main/java/com/particlesdevs/photoncamera/processing/parameters/FrameNumberSelector.java"
-          grep -F "frameCount = 1" "$ROOT/app/src/main/java/com/particlesdevs/photoncamera/processing/parameters/FrameNumberSelector.java"
-          grep -F "M10R CAPTURE1: one untouched RAW DNG" "$ROOT/app/src/main/java/com/particlesdevs/photoncamera/processing/DefaultSaver.java"
-          grep -F "saveSingleRaw" "$ROOT/app/src/main/java/com/particlesdevs/photoncamera/processing/DefaultSaver.java"
-          grep -F "capture1Frame.close()" "$ROOT/app/src/main/java/com/particlesdevs/photoncamera/processing/DefaultSaver.java"
+          python3 "$GITHUB_WORKSPACE/patches/apply-m10r-capture1b-renderer.py" "$GITHUB_WORKSPACE/PhotonCamera"
+
+      - name: Verify CAPTURE1B invariants
+        run: |
+          set -euo pipefail
+          python3 "$GITHUB_WORKSPACE/patches/verify-m10r-capture1b.py" "$GITHUB_WORKSPACE/PhotonCamera"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -58,25 +59,25 @@ jobs:
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platforms;android-36" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.0.12077973"
 
-      - name: Build CAPTURE1 debug APK
+      - name: Build CAPTURE1B debug APK
         run: |
           set -o pipefail
           cd PhotonCamera
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_CAPTURE1_GRADLE.log"
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_CAPTURE1B_GRADLE.log"
 
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: M10R-CAPTURE1-buildlog
-          path: M10R_CAPTURE1_GRADLE.log
+          name: M10R-CAPTURE1B-buildlog
+          path: M10R_CAPTURE1B_GRADLE.log
           if-no-files-found: ignore
 
-      - name: Upload CAPTURE1 APK and provenance
+      - name: Upload CAPTURE1B APK and provenance
         uses: actions/upload-artifact@v4
         with:
-          name: M10RCam-CAPTURE1-single-raw
+          name: M10RCam-CAPTURE1B-native-m10r
           path: |
             PhotonCamera/app/build/outputs/apk/debug/*.apk
             PHOTON_UPSTREAM_COMMIT.txt
