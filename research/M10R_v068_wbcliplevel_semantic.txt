@@ -1,0 +1,246 @@
+V068_SECTION_COUNT=102
+V068_IMG_SECTIONS=1
+V068_MAP_BIAS=0x41fffffc
+V068_WB_PAGE_BASE=0x20020080
+
+=== DIRECT_WB_DRIVER ===
+420d4380: push     {r4, r5, r6, lr}
+420d4382: movs     r5, r0
+420d4384: movs     r4, r1
+420d4386: movs     r6, r2
+420d4388: cmp      r5, #0
+420d438a: bne      #0x420d439c
+420d438c: cmp      r4, #0
+420d438e: bne      #0x420d439c
+420d4390: cmp      r6, #0
+420d4392: bne      #0x420d439c
+420d4394: adr      r1, #0x6c
+420d4396: movs     r0, #4
+420d4398: bl       #0x42140150
+420d439c: movs     r0, #1
+420d439e: lsls     r0, r0, #0xb
+420d43a0: cmp      r5, r0
+420d43a2: bge      #0x420d43ac
+420d43a4: cmp      r4, r0
+420d43a6: bge      #0x420d43ac
+420d43a8: cmp      r6, r0
+420d43aa: blt      #0x420d43b4
+420d43ac: adr      r1, #0x8c
+420d43ae: movs     r0, #4
+420d43b0: bl       #0x42140150
+420d43b4: ldr      r0, [pc, #0xbc]
+420d43b6: ldr      r0, [r0, #0x10]
+420d43b8: ldr      r1, [pc, #0xbc]
+420d43ba: ands     r0, r1
+420d43bc: lsls     r1, r4, #0x10
+420d43be: ldr      r2, [pc, #0xb8]
+420d43c0: mvns     r2, r2
+420d43c2: ands     r1, r2
+420d43c4: orrs     r0, r1
+420d43c6: ldr      r1, [pc, #0xac]
+420d43c8: str      r0, [r1, #0x10]
+420d43ca: movs     r0, r1
+420d43cc: ldr      r0, [r0, #0x10]
+420d43ce: lsrs     r0, r0, #0xb
+420d43d0: lsls     r0, r0, #0xb
+420d43d2: lsls     r1, r4, #0x15
+420d43d4: lsrs     r1, r1, #0x15
+420d43d6: orrs     r0, r1
+420d43d8: ldr      r1, [pc, #0x98]
+420d43da: str      r0, [r1, #0x10]
+420d43dc: movs     r0, r1
+420d43de: ldr      r0, [r0, #0xc]
+420d43e0: lsrs     r0, r0, #0xb
+420d43e2: lsls     r0, r0, #0xb
+420d43e4: lsls     r1, r5, #0x15
+420d43e6: lsrs     r1, r1, #0x15
+420d43e8: orrs     r0, r1
+420d43ea: ldr      r1, [pc, #0x88]
+420d43ec: str      r0, [r1, #0xc]
+420d43ee: movs     r0, r1
+420d43f0: ldr      r0, [r0, #0xc]
+420d43f2: mvns     r1, r2
+420d43f4: ands     r0, r1
+420d43f6: lsls     r1, r6, #0x10
+420d43f8: ands     r1, r2
+420d43fa: orrs     r0, r1
+420d43fc: ldr      r1, [pc, #0x74]
+420d43fe: str      r0, [r1, #0xc]
+420d4400: pop      {r4, r5, r6, pc}
+
+=== WBCLIP_DRIVER ===
+420d42dc: cmp      r1, #0
+420d42de: bne      #0x420d4336
+420d42e0: ldr      r2, [pc, #0x94]
+420d42e2: ldr      r2, [r2, #0x14]
+420d42e4: lsrs     r2, r2, #0x10
+420d42e6: lsls     r2, r2, #0x10
+420d42e8: ldrh     r3, [r0, #4]
+420d42ea: lsls     r3, r3, #0x10
+420d42ec: lsrs     r3, r3, #0x10
+420d42ee: orrs     r2, r3
+420d42f0: ldr      r3, [pc, #0x84]
+420d42f2: str      r2, [r3, #0x14]
+420d42f4: movs     r2, r3
+420d42f6: ldr      r2, [r2, #0x14]
+420d42f8: lsls     r2, r2, #0x10
+420d42fa: lsrs     r2, r2, #0x10
+420d42fc: ldrh     r3, [r0]
+420d42fe: lsls     r3, r3, #0x10
+420d4300: lsrs     r3, r3, #0x10
+420d4302: lsls     r3, r3, #0x10
+420d4304: orrs     r2, r3
+420d4306: ldr      r3, [pc, #0x70]
+420d4308: str      r2, [r3, #0x14]
+420d430a: movs     r2, r3
+420d430c: ldr      r2, [r2, #0x18]
+420d430e: lsrs     r2, r2, #0x10
+420d4310: lsls     r2, r2, #0x10
+420d4312: ldrh     r3, [r0, #0xc]
+420d4314: lsls     r3, r3, #0x10
+420d4316: lsrs     r3, r3, #0x10
+420d4318: orrs     r2, r3
+420d431a: ldr      r3, [pc, #0x5c]
+420d431c: str      r2, [r3, #0x18]
+420d431e: movs     r2, r3
+420d4320: ldr      r2, [r2, #0x18]
+420d4322: lsls     r2, r2, #0x10
+420d4324: lsrs     r2, r2, #0x10
+420d4326: ldrh     r3, [r0, #8]
+420d4328: lsls     r3, r3, #0x10
+420d432a: lsrs     r3, r3, #0x10
+420d432c: lsls     r3, r3, #0x10
+420d432e: orrs     r2, r3
+420d4330: ldr      r3, [pc, #0x44]
+420d4332: str      r2, [r3, #0x18]
+420d4334: b        #0x420d4374
+420d4336: ldr      r2, [pc, #0x40]
+420d4338: ldr      r2, [r2, #0x14]
+420d433a: lsrs     r2, r2, #0x10
+420d433c: lsls     r2, r2, #0x10
+420d433e: ldr      r3, [pc, #0x3c]
+420d4340: adds     r3, r2, r3
+420d4342: ldr      r2, [pc, #0x34]
+420d4344: str      r3, [r2, #0x14]
+420d4346: ldr      r2, [r2, #0x14]
+420d4348: lsls     r2, r2, #0x10
+420d434a: lsrs     r2, r2, #0x10
+420d434c: movs     r3, #1
+420d434e: lsls     r3, r3, #0x10
+420d4350: subs     r3, r2, r3
+420d4352: ldr      r2, [pc, #0x24]
+420d4354: str      r3, [r2, #0x14]
+420d4356: ldr      r2, [r2, #0x18]
+420d4358: lsrs     r2, r2, #0x10
+420d435a: lsls     r2, r2, #0x10
+420d435c: ldr      r3, [pc, #0x1c]
+420d435e: adds     r3, r2, r3
+420d4360: ldr      r2, [pc, #0x14]
+420d4362: str      r3, [r2, #0x18]
+420d4364: ldr      r2, [r2, #0x18]
+420d4366: lsls     r2, r2, #0x10
+420d4368: lsrs     r2, r2, #0x10
+420d436a: movs     r3, #1
+420d436c: lsls     r3, r3, #0x10
+420d436e: subs     r3, r2, r3
+420d4370: ldr      r2, [pc, #4]
+420d4372: str      r3, [r2, #0x18]
+420d4374: bx       lr
+V068_DIRECT_WB_DRIVER=0x420d4380
+V068_DIRECT_WB_FIELD_MASK=0x07ff|packed_low_and_bits26_16
+V068_DIRECT_WB_RANGE_CHECK_0X800=1
+V068_DIRECT_WB_11BIT_PACKING=1
+V068_WBCLIP_DRIVER=0x420d42dc
+V068_WBCLIP_REGS=0x20020094,0x20020098
+V068_WBCLIP_LDRH_COUNT=4
+V068_WBCLIP_LDRSH_COUNT=0
+V068_WBCLIP_DRIVER_HAS_FFFF_CONSTRUCTION=0
+V068_WB_PAGE_LITERAL_COUNT=7
+V068_WB_PAGE_LITERAL=pool=0x420d2598|xrefs=20
+V068_WB_PAGE_XREF=0x420d244e|func=0x420d2448|ldr r2, [pc, #0x148]
+V068_WB_PAGE_XREF=0x420d245e|func=0x420d2448|ldr r3, [pc, #0x138]
+V068_WB_PAGE_XREF=0x420d2474|func=0x420d2448|ldr r3, [pc, #0x120]
+V068_WB_PAGE_XREF=0x420d248a|func=0x420d2448|ldr r3, [pc, #0x10c]
+V068_WB_PAGE_XREF=0x420d249e|func=0x420d2448|ldr r3, [pc, #0xf8]
+V068_WB_PAGE_XREF=0x420d24b6|func=0x420d2448|ldr r3, [pc, #0xe0]
+V068_WB_PAGE_XREF=0x420d24ca|func=0x420d2448|ldr r3, [pc, #0xcc]
+V068_WB_PAGE_XREF=0x420d24de|func=0x420d2448|ldr r3, [pc, #0xb8]
+V068_WB_PAGE_XREF=0x420d24f6|func=0x420d2448|ldr r3, [pc, #0xa0]
+V068_WB_PAGE_XREF=0x420d250a|func=0x420d2448|ldr r3, [pc, #0x8c]
+V068_WB_PAGE_XREF=0x420d2510|func=0x420d2448|ldr r2, [pc, #0x84]
+V068_WB_PAGE_XREF=0x420d251a|func=0x420d2448|ldr r3, [pc, #0x7c]
+V068_WB_PAGE_XREF=0x420d2528|func=0x420d2448|ldr r3, [pc, #0x6c]
+V068_WB_PAGE_XREF=0x420d253c|func=0x420d2448|ldr r2, [pc, #0x58]
+V068_WB_PAGE_XREF=0x420d2548|func=0x420d2448|ldr r3, [pc, #0x4c]
+V068_WB_PAGE_XREF=0x420d255a|func=0x420d2448|ldr r2, [pc, #0x3c]
+V068_WB_PAGE_XREF=0x420d2566|func=0x420d2448|ldr r3, [pc, #0x30]
+V068_WB_PAGE_XREF=0x420d2578|func=0x420d2448|ldr r2, [pc, #0x1c]
+V068_WB_PAGE_XREF=0x420d2586|func=0x420d2448|ldr r2, [pc, #0x10]
+V068_WB_PAGE_XREF=0x420d2590|func=0x420d2448|ldr r3, [pc, #4]
+V068_WB_PAGE_LITERAL=pool=0x420d3420|xrefs=0
+V068_WB_PAGE_LITERAL=pool=0x420d3638|xrefs=6
+V068_WB_PAGE_XREF=0x420d35e6|func=0x420d35e0|ldr r2, [pc, #0x50]
+V068_WB_PAGE_XREF=0x420d35f6|func=0x420d35e0|ldr r3, [pc, #0x40]
+V068_WB_PAGE_XREF=0x420d3610|func=0x420d35e0|ldr r3, [pc, #0x24]
+V068_WB_PAGE_XREF=0x420d3616|func=0x420d35e0|ldr r2, [pc, #0x20]
+V068_WB_PAGE_XREF=0x420d3620|func=0x420d35e0|ldr r3, [pc, #0x14]
+V068_WB_PAGE_XREF=0x420d3630|func=0x420d35e0|ldr r3, [pc, #4]
+V068_WB_PAGE_LITERAL=pool=0x420d4378|xrefs=10
+V068_WB_PAGE_XREF=0x420d42e0|func=?|ldr r2, [pc, #0x94]
+V068_WB_PAGE_XREF=0x420d42f0|func=?|ldr r3, [pc, #0x84]
+V068_WB_PAGE_XREF=0x420d4306|func=?|ldr r3, [pc, #0x70]
+V068_WB_PAGE_XREF=0x420d431a|func=?|ldr r3, [pc, #0x5c]
+V068_WB_PAGE_XREF=0x420d4330|func=?|ldr r3, [pc, #0x44]
+V068_WB_PAGE_XREF=0x420d4336|func=?|ldr r2, [pc, #0x40]
+V068_WB_PAGE_XREF=0x420d4342|func=?|ldr r2, [pc, #0x34]
+V068_WB_PAGE_XREF=0x420d4352|func=?|ldr r2, [pc, #0x24]
+V068_WB_PAGE_XREF=0x420d4360|func=?|ldr r2, [pc, #0x14]
+V068_WB_PAGE_XREF=0x420d4370|func=?|ldr r2, [pc, #4]
+V068_WB_PAGE_LITERAL=pool=0x420d4474|xrefs=5
+V068_WB_PAGE_XREF=0x420d43b4|func=0x420d4380|ldr r0, [pc, #0xbc]
+V068_WB_PAGE_XREF=0x420d43c6|func=0x420d4380|ldr r1, [pc, #0xac]
+V068_WB_PAGE_XREF=0x420d43d8|func=0x420d4380|ldr r1, [pc, #0x98]
+V068_WB_PAGE_XREF=0x420d43ea|func=0x420d4380|ldr r1, [pc, #0x88]
+V068_WB_PAGE_XREF=0x420d43fc|func=0x420d4380|ldr r1, [pc, #0x74]
+V068_WB_PAGE_LITERAL=pool=0x42153394|xrefs=11
+V068_WB_PAGE_XREF=0x42152f98|func=0x42152f8c|ldr r0, [pc, #0x3f8]
+V068_WB_PAGE_XREF=0x42152fac|func=0x42152f8c|ldr r1, [pc, #0x3e4]
+V068_WB_PAGE_XREF=0x42152fc0|func=0x42152f8c|ldr r1, [pc, #0x3d0]
+V068_WB_PAGE_XREF=0x42152fd4|func=0x42152f8c|ldr r1, [pc, #0x3bc]
+V068_WB_PAGE_XREF=0x42152fe8|func=0x42152f8c|ldr r1, [pc, #0x3a8]
+V068_WB_PAGE_XREF=0x42152ff8|func=0x42152f8c|ldr r1, [pc, #0x398]
+V068_WB_PAGE_XREF=0x4215300a|func=0x42152f8c|ldr r1, [pc, #0x388]
+V068_WB_PAGE_XREF=0x4215301c|func=0x42152f8c|ldr r1, [pc, #0x374]
+V068_WB_PAGE_XREF=0x4215302e|func=0x42152f8c|ldr r1, [pc, #0x364]
+V068_WB_PAGE_XREF=0x42153034|func=0x42152f8c|ldr r0, [pc, #0x35c]
+V068_WB_PAGE_XREF=0x4215304e|func=0x42152f8c|ldr r1, [pc, #0x344]
+V068_WB_PAGE_LITERAL=pool=0x4215390c|xrefs=11
+V068_WB_PAGE_XREF=0x421536c6|func=0x421536bc|ldr r0, [pc, #0x244]
+V068_WB_PAGE_XREF=0x421536da|func=0x421536bc|ldr r1, [pc, #0x230]
+V068_WB_PAGE_XREF=0x421536ee|func=0x421536bc|ldr r1, [pc, #0x21c]
+V068_WB_PAGE_XREF=0x42153702|func=0x421536bc|ldr r1, [pc, #0x208]
+V068_WB_PAGE_XREF=0x42153716|func=0x421536bc|ldr r1, [pc, #0x1f4]
+V068_WB_PAGE_XREF=0x42153726|func=0x421536bc|ldr r1, [pc, #0x1e4]
+V068_WB_PAGE_XREF=0x42153738|func=0x421536bc|ldr r1, [pc, #0x1d0]
+V068_WB_PAGE_XREF=0x4215374a|func=0x421536bc|ldr r1, [pc, #0x1c0]
+V068_WB_PAGE_XREF=0x4215375c|func=0x421536bc|ldr r1, [pc, #0x1ac]
+V068_WB_PAGE_XREF=0x42153762|func=0x421536bc|ldr r0, [pc, #0x1a8]
+V068_WB_PAGE_XREF=0x4215377c|func=0x421536bc|ldr r1, [pc, #0x18c]
+V068_WB_PAGE_OWNER_COUNT=15
+V068_WB_PAGE_OWNERS=0x420d2448,0x420d35e0,0x420d42e0,0x420d42f0,0x420d4306,0x420d431a,0x420d4330,0x420d4336,0x420d4342,0x420d4352,0x420d4360,0x420d4370,0x420d4380,0x42152f8c,0x421536bc
+V068_WBCLIPEN_HITS=0
+V068_WBCLIPCCD_HITS=0
+V068_B2Y_ID4_VARIANTS=1
+V068_B2Y_ID4=section=74:IMG Calibration Data/data/calib/B2Y.bin|index=129|size=0x10|payload=0xa75f4|fields=0xf82f,0xf82f,0xf82f,0xf82f
+V068_B2Y_ID4_HEX=2ff800002ff800002ff800002ff80000
+V068_F82F_WB_DRIVERS_HITS=0|-
+V068_07D0_WB_DRIVERS_HITS=0|-
+V068_07D1_WB_DRIVERS_HITS=0|-
+V068_F82F_CENTRAL_HITS=0|-
+V068_07D0_CENTRAL_HITS=0|-
+V068_07D1_CENTRAL_HITS=0|-
+V068_WBCLIP_SUCCESS_FIELDS_F82F_X4=1
+V068_WBCLIP_FALLBACK_FIELDS=0xffff,0xffff,0xffff,0xffff
+V068_SIGNED_MINUS2001_SUPPORTED=0
+V068_FFFF_DISABLE_OR_MAX_PROVEN=0
+OVERALL_VERDICT=WBCLIP_RAW16_UNSIGNED_LOAD_PATH_PROVEN_ENABLE_SEMANTICS_STILL_UNRESOLVED
