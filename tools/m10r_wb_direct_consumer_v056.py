@@ -1,18 +1,13 @@
 #!/usr/bin/env python3
 """M10-R v0.56 surgical canonical-WB consumer probe.
 
-Evidence anchor (already proven in archived research): central selector 0x42154F84
-loads the B2Y runtime halfwords at local +0x04/+0x06/+0x08 into r0/r1/r2 and
-calls 0x420D4380.  This probe does not rediscover speculative addresses.  It
-inspects that exact callee, reports its bounded Thumb body and follows the three
-incoming argument registers conservatively through simple register transfers,
-arithmetic, stores and calls.
+Proven archived anchor: central selector 0x42154F84 loads the B2Y runtime
+halfwords local +0x04/+0x06/+0x08 into r0/r1/r2 and calls 0x420D4380.
 
-The firmware section table records IMG-System with image_base=0.  Archived
-research disassembly consistently labels this section as 0x42000000 + section
-offset; that label convention is used only to map already-proven archived code
-addresses back into the extracted IMG-System bytes.  It is not presented as a
-section-table runtime base.
+The IMG-System section table has image_base=0, so archived 0x420... labels are
+mapped back to raw section offsets only after TWO independent exact string
+anchors from the preserved research agree on the same address-minus-offset
+bias.  No guessed 0x42000000 raw base is accepted.
 
 No renderer/application files are touched.
 """
@@ -24,32 +19,40 @@ from capstone import Cs, CS_ARCH_ARM, CS_MODE_THUMB, CS_MODE_LITTLE_ENDIAN
 from capstone.arm import ARM_OP_MEM, ARM_OP_REG, ARM_REG_PC
 
 TARGET = 0x420D4380
-ARCHIVE_IMG_LABEL_BASE = 0x42000000
 WINDOW = 0x280
+STRING_ANCHORS = [
+    (0x420A40AF, b'Gain R: %4.f | G: %4.f | B: %4.f'),
+    (0x421E9CCD, b'ca9_cm_ColorManagementFinished'),
+]
 
 
-def load_sections(root: Path):
-    rows = list(csv.DictReader((root / 'sections.csv').open(encoding='utf-8')))
-    out=[]
+def get_img_section(root: Path):
+    rows=list(csv.DictReader((root/'sections.csv').open(encoding='utf-8')))
+    hits=[]
     for row in rows:
-        table_base=int(row['image_base'],16)
-        p=root/row['file']
-        data=p.read_bytes()
-        if table_base and table_base <= TARGET < table_base+len(data):
-            out.append((row,table_base,data,'section-table-base'))
-            continue
-        if row['name'] == 'IMG-System' and table_base == 0:
-            off=TARGET-ARCHIVE_IMG_LABEL_BASE
-            if 0 <= off < len(data):
-                out.append((row,ARCHIVE_IMG_LABEL_BASE,data,'archived-img-label-base'))
-    return out
+        if row['name']=='IMG-System':
+            hits.append((row,(root/row['file']).read_bytes()))
+    return hits
 
 
-def rn(md, rid):
-    return md.reg_name(rid) if rid else None
+def derive_mapping(data: bytes):
+    evidence=[]
+    for va,needle in STRING_ANCHORS:
+        poss=[]; start=0
+        while True:
+            p=data.find(needle,start)
+            if p<0: break
+            poss.append(p); start=p+1
+        evidence.append((va,needle,poss))
+    if any(len(x[2])!=1 for x in evidence):
+        return evidence,None
+    biases=[va-poss[0] for va,_,poss in evidence]
+    return evidence,(biases[0] if len(set(biases))==1 else None)
 
 
-def op_regs(ins, md):
+def rn(md,rid): return md.reg_name(rid) if rid else None
+
+def op_regs(ins,md):
     try:
         rd,wr=ins.regs_access()
         return ({rn(md,x) for x in rd if rn(md,x)}, {rn(md,x) for x in wr if rn(md,x)})
@@ -57,124 +60,93 @@ def op_regs(ins, md):
         return set(),set()
 
 
-def literal_value(ins, op, data, label_base):
-    if op.type != ARM_OP_MEM:
-        return None
-    mem=op.mem
-    if mem.base != ARM_REG_PC:
-        return None
-    addr=((ins.address+4)&~3)+int(mem.disp)
-    off=addr-label_base
-    if 0 <= off <= len(data)-4:
-        return addr, struct.unpack_from('<I',data,off)[0]
+def literal_value(ins,op,data,bias):
+    if op.type!=ARM_OP_MEM or op.mem.base!=ARM_REG_PC: return None
+    va=((ins.address+4)&~3)+int(op.mem.disp)
+    off=va-bias
+    if 0<=off<=len(data)-4:
+        return va,struct.unpack_from('<I',data,off)[0]
     return None
 
 
 def main():
-    if len(sys.argv)!=2:
-        raise SystemExit(f'usage: {sys.argv[0]} sections_dir')
-    root=Path(sys.argv[1])
-    matches=load_sections(root)
+    if len(sys.argv)!=2: raise SystemExit(f'usage: {sys.argv[0]} sections_dir')
+    root=Path(sys.argv[1]); imgs=get_img_section(root)
     print('V056_ANCHOR=0x42154f84:local+04/+06/+08->r0/r1/r2->0x420d4380')
     print('V056_CALLEE=0x420d4380')
-    print(f'V056_MATCHING_SECTIONS={len(matches)}')
-    if len(matches)!=1:
-        print('OVERALL_VERDICT=UNRESOLVED_SECTION_MAPPING')
-        return 0
-    row,label_base,data,mapping=matches[0]
-    off=TARGET-label_base
-    table_base=int(row['image_base'],16)
+    print(f'V056_IMG_SECTIONS={len(imgs)}')
+    if len(imgs)!=1:
+        print('OVERALL_VERDICT=UNRESOLVED_IMG_SECTION'); return 0
+    row,data=imgs[0]
     print(f"V056_SECTION={row['index']}:{row['name']}")
-    print(f'V056_SECTION_TABLE_BASE=0x{table_base:08x}')
-    print(f'V056_ADDRESS_MAPPING={mapping}')
-    print(f'V056_ARCHIVE_LABEL_BASE=0x{label_base:08x}')
-    print(f'V056_CALLEE_OFFSET=0x{off:x}')
+    print(f"V056_SECTION_TABLE_BASE={row['image_base']}")
+    evidence,bias=derive_mapping(data)
+    for va,needle,poss in evidence:
+        print(f"V056_MAP_ANCHOR=0x{va:08x}|{needle.decode('ascii')}|hits={len(poss)}|offsets={','.join(hex(x) for x in poss) or '-'}")
+        for p in poss:
+            print(f'V056_MAP_BIAS_CANDIDATE=0x{va-p:08x}')
+    if bias is None:
+        print('OVERALL_VERDICT=UNRESOLVED_ARCHIVE_TO_FILE_MAPPING'); return 0
+    off=TARGET-bias
+    print(f'V056_MAP_BIAS=0x{bias:08x}')
+    print(f'V056_CALLEE_FILE_OFFSET=0x{off:x}')
+    if not (0<=off<len(data)):
+        print('OVERALL_VERDICT=UNRESOLVED_CALLEE_OFFSET'); return 0
+    print(f'V056_CALLEE_BYTES={data[off:off+32].hex()}')
 
-    md=Cs(CS_ARCH_ARM, CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN)
-    md.detail=True
+    md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True
     code=data[off:off+WINDOW]
     taint={'r0':{'R'},'r1':{'G'},'r2':{'B'}}
-    stores=[]; calls=[]; literals=[]; taint_ops=[]
-    insn_count=0
-    return_seen=False
-
+    stores=[]; calls=[]; literals=[]; taint_ops=[]; insn_count=0; return_seen=False
     print('=== V056_CALLEE_BODY ===')
     for ins in md.disasm(code,TARGET):
-        insn_count += 1
-        txt=f'{ins.address:08x}: {ins.mnemonic:<10} {ins.op_str}'.rstrip()
-        print(txt)
-        if ins.id==0:
-            taint.clear(); continue
+        insn_count+=1
+        print(f'{ins.address:08x}: {ins.mnemonic:<10} {ins.op_str}'.rstrip())
         try: ops=list(ins.operands)
         except Exception: ops=[]
         reads,writes=op_regs(ins,md)
         used=set()
-        for r in reads:
-            used |= taint.get(r,set())
-
+        for r in reads: used|=taint.get(r,set())
         for op in ops:
-            lv=literal_value(ins,op,data,label_base)
+            lv=literal_value(ins,op,data,bias)
             if lv:
-                addr,val=lv; literals.append((ins.address,addr,val))
-                print(f'  V056_LITERAL@0x{ins.address:08x}=0x{val:08x} pool=0x{addr:08x}')
-
+                va,val=lv; literals.append((ins.address,va,val))
+                print(f'  V056_LITERAL@0x{ins.address:08x}=0x{val:08x} pool=0x{va:08x}')
         mn=ins.mnemonic.lower()
         if used:
             taint_ops.append((ins.address,mn,ins.op_str,sorted(used)))
             print(f"  V056_TAINT_USE labels={','.join(sorted(used))}")
-
         if mn.startswith('str') and ops:
-            src_labels=set()
-            if ops[0].type==ARM_OP_REG:
-                src_labels |= taint.get(rn(md,ops[0].reg),set())
-            stores.append((ins.address,ins.op_str,sorted(src_labels)))
-            print(f"  V056_STORE labels={','.join(sorted(src_labels)) or '-'} op='{ins.op_str}'")
-
+            labs=set()
+            if ops[0].type==ARM_OP_REG: labs|=taint.get(rn(md,ops[0].reg),set())
+            stores.append((ins.address,ins.op_str,sorted(labs)))
+            print(f"  V056_STORE labels={','.join(sorted(labs)) or '-'} op='{ins.op_str}'")
         if mn in ('bl','blx'):
             argmap={r:sorted(taint.get(r,set())) for r in ('r0','r1','r2','r3') if taint.get(r)}
-            calls.append((ins.address,ins.op_str,argmap))
-            print(f'  V056_CALL_TAINT={argmap}')
-            for r in ('r0','r1','r2','r3','r12','lr'):
-                taint.pop(r,None)
+            calls.append((ins.address,ins.op_str,argmap)); print(f'  V056_CALL_TAINT={argmap}')
+            for r in ('r0','r1','r2','r3','r12','lr'): taint.pop(r,None)
         else:
-            src_labels=set()
-            for r in reads:
-                src_labels |= taint.get(r,set())
-            for w in writes:
-                taint.pop(w,None)
-            if src_labels and len(writes)==1 and not mn.startswith(('cmp','tst','str','push')):
-                w=next(iter(writes)); taint[w]=set(src_labels)
-
-        if mn=='bx' and 'lr' in ins.op_str:
-            return_seen=True; break
-        if mn=='pop' and 'pc' in ins.op_str:
-            return_seen=True; break
-        if insn_count>=220:
-            break
+            labs=set()
+            for r in reads: labs|=taint.get(r,set())
+            for w in writes: taint.pop(w,None)
+            if labs and len(writes)==1 and not mn.startswith(('cmp','tst','str','push')):
+                taint[next(iter(writes))]=set(labs)
+        if mn=='bx' and 'lr' in ins.op_str: return_seen=True; break
+        if mn=='pop' and 'pc' in ins.op_str: return_seen=True; break
+        if insn_count>=220: break
 
     print('=== V056_SUMMARY ===')
-    print(f'V056_INSNS={insn_count}')
-    print(f'V056_RETURN_SEEN={int(return_seen)}')
-    print(f'V056_TAINT_OPS={len(taint_ops)}')
-    print(f'V056_STORES={len(stores)}')
-    print(f'V056_CALLS={len(calls)}')
-    print(f'V056_LITERALS={len(literals)}')
-    labeled_stores=[x for x in stores if x[2]]
-    tainted_calls=[x for x in calls if x[2]]
-    print(f'V056_TAINTED_STORES={len(labeled_stores)}')
-    print(f'V056_TAINTED_CALLS={len(tainted_calls)}')
-    for a,op,labs in labeled_stores:
-        print(f"V056_TAINTED_STORE=0x{a:08x}|{','.join(labs)}|{op}")
-    for a,op,argmap in tainted_calls:
-        print(f'V056_TAINTED_CALL=0x{a:08x}|{op}|{argmap}')
-    if labeled_stores:
-        print('OVERALL_VERDICT=CANONICAL_WB_REACHES_STORE_NEEDS_TARGET_CLASSIFICATION')
-    elif tainted_calls:
-        print('OVERALL_VERDICT=CANONICAL_WB_ESCAPES_TO_CALLEE_UNRESOLVED')
-    elif return_seen:
-        print('OVERALL_VERDICT=NO_OUTWARD_CANONICAL_WB_CONSUMER_IN_HELPER')
-    else:
-        print('OVERALL_VERDICT=UNRESOLVED')
+    print(f'V056_INSNS={insn_count}'); print(f'V056_RETURN_SEEN={int(return_seen)}')
+    print(f'V056_TAINT_OPS={len(taint_ops)}'); print(f'V056_STORES={len(stores)}')
+    print(f'V056_CALLS={len(calls)}'); print(f'V056_LITERALS={len(literals)}')
+    ls=[x for x in stores if x[2]]; lc=[x for x in calls if x[2]]
+    print(f'V056_TAINTED_STORES={len(ls)}'); print(f'V056_TAINTED_CALLS={len(lc)}')
+    for a,op,labs in ls: print(f"V056_TAINTED_STORE=0x{a:08x}|{','.join(labs)}|{op}")
+    for a,op,args in lc: print(f'V056_TAINTED_CALL=0x{a:08x}|{op}|{args}')
+    if insn_count==0: print('OVERALL_VERDICT=UNRESOLVED_NO_DECODE')
+    elif ls: print('OVERALL_VERDICT=CANONICAL_WB_REACHES_STORE_NEEDS_TARGET_CLASSIFICATION')
+    elif lc: print('OVERALL_VERDICT=CANONICAL_WB_ESCAPES_TO_CALLEE_UNRESOLVED')
+    elif return_seen: print('OVERALL_VERDICT=NO_OUTWARD_CANONICAL_WB_CONSUMER_IN_HELPER')
+    else: print('OVERALL_VERDICT=UNRESOLVED')
 
-if __name__=='__main__':
-    main()
+if __name__=='__main__': main()
