@@ -1,0 +1,46 @@
+M10-R v0.59 BAYER-DOMAIN DIRECT-WB HEADROOM DISCRIMINATOR
+source: exact Photography Blog M10-R sample pairs 01..06 reused from v2.20/v0.58
+change from v0.58: proven Q8 WB and candidate clipping are applied on native GBRG CFA before a fixed demosaic proxy
+IMPORTANT: empirical proxy only; the OpenCV demosaic is not claimed to be Leica B2Y demosaic.
+
+=== per-sample ===
+sample 01 identity=True defaults=True schema=True pattern=GBRG shape=[5208, 7872] align=(6,6) rot90=0 gains=[897, 256, 390] ASN=[0.2853957637, 1.0, 0.6564102564] white=15000 train=6552 test=88
+  trunc: dng_white rmse=0.896874 chroma=0.350856; b2y14 rmse=0.900002 chroma=0.348999; v059_delta=-0.003127 v058_delta=-0.007484202924740391
+  nearest: dng_white rmse=0.896874 chroma=0.350855; b2y14 rmse=0.900001 chroma=0.348999; v059_delta=-0.003127 v058_delta=-0.007484682668984499
+  rounding_delta nearest-minus-trunc {'b2y_14bit': -1.0145963735830321e-07, 'dng_white': -2.8498159321266314e-07}
+sample 02 identity=True defaults=True schema=True pattern=GBRG shape=[5208, 7872] align=(6,6) rot90=0 gains=[862, 256, 407] ASN=[0.2969837587, 1.0, 0.628992629] white=15000 train=6980 test=0
+  ERROR insufficient train/test highlight patches
+sample 03 identity=True defaults=True schema=True pattern=GBRG shape=[5208, 7872] align=(18,6) rot90=0 gains=[897, 256, 392] ASN=[0.2853957637, 1.0, 0.6530612245] white=15000 train=7131 test=0
+  ERROR insufficient train/test highlight patches
+sample 04 identity=True defaults=True schema=True pattern=GBRG shape=[5208, 7872] align=(18,6) rot90=0 gains=[885, 256, 412] ASN=[0.2892655367, 1.0, 0.6213592233] white=15000 train=6563 test=41
+  trunc: dng_white rmse=0.873874 chroma=0.274917; b2y14 rmse=0.873140 chroma=0.278548; v059_delta=0.000735 v058_delta=0.0031266955625685044
+  nearest: dng_white rmse=0.873876 chroma=0.274923; b2y14 rmse=0.873140 chroma=0.278548; v059_delta=0.000736 v058_delta=0.0031278601841634446
+  rounding_delta nearest-minus-trunc {'b2y_14bit': 5.254162410706087e-07, 'dng_white': 1.428493544897158e-06}
+sample 05 identity=True defaults=True schema=True pattern=GBRG shape=[5208, 7872] align=(18,6) rot90=0 gains=[897, 256, 387] ASN=[0.2853957637, 1.0, 0.661498708] white=15000 train=5624 test=113
+  trunc: dng_white rmse=0.712223 chroma=0.313864; b2y14 rmse=0.722118 chroma=0.306204; v059_delta=-0.009895 v058_delta=0.006589911640426549
+  nearest: dng_white rmse=0.712222 chroma=0.313863; b2y14 rmse=0.722117 chroma=0.306205; v059_delta=-0.009895 v058_delta=0.00659518524154501
+  rounding_delta nearest-minus-trunc {'b2y_14bit': -5.568131379307673e-07, 'dng_white': -5.836839703787788e-07}
+sample 06 identity=True defaults=True schema=True pattern=GBRG shape=[5208, 7872] align=(18,6) rot90=0 gains=[910, 256, 387] ASN=[0.2813186813, 1.0, 0.661498708] white=15000 train=6694 test=58
+  trunc: dng_white rmse=0.866187 chroma=0.291535; b2y14 rmse=0.872912 chroma=0.297034; v059_delta=-0.006725 v058_delta=0.002059204053310393
+  nearest: dng_white rmse=0.866185 chroma=0.291532; b2y14 rmse=0.872910 chroma=0.297030; v059_delta=-0.006725 v058_delta=0.0020575683778679688
+  rounding_delta nearest-minus-trunc {'b2y_14bit': -1.6880962628862406e-06, 'dng_white': -1.807706084377969e-06}
+
+=== aggregate ===
+trunc: valid=4 b2y14_wins=1 dng_white_wins=3 ties=0 median_delta=-0.004925933600257004 mean_delta=-0.004753046014110057
+  deltas [-0.003127275524295814, 0.0007349519000149352, -0.009895268755941156, -0.0067245916762181945]
+nearest: valid=4 b2y14_wins=1 dng_white_wins=3 ties=0 median_delta=-0.004926085166145677 mean_delta=-0.004752902745436549
+  deltas [-0.0031274590462516683, 0.0007358549773187617, -0.009895295626773604, -0.006724711286039686]
+rounding dng_white: trunc_wins=1 nearest_wins=3 ties=0 median nearest-minus-trunc=-4.34332781795721e-07
+rounding b2y_14bit: trunc_wins=1 nearest_wins=3 ties=0 median nearest-minus-trunc=-3.2913638764453523e-07
+
+HEADROOM_VERDICT UNRESOLVED
+ROUNDING_VERDICT ROUNDING_UNRESOLVED
+SIGN_STABILITY trunc [('01', True), ('04', True), ('05', False), ('06', False)]
+SIGN_STABILITY nearest [('01', True), ('04', True), ('05', False), ('06', False)]
+
+LIMITATIONS
+- native CFA comes from rawpy raw_image_visible; independent project v2.42 SOF3 work is the pixel-exact decoder validation baseline.
+- OpenCV Bayer demosaic is a controlled proxy held identical across candidates; it is not asserted to reproduce Leica B2Y demosaic.
+- per-scene downstream quadratic fit still absorbs unknown rendered CC/tone behavior using midtones only.
+- 8-bit JPEG may remain insufficient to identify one-code Q8 rounding differences.
+- no frozen renderer/color/tone/B2Y assets are modified.
