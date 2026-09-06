@@ -1,0 +1,116 @@
+name: M10-R CA9_PARITY1 B2Y Unity Calibration Map
+on:
+  push:
+    branches: [m10r-ca9-parity1]
+    paths:
+      - '.github/workflows/m10r-ca9-b2y-unity-calibration-map.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+
+jobs:
+  map:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Map packed unity values to B2Y calibration selectors
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 \
+            'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' \
+            -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+
+          python3 - <<'PY' > research/M10R_ca9_parity1_b2y_unity_calibration_map.txt
+          from pathlib import Path
+          import struct, collections, hashlib
+          d=Path('/tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin').read_bytes(); P=4
+          u32=lambda o:struct.unpack_from('<I',d,o)[0]
+          def s64(o): return d[o:o+0x40].split(b'\0',1)[0].decode('ascii','replace')
+          count=u32(P+8); stride=0xA90; rec0=P+0x10; payload_base=rec0+count*stride
+          recs=[]
+          for i in range(count):
+              o=rec0+i*stride; rid=u32(o); rel=u32(o+4); x8=u32(o+8); nk=u32(o+0xc)
+              keys=[s64(o+0x10+j*0x40) for j in range(min(nk,42))]
+              recs.append(dict(i=i,id=rid,rel=rel,x8=x8,nk=nk,keys=keys,ap=payload_base+rel))
+          starts=sorted(set(r['ap'] for r in recs if payload_base<=r['ap']<=len(d)))
+          def extent(ap):
+              z=next((v for v in starts if v>ap),len(d)); return z-ap
+          unity=struct.pack('<I',0x01000100)
+          unity_pair=unity+unity
+          print('M10-R CA9_PARITY1 B2Y PACKED UNITY CALIBRATION MAP')
+          print('section_size',hex(len(d)),'count',count,'payload_base',hex(payload_base),'sha256',hashlib.sha256(d).hexdigest())
+          print('candidate packed WB-unity word = 0x01000100 (two 11-bit channel codes both 256)')
+
+          rows=[]; totals=collections.Counter()
+          for r in recs:
+              ex=extent(r['ap']); blob=d[r['ap']:r['ap']+ex]
+              pos=[]; q=0
+              while True:
+                  q=blob.find(unity,q)
+                  if q<0: break
+                  pos.append(q); q+=1
+              pairs=[]; q=0
+              while True:
+                  q=blob.find(unity_pair,q)
+                  if q<0: break
+                  pairs.append(q); q+=1
+              if pos:
+                  rows.append((len(pos),len(pairs),r,ex,pos,pairs))
+                  totals[r['id']]+=len(pos)
+
+          print('\n=== selector records containing packed 0x01000100 ===')
+          for n,np,r,ex,pos,pairs in sorted(rows,key=lambda x:(-x[0],x[2]['i'])):
+              print(f"rec={r['i']:3d} id={r['id']:#04x} rel={r['rel']:#x} payload={r['ap']:#x} extent={ex:#x} x8={r['x8']:#x} keys={r['nk']} unity_words={n} adjacent_pairs={np}")
+              print('  word_offsets',[hex(x) for x in pos[:32]])
+              if pairs: print('  pair_offsets',[hex(x) for x in pairs[:32]])
+              for j,k in enumerate(r['keys']):
+                  if k and ('B2YMODE' in k or 'WB' in k or 'GAIN' in k): print(f'  key[{j}] {k}')
+
+          print('\n=== packed-unity totals by selector id ===')
+          for rid,n in totals.most_common(): print(hex(rid),n)
+
+          print('\n=== records with unity pair at payload offset 0 or small fixed offsets ===')
+          for n,np,r,ex,pos,pairs in rows:
+              small=[x for x in pairs if x<0x80]
+              if small:
+                  print(f"rec={r['i']} id={r['id']:#x} x8={r['x8']:#x} keys={r['nk']} pair_offsets={[hex(x) for x in small]}")
+                  print('  head128',d[r['ap']:r['ap']+0x80].hex())
+                  for j,k in enumerate(r['keys']):
+                      if k: print(f'  key[{j}] {k}')
+
+          print('\n=== direct selector-key search for WB/gain terminology ===')
+          for r in recs:
+              hits=[(j,k) for j,k in enumerate(r['keys']) if any(t in k.upper() for t in ('WB','GAIN','WHITE'))]
+              if hits:
+                  print(f"rec={r['i']} id={r['id']:#x} rel={r['rel']:#x} x8={r['x8']:#x} keys={r['nk']}")
+                  for j,k in hits: print(' ',j,k)
+
+          print('\n=== interpretation guard ===')
+          print('Packed 0x01000100 inside calibration is not itself sufficient to identify a WB-gain record. A useful unity proof requires the value to reside in a selector/record structurally connected to the gain words programmed at 0x2002008C/0x20020090.')
+          print('\n=== target ===')
+          print('Use selector concentration, payload offsets and key semantics to identify whether any calibration record initializes the B2Y gain pair to 256/256; otherwise pursue code-side reset/init writes.')
+          PY
+
+      - name: Commit map
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_ca9_parity1_b2y_unity_calibration_map.txt
+          git commit -m 'research: map B2Y packed unity calibration records' || exit 0
+          git pull --rebase origin m10r-ca9-parity1
+          git push
