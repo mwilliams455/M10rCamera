@@ -1,7 +1,7 @@
-name: M10-R v2.47 Highlight Boundary Factorial APK
+name: M10-R RENDER_PARITY1A Canonical Factorial APK
 on:
   push:
-    branches: [m10r-highlight-factorial-v053]
+    branches: [m10r-render-parity1a]
     paths:
       - 'app/**'
       - 'tools/M10RLinearReferenceCli.java'
@@ -20,7 +20,7 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Verify frozen decoder, v0.4, v0.5.1, and v0.5.2 composite
+      - name: Verify frozen decoder and reference cores
         shell: bash
         run: |
           test "$(git hash-object app/src/main/java/com/m10r/diagnostic/DngRawDecoder.java)" = '843dd16a36b16cda81d4a9d29d1e11b3d0943a9d'
@@ -28,21 +28,27 @@ jobs:
           test "$(git hash-object app/src/main/java/com/m10r/diagnostic/SensorPreviewCore.java)" = '4e463bc5ad2c33b4ad6bc65a6df61a9b086e90a2'
           test "$(git hash-object app/src/main/java/com/m10r/diagnostic/M10RLinearReferenceRenderer.java)" = '827c71a4cd1d72f63341d5f56685577e83a304e5'
           test "$(git hash-object app/src/main/java/com/m10r/diagnostic/M10RNeutralClipReferenceRenderer.java)" = '0866e3128754459b4950d55ba82220737be043d9'
-          echo 'A and D reference implementations are byte-identical to v0.5.1/v0.5.2.'
+          echo 'Decoder, sensor sanity, and legacy reference cores remain byte-identical.'
 
-      - name: Verify v0.5.3 build identity
+      - name: Verify RENDER_PARITY1A build identity and canonical modes
         shell: bash
         run: |
-          grep -F 'versionCode = 8' app/build.gradle.kts
-          grep -F 'versionName = "0.5.3-highlight-factorial"' app/build.gradle.kts
-          grep -F 'M10-R RAW Diagnostic v0.5.3' app/src/main/java/com/m10r/diagnostic/MainActivity.java
-          grep -F 'WHITELEVEL_CLAMP_ONLY' app/src/main/java/com/m10r/diagnostic/M10RHighlightFactorialRenderer.java
-          grep -F 'HEADROOM_NEUTRAL_CLIP_ONLY' app/src/main/java/com/m10r/diagnostic/M10RHighlightFactorialRenderer.java
+          grep -F 'versionCode = 9' app/build.gradle.kts
+          grep -F 'versionName = "0.5.4-render-parity1a"' app/build.gradle.kts
+          grep -F 'M10-R RAW Diagnostic — RENDER_PARITY1A' app/src/main/java/com/m10r/diagnostic/MainActivity.java
+          grep -F 'Mode.A_BASELINE' app/src/main/java/com/m10r/diagnostic/MainActivity.java
+          grep -F 'Mode.B_HEADROOM' app/src/main/java/com/m10r/diagnostic/MainActivity.java
+          grep -F 'Mode.C_CA9_CLIP' app/src/main/java/com/m10r/diagnostic/MainActivity.java
+          grep -F 'Mode.D_HEADROOM_CA9' app/src/main/java/com/m10r/diagnostic/MainActivity.java
+          grep -F 'A_BASELINE(false, false)' app/src/main/java/com/m10r/diagnostic/M10RHighlightFactorialRenderer.java
+          grep -F 'B_HEADROOM(true, false)' app/src/main/java/com/m10r/diagnostic/M10RHighlightFactorialRenderer.java
+          grep -F 'C_CA9_CLIP(false, true)' app/src/main/java/com/m10r/diagnostic/M10RHighlightFactorialRenderer.java
+          grep -F 'D_HEADROOM_CA9(true, true)' app/src/main/java/com/m10r/diagnostic/M10RHighlightFactorialRenderer.java
 
       - name: Download verified public M10-R DNG
         run: curl -L --fail --retry 3 -o /tmp/m10r.dng 'https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_01.dng'
 
-      - name: Validate public DNG through all four highlight-factor cells
+      - name: Validate public DNG through canonical A/B/C/D
         shell: bash
         run: |
           mkdir -p /tmp/classes
@@ -61,10 +67,11 @@ jobs:
           grep -F 'Decoded CFA: 7872x5208' /tmp/reference.txt
           grep -F 'SOF3: precision=14, predictor=1, Pt=0' /tmp/reference.txt
           grep -F 'CFA SHA-256 (LE u16): 27814cbc80f92d23d7b975d4833f70525f35bc52917d992b35d0a899829a097a' /tmp/reference.txt
-          grep -F 'A — v0.5.1 LINEAR IMAGE:' /tmp/reference.txt
-          grep -F 'B — v0.5.3 FACTORIAL WHITELEVEL_CLAMP_ONLY:' /tmp/reference.txt
-          grep -F 'C — v0.5.3 FACTORIAL HEADROOM_NEUTRAL_CLIP_ONLY:' /tmp/reference.txt
-          grep -F 'D — v0.5.2 EXPERIMENTAL CA9 NEUTRAL-CLIP IMAGE:' /tmp/reference.txt
+          grep -F 'A — RENDER_PARITY1A A_BASELINE:' /tmp/reference.txt
+          grep -F 'B — RENDER_PARITY1A B_HEADROOM:' /tmp/reference.txt
+          grep -F 'C — RENDER_PARITY1A C_CA9_CLIP:' /tmp/reference.txt
+          grep -F 'D — RENDER_PARITY1A D_HEADROOM_CA9:' /tmp/reference.txt
+          grep -F 'A ARGB8 SHA-256:' /tmp/reference.txt
           grep -F 'B ARGB8 SHA-256:' /tmp/reference.txt
           grep -F 'C ARGB8 SHA-256:' /tmp/reference.txt
           grep -F 'D ARGB8 SHA-256:' /tmp/reference.txt
@@ -86,7 +93,7 @@ jobs:
       - name: Run Android unit tests
         run: gradle --no-daemon :app:testDebugUnitTest
 
-      - name: Build v0.5.3 factorial diagnostic debug APK
+      - name: Build RENDER_PARITY1A diagnostic debug APK
         run: gradle --no-daemon :app:assembleDebug
 
       - name: Verify APK
@@ -96,9 +103,9 @@ jobs:
           sha256sum app/build/outputs/apk/debug/app-debug.apk | tee /tmp/apk-sha256.txt
           ls -lh app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Upload v0.5.3 factorial diagnostic APK
+      - name: Upload RENDER_PARITY1A diagnostic APK
         uses: actions/upload-artifact@v4
         with:
-          name: M10RDiagnostic-v0.5.3-highlight-factorial-debug-apk
+          name: M10RDiagnostic-v0.5.4-render-parity1a-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
