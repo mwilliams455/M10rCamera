@@ -2,7 +2,9 @@ name: M10-R v0.59 Bayer-domain WB headroom discriminator
 on:
   push:
     branches: [m10r-wb-bayer-v059]
-    paths: ['.github/workflows/m10r-wb-bayer-v059.yml']
+    paths:
+      - '.github/workflows/m10r-wb-bayer-v059.yml'
+      - 'tools/m10r_wb_bayer_headroom_v059.py'
   workflow_dispatch:
 permissions:
   contents: write
@@ -121,8 +123,6 @@ jobs:
             elif near: rver='NEAREST_EMPIRICALLY_PREFERRED'
           agg['rounding_verdict']=rver
 
-          # Stability view: does moving WB ahead of demosaic change each sample's
-          # headroom sign relative to v0.58? This is diagnostic, not a proof gate.
           stability={}
           for rnd in ('trunc','nearest'):
             pairs=[]
