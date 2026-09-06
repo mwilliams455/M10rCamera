@@ -2,13 +2,17 @@
 """M10-R v0.57 B2Y named-driver / MMIO ownership inventory.
 
 Goal: place the proven direct WB gain block structurally without inferring pixel
-order from programmer/call order.  We recover the IMG-System virtual mapping
-only if two independent archived string anchors agree, enumerate exact
-`drv_img_b2y_*` strings, recover Thumb ADR xrefs in the bounded B2Y driver
-region, and report each named routine's MMIO literals.
+order from programmer/call order. We recover IMG-System virtual mapping only if
+two independent archived string anchors agree, enumerate exact `drv_img_b2y_*`
+strings, then recover Thumb ADR xrefs with candidate-seeded local decoding.
 
-This is a routing/ownership probe only.  It does NOT claim that register address
-order or setter call order equals pixel processing order.
+Why candidate seeded: a long linear Thumb disassembly can terminate on embedded
+data and falsely miss later routines. Each string is therefore searched only in
+a bounded backwards window, and a candidate function start is accepted only if
+sequential decoding from a plausible PUSH/LR prologue reaches the exact xref.
+
+This is a routing/ownership probe only. Register address order and setter call
+order are NOT treated as pixel processing order.
 """
 from __future__ import annotations
 
@@ -21,8 +25,9 @@ MAP_ANCHORS = [
     (0x420A40AF, b'Gain R: %4.f | G: %4.f | B: %4.f'),
     (0x421E9CCD, b'ca9_cm_ColorManagementFinished'),
 ]
-DRIVER_START = 0x420D2000
-DRIVER_END   = 0x420D5200
+XREF_BACK = 0x180
+FUNC_BACK = 0x100
+FUNC_MAX  = 0x380
 MMIO_MIN = 0x20000000
 MMIO_MAX = 0x2003FFFF
 KEYWORDS = ('wbgain','white','gain','cc','color','tone','gamma','deknee','knee','demosaic','debayer','bayer','operation','mode','link')
@@ -30,10 +35,7 @@ KEYWORDS = ('wbgain','white','gain','cc','color','tone','gamma','deknee','knee',
 
 def load_img(root: Path):
     rows=list(csv.DictReader((root/'sections.csv').open(encoding='utf-8')))
-    hits=[]
-    for r in rows:
-        if r['name']=='IMG-System': hits.append((r,(root/r['file']).read_bytes()))
-    return hits
+    return [(r,(root/r['file']).read_bytes()) for r in rows if r['name']=='IMG-System']
 
 
 def all_hits(data: bytes, needle: bytes):
@@ -54,7 +56,6 @@ def derive_bias(data: bytes):
 
 
 def printable_strings(data: bytes, bias: int):
-    # Exact NUL-terminated printable strings, length >= 6.
     out=[]
     for m in re.finditer(rb'[\x20-\x7e]{6,}\x00',data):
         raw=m.group()[:-1]
@@ -67,7 +68,6 @@ def printable_strings(data: bytes, bias: int):
 
 def adr_target(ins):
     if ins.mnemonic.lower()!='adr': return None
-    # Capstone Thumb ADR immediate is printed as #imm relative to aligned PC.
     m=re.search(r'#(0x[0-9a-fA-F]+|\d+)',ins.op_str)
     if not m: return None
     imm=int(m.group(1),0)
@@ -92,29 +92,56 @@ def is_ret(ins):
     return (mn=='pop' and 'pc' in s) or (mn=='bx' and 'lr' in s)
 
 
-def recover_function_start(insns, idx):
-    # Walk back max 0x100 bytes to nearest plausible prologue. Deliberately
-    # conservative; ambiguity is reported rather than guessed.
-    addr=insns[idx].address
-    cand=[]
-    j=idx
-    while j>=0 and addr-insns[j].address<=0x100:
-        mn=insns[j].mnemonic.lower(); s=insns[j].op_str.lower()
-        if mn=='push' and 'lr' in s: cand.append(insns[j].address)
-        j-=1
-    return max(cand) if cand else None
+def decode_one(md,data,bias,va):
+    off=va-bias
+    if not (0<=off<len(data)-2): return None
+    got=list(md.disasm(data[off:off+4],va,count=1))
+    return got[0] if got else None
 
 
-def function_slice(insns,start):
-    if start is None: return []
-    out=[]; active=False
-    for ins in insns:
-        if ins.address==start: active=True
-        if not active: continue
-        out.append(ins)
-        if is_ret(ins): break
-        if ins.address-start>0x300: break
+def seeded_xrefs(md,data,bias,sva):
+    out=[]
+    lo=max(bias,(sva-XREF_BACK)&~1)
+    hi=sva&~1
+    for va in range(lo,hi,2):
+        ins=decode_one(md,data,bias,va)
+        if ins and adr_target(ins)==sva:
+            out.append(va)
     return out
+
+
+def sequential(md,data,bias,start,limit):
+    off=start-bias
+    if not (0<=off<len(data)): return []
+    return list(md.disasm(data[off:min(len(data),off+limit)],start))
+
+
+def recover_function(md,data,bias,xva):
+    # Candidate PUSH/LR prologues are independently detected, then verified by
+    # sequential decode reaching the exact ADR xref. Nearest valid wins.
+    cand=[]
+    lo=max(bias,(xva-FUNC_BACK)&~1)
+    for va in range(lo,xva+1,2):
+        ins=decode_one(md,data,bias,va)
+        if ins and ins.mnemonic.lower()=='push' and 'lr' in ins.op_str.lower():
+            cand.append(va)
+    valid=[]
+    for fs in cand:
+        body=sequential(md,data,bias,fs,FUNC_MAX)
+        addrs={i.address for i in body}
+        if xva not in addrs: continue
+        # xref must occur before first return.
+        first_ret=next((i.address for i in body if is_ret(i)),None)
+        if first_ret is not None and xva>first_ret: continue
+        valid.append((fs,body))
+    if not valid: return None,[]
+    fs,body=max(valid,key=lambda x:x[0])
+    trimmed=[]
+    for ins in body:
+        trimmed.append(ins)
+        if is_ret(ins): break
+        if ins.address-fs>FUNC_MAX: break
+    return fs,trimmed
 
 
 def main():
@@ -138,30 +165,26 @@ def main():
         mark='KEY' if any(k in txt.lower() for k in KEYWORDS) else 'OTHER'
         print(f'V057_STRING=0x{va:08x}|{mark}|{txt}')
 
-    off0=max(0,DRIVER_START-bias); off1=min(len(data),DRIVER_END-bias)
     md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True
-    insns=list(md.disasm(data[off0:off1],DRIVER_START))
-    smap={va:txt for va,txt in strings}
     xrefs=[]
-    for i,ins in enumerate(insns):
-        at=adr_target(ins)
-        if at in smap:
-            fs=recover_function_start(insns,i)
-            xrefs.append((i,ins.address,at,smap[at],fs))
+    for sva,txt in strings:
+        for xva in seeded_xrefs(md,data,bias,sva):
+            fs,body=recover_function(md,data,bias,xva)
+            xrefs.append((xva,sva,txt,fs,body))
     print(f'V057_NAMED_XREFS={len(xrefs)}')
 
     seen=set()
-    for i,xva,sva,txt,fs in xrefs:
+    for xva,sva,txt,fs,body in sorted(xrefs):
         print(f"V057_XREF=0x{xva:08x}->0x{sva:08x}|func={('0x%08x'%fs) if fs else '-'}|{txt}")
         if fs is None or fs in seen: continue
         seen.add(fs)
-        body=function_slice(insns,fs)
-        names=[]; mmio=[]; lits=[]
+        names=[]; mmio=[]
         for ins in body:
             at=adr_target(ins)
-            if at in smap: names.append(smap[at])
+            if at is not None:
+                for ssva,stxt in strings:
+                    if at==ssva: names.append(stxt)
             for pool,val in literal_values(ins,data,bias):
-                lits.append((ins.address,pool,val))
                 if MMIO_MIN<=val<=MMIO_MAX: mmio.append((ins.address,val))
         key=any(any(k in n.lower() for k in KEYWORDS) for n in names)
         if not key: continue
@@ -170,24 +193,28 @@ def main():
         for a,v in mmio:
             if v not in [x[1] for x in uniq]: uniq.append((a,v))
         print('V057_MMIO=' + ('|'.join(f'0x{v:08x}@0x{a:08x}' for a,v in uniq) if uniq else '-'))
-        # Print compact disassembly for WB / operation / possible Bayer/CC routing only.
         nl=' '.join(names).lower()
         if any(k in nl for k in ('wbgain','operation','demosaic','debayer','bayer')):
             print(f'=== V057_BODY 0x{fs:08x} ===')
             for ins in body:
                 extra=[]
                 at=adr_target(ins)
-                if at in smap: extra.append('STR='+smap[at])
-                for pool,val in literal_values(ins,data,bias):
+                for ssva,stxt in strings:
+                    if at==ssva: extra.append('STR='+stxt)
+                for _,val in literal_values(ins,data,bias):
                     if MMIO_MIN<=val<=MMIO_MAX: extra.append(f'MMIO=0x{val:08x}')
                 print(f"{ins.address:08x}: {ins.mnemonic:<9} {ins.op_str}" + ((' ; '+' ; '.join(extra)) if extra else ''))
 
-    wb=[(fs,txt) for _,_,_,txt,fs in xrefs if 'wbgain' in txt.lower() and fs]
-    bayer=[(fs,txt) for _,_,_,txt,fs in xrefs if any(k in txt.lower() for k in ('demosaic','debayer','bayer')) and fs]
-    op=[(fs,txt) for _,_,_,txt,fs in xrefs if 'operation' in txt.lower() and fs]
+    wb=[(fs,txt) for _,_,txt,fs,_ in xrefs if 'wbgain' in txt.lower() and fs]
+    bayer=[(fs,txt) for _,_,txt,fs,_ in xrefs if any(k in txt.lower() for k in ('demosaic','debayer','bayer')) and fs]
+    op=[(fs,txt) for _,_,txt,fs,_ in xrefs if 'operation' in txt.lower() and fs]
+    tone=[(fs,txt) for _,_,txt,fs,_ in xrefs if 'tone' in txt.lower() and fs]
+    gamma=[(fs,txt) for _,_,txt,fs,_ in xrefs if 'gamma' in txt.lower() and fs]
     print(f'V057_WB_NAMED_FUNCTIONS={len(set(x[0] for x in wb))}')
     print(f'V057_BAYER_NAMED_FUNCTIONS={len(set(x[0] for x in bayer))}')
     print(f'V057_OPERATION_NAMED_FUNCTIONS={len(set(x[0] for x in op))}')
+    print(f'V057_TONE_NAMED_FUNCTIONS={len(set(x[0] for x in tone))}')
+    print(f'V057_GAMMA_NAMED_FUNCTIONS={len(set(x[0] for x in gamma))}')
     if wb and bayer:
         print('OVERALL_VERDICT=NAMED_WB_AND_BAYER_DRIVERS_FOUND_NEEDS_ROUTING_RELATION')
     elif wb:
