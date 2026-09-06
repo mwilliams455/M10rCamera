@@ -30,16 +30,17 @@ jobs:
           test "$(git hash-object app/src/main/java/com/m10r/diagnostic/M10RNeutralClipReferenceRenderer.java)" = '0866e3128754459b4950d55ba82220737be043d9'
           echo 'Decoder, sensor sanity, and legacy reference cores remain byte-identical.'
 
-      - name: Verify RENDER_PARITY1A build identity and canonical modes
+      - name: Verify RENDER_PARITY1A promoted C identity and canonical modes
         shell: bash
         run: |
-          grep -F 'versionCode = 9' app/build.gradle.kts
-          grep -F 'versionName = "0.5.4-render-parity1a"' app/build.gradle.kts
+          grep -F 'versionCode = 10' app/build.gradle.kts
+          grep -F 'versionName = "0.5.5-render-parity1a-c-promoted"' app/build.gradle.kts
           grep -F 'M10-R RAW Diagnostic — RENDER_PARITY1A' app/src/main/java/com/m10r/diagnostic/MainActivity.java
           grep -F 'Mode.A_BASELINE' app/src/main/java/com/m10r/diagnostic/MainActivity.java
           grep -F 'Mode.B_HEADROOM' app/src/main/java/com/m10r/diagnostic/MainActivity.java
-          grep -F 'Mode.C_CA9_CLIP' app/src/main/java/com/m10r/diagnostic/MainActivity.java
+          grep -F 'M10RProductionRenderer.render(raw, info)' app/src/main/java/com/m10r/diagnostic/MainActivity.java
           grep -F 'Mode.D_HEADROOM_CA9' app/src/main/java/com/m10r/diagnostic/MainActivity.java
+          grep -F 'Mode.C_CA9_CLIP' app/src/main/java/com/m10r/diagnostic/M10RProductionRenderer.java
           grep -F 'A_BASELINE(false, false)' app/src/main/java/com/m10r/diagnostic/M10RHighlightFactorialRenderer.java
           grep -F 'B_HEADROOM(true, false)' app/src/main/java/com/m10r/diagnostic/M10RHighlightFactorialRenderer.java
           grep -F 'C_CA9_CLIP(false, true)' app/src/main/java/com/m10r/diagnostic/M10RHighlightFactorialRenderer.java
@@ -62,6 +63,7 @@ jobs:
             app/src/main/java/com/m10r/diagnostic/M10RLinearReferenceRenderer.java \
             app/src/main/java/com/m10r/diagnostic/M10RNeutralClipReferenceRenderer.java \
             app/src/main/java/com/m10r/diagnostic/M10RHighlightFactorialRenderer.java \
+            app/src/main/java/com/m10r/diagnostic/M10RProductionRenderer.java \
             tools/M10RLinearReferenceCli.java
           java -Xmx1024m -cp /tmp/classes com.m10r.diagnostic.M10RLinearReferenceCli /tmp/m10r.dng | tee /tmp/reference.txt
           grep -F 'Decoded CFA: 7872x5208' /tmp/reference.txt
@@ -106,6 +108,6 @@ jobs:
       - name: Upload RENDER_PARITY1A diagnostic APK
         uses: actions/upload-artifact@v4
         with:
-          name: M10RDiagnostic-v0.5.4-render-parity1a-debug-apk
+          name: M10RDiagnostic-v0.5.5-render-parity1a-c-promoted-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
