@@ -1,0 +1,44 @@
+M10-R v0.58 COLOR-SENSITIVE DIRECT-WB HEADROOM DISCRIMINATOR
+source: exact Photography Blog M10-R sample pairs 01..06 reused from v2.20
+observable: identity-WB linear camera RGB -> firmware Q8 WB triplet -> candidate clip ceiling -> nuisance downstream fit
+IMPORTANT: empirical proxy only; not proof of hidden B2Y multiplier/rounding or Bayer-domain placement.
+
+=== per-sample ===
+sample 01 identity=True defaults=True align=(6,6) rot90=0 score=0.940641 gains=[897, 256, 390] ASN=[0.2853957637, 1.0, 0.6564102564] white=15000.0 train=6569 test=59
+  trunc: dng_white rmse=0.936005 chroma=0.339685; b2y14 rmse=0.943489 chroma=0.337762; delta=-0.007484
+  nearest: dng_white rmse=0.936005 chroma=0.339684; b2y14 rmse=0.943489 chroma=0.337762; delta=-0.007485
+  rounding_delta nearest-minus-trunc {'b2y_14bit': 3.1873399808368674e-07, 'dng_white': -1.610102460247731e-07}
+sample 02 identity=True defaults=True align=(6,6) rot90=0 score=0.942926 gains=[862, 256, 407] ASN=[0.2969837587, 1.0, 0.628992629] white=15000.0 train=6980 test=0
+  ERROR insufficient train/test highlight patches
+sample 03 identity=True defaults=True align=(18,6) rot90=0 score=0.956055 gains=[897, 256, 392] ASN=[0.2853957637, 1.0, 0.6530612245] white=15000.0 train=7131 test=0
+  ERROR insufficient train/test highlight patches
+sample 04 identity=True defaults=True align=(18,6) rot90=0 score=0.946183 gains=[885, 256, 412] ASN=[0.2892655367, 1.0, 0.6213592233] white=15000.0 train=6581 test=22
+  trunc: dng_white rmse=0.951458 chroma=0.329436; b2y14 rmse=0.948331 chroma=0.330073; delta=0.003127
+  nearest: dng_white rmse=0.951460 chroma=0.329440; b2y14 rmse=0.948332 chroma=0.330075; delta=0.003128
+  rounding_delta nearest-minus-trunc {'b2y_14bit': 9.381663503837956e-07, 'dng_white': 2.102787945323925e-06}
+sample 05 identity=True defaults=True align=(18,6) rot90=0 score=0.932264 gains=[897, 256, 387] ASN=[0.2853957637, 1.0, 0.661498708] white=15000.0 train=5687 test=51
+  trunc: dng_white rmse=0.818580 chroma=0.409271; b2y14 rmse=0.811990 chroma=0.436682; delta=0.006590
+  nearest: dng_white rmse=0.818571 chroma=0.409264; b2y14 rmse=0.811976 chroma=0.436673; delta=0.006595
+  rounding_delta nearest-minus-trunc {'b2y_14bit': -1.407733771641162e-05, 'dng_white': -8.803736597950973e-06}
+sample 06 identity=True defaults=True align=(18,6) rot90=0 score=0.927302 gains=[910, 256, 387] ASN=[0.2813186813, 1.0, 0.661498708] white=15000.0 train=6706 test=43
+  trunc: dng_white rmse=0.929863 chroma=0.321337; b2y14 rmse=0.927804 chroma=0.333798; delta=0.002059
+  nearest: dng_white rmse=0.929856 chroma=0.321324; b2y14 rmse=0.927799 chroma=0.333797; delta=0.002058
+  rounding_delta nearest-minus-trunc {'b2y_14bit': -4.996084962405334e-06, 'dng_white': -6.631760404829379e-06}
+
+=== aggregate ===
+trunc: valid=4 b2y14_wins=3 dng_white_wins=1 ties=0 median_delta=0.0025929498079394486 mean_delta=0.0010729020828912639
+  deltas [-0.007484202924740391, 0.0031266955625685044, 0.006589911640426549, 0.002059204053310393]
+nearest: valid=4 b2y14_wins=3 dng_white_wins=1 ties=0 median_delta=0.0025927142810157067 mean_delta=0.001073982783647981
+  deltas [-0.007484682668984499, 0.0031278601841634446, 0.00659518524154501, 0.0020575683778679688]
+rounding dng_white: trunc_wins=1 nearest_wins=3 ties=0 median nearest-minus-trunc=-3.396385325427076e-06
+rounding b2y_14bit: trunc_wins=2 nearest_wins=2 ties=0 median nearest-minus-trunc=-2.3386754821608235e-06
+
+HEADROOM_VERDICT UNRESOLVED
+ROUNDING_VERDICT ROUNDING_UNRESOLVED
+
+LIMITATIONS
+- WB is applied to a post-demosaic identity-WB camera-RGB proxy; this does not prove Bayer-domain arithmetic placement.
+- per-scene quadratic downstream fit absorbs unknown fixed/dynamic CC and tone behavior on midtones.
+- the discriminator is intentionally driven by highlight information lost under one ceiling but retained under the other.
+- 8-bit JPEG output may be insufficient to distinguish truncation from nearest rounding; unresolved is an acceptable result.
+- no renderer assets or frozen color/tone behavior are changed by this experiment.
