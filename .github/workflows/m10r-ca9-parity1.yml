@@ -1,0 +1,59 @@
+name: M10-R CA9_PARITY1 Arithmetic Probe
+on:
+  push:
+    branches: [m10r-ca9-parity1]
+    paths:
+      - 'app/**'
+      - '.github/workflows/m10r-ca9-parity1.yml'
+  workflow_dispatch:
+
+jobs:
+  arithmetic-probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Verify RENDER_PARITY1A production path remains frozen
+        shell: bash
+        run: |
+          test "$(git hash-object app/src/main/java/com/m10r/diagnostic/DngRawDecoder.java)" = '843dd16a36b16cda81d4a9d29d1e11b3d0943a9d'
+          test "$(git hash-object app/src/main/java/com/m10r/diagnostic/LosslessJpegDecoder.java)" = '06bff56fbeb7c7d13e7d7c0b8768c92b9e520cd6'
+          test "$(git hash-object app/src/main/java/com/m10r/diagnostic/SensorPreviewCore.java)" = '4e463bc5ad2c33b4ad6bc65a6df61a9b086e90a2'
+          test "$(git hash-object app/src/main/java/com/m10r/diagnostic/M10RLinearReferenceRenderer.java)" = '827c71a4cd1d72f63341d5f56685577e83a304e5'
+          test "$(git hash-object app/src/main/java/com/m10r/diagnostic/M10RNeutralClipReferenceRenderer.java)" = '0866e3128754459b4950d55ba82220737be043d9'
+          test "$(git hash-object app/src/main/java/com/m10r/diagnostic/M10RHighlightFactorialRenderer.java)" = 'b07331f2e5564cfdd49699bc17f2baf90c946889'
+          test "$(git hash-object app/src/main/java/com/m10r/diagnostic/M10RProductionRenderer.java)" = 'fcfbed854ee0700be54b106885a6f3457f8a1387'
+          test "$(git hash-object app/src/main/java/com/m10r/diagnostic/M10RColorSpecCore.java)" = 'eb647243cc0d6af27e209e4c855bf935a1d0eeb6'
+          echo 'RENDER_PARITY1A production and current ColorSpec arithmetic remain byte-identical.'
+
+      - name: Verify CA9_PARITY1 oracle scope
+        shell: bash
+        run: |
+          grep -F 'class M10RCa9ArithmeticOracle' app/src/main/java/com/m10r/diagnostic/M10RCa9ArithmeticOracle.java
+          grep -F 'roundHalfAwayFromZero' app/src/main/java/com/m10r/diagnostic/M10RCa9ArithmeticOracle.java
+          grep -F 'recoverSourceGainFromAsn' app/src/main/java/com/m10r/diagnostic/M10RCa9ArithmeticOracle.java
+          grep -F 'sourceGainRecoveryExposesCurrentTiesToEvenBoundaryMismatch' app/src/test/java/com/m10r/diagnostic/M10RCa9ArithmeticOracleTest.java
+          grep -F 'sourceGainAbiRoundTripsExhaustivelyAcrossOneToTwoThousand' app/src/test/java/com/m10r/diagnostic/M10RCa9ArithmeticOracleTest.java
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android 36 SDK
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+
+      - name: Set up Gradle 9.6
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+
+      - name: Run CA9_PARITY1 unit tests
+        run: gradle --no-daemon :app:testDebugUnitTest
