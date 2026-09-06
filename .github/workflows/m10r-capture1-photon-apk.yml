@@ -1,4 +1,4 @@
-name: M10-R CAPTURE1B JPEGSAVE1 APK
+name: M10-R CAPTURE1B RGBORDER1A APK
 
 on:
   workflow_dispatch:
@@ -23,6 +23,7 @@ jobs:
           python3 -m py_compile patches/fix-m10r-capture1b-compile2.py
           python3 -m py_compile patches/fix-m10r-capture1b-device1.py
           python3 -m py_compile patches/fix-m10r-capture1b-jpegsave1.py
+          python3 -m py_compile patches/fix-m10r-capture1b-rgborder1a.py
           python3 -m py_compile patches/verify-m10r-capture1b.py
 
       - name: Clone exact Photon baseline proven by current M9 project
@@ -49,8 +50,9 @@ jobs:
           python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-compile2.py" "$GITHUB_WORKSPACE/PhotonCamera"
           python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-device1.py" "$GITHUB_WORKSPACE/PhotonCamera"
           python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-jpegsave1.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-rgborder1a.py" "$GITHUB_WORKSPACE/PhotonCamera"
 
-      - name: Verify CAPTURE1B JPEGSAVE1 invariants
+      - name: Verify CAPTURE1B RGBORDER1A invariants
         run: |
           set -euo pipefail
           python3 "$GITHUB_WORKSPACE/patches/verify-m10r-capture1b.py" "$GITHUB_WORKSPACE/PhotonCamera"
@@ -59,6 +61,11 @@ jobs:
           ! grep -F "org.opencv:opencv:4.10.0" "$GITHUB_WORKSPACE/PhotonCamera/app/build.gradle"
           grep -F "OpenCVLoader.initDebug()" "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
           grep -F 'single_frame_Bayer_EA_demosaic_only' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
+          grep -F 'demosaicOutputChannelOrder", "RGB"' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
+          grep -F 'demosaicChannelOrderFix", "RGBORDER1A"' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
+          grep -F 'postDemosaicRedBlueSwapApplied", false' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
+          grep -F 'double sr = (bgr[i * 3] & 0xffff)' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
+          grep -F 'double sb = (bgr[i * 3 + 2] & 0xffff)' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
           grep -F 'parameters.sensorPix.left' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/DngCreator.java"
           grep -F 'parameters.sensorPix.right' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/DngCreator.java"
           grep -F 'capture1Dng.resolveSibling(capture1Stem + ".jpg")' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/DefaultSaver.java"
@@ -81,25 +88,25 @@ jobs:
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platforms;android-36" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.0.12077973"
 
-      - name: Build CAPTURE1B JPEGSAVE1 debug APK
+      - name: Build CAPTURE1B RGBORDER1A debug APK
         run: |
           set -o pipefail
           cd PhotonCamera
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_CAPTURE1B_JPEGSAVE1_GRADLE.log"
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_CAPTURE1B_RGBORDER1A_GRADLE.log"
 
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: M10R-CAPTURE1B-JPEGSAVE1-buildlog
-          path: M10R_CAPTURE1B_JPEGSAVE1_GRADLE.log
+          name: M10R-CAPTURE1B-RGBORDER1A-buildlog
+          path: M10R_CAPTURE1B_RGBORDER1A_GRADLE.log
           if-no-files-found: ignore
 
-      - name: Upload CAPTURE1B JPEGSAVE1 APK and provenance
+      - name: Upload CAPTURE1B RGBORDER1A APK and provenance
         uses: actions/upload-artifact@v4
         with:
-          name: M10RCam-CAPTURE1B-JPEGSAVE1-debug-apk
+          name: M10RCam-CAPTURE1B-RGBORDER1A-debug-apk
           path: |
             PhotonCamera/app/build/outputs/apk/debug/*.apk
             PHOTON_UPSTREAM_COMMIT.txt
