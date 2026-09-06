@@ -70,8 +70,12 @@ pos_render_catch=saver.find('                } catch (Throwable renderError)', p
 if min(pos_render_try,pos_render_catch) < 0 or not (pos_render_try < pos_render < pos_render_catch < pos_dng):
     raise SystemExit('CAPTURE1B DEVICE1 DNG is not preserved after render failure')
 
+# Restrict this check to the CAPTURE1B early-return route. Legacy Photon code below
+# the return still uses ImagePath.newImageFilePath(), but CAPTURE1B never reaches it.
 cap_block_start=saver.find('// M10R CAPTURE1B:')
-cap_block_end=saver.find('        hdrxProcessor.configure(', cap_block_start)
+cap_block_end=saver.find('            return;\n        }', cap_block_start)
+if cap_block_start < 0 or cap_block_end < 0:
+    raise SystemExit('CAPTURE1B JPEGSAVE1 route bounds missing')
 cap_block=saver[cap_block_start:cap_block_end]
 if 'ImagePath.newImageFilePath()' in cap_block:
     raise SystemExit('CAPTURE1B JPEGSAVE1 regressed to extensionless ImagePath.newImageFilePath()')
