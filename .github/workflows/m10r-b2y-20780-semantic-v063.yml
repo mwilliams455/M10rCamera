@@ -4,6 +4,7 @@ on:
     branches: [m10r-b2y-20780-semantic-v063]
     paths:
       - 'tools/m10r_b2y_20780_semantic_v063.py'
+      - 'tools/m10r_b2y_20780_neighbors_v063b.py'
       - '.github/workflows/m10r-b2y-20780-semantic-v063.yml'
   workflow_dispatch:
 permissions:
@@ -14,8 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 -m pip install --quiet 'capstone==5.0.3'
-      - name: Syntax-check probe
-        run: python3 -m py_compile tools/m10r_b2y_20780_semantic_v063.py
+      - name: Syntax-check probes
+        run: python3 -m py_compile tools/m10r_b2y_20780_semantic_v063.py tools/m10r_b2y_20780_neighbors_v063b.py
       - name: Fetch and verify firmware
         shell: bash
         run: |
@@ -39,9 +40,11 @@ jobs:
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sec >/dev/null
       - name: Trace 0x20020780 target fields
         run: python3 tools/m10r_b2y_20780_semantic_v063.py /tmp/sec | tee research/M10R_v063_b2y_20780_semantic.txt
+      - name: Capture semantic neighborhood
+        run: python3 tools/m10r_b2y_20780_neighbors_v063b.py /tmp/sec | tee research/M10R_v063b_b2y_20780_neighbors.txt
       - name: Commit evidence
         run: |
           git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add research/M10R_v063_b2y_20780_semantic.txt
-          git commit -m 'research: record v063 B2Y 0x20020780 field semantics' || exit 0
+          git add research/M10R_v063_b2y_20780_semantic.txt research/M10R_v063b_b2y_20780_neighbors.txt
+          git commit -m 'research: record v063 B2Y 0x20020780 semantics and neighborhood' || exit 0
           git pull --rebase origin m10r-b2y-20780-semantic-v063 && git push
