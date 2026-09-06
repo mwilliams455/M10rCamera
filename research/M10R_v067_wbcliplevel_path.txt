@@ -1,0 +1,544 @@
+V067_IMG_SECTIONS=1
+V067_MAP_BIAS=0x41fffffc
+V067_CLIP_STRINGS=21
+V067_CLIP_ASCII=0x42154db8|WBCLIPLEVEL     String:%s
+V067_CLIP_ASCII=0x42154ddc|NO VALID STRING   img_b2y_select_wbcliplevel_paraset
+V067_TARGET_CALLERS=1|0x42154fd8
+
+=== WBCLIP_SELECTOR 0x42154d58-0x42154db0 ===
+42154d58: push     {r4, r5, r6, r7, lr}
+42154d5a: sub      sp, #0x44
+42154d5c: movs     r7, r0
+42154d5e: movs     r5, r1
+42154d60: movs     r6, #0
+42154d62: ldr      r0, [pc, #0x4c] ; pool=0x42154db0->0x408cedaa:RAM:str=None
+42154d64: ldrb     r0, [r0]
+42154d66: cmp      r0, #1
+42154d68: bne      #0x42154d6e
+42154d6a: cmp      r5, #1
+42154d6c: beq      #0x42154dac
+42154d6e: movs     r0, #1
+42154d70: ldr      r1, [pc, #0x3c] ; pool=0x42154db0->0x408cedaa:RAM:str=None
+42154d72: strb     r0, [r1]
+42154d74: adr      r0, #0x3c
+42154d76: ldrb     r0, [r0]
+42154d78: mov      r1, sp
+42154d7a: strb     r0, [r1, #4]
+42154d7c: add      r2, sp, #4
+42154d7e: adr      r1, #0x38
+42154d80: movs     r0, #2
+42154d82: bl       #0x42140150
+42154d86: add      r2, sp, #4
+42154d88: movs     r1, #4
+42154d8a: adr      r0, #0x48
+42154d8c: bl       #0x421a0fc0
+42154d90: movs     r4, r0
+42154d92: cmp      r4, #0
+42154d94: bne      #0x42154da4
+42154d96: movs     r6, #1
+42154d98: ldr      r1, [pc, #0x14] ; pool=0x42154db0->0x408cedaa:RAM:str=None
+42154d9a: strb     r0, [r1]
+42154d9c: adr      r1, #0x3c
+42154d9e: movs     r0, #4
+42154da0: bl       #0x42140150
+42154da4: movs     r1, r6
+42154da6: movs     r0, r4
+42154da8: bl       #0x420d42dc
+42154dac: add      sp, #0x44
+42154dae: pop      {r4, r5, r6, r7, pc}
+V067_FUNC_SUMMARY=WBCLIP_SELECTOR|start=0x42154d58|end=0x42154db0|calls=4|mmio_refs=0|memops=8
+V067_FUNC_CALLS=0x42154d82->0x42140150,0x42154d8c->0x421a0fc0,0x42154da0->0x42140150,0x42154da8->0x420d42dc
+V067_MEMOP=WBCLIP_SELECTOR|0x42154d62|ldr r0, [pc, #0x4c]
+V067_MEMOP=WBCLIP_SELECTOR|0x42154d64|ldrb r0, [r0]
+V067_MEMOP=WBCLIP_SELECTOR|0x42154d70|ldr r1, [pc, #0x3c]
+V067_MEMOP=WBCLIP_SELECTOR|0x42154d72|strb r0, [r1]
+V067_MEMOP=WBCLIP_SELECTOR|0x42154d76|ldrb r0, [r0]
+V067_MEMOP=WBCLIP_SELECTOR|0x42154d7a|strb r0, [r1, #4]
+V067_MEMOP=WBCLIP_SELECTOR|0x42154d98|ldr r1, [pc, #0x14]
+V067_MEMOP=WBCLIP_SELECTOR|0x42154d9a|strb r0, [r1]
+
+=== CHILD_FROM_0x42154d82 0x42140150-0x421402ac ===
+42140150: push     {r0, r1, r2, r3}
+42140152: push     {r4, r5, r6, r7, lr}
+42140154: sub      sp, #0x1c
+42140156: movs     r5, r0
+42140158: movs     r1, #0
+4214015a: str      r1, [sp, #0x10]
+4214015c: str      r1, [sp, #0x14]
+4214015e: movs     r0, #0
+42140160: str      r0, [sp, #0xc]
+42140162: str      r0, [sp, #8]
+42140164: movs     r4, #0
+42140166: movs     r0, #0xaf
+42140168: bl       #0x4214be4c
+4214016c: movs     r7, r0
+4214016e: cmp      r7, r5
+42140170: bls      #0x4214017e
+42140172: movs     r0, #0
+42140174: add      sp, #0x1c
+42140176: pop      {r4, r5, r6, r7}
+42140178: pop      {r3}
+4214017a: add      sp, #0x10
+4214017c: bx       r3
+4214017e: cmp      r7, #5
+42140180: bne      #0x4214018a
+42140182: cmp      r5, #5
+42140184: beq      #0x4214018a
+42140186: movs     r0, #0
+42140188: b        #0x42140174
+4214018a: mov      r1, sp
+4214018c: movs     r0, #0
+4214018e: bl       #0x4205f3c8
+42140192: adds     r0, #0x12
+42140194: cmp      r0, #0
+42140196: bne      #0x4214019c
+42140198: str      r0, [sp, #0xc]
+4214019a: b        #0x421401a2
+4214019c: add      r0, sp, #0xc
+4214019e: bl       #0x4205f268
+421401a2: movs     r0, #0xae
+421401a4: bl       #0x4214be90
+421401a8: mov      r1, sp
+421401aa: ldrh     r1, [r1, #0xc]
+421401ac: lsrs     r0, r1
+421401ae: lsls     r0, r0, #0x1f
+421401b0: lsrs     r0, r0, #0x1f
+421401b2: cmp      r0, #0
+421401b4: bne      #0x421401b8
+421401b6: b        #0x42140174
+421401b8: ldr      r0, [pc, #0x7c] ; pool=0x42140238->0x409b0854:RAM:str=None
+421401ba: bl       #0x4213f8e8
+421401be: movs     r4, r0
+421401c0: cmp      r4, #0
+421401c2: beq      #0x42140232
+421401c4: str      r5, [r4, #4]
+421401c6: mov      r1, sp
+421401c8: movs     r0, #0xc
+421401ca: ldrsh    r0, [r1, r0]
+421401cc: str      r0, [r4, #8]
+421401ce: add      r0, sp, #0x10
+421401d0: bl       #0x4205f274
+421401d4: ldr      r0, [sp, #0x10]
+421401d6: str      r0, [r4]
+421401d8: add      r0, sp, #0x38
+421401da: str      r0, [sp, #4]
+421401dc: movs     r1, #0x6d
+421401de: movs     r0, r4
+421401e0: adds     r0, #0xc
+421401e2: ldr      r3, [sp, #4]
+421401e4: ldr      r2, [sp, #0x34]
+421401e6: bl       #0x4204e1b8
+421401ea: movs     r6, r0
+421401ec: movs     r0, #0
+421401ee: str      r0, [sp, #4]
+421401f0: cmp      r6, #0x6d
+421401f2: blt      #0x4214020e
+421401f4: movs     r1, #0x2e
+421401f6: movs     r0, #0x78
+421401f8: strb     r1, [r0, r4]
+421401fa: movs     r1, #0xa
+421401fc: movs     r0, #0x79
+421401fe: strb     r1, [r0, r4]
+42140200: movs     r1, #0xd
+42140202: movs     r0, #0x7a
+42140204: strb     r1, [r0, r4]
+42140206: movs     r1, #0
+42140208: movs     r0, #0x7b
+4214020a: strb     r1, [r0, r4]
+4214020c: b        #0x4214022a
+4214020e: movs     r1, #0xa
+42140210: movs     r0, r6
+42140212: adds     r6, r6, #1
+42140214: movs     r2, r4
+42140216: adds     r2, #0xc
+42140218: strb     r1, [r2, r0]
+4214021a: movs     r1, #0xd
+4214021c: movs     r0, r6
+4214021e: adds     r6, r6, #1
+42140220: strb     r1, [r2, r0]
+42140222: movs     r1, #0
+42140224: movs     r0, r6
+42140226: adds     r6, r6, #1
+42140228: strb     r1, [r2, r0]
+4214022a: movs     r0, #4
+4214022c: bl       #0x4205f52e
+42140230: mov      r8, r8
+42140232: ldr      r0, [sp, #8]
+42140234: b        #0x42140174
+42140236: movs     r0, r0
+42140238: lsrs     r4, r2, #1
+4214023a: lsls     r3, r3
+4214023c: ldr      r1, [pc, #0x4c] ; pool=0x4214028c->0x421402b1:RAM:str=None
+4214023e: adr      r0, #0x50
+42140240: bl       #0x4213fda4
+42140244: mov      r8, r8
+42140246: ldr      r0, [pc, #0x60] ; pool=0x421402a8->0x409b0854:RAM:str=None
+42140248: bl       #0x4213fb8c
+4214024c: movs     r4, r0
+4214024e: cmp      r4, #0
+42140250: beq      #0x42140284
+42140252: ldr      r0, [pc, #0x58] ; pool=0x421402ac->0x408eebf0:RAM:str=None
+42140254: ldrb     r0, [r0, #0x11]
+42140256: cmp      r0, #1
+42140258: bne      #0x4214026a
+4214025a: ldr      r0, [pc, #0x50] ; pool=0x421402ac->0x408eebf0:RAM:str=None
+4214025c: ldrb     r0, [r0, #0x10]
+4214025e: cmp      r0, #1
+42140260: bne      #0x4214026a
+42140262: ldr      r0, [pc, #0x48] ; pool=0x421402ac->0x408eebf0:RAM:str=None
+42140264: ldr      r1, [r0, #0x14]
+42140266: movs     r0, r4
+42140268: blx      r1
+4214026a: ldr      r0, [pc, #0x40] ; pool=0x421402ac->0x408eebf0:RAM:str=None
+4214026c: ldrb     r0, [r0, #5]
+4214026e: cmp      r0, #1
+42140270: bne      #0x42140288
+42140272: ldr      r0, [pc, #0x38] ; pool=0x421402ac->0x408eebf0:RAM:str=None
+42140274: ldrb     r0, [r0, #4]
+42140276: cmp      r0, #1
+42140278: bne      #0x42140288
+4214027a: ldr      r0, [pc, #0x30] ; pool=0x421402ac->0x408eebf0:RAM:str=None
+4214027c: ldr      r1, [r0, #8]
+4214027e: movs     r0, r4
+42140280: blx      r1
+42140282: b        #0x42140288
+42140284: bl       #0x4205f470
+42140288: b        #0x42140246
+4214028a: movs     r0, r0
+4214028c: lsls     r1, r6, #0xa
+4214028e: tst      r4, r2
+42140290: strb     r0, [r5, #0xd]
+42140292: ldrsh    r3, [r5, r5]
+42140294: str      r4, [r6, #0x54]
+42140296: strb     r3, [r6, #0x11]
+42140298: strb     r7, [r3, #1]
+4214029a: ldr      r2, [r6, #0x14]
+4214029c: strb     r6, [r5, #0x11]
+4214029e: str      r7, [r3, #0x64]
+421402a0: ldr      r5, [r6, #0x64]
+421402a2: strb     r3, [r4, #0x11]
+421402a4: ldr      r1, [r5, #0x74]
+421402a6: lsls     r6, r5, #1
+421402a8: lsrs     r4, r2, #1
+421402aa: lsls     r3, r3
+V067_FUNC_SUMMARY=CHILD_FROM_0x42154d82|start=0x42140150|end=0x421402ac|calls=11|mmio_refs=0|memops=49
+V067_FUNC_CALLS=0x42140168->0x4214be4c,0x4214018e->0x4205f3c8,0x4214019e->0x4205f268,0x421401a4->0x4214be90,0x421401ba->0x4213f8e8,0x421401d0->0x4205f274,0x421401e6->0x4204e1b8,0x4214022c->0x4205f52e,0x42140240->0x4213fda4,0x42140248->0x4213fb8c,0x42140284->0x4205f470
+V067_MEMOP=CHILD_FROM_0x42154d82|0x4214015a|str r1, [sp, #0x10]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x4214015c|str r1, [sp, #0x14]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140160|str r0, [sp, #0xc]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140162|str r0, [sp, #8]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140198|str r0, [sp, #0xc]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x421401aa|ldrh r1, [r1, #0xc]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x421401b8|ldr r0, [pc, #0x7c]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x421401c4|str r5, [r4, #4]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x421401ca|ldrsh r0, [r1, r0]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x421401cc|str r0, [r4, #8]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x421401d4|ldr r0, [sp, #0x10]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x421401d6|str r0, [r4]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x421401da|str r0, [sp, #4]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x421401e2|ldr r3, [sp, #4]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x421401e4|ldr r2, [sp, #0x34]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x421401ee|str r0, [sp, #4]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x421401f8|strb r1, [r0, r4]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x421401fe|strb r1, [r0, r4]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140204|strb r1, [r0, r4]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x4214020a|strb r1, [r0, r4]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140218|strb r1, [r2, r0]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140220|strb r1, [r2, r0]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140228|strb r1, [r2, r0]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140232|ldr r0, [sp, #8]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x4214023c|ldr r1, [pc, #0x4c]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140246|ldr r0, [pc, #0x60]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140252|ldr r0, [pc, #0x58]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140254|ldrb r0, [r0, #0x11]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x4214025a|ldr r0, [pc, #0x50]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x4214025c|ldrb r0, [r0, #0x10]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140262|ldr r0, [pc, #0x48]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140264|ldr r1, [r0, #0x14]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x4214026a|ldr r0, [pc, #0x40]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x4214026c|ldrb r0, [r0, #5]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140272|ldr r0, [pc, #0x38]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140274|ldrb r0, [r0, #4]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x4214027a|ldr r0, [pc, #0x30]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x4214027c|ldr r1, [r0, #8]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140290|strb r0, [r5, #0xd]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140292|ldrsh r3, [r5, r5]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140294|str r4, [r6, #0x54]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140296|strb r3, [r6, #0x11]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x42140298|strb r7, [r3, #1]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x4214029a|ldr r2, [r6, #0x14]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x4214029c|strb r6, [r5, #0x11]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x4214029e|str r7, [r3, #0x64]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x421402a0|ldr r5, [r6, #0x64]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x421402a2|strb r3, [r4, #0x11]
+V067_MEMOP=CHILD_FROM_0x42154d82|0x421402a4|ldr r1, [r5, #0x74]
+
+=== CHILD_FROM_0x42154d8c 0x421a0fc0-0x421a108e ===
+421a0fc0: push     {r0, r1, r2, r4, r5, r6, r7, lr}
+421a0fc2: sub      sp, #0x10
+421a0fc4: movs     r7, r1
+421a0fc6: movs     r0, #0
+421a0fc8: str      r0, [sp, #0xc]
+421a0fca: ldr      r0, [sp, #0x10]
+421a0fcc: bl       #0x421a0c7c
+421a0fd0: movs     r4, r0
+421a0fd2: cmp      r4, #0
+421a0fd4: beq      #0x421a1068
+421a0fd6: movs     r0, #0x41
+421a0fd8: lsls     r0, r0, #3
+421a0fda: ldr      r5, [r0, r4]
+421a0fdc: ldr      r1, [pc, #0xb0] ; pool=0x421a1090->0xca11bf11:VALUE:str=None
+421a0fde: ldr      r0, [r5]
+421a0fe0: cmp      r0, r1
+421a0fe2: bne      #0x421a105c
+421a0fe4: movs     r0, #0x41
+421a0fe6: lsls     r0, r0, #3
+421a0fe8: ldr      r0, [r0, r4]
+421a0fea: adds     r0, #0x10
+421a0fec: str      r0, [sp, #8]
+421a0fee: movs     r0, #0
+421a0ff0: str      r0, [sp, #4]
+421a0ff2: b        #0x421a1052
+421a0ff4: movs     r1, #0xa9
+421a0ff6: lsls     r1, r1, #4
+421a0ff8: ldr      r0, [sp, #4]
+421a0ffa: muls     r0, r1, r0
+421a0ffc: ldr      r1, [sp, #8]
+421a0ffe: adds     r6, r0, r1
+421a1000: ldr      r0, [r6]
+421a1002: cmp      r0, r7
+421a1004: bne      #0x421a104c
+421a1006: movs     r0, #0
+421a1008: str      r0, [sp]
+421a100a: b        #0x421a1042
+421a100c: ldr      r1, [sp]
+421a100e: lsls     r2, r1, #6
+421a1010: movs     r1, r6
+421a1012: adds     r1, #0x10
+421a1014: adds     r0, r2, r1
+421a1016: movs     r2, #0x40
+421a1018: ldr      r1, [sp, #0x18]
+421a101a: bl       #0x4204f160
+421a101e: cmp      r0, #0
+421a1020: bne      #0x421a103c
+421a1022: ldr      r1, [r6, #4]
+421a1024: movs     r2, #0xa9
+421a1026: lsls     r2, r2, #4
+421a1028: ldr      r0, [r5, #8]
+421a102a: muls     r0, r2, r0
+421a102c: adds     r0, r1, r0
+421a102e: adds     r0, #0x10
+421a1030: movs     r1, #0x41
+421a1032: lsls     r1, r1, #3
+421a1034: ldr      r1, [r1, r4]
+421a1036: adds     r0, r0, r1
+421a1038: str      r0, [sp, #0xc]
+421a103a: b        #0x421a104a
+421a103c: ldr      r0, [sp]
+421a103e: adds     r0, r0, #1
+421a1040: str      r0, [sp]
+421a1042: ldr      r1, [r6, #0xc]
+421a1044: ldr      r0, [sp]
+421a1046: cmp      r1, r0
+421a1048: bhi      #0x421a100c
+421a104a: mov      r8, r8
+421a104c: ldr      r0, [sp, #4]
+421a104e: adds     r0, r0, #1
+421a1050: str      r0, [sp, #4]
+421a1052: ldr      r1, [r5, #8]
+421a1054: ldr      r0, [sp, #4]
+421a1056: cmp      r1, r0
+421a1058: bhi      #0x421a0ff4
+421a105a: b        #0x421a1066
+421a105c: ldr      r1, [pc, #0x34] ; pool=0x421a1094->0x4284509c:RAM:str='sd1_FindImageSettingsByName: FileHeader MagiicNumber 0x%08X != 0xCA11BF11'
+421a105e: movs     r0, #4
+421a1060: ldr      r2, [r5]
+421a1062: bl       #0x42140150
+421a1066: b        #0x421a1072
+421a1068: ldr      r1, [pc, #0x2c] ; pool=0x421a1098->0x428455d0:RAM:str='sd1_FindImageSettingsByName: Calibration File [%s] was not found'
+421a106a: movs     r0, #4
+421a106c: ldr      r2, [sp, #0x10]
+421a106e: bl       #0x42140150
+421a1072: ldr      r0, [sp, #0xc]
+421a1074: cmp      r0, #0
+421a1076: bne      #0x421a1088
+421a1078: ldr      r0, [sp, #0x18]
+421a107a: movs     r3, r7
+421a107c: str      r0, [sp]
+421a107e: ldr      r1, [pc, #0x1c] ; pool=0x421a109c->0x42845440:RAM:str='sd1_FindImageSettingsByName: NOT Found Entry [%s] | CAT=[%d] | PAR=[%s]'
+421a1080: movs     r0, #4
+421a1082: ldr      r2, [sp, #0x10]
+421a1084: bl       #0x42140150
+421a1088: ldr      r0, [sp, #0xc]
+421a108a: add      sp, #0x1c
+421a108c: pop      {r4, r5, r6, r7, pc}
+V067_FUNC_SUMMARY=CHILD_FROM_0x42154d8c|start=0x421a0fc0|end=0x421a108e|calls=5|mmio_refs=0|memops=36
+V067_FUNC_CALLS=0x421a0fcc->0x421a0c7c,0x421a101a->0x4204f160,0x421a1062->0x42140150,0x421a106e->0x42140150,0x421a1084->0x42140150
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a0fc8|str r0, [sp, #0xc]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a0fca|ldr r0, [sp, #0x10]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a0fda|ldr r5, [r0, r4]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a0fdc|ldr r1, [pc, #0xb0]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a0fde|ldr r0, [r5]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a0fe8|ldr r0, [r0, r4]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a0fec|str r0, [sp, #8]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a0ff0|str r0, [sp, #4]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a0ff8|ldr r0, [sp, #4]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a0ffc|ldr r1, [sp, #8]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1000|ldr r0, [r6]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1008|str r0, [sp]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a100c|ldr r1, [sp]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1018|ldr r1, [sp, #0x18]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1022|ldr r1, [r6, #4]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1028|ldr r0, [r5, #8]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1034|ldr r1, [r1, r4]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1038|str r0, [sp, #0xc]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a103c|ldr r0, [sp]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1040|str r0, [sp]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1042|ldr r1, [r6, #0xc]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1044|ldr r0, [sp]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a104c|ldr r0, [sp, #4]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1050|str r0, [sp, #4]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1052|ldr r1, [r5, #8]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1054|ldr r0, [sp, #4]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a105c|ldr r1, [pc, #0x34]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1060|ldr r2, [r5]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1068|ldr r1, [pc, #0x2c]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a106c|ldr r2, [sp, #0x10]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1072|ldr r0, [sp, #0xc]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1078|ldr r0, [sp, #0x18]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a107c|str r0, [sp]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a107e|ldr r1, [pc, #0x1c]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1082|ldr r2, [sp, #0x10]
+V067_MEMOP=CHILD_FROM_0x42154d8c|0x421a1088|ldr r0, [sp, #0xc]
+V067_STRINGREF=CHILD_FROM_0x42154d8c|0x4284509c|sd1_FindImageSettingsByName: FileHeader MagiicNumber 0x%08X != 0xCA11BF11
+V067_STRINGREF=CHILD_FROM_0x42154d8c|0x42845440|sd1_FindImageSettingsByName: NOT Found Entry [%s] | CAT=[%d] | PAR=[%s]
+V067_STRINGREF=CHILD_FROM_0x42154d8c|0x428455d0|sd1_FindImageSettingsByName: Calibration File [%s] was not found
+
+=== CHILD_FROM_0x42154da8 0x420d42dc-0x420d4376 ===
+420d42dc: cmp      r1, #0
+420d42de: bne      #0x420d4336
+420d42e0: ldr      r2, [pc, #0x94] ; pool=0x420d4378->0x20020080:WB_PAGE:str=None
+420d42e2: ldr      r2, [r2, #0x14]
+420d42e4: lsrs     r2, r2, #0x10
+420d42e6: lsls     r2, r2, #0x10
+420d42e8: ldrh     r3, [r0, #4]
+420d42ea: lsls     r3, r3, #0x10
+420d42ec: lsrs     r3, r3, #0x10
+420d42ee: orrs     r2, r3
+420d42f0: ldr      r3, [pc, #0x84] ; pool=0x420d4378->0x20020080:WB_PAGE:str=None
+420d42f2: str      r2, [r3, #0x14]
+420d42f4: movs     r2, r3
+420d42f6: ldr      r2, [r2, #0x14]
+420d42f8: lsls     r2, r2, #0x10
+420d42fa: lsrs     r2, r2, #0x10
+420d42fc: ldrh     r3, [r0]
+420d42fe: lsls     r3, r3, #0x10
+420d4300: lsrs     r3, r3, #0x10
+420d4302: lsls     r3, r3, #0x10
+420d4304: orrs     r2, r3
+420d4306: ldr      r3, [pc, #0x70] ; pool=0x420d4378->0x20020080:WB_PAGE:str=None
+420d4308: str      r2, [r3, #0x14]
+420d430a: movs     r2, r3
+420d430c: ldr      r2, [r2, #0x18]
+420d430e: lsrs     r2, r2, #0x10
+420d4310: lsls     r2, r2, #0x10
+420d4312: ldrh     r3, [r0, #0xc]
+420d4314: lsls     r3, r3, #0x10
+420d4316: lsrs     r3, r3, #0x10
+420d4318: orrs     r2, r3
+420d431a: ldr      r3, [pc, #0x5c] ; pool=0x420d4378->0x20020080:WB_PAGE:str=None
+420d431c: str      r2, [r3, #0x18]
+420d431e: movs     r2, r3
+420d4320: ldr      r2, [r2, #0x18]
+420d4322: lsls     r2, r2, #0x10
+420d4324: lsrs     r2, r2, #0x10
+420d4326: ldrh     r3, [r0, #8]
+420d4328: lsls     r3, r3, #0x10
+420d432a: lsrs     r3, r3, #0x10
+420d432c: lsls     r3, r3, #0x10
+420d432e: orrs     r2, r3
+420d4330: ldr      r3, [pc, #0x44] ; pool=0x420d4378->0x20020080:WB_PAGE:str=None
+420d4332: str      r2, [r3, #0x18]
+420d4334: b        #0x420d4374
+420d4336: ldr      r2, [pc, #0x40] ; pool=0x420d4378->0x20020080:WB_PAGE:str=None
+420d4338: ldr      r2, [r2, #0x14]
+420d433a: lsrs     r2, r2, #0x10
+420d433c: lsls     r2, r2, #0x10
+420d433e: ldr      r3, [pc, #0x3c] ; pool=0x420d437c->0x0000ffff:VALUE:str=None
+420d4340: adds     r3, r2, r3
+420d4342: ldr      r2, [pc, #0x34] ; pool=0x420d4378->0x20020080:WB_PAGE:str=None
+420d4344: str      r3, [r2, #0x14]
+420d4346: ldr      r2, [r2, #0x14]
+420d4348: lsls     r2, r2, #0x10
+420d434a: lsrs     r2, r2, #0x10
+420d434c: movs     r3, #1
+420d434e: lsls     r3, r3, #0x10
+420d4350: subs     r3, r2, r3
+420d4352: ldr      r2, [pc, #0x24] ; pool=0x420d4378->0x20020080:WB_PAGE:str=None
+420d4354: str      r3, [r2, #0x14]
+420d4356: ldr      r2, [r2, #0x18]
+420d4358: lsrs     r2, r2, #0x10
+420d435a: lsls     r2, r2, #0x10
+420d435c: ldr      r3, [pc, #0x1c] ; pool=0x420d437c->0x0000ffff:VALUE:str=None
+420d435e: adds     r3, r2, r3
+420d4360: ldr      r2, [pc, #0x14] ; pool=0x420d4378->0x20020080:WB_PAGE:str=None
+420d4362: str      r3, [r2, #0x18]
+420d4364: ldr      r2, [r2, #0x18]
+420d4366: lsls     r2, r2, #0x10
+420d4368: lsrs     r2, r2, #0x10
+420d436a: movs     r3, #1
+420d436c: lsls     r3, r3, #0x10
+420d436e: subs     r3, r2, r3
+420d4370: ldr      r2, [pc, #4] ; pool=0x420d4378->0x20020080:WB_PAGE:str=None
+420d4372: str      r3, [r2, #0x18]
+420d4374: bx       lr
+V067_FUNC_SUMMARY=CHILD_FROM_0x42154da8|start=0x420d42dc|end=0x420d4376|calls=0|mmio_refs=10|memops=32
+V067_FUNC_CALLS=-
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d42e0|ldr r2, [pc, #0x94]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d42e2|ldr r2, [r2, #0x14]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d42e8|ldrh r3, [r0, #4]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d42f0|ldr r3, [pc, #0x84]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d42f2|str r2, [r3, #0x14]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d42f6|ldr r2, [r2, #0x14]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d42fc|ldrh r3, [r0]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4306|ldr r3, [pc, #0x70]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4308|str r2, [r3, #0x14]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d430c|ldr r2, [r2, #0x18]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4312|ldrh r3, [r0, #0xc]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d431a|ldr r3, [pc, #0x5c]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d431c|str r2, [r3, #0x18]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4320|ldr r2, [r2, #0x18]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4326|ldrh r3, [r0, #8]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4330|ldr r3, [pc, #0x44]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4332|str r2, [r3, #0x18]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4336|ldr r2, [pc, #0x40]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4338|ldr r2, [r2, #0x14]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d433e|ldr r3, [pc, #0x3c]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4342|ldr r2, [pc, #0x34]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4344|str r3, [r2, #0x14]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4346|ldr r2, [r2, #0x14]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4352|ldr r2, [pc, #0x24]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4354|str r3, [r2, #0x14]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4356|ldr r2, [r2, #0x18]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d435c|ldr r3, [pc, #0x1c]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4360|ldr r2, [pc, #0x14]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4362|str r3, [r2, #0x18]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4364|ldr r2, [r2, #0x18]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4370|ldr r2, [pc, #4]
+V067_MEMOP=CHILD_FROM_0x42154da8|0x420d4372|str r3, [r2, #0x18]
+V067_MMIO=CHILD_FROM_0x42154da8|0x420d42e0|pool=0x420d4378|value=0x20020080|WB_PAGE
+V067_MMIO=CHILD_FROM_0x42154da8|0x420d42f0|pool=0x420d4378|value=0x20020080|WB_PAGE
+V067_MMIO=CHILD_FROM_0x42154da8|0x420d4306|pool=0x420d4378|value=0x20020080|WB_PAGE
+V067_MMIO=CHILD_FROM_0x42154da8|0x420d431a|pool=0x420d4378|value=0x20020080|WB_PAGE
+V067_MMIO=CHILD_FROM_0x42154da8|0x420d4330|pool=0x420d4378|value=0x20020080|WB_PAGE
+V067_MMIO=CHILD_FROM_0x42154da8|0x420d4336|pool=0x420d4378|value=0x20020080|WB_PAGE
+V067_MMIO=CHILD_FROM_0x42154da8|0x420d4342|pool=0x420d4378|value=0x20020080|WB_PAGE
+V067_MMIO=CHILD_FROM_0x42154da8|0x420d4352|pool=0x420d4378|value=0x20020080|WB_PAGE
+V067_MMIO=CHILD_FROM_0x42154da8|0x420d4360|pool=0x420d4378|value=0x20020080|WB_PAGE
+V067_MMIO=CHILD_FROM_0x42154da8|0x420d4370|pool=0x420d4378|value=0x20020080|WB_PAGE
+V067_CHILDREN_WITH_MMIO=1
+V067_HW_CHILD=callsite=0x42154da8|callee=0x420d42dc|mmio=0x20020080,0x20020080,0x20020080,0x20020080,0x20020080,0x20020080,0x20020080,0x20020080,0x20020080,0x20020080
+V067_CHILDREN_WITH_CLIP_WB_STRING=0
+V067_WBCLIP_PATH_HAS_PAGE20780=0
+V067_WBCLIP_PATH_HAS_WB_PAGE=1
+OVERALL_VERDICT=WBCLIP_SELECTOR_TO_MMIO_CHILD_FOUND_NEEDS_FIELD_CLASSIFICATION
