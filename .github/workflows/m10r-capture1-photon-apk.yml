@@ -1,4 +1,4 @@
-name: M10-R CAPTURE1B DEVICE1 DNG + JPEG APK
+name: M10-R CAPTURE1B JPEGSAVE1 APK
 
 on:
   workflow_dispatch:
@@ -22,6 +22,7 @@ jobs:
           python3 -m py_compile patches/fix-m10r-capture1b-opencv1.py
           python3 -m py_compile patches/fix-m10r-capture1b-compile2.py
           python3 -m py_compile patches/fix-m10r-capture1b-device1.py
+          python3 -m py_compile patches/fix-m10r-capture1b-jpegsave1.py
           python3 -m py_compile patches/verify-m10r-capture1b.py
 
       - name: Clone exact Photon baseline proven by current M9 project
@@ -39,7 +40,7 @@ jobs:
           set -euo pipefail
           python3 "$GITHUB_WORKSPACE/patches/apply-m10r-capture1-foundation.py" "$GITHUB_WORKSPACE/PhotonCamera"
 
-      - name: Apply CAPTURE1B native-source renderer
+      - name: Apply CAPTURE1B native-source renderer and device fixes
         run: |
           set -euo pipefail
           python3 "$GITHUB_WORKSPACE/patches/apply-m10r-capture1b-renderer.py" "$GITHUB_WORKSPACE/PhotonCamera"
@@ -47,19 +48,23 @@ jobs:
           python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-opencv1.py" "$GITHUB_WORKSPACE/PhotonCamera"
           python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-compile2.py" "$GITHUB_WORKSPACE/PhotonCamera"
           python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-device1.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-jpegsave1.py" "$GITHUB_WORKSPACE/PhotonCamera"
 
-      - name: Verify CAPTURE1B DEVICE1 invariants
+      - name: Verify CAPTURE1B JPEGSAVE1 invariants
         run: |
           set -euo pipefail
           python3 "$GITHUB_WORKSPACE/patches/verify-m10r-capture1b.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          grep -F "versionName '0.97-m10rcapture1b-jpegsave1'" "$GITHUB_WORKSPACE/PhotonCamera/app/build.gradle"
           grep -F "implementation 'org.opencv:opencv:4.13.0'" "$GITHUB_WORKSPACE/PhotonCamera/app/build.gradle"
           ! grep -F "org.opencv:opencv:4.10.0" "$GITHUB_WORKSPACE/PhotonCamera/app/build.gradle"
           grep -F "OpenCVLoader.initDebug()" "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
           grep -F 'single_frame_Bayer_EA_demosaic_only' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
-          grep -F 'Byte ref2Obj = c.get(CameraCharacteristics.SENSOR_REFERENCE_ILLUMINANT2);' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
           grep -F 'parameters.sensorPix.left' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/DngCreator.java"
           grep -F 'parameters.sensorPix.right' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/DngCreator.java"
-          grep -F 'device1RenderBeforeDng' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/DefaultSaver.java"
+          grep -F 'capture1Dng.resolveSibling(capture1Stem + ".jpg")' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/DefaultSaver.java"
+          grep -F 'saveBitmapAsJPGM10R' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/DefaultSaver.java"
+          grep -F 'public static boolean saveBitmapAsJPGM10R' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/ImageSaver.java"
+          grep -F 'EXIF finalisation failed but JPEG bytes are preserved' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/ImageSaver.java"
           grep -F 'persistFailureDiagnostics' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
 
       - name: Set up JDK 17
@@ -76,25 +81,25 @@ jobs:
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platforms;android-36" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.0.12077973"
 
-      - name: Build CAPTURE1B DEVICE1 debug APK
+      - name: Build CAPTURE1B JPEGSAVE1 debug APK
         run: |
           set -o pipefail
           cd PhotonCamera
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_CAPTURE1B_DEVICE1_GRADLE.log"
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_CAPTURE1B_JPEGSAVE1_GRADLE.log"
 
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: M10R-CAPTURE1B-DEVICE1-buildlog
-          path: M10R_CAPTURE1B_DEVICE1_GRADLE.log
+          name: M10R-CAPTURE1B-JPEGSAVE1-buildlog
+          path: M10R_CAPTURE1B_JPEGSAVE1_GRADLE.log
           if-no-files-found: ignore
 
-      - name: Upload CAPTURE1B DEVICE1 APK and provenance
+      - name: Upload CAPTURE1B JPEGSAVE1 APK and provenance
         uses: actions/upload-artifact@v4
         with:
-          name: M10RCam-CAPTURE1B-DEVICE1-dnggainmap-jpeg-runtime
+          name: M10RCam-CAPTURE1B-JPEGSAVE1-debug-apk
           path: |
             PhotonCamera/app/build/outputs/apk/debug/*.apk
             PHOTON_UPSTREAM_COMMIT.txt
