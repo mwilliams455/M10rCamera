@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""M10-R v0.63b: identify semantic neighbors of the direct 0x20020780 writes.
+"""M10-R v0.63b: semantic neighborhood of the direct 0x20020780 writes.
 
 v0.63 proved that only central owner 0x42154f84 references the 0x200207xx
 page and that +0c/+10/+14 have no CPU-side external readers/writers. This
-probe names the configuration neighborhood by decoding the wrappers immediately
-before/after the direct field block and their low-level B2Y callees.
+revision additionally resolves ADR-backed inline diagnostic strings so that
+nearby parameter selectors can be named from direct code references rather
+than string proximity alone.
 """
 from pathlib import Path
 import sys
@@ -13,7 +14,10 @@ from capstone.arm import ARM_OP_IMM, ARM_OP_MEM, ARM_REG_PC
 from m10r_wb_direct_consumer_v056 import get_img_section, derive_mapping, u32, read_cstr_va
 
 CENTRAL=0x42154f84
-SEEDS=[0x42154d58,0x42154350,0x42153d24,0x42154bb4,0x420d038c,0x4215440c,0x42153dec]
+WBCLIP_WRAP=0x42154d58
+WBCLIP_DRIVER=0x420d42dc
+WB_MMIO=0x20020080
+SEEDS=[WBCLIP_WRAP,0x42154350,0x42153d24,0x42154bb4,0x420d038c,0x4215440c,0x42153dec]
 DRIVER_LO=0x420c0000; DRIVER_HI=0x420e8000
 
 
@@ -35,6 +39,30 @@ def bt(ins):
             if op.type==ARM_OP_IMM: return int(op.imm)&0xffffffff
     except Exception: pass
     return None
+
+
+def adr_target(ins):
+    if ins.mnemonic.lower()!='adr': return None
+    parts=ins.op_str.split('#')
+    if len(parts)!=2: return None
+    try: imm=int(parts[1],0)
+    except ValueError: return None
+    return ((ins.address+4)&~3)+imm
+
+
+def inline_ascii_near(data,bias,va,span=0x50):
+    off=va-bias
+    if not (0<=off<len(data)): return []
+    out=[]
+    for d in range(0,span):
+        p=off+d
+        if p>=len(data) or not (32<=data[p]<127): continue
+        if p>off and 32<=data[p-1]<127: continue
+        j=p
+        while j<len(data) and 32<=data[j]<127: j+=1
+        if j-p>=8:
+            out.append((bias+p,data[p:j].decode('ascii','replace')))
+    return out
 
 
 def decode(md,data,bias,st,maxlen=0x900):
@@ -65,7 +93,7 @@ def ascii_near(data,bias,va,r=0x180):
 def emit(md,data,bias,st,label):
     seq,en=decode(md,data,bias,st)
     print(f'\n=== V063B_{label} 0x{st:08x}-0x{en:08x} ===')
-    calls=[]; mm=[]; strings=[]
+    calls=[]; mm=[]; strings=[]; adr_strings=[]
     for ins in seq:
         t=bt(ins)
         if ins.mnemonic.lower() in ('bl','blx') and t is not None: calls.append((ins.address,t))
@@ -74,12 +102,16 @@ def emit(md,data,bias,st,label):
             if bias<=v<bias+len(data):
                 s=read_cstr_va(data,bias,v)
                 if s: strings.append((ins.address,s))
+        at=adr_target(ins)
+        if at is not None:
+            for sva,s in inline_ascii_near(data,bias,at): adr_strings.append((ins.address,at,sva,s))
         print(f'{ins.address:08x}: {ins.mnemonic:<8} {ins.op_str}')
     for a,t in calls: print(f'V063B_CALL={label}|0x{a:08x}->0x{t:08x}')
     for a,p,v in mm: print(f'V063B_MMIO={label}|0x{a:08x}|pool=0x{p:08x}|value=0x{v:08x}')
     for a,s in strings: print(f'V063B_DIRECT_STRING={label}|0x{a:08x}|{s}')
+    for a,at,sva,s in adr_strings: print(f'V063B_ADR_STRING={label}|ins=0x{a:08x}|target=0x{at:08x}|string_va=0x{sva:08x}|{s}')
     for a,s in ascii_near(data,bias,st): print(f'V063B_NEAR_STRING={label}|0x{a:08x}|{s}')
-    return calls
+    return calls,mm,adr_strings
 
 
 def main():
@@ -91,18 +123,33 @@ def main():
     print(f'V063B_MAP_BIAS=0x{bias:08x}'); print(f"V063B_SECTION={row['index']}:{row['name']}")
     md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True
 
-    seq,en=decode(md,data,bias,CENTRAL)
+    seq,_=decode(md,data,bias,CENTRAL)
     print('\n=== V063B_CENTRAL_SLICE ===')
     for ins in seq:
-        if 0x42154fa0<=ins.address<=0x42155080:
-            print(f'{ins.address:08x}: {ins.mnemonic:<8} {ins.op_str}')
+        if 0x42154fa0<=ins.address<=0x42155080: print(f'{ins.address:08x}: {ins.mnemonic:<8} {ins.op_str}')
 
-    all_calls=[]
-    for st in SEEDS: all_calls += emit(md,data,bias,st,f'WRAP_{st:08x}')
+    all_calls=[]; evidence={}
+    for st in SEEDS:
+        calls,mm,adr_strings=emit(md,data,bias,st,f'WRAP_{st:08x}')
+        all_calls+=calls; evidence[st]=(calls,mm,adr_strings)
     drivers=sorted({t for _,t in all_calls if DRIVER_LO<=t<DRIVER_HI})
     print('V063B_DRIVER_CALLEES='+(','.join(f'0x{x:08x}' for x in drivers) or '-'))
-    for st in drivers: emit(md,data,bias,st,f'DRIVER_{st:08x}')
+    driver_evidence={}
+    for st in drivers: driver_evidence[st]=emit(md,data,bias,st,f'DRIVER_{st:08x}')
 
-    print('OVERALL_VERDICT=B2Y_20780_SEMANTIC_NEIGHBORHOOD_CAPTURED_NEEDS_CLASSIFICATION')
+    wcalls,wmm,wadr=evidence[WBCLIP_WRAP]
+    named=any('wbcliplevel' in s.lower() for _,_,_,s in wadr)
+    calls_driver=any(t==WBCLIP_DRIVER for _,t in wcalls)
+    dmm=driver_evidence.get(WBCLIP_DRIVER,([],[],[]))[1]
+    driver_wb_page=any(v==WB_MMIO for _,_,v in dmm)
+    print(f'V063B_WBCLIP_WRAPPER_NAMED={int(named)}')
+    print(f'V063B_WBCLIP_CALLS_DRIVER_420D42DC={int(calls_driver)}')
+    print(f'V063B_WBCLIP_DRIVER_USES_20020080={int(driver_wb_page)}')
+    if named and calls_driver and driver_wb_page:
+        print('V063B_DEDICATED_WBCLIP_CONTROL_PAGE=0x20020080')
+        print('V063B_20780_IS_DEDICATED_WBCLIP_CONTROL=0')
+        print('OVERALL_VERDICT=B2Y_20780_NOT_DEDICATED_WBCLIPLEVEL_CONTROL')
+    else:
+        print('OVERALL_VERDICT=B2Y_20780_SEMANTIC_NEIGHBORHOOD_CAPTURED_NEEDS_CLASSIFICATION')
 
 if __name__=='__main__': main()
