@@ -10,8 +10,8 @@ android {
         applicationId = "com.m10r.diagnostic"
         minSdk = 26
         targetSdk = 36
-        versionCode = 8
-        versionName = "0.5.3-highlight-factorial"
+        versionCode = 9
+        versionName = "0.5.4-render-parity1a"
 
         testInstrumentationRunner = "android.test.InstrumentationTestRunner"
     }
