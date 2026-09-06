@@ -1,0 +1,161 @@
+name: M10-R v0.59 Bayer-domain WB headroom discriminator
+on:
+  push:
+    branches: [m10r-wb-bayer-v059]
+    paths: ['.github/workflows/m10r-wb-bayer-v059.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install analysis dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl >/dev/null
+          python3 -m pip install --quiet rawpy pillow numpy opencv-python-headless
+      - name: Re-run exact six public fixtures with Bayer-domain WB
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f research/M10R_v058_wb_headroom_empirical.json
+          mkdir -p /tmp/m10r_v059
+          for id in 01 02 03 04 05 06; do
+            echo "=== sample $id ==="
+            base="https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_${id}"
+            curl -L --fail --retry 3 --retry-delay 2 "$base.jpg" -o "/tmp/m10r_v059/${id}.jpg"
+            curl -L --fail --retry 3 --retry-delay 2 "$base.dng" -o "/tmp/m10r_v059/${id}.dng"
+            exiftool -j -n \
+              -Make -Model -SerialNumber -ImageUniqueID -DateTimeOriginal -CreateDate \
+              -ExposureTime -FNumber -ISO -FocalLength -ExposureCompensation \
+              -WhiteBalance -Contrast -Saturation -Sharpness \
+              -AsShotNeutral -WhiteLevel -BlackLevel \
+              "/tmp/m10r_v059/${id}.jpg" "/tmp/m10r_v059/${id}.dng" > "/tmp/m10r_v059/${id}_exif.json"
+            python3 tools/m10r_wb_bayer_headroom_v059.py \
+              --jpg "/tmp/m10r_v059/${id}.jpg" \
+              --dng "/tmp/m10r_v059/${id}.dng" \
+              --metadata-json "/tmp/m10r_v059/${id}_exif.json" \
+              --v058-json research/M10R_v058_wb_headroom_empirical.json \
+              --sample "$id" \
+              --out "/tmp/m10r_v059/${id}_fit.json"
+            rm -f "/tmp/m10r_v059/${id}.jpg" "/tmp/m10r_v059/${id}.dng"
+          done
+      - name: Aggregate Bayer-domain headroom evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, statistics
+          from pathlib import Path
+
+          rows=[json.loads(p.read_text()) for p in sorted(Path('/tmp/m10r_v059').glob('*_fit.json'))]
+          old=json.loads(Path('research/M10R_v058_wb_headroom_empirical.json').read_text())
+          old_by={str(r['sample']):r for r in old.get('samples',[])}
+          valid=[r for r in rows if r.get('metadata',{}).get('identity_supported') is True
+                 and r.get('metadata',{}).get('default_jpeg_controls') is True
+                 and r.get('raw',{}).get('schema_matches_pixel_exact_fixture') is True
+                 and r.get('fits') and not r.get('error')]
+
+          out=[]
+          out.append('M10-R v0.59 BAYER-DOMAIN DIRECT-WB HEADROOM DISCRIMINATOR')
+          out.append('source: exact Photography Blog M10-R sample pairs 01..06 reused from v2.20/v0.58')
+          out.append('change from v0.58: proven Q8 WB and candidate clipping are applied on native GBRG CFA before a fixed demosaic proxy')
+          out.append('IMPORTANT: empirical proxy only; the OpenCV demosaic is not claimed to be Leica B2Y demosaic.')
+          out.append('')
+          out.append('=== per-sample ===')
+          for r in rows:
+            a=r['alignment']; w=r['wb']; p=r['patches']; raw=r['raw']; m=r['metadata']
+            out.append(f"sample {r['sample']} identity={m.get('identity_supported')} defaults={m.get('default_jpeg_controls')} "
+                       f"schema={raw.get('schema_matches_pixel_exact_fixture')} pattern={raw.get('pattern_letters')} shape={raw.get('shape')} "
+                       f"align=({a['dx']},{a['dy']}) rot90={a['rot90_k']} gains={w['gain_q8_rgb']} ASN={w['asn']} "
+                       f"white={raw['white_level']} train={p['train']} test={p['test']}")
+            if r.get('error'):
+              out.append('  ERROR '+r['error'])
+              continue
+            for rnd in ('trunc','nearest'):
+              dw=r['fits'][f'dng_white|{rnd}']; b14=r['fits'][f'b2y_14bit|{rnd}']; d=r['headroom_delta'][rnd]
+              oldd=old_by.get(str(r['sample']),{}).get('headroom_delta',{}).get(rnd)
+              out.append(f"  {rnd}: dng_white rmse={dw['rgb_rmse']:.6f} chroma={dw['chromaticity_mae']:.6f}; "
+                         f"b2y14 rmse={b14['rgb_rmse']:.6f} chroma={b14['chromaticity_mae']:.6f}; "
+                         f"v059_delta={d:.6f} v058_delta={oldd}")
+            out.append('  rounding_delta nearest-minus-trunc '+repr(r.get('rounding_delta',{})))
+
+          agg={'total':len(rows),'valid':len(valid),'headroom':{},'rounding':{}}
+          out.append('')
+          out.append('=== aggregate ===')
+          for rnd in ('trunc','nearest'):
+            ds=[r['headroom_delta'][rnd] for r in valid]
+            rec={'b2y14_wins':sum(d>0 for d in ds),'dng_white_wins':sum(d<0 for d in ds),'ties':sum(d==0 for d in ds),
+                 'deltas':ds,'median_delta':statistics.median(ds) if ds else None,'mean_delta':statistics.mean(ds) if ds else None}
+            agg['headroom'][rnd]=rec
+            out.append(f"{rnd}: valid={len(ds)} b2y14_wins={rec['b2y14_wins']} dng_white_wins={rec['dng_white_wins']} "
+                       f"ties={rec['ties']} median_delta={rec['median_delta']} mean_delta={rec['mean_delta']}")
+            out.append('  deltas '+repr(ds))
+
+          for ceiling in ('dng_white','b2y_14bit'):
+            ds=[r['rounding_delta'][ceiling] for r in valid]
+            rec={'trunc_wins':sum(d>0 for d in ds),'nearest_wins':sum(d<0 for d in ds),'ties':sum(d==0 for d in ds),
+                 'deltas':ds,'median_delta':statistics.median(ds) if ds else None}
+            agg['rounding'][ceiling]=rec
+            out.append(f"rounding {ceiling}: trunc_wins={rec['trunc_wins']} nearest_wins={rec['nearest_wins']} "
+                       f"ties={rec['ties']} median nearest-minus-trunc={rec['median_delta']}")
+
+          verdict='UNRESOLVED'
+          if len(valid)>=4:
+            need=max(4,int(0.8*len(valid)+0.9999))
+            b14=all(agg['headroom'][r]['b2y14_wins']>=need and (agg['headroom'][r]['median_delta'] or 0)>0.002 for r in ('trunc','nearest'))
+            dng=all(agg['headroom'][r]['dng_white_wins']>=need and (agg['headroom'][r]['median_delta'] or 0)<-0.002 for r in ('trunc','nearest'))
+            if b14: verdict='B2Y_14BIT_HEADROOM_EMPIRICALLY_PREFERRED'
+            elif dng: verdict='DNG_WHITE_HEADROOM_EMPIRICALLY_PREFERRED'
+          agg['headroom_verdict']=verdict
+
+          rver='ROUNDING_UNRESOLVED'
+          if len(valid)>=4:
+            need=max(4,int(0.8*len(valid)+0.9999))
+            trunc=all(agg['rounding'][c]['trunc_wins']>=need and (agg['rounding'][c]['median_delta'] or 0)>0.0005 for c in ('dng_white','b2y_14bit'))
+            near=all(agg['rounding'][c]['nearest_wins']>=need and (agg['rounding'][c]['median_delta'] or 0)<-0.0005 for c in ('dng_white','b2y_14bit'))
+            if trunc: rver='TRUNC_EMPIRICALLY_PREFERRED'
+            elif near: rver='NEAREST_EMPIRICALLY_PREFERRED'
+          agg['rounding_verdict']=rver
+
+          # Stability view: does moving WB ahead of demosaic change each sample's
+          # headroom sign relative to v0.58? This is diagnostic, not a proof gate.
+          stability={}
+          for rnd in ('trunc','nearest'):
+            pairs=[]
+            for r in valid:
+              od=old_by.get(str(r['sample']),{}).get('headroom_delta',{}).get(rnd)
+              if od is not None:
+                nd=r['headroom_delta'][rnd]
+                pairs.append({'sample':r['sample'],'v058':od,'v059':nd,'same_sign':(od==0 and nd==0) or (od*nd>0)})
+            stability[rnd]=pairs
+          agg['v058_v059_sign_stability']=stability
+
+          out.append('')
+          out.append('HEADROOM_VERDICT '+verdict)
+          out.append('ROUNDING_VERDICT '+rver)
+          for rnd,pairs in stability.items():
+            out.append(f"SIGN_STABILITY {rnd} "+repr([(p['sample'],p['same_sign']) for p in pairs]))
+          out.append('')
+          out.append('LIMITATIONS')
+          out.append('- native CFA comes from rawpy raw_image_visible; independent project v2.42 SOF3 work is the pixel-exact decoder validation baseline.')
+          out.append('- OpenCV Bayer demosaic is a controlled proxy held identical across candidates; it is not asserted to reproduce Leica B2Y demosaic.')
+          out.append('- per-scene downstream quadratic fit still absorbs unknown rendered CC/tone behavior using midtones only.')
+          out.append('- 8-bit JPEG may remain insufficient to identify one-code Q8 rounding differences.')
+          out.append('- no frozen renderer/color/tone/B2Y assets are modified.')
+
+          Path('research/M10R_v059_wb_bayer_headroom_empirical.txt').write_text('\n'.join(out)+'\n')
+          Path('research/M10R_v059_wb_bayer_headroom_empirical.json').write_text(json.dumps({'samples':rows,'aggregate':agg},indent=2,sort_keys=True)+'\n')
+          print('\n'.join(out))
+          PY
+      - name: Commit v0.59 empirical evidence
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v059_wb_bayer_headroom_empirical.txt research/M10R_v059_wb_bayer_headroom_empirical.json
+          git commit -m 'research: record v059 Bayer-domain WB headroom discriminator' || exit 0
+          git pull --rebase origin m10r-wb-bayer-v059
+          git push
