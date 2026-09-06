@@ -1,0 +1,142 @@
+name: M10-R v0.58 WB color-sensitive headroom discriminator
+on:
+  push:
+    branches: [m10r-wb-empirical-v058]
+    paths: ['.github/workflows/m10r-wb-empirical-v058.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install analysis dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl >/dev/null
+          python3 -m pip install --quiet rawpy pillow numpy
+      - name: Re-run exact six public JPEG/DNG fixtures with color-sensitive WB proxy
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/m10r_v058
+          for id in 01 02 03 04 05 06; do
+            echo "=== sample $id ==="
+            base="https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_${id}"
+            curl -L --fail --retry 3 --retry-delay 2 "$base.jpg" -o "/tmp/m10r_v058/${id}.jpg"
+            curl -L --fail --retry 3 --retry-delay 2 "$base.dng" -o "/tmp/m10r_v058/${id}.dng"
+            exiftool -j -n \
+              -Make -Model -SerialNumber -ImageUniqueID -DateTimeOriginal -CreateDate \
+              -ExposureTime -FNumber -ISO -FocalLength -ExposureCompensation \
+              -WhiteBalance -Contrast -Saturation -Sharpness \
+              -AsShotNeutral -WhiteLevel -BlackLevel \
+              "/tmp/m10r_v058/${id}.jpg" "/tmp/m10r_v058/${id}.dng" > "/tmp/m10r_v058/${id}_exif.json"
+            python3 tools/m10r_wb_headroom_fit_v058.py \
+              --jpg "/tmp/m10r_v058/${id}.jpg" \
+              --dng "/tmp/m10r_v058/${id}.dng" \
+              --metadata-json "/tmp/m10r_v058/${id}_exif.json" \
+              --sample "$id" \
+              --out "/tmp/m10r_v058/${id}_fit.json"
+            rm -f "/tmp/m10r_v058/${id}.jpg" "/tmp/m10r_v058/${id}.dng"
+          done
+      - name: Aggregate WB headroom evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, statistics
+          from pathlib import Path
+
+          rows=[json.loads(p.read_text()) for p in sorted(Path('/tmp/m10r_v058').glob('*_fit.json'))]
+          valid=[r for r in rows if r.get('metadata',{}).get('identity_supported') is True
+                 and r.get('metadata',{}).get('default_jpeg_controls') is True
+                 and r.get('fits') and not r.get('error')]
+          out=[]
+          out.append('M10-R v0.58 COLOR-SENSITIVE DIRECT-WB HEADROOM DISCRIMINATOR')
+          out.append('source: exact Photography Blog M10-R sample pairs 01..06 reused from v2.20')
+          out.append('observable: identity-WB linear camera RGB -> firmware Q8 WB triplet -> candidate clip ceiling -> nuisance downstream fit')
+          out.append('IMPORTANT: empirical proxy only; not proof of hidden B2Y multiplier/rounding or Bayer-domain placement.')
+          out.append('')
+          out.append('=== per-sample ===')
+          for r in rows:
+            a=r['alignment']; w=r['wb']; p=r['patches']; m=r['metadata']
+            out.append(f"sample {r['sample']} identity={m.get('identity_supported')} defaults={m.get('default_jpeg_controls')} "
+                       f"align=({a['dx']},{a['dy']}) rot90={a['rot90_k']} score={a['score']:.6f} "
+                       f"gains={w['gain_q8_rgb']} ASN={w['asn']} white={r['raw']['white_level']} train={p['train']} test={p['test']}")
+            if r.get('error'):
+              out.append('  ERROR '+r['error'])
+              continue
+            for rnd in ('trunc','nearest'):
+              dw=r['fits'][f'dng_white|{rnd}']; b14=r['fits'][f'b2y_14bit|{rnd}']; d=r['headroom_delta'][rnd]
+              out.append(f"  {rnd}: dng_white rmse={dw['rgb_rmse']:.6f} chroma={dw['chromaticity_mae']:.6f}; "
+                         f"b2y14 rmse={b14['rgb_rmse']:.6f} chroma={b14['chromaticity_mae']:.6f}; delta={d:.6f}")
+            out.append('  rounding_delta nearest-minus-trunc '+repr(r.get('rounding_delta',{})))
+
+          agg={'total':len(rows),'valid':len(valid),'headroom':{},'rounding':{}}
+          out.append('')
+          out.append('=== aggregate ===')
+          for rnd in ('trunc','nearest'):
+            ds=[r['headroom_delta'][rnd] for r in valid]
+            rec={'b2y14_wins':sum(d>0 for d in ds),'dng_white_wins':sum(d<0 for d in ds),'ties':sum(d==0 for d in ds),
+                 'deltas':ds,'median_delta':statistics.median(ds) if ds else None,'mean_delta':statistics.mean(ds) if ds else None}
+            agg['headroom'][rnd]=rec
+            out.append(f"{rnd}: valid={len(ds)} b2y14_wins={rec['b2y14_wins']} dng_white_wins={rec['dng_white_wins']} "
+                       f"ties={rec['ties']} median_delta={rec['median_delta']} mean_delta={rec['mean_delta']}")
+            out.append('  deltas '+repr(ds))
+
+          for ceiling in ('dng_white','b2y_14bit'):
+            ds=[r['rounding_delta'][ceiling] for r in valid]
+            rec={'trunc_wins':sum(d>0 for d in ds),'nearest_wins':sum(d<0 for d in ds),'ties':sum(d==0 for d in ds),
+                 'deltas':ds,'median_delta':statistics.median(ds) if ds else None}
+            agg['rounding'][ceiling]=rec
+            out.append(f"rounding {ceiling}: trunc_wins={rec['trunc_wins']} nearest_wins={rec['nearest_wins']} "
+                       f"ties={rec['ties']} median nearest-minus-trunc={rec['median_delta']}")
+
+          # Conservative empirical support gate: at least four valid scenes and one
+          # ceiling wins >=80% under both rounding modes with median RGB RMSE gap
+          # greater than 0.002 (0..1 RGB scale).  Otherwise leave unresolved.
+          verdict='UNRESOLVED'
+          if len(valid)>=4:
+            need=max(4,int(0.8*len(valid)+0.9999))
+            b14=all(agg['headroom'][r]['b2y14_wins']>=need and (agg['headroom'][r]['median_delta'] or 0)>0.002 for r in ('trunc','nearest'))
+            dng=all(agg['headroom'][r]['dng_white_wins']>=need and (agg['headroom'][r]['median_delta'] or 0)<-0.002 for r in ('trunc','nearest'))
+            if b14: verdict='B2Y_14BIT_HEADROOM_EMPIRICALLY_PREFERRED'
+            elif dng: verdict='DNG_WHITE_HEADROOM_EMPIRICALLY_PREFERRED'
+          agg['headroom_verdict']=verdict
+
+          # 8-bit JPEG is expected to be weak for a one-code Q8 rounding test.
+          # Only call rounding if one rule wins >=80% for both ceilings and median
+          # RGB RMSE separation exceeds 0.0005; otherwise explicitly unresolved.
+          rver='ROUNDING_UNRESOLVED'
+          if len(valid)>=4:
+            need=max(4,int(0.8*len(valid)+0.9999))
+            trunc=all(agg['rounding'][c]['trunc_wins']>=need and (agg['rounding'][c]['median_delta'] or 0)>0.0005 for c in ('dng_white','b2y_14bit'))
+            near=all(agg['rounding'][c]['nearest_wins']>=need and (agg['rounding'][c]['median_delta'] or 0)<-0.0005 for c in ('dng_white','b2y_14bit'))
+            if trunc: rver='TRUNC_EMPIRICALLY_PREFERRED'
+            elif near: rver='NEAREST_EMPIRICALLY_PREFERRED'
+          agg['rounding_verdict']=rver
+          out.append('')
+          out.append('HEADROOM_VERDICT '+verdict)
+          out.append('ROUNDING_VERDICT '+rver)
+          out.append('')
+          out.append('LIMITATIONS')
+          out.append('- WB is applied to a post-demosaic identity-WB camera-RGB proxy; this does not prove Bayer-domain arithmetic placement.')
+          out.append('- per-scene quadratic downstream fit absorbs unknown fixed/dynamic CC and tone behavior on midtones.')
+          out.append('- the discriminator is intentionally driven by highlight information lost under one ceiling but retained under the other.')
+          out.append('- 8-bit JPEG output may be insufficient to distinguish truncation from nearest rounding; unresolved is an acceptable result.')
+          out.append('- no renderer assets or frozen color/tone behavior are changed by this experiment.')
+
+          Path('research/M10R_v058_wb_headroom_empirical.txt').write_text('\n'.join(out)+'\n')
+          Path('research/M10R_v058_wb_headroom_empirical.json').write_text(json.dumps({'samples':rows,'aggregate':agg},indent=2,sort_keys=True)+'\n')
+          print('\n'.join(out))
+          PY
+      - name: Commit v0.58 empirical evidence
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v058_wb_headroom_empirical.txt research/M10R_v058_wb_headroom_empirical.json
+          git commit -m 'research: record v058 WB headroom empirical discriminator' || exit 0
+          git pull --rebase origin m10r-wb-empirical-v058
+          git push
