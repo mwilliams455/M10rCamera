@@ -19,7 +19,7 @@ dng=text('app/src/main/java/com/particlesdevs/photoncamera/processing/DngCreator
 image_saver=text('app/src/main/java/com/particlesdevs/photoncamera/processing/ImageSaver.java')
 
 required = {
-    'gradle': ["applicationId 'com.m10rproject.m10rcam.photon'", "versionName '0.97-m10rcapture1b'",
+    'gradle': ["applicationId 'com.m10rproject.m10rcam.photon'", "versionName '0.97-m10rcapture1b-jpegsave1'",
                "implementation 'org.opencv:opencv:4.13.0'"],
     'frames': ['CameraMode.PHOTO', 'frameCount = 1', 'throwCount = 0', 'return 1;'],
     'saver': ['M10RNativeRenderer.render(', 'ImageSaver.Util.saveSingleRaw(', 'ImageSaver.Util.saveBitmapAsJPGM10R(',
@@ -50,16 +50,11 @@ for name, needles in required.items():
     for n in needles:
         if n not in hay: raise SystemExit('CAPTURE1B verify %s missing %r' % (name,n))
 
-# The DNG JNI ABI is xmin/ymin/xmax/ymax. Guard exact argument order so the
-# horizontal GainMap seam fixed on-device in the M9 project cannot regress here.
 correct_gainmap = '''        setGainMap(parameters.gainMap,\n                   parameters.sensorPix.left,\n                   parameters.sensorPix.top,\n                   parameters.sensorPix.right,\n                   parameters.sensorPix.bottom,\n                   parameters.mapSize.x,\n                   parameters.mapSize.y);'''
 wrong_gainmap = '''        setGainMap(parameters.gainMap,\n                   parameters.sensorPix.top,\n                   parameters.sensorPix.left,\n                   parameters.sensorPix.bottom,\n                   parameters.sensorPix.right,\n                   parameters.mapSize.x,\n                   parameters.mapSize.y);'''
 if correct_gainmap not in dng or wrong_gainmap in dng:
     raise SystemExit('CAPTURE1B DNG GainMap x/y geometry regression')
 
-# DEVICE1 deliberately renders/publishes the JPEG before constructing the DNG.
-# JPEGSAVE1 writes the JPEG beside the DNG with the same stem and an explicit
-# .jpg extension, using JPEG-byte success as the publication criterion.
 pos_render=saver.find('capture1b = M10RNativeRenderer.render(')
 pos_jpeg=saver.find('jpegSaved = ImageSaver.Util.saveBitmapAsJPGM10R(', pos_render)
 pos_dng=saver.find('dngSaved = ImageSaver.Util.saveSingleRaw(', pos_render)
@@ -70,14 +65,11 @@ if min(pos_render,pos_jpeg,pos_dng,pos_return,pos_hdr) < 0:
 if not (pos_render < pos_jpeg < pos_dng < pos_return < pos_hdr):
     raise SystemExit('CAPTURE1B DEVICE1 route order invalid: expected render/JPEG -> DNG -> return -> legacy HDR')
 
-# DNG must remain outside the render try/catch so a JPEG renderer exception cannot
-# suppress RAW publication.
 pos_render_try=saver.rfind('                try {', 0, pos_render)
 pos_render_catch=saver.find('                } catch (Throwable renderError)', pos_render)
 if min(pos_render_try,pos_render_catch) < 0 or not (pos_render_try < pos_render < pos_render_catch < pos_dng):
     raise SystemExit('CAPTURE1B DEVICE1 DNG is not preserved after render failure')
 
-# Ensure we no longer use the extensionless DCIM/Camera path for CAPTURE1B.
 cap_block_start=saver.find('// M10R CAPTURE1B:')
 cap_block_end=saver.find('        hdrxProcessor.configure(', cap_block_start)
 cap_block=saver[cap_block_start:cap_block_end]
@@ -86,7 +78,6 @@ if 'ImagePath.newImageFilePath()' in cap_block:
 if 'capture1Dng.resolveSibling(capture1Stem + ".jpg")' not in cap_block:
     raise SystemExit('CAPTURE1B JPEGSAVE1 same-stem sibling path missing')
 
-# Prevent accidental reintroduction of Cobalt/profile LUT naming in the integration renderer.
 for forbidden in ['Cobalt_', 'm9_r35_calibration', 'ProfileHueSatMap', 'HdrxProcessor']:
     if forbidden in renderer:
         raise SystemExit('CAPTURE1B renderer forbidden dependency: '+forbidden)
@@ -94,6 +85,7 @@ if 'photonPostPipelineUsed", false' not in renderer:
     raise SystemExit('CAPTURE1B PostPipeline false diagnostic missing')
 
 print('M10-R CAPTURE1B JPEGSAVE1 verification PASS')
+print(' - build identity 0.97-m10rcapture1b-jpegsave1 enforced')
 print(' - pinned single-frame CAPTURE1 semantics retained')
 print(' - JPEG renders before DNG to bound peak memory')
 print(' - JPEG uses same proven-writable DNG directory and explicit .jpg suffix')
