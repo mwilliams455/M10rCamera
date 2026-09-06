@@ -11,6 +11,7 @@ on:
       - 'tools/m10r_direct_gain_consumer_v055_callprobe.py'
       - 'tools/m10r_direct_gain_consumer_v055_svcprobe.py'
       - 'tools/m10r_direct_gain_consumer_v055_svchandlerprobe.py'
+      - 'tools/m10r_direct_gain_consumer_v055_svcabi_probe.py'
       - '.github/workflows/m10r-direct-gain-consumer-v055.yml'
   workflow_dispatch:
 
@@ -35,6 +36,7 @@ jobs:
           python3 -m py_compile tools/m10r_direct_gain_consumer_v055_callprobe.py
           python3 -m py_compile tools/m10r_direct_gain_consumer_v055_svcprobe.py
           python3 -m py_compile tools/m10r_direct_gain_consumer_v055_svchandlerprobe.py
+          python3 -m py_compile tools/m10r_direct_gain_consumer_v055_svcabi_probe.py
 
       - name: Fetch and verify archived firmware
         shell: bash
@@ -90,6 +92,12 @@ jobs:
           set -euo pipefail
           python3 tools/m10r_direct_gain_consumer_v055_svchandlerprobe.py /tmp/m10r_sections | tee artifacts/m10r_direct_gain_consumer_v055_svchandlerprobe.txt
 
+      - name: Characterize SVC7 wrapper ABI
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/m10r_direct_gain_consumer_v055_svcabi_probe.py /tmp/m10r_sections | tee artifacts/m10r_direct_gain_consumer_v055_svcabi_probe.txt
+
       - name: Hard evidence summary
         if: always()
         shell: bash
@@ -108,6 +116,9 @@ jobs:
           fi
           if [ -f artifacts/m10r_direct_gain_consumer_v055_svchandlerprobe.txt ]; then
             grep -E '^(SVCHANDLER_(SECTION|RUNTIME_BASE_KNOWN|ARM_INSNS|LR_TRAP_LOAD_COUNT|MRS_SPSR_COUNT|MSR_SPSR_COUNT|EXCEPTION_RETURN_COUNT|CLUSTER_COUNT|STRONG_CANDIDATES|BEST_START|BEST_END|VERDICT)=)' artifacts/m10r_direct_gain_consumer_v055_svchandlerprobe.txt || true
+          fi
+          if [ -f artifacts/m10r_direct_gain_consumer_v055_svcabi_probe.txt ]; then
+            grep -E '^(SVCABI_(SECTION|RUNTIME_BASE_KNOWN|THUMB_INSNS|SVC7_COUNT|SVC6_COUNT|TOKEN_PAIR_COUNT|NEAR_PROLOGUE_PAIR_COUNT|PROLOGUE_R[0-3]_UNPREPARED|PROLOGUE_R2_UNPREPARED_RATIO|FIRST_POST_R2_(CLOBBER|READ_OR_TRANSFORM|NONE)|TARGET_HELPER|TARGET_HELPER_SVC7_OFFSET|TARGET_HELPER_NEAR_PROLOGUE|TARGET_HELPER_R2_PREPARED|TARGET_HELPER_FIRST_POST_R2|R2_ARGUMENT_EVIDENCE)=)' artifacts/m10r_direct_gain_consumer_v055_svcabi_probe.txt || true
           fi
 
       - name: Upload v0.55 evidence
