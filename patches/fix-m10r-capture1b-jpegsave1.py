@@ -9,13 +9,23 @@ root = Path(sys.argv[1]).resolve()
 if not (root / 'app').is_dir():
     raise SystemExit('CAPTURE1B JPEGSAVE1: not a PhotonCamera root')
 
-# The device log does not contain the failing M10-R shutter transaction itself,
-# but the user-visible "image save error" can only be emitted after the renderer
-# has reached the JPEG publication call and that call reports false.  Photon
-# ImagePath.newImageFilePath() deliberately returns an extensionless path in
-# DCIM/Camera.  For CAPTURE1B we instead publish the JPEG beside the already
-# proven-writable DNG, with an explicit .jpg suffix and identical capture stem.
-# This also avoids treating best-effort EXIF finalisation as JPEG byte failure.
+# The supplied device log does not contain the failing M10-R shutter transaction
+# itself. It ends after camera-session setup. The user-visible "image save error"
+# nevertheless tells us the CAPTURE1B path reached JPEG publication and that
+# publication reported false. Photon ImagePath.newImageFilePath() deliberately
+# returns an extensionless path in DCIM/Camera. For CAPTURE1B we instead publish
+# the JPEG beside the already proven-writable DNG, with an explicit .jpg suffix
+# and identical capture stem. JPEG byte persistence is authoritative; EXIF is
+# best effort and cannot turn an already-written photograph into a save failure.
+
+gradle = root / 'app/build.gradle'
+g = gradle.read_text()
+if "versionName '0.97-m10rcapture1b'" in g:
+    g = g.replace("versionName '0.97-m10rcapture1b'",
+                  "versionName '0.97-m10rcapture1b-jpegsave1'", 1)
+elif "versionName '0.97-m10rcapture1b-jpegsave1'" not in g:
+    raise SystemExit('CAPTURE1B JPEGSAVE1 version anchor missing')
+gradle.write_text(g)
 
 saver = root / 'app/src/main/java/com/particlesdevs/photoncamera/processing/DefaultSaver.java'
 s = saver.read_text()
@@ -33,8 +43,6 @@ if new_call not in s:
         raise SystemExit('CAPTURE1B JPEGSAVE1 save call anchor missing/non-unique')
     s = s.replace(old_call, new_call, 1)
 
-# Make diagnostics explicit so the next device report tells us whether byte
-# publication or only EXIF/media scanning had a problem.
 needle = '                    capture1b.diagnostics.put("device1RenderBeforeDng", true);\n'
 insert = needle + '''                    capture1b.diagnostics.put("jpegSavePolicy", "m10r_jpegsave1_same_dng_dir_explicit_jpg_best_effort_exif");\n                    capture1b.diagnostics.put("jpegParent", String.valueOf(capture1Jpeg.getParent()));\n'''
 if insert not in s:
@@ -49,13 +57,16 @@ anchor = '''        public static boolean saveBitmapAsJPG(Path fileToSave, Bitma
 if anchor not in i:
     raise SystemExit('CAPTURE1B JPEGSAVE1 ImageSaver anchor missing')
 if 'saveBitmapAsJPGM10R(' not in i:
-    helper = anchor + '''\n        /**\n         * CAPTURE1B JPEGSAVE1 publication primitive. JPEG byte persistence is the\n         * success criterion; EXIF finalisation is best effort and cannot turn a\n         * valid JPEG into a user-visible save failure.\n         */\n        public static boolean saveBitmapAsJPGM10R(Path fileToSave, Bitmap img, int jpgQuality, ParseExif.ExifData exifData) {\n            if (fileToSave == null || img == null) {\n                Log.e(TAG, "M10-R JPEGSAVE1 invalid JPEG arguments");\n                return false;\n            }\n            boolean bytesSaved = false;\n            try {\n                Path parent = fileToSave.getParent();\n                if (parent != null) Files.createDirectories(parent);\n                try (OutputStream outputStream = Files.newOutputStream(fileToSave)) {\n                    bytesSaved = img.compress(Bitmap.CompressFormat.JPEG, jpgQuality, outputStream);\n                    outputStream.flush();\n                }\n                if (!bytesSaved || !Files.exists(fileToSave) || Files.size(fileToSave) <= 0L) {\n                    Log.e(TAG, "M10-R JPEGSAVE1 JPEG encoder/write produced no bytes: " + fileToSave);\n                    return false;\n                }\n                if (exifData != null) {\n                    try {\n                        exifData.COMPRESSION = String.valueOf(jpgQuality);\n                        ExifInterface inter = ParseExif.setAllAttributes(fileToSave.toFile(), exifData);\n                        inter.saveAttributes();\n                    } catch (Throwable exifError) {\n                        // The photograph already exists. Preserve it and report the EXIF issue only in logs.\n                        Log.e(TAG, "M10-R JPEGSAVE1 EXIF finalisation failed but JPEG bytes are preserved: "\n                                + Log.getStackTraceString(exifError));\n                    }\n                }\n                Log.d(TAG, "M10-R JPEGSAVE1 JPEG saved bytes=" + Files.size(fileToSave)\n                        + " path=" + fileToSave);\n                return true;\n            } catch (Throwable saveError) {\n                Log.e(TAG, "M10-R JPEGSAVE1 JPEG byte save failed path=" + fileToSave + " "\n                        + Log.getStackTraceString(saveError));\n                return false;\n            } finally {\n                try {\n                    if (!img.isRecycled()) img.recycle();\n                } catch (Throwable ignored) {}\n            }\n        }\n'''
+    helper = anchor + '''\n        /**\n         * CAPTURE1B JPEGSAVE1 publication primitive. JPEG byte persistence is the\n         * success criterion; EXIF finalisation is best effort and cannot turn a\n         * valid JPEG into a user-visible save failure.\n         */\n        public static boolean saveBitmapAsJPGM10R(Path fileToSave, Bitmap img, int jpgQuality, ParseExif.ExifData exifData) {\n            if (fileToSave == null || img == null) {\n                Log.e(TAG, "M10-R JPEGSAVE1 invalid JPEG arguments");\n                return false;\n            }\n            boolean bytesSaved = false;\n            try {\n                Path parent = fileToSave.getParent();\n                if (parent != null) Files.createDirectories(parent);\n                try (OutputStream outputStream = Files.newOutputStream(fileToSave)) {\n                    bytesSaved = img.compress(Bitmap.CompressFormat.JPEG, jpgQuality, outputStream);\n                    outputStream.flush();\n                }\n                if (!bytesSaved || !Files.exists(fileToSave) || Files.size(fileToSave) <= 0L) {\n                    Log.e(TAG, "M10-R JPEGSAVE1 JPEG encoder/write produced no bytes: " + fileToSave);\n                    return false;\n                }\n                if (exifData != null) {\n                    try {\n                        exifData.COMPRESSION = String.valueOf(jpgQuality);\n                        ExifInterface inter = ParseExif.setAllAttributes(fileToSave.toFile(), exifData);\n                        inter.saveAttributes();\n                    } catch (Throwable exifError) {\n                        Log.e(TAG, "M10-R JPEGSAVE1 EXIF finalisation failed but JPEG bytes are preserved: "\n                                + Log.getStackTraceString(exifError));\n                    }\n                }\n                Log.d(TAG, "M10-R JPEGSAVE1 JPEG saved bytes=" + Files.size(fileToSave)\n                        + " path=" + fileToSave);\n                return true;\n            } catch (Throwable saveError) {\n                Log.e(TAG, "M10-R JPEGSAVE1 JPEG byte save failed path=" + fileToSave + " "\n                        + Log.getStackTraceString(saveError));\n                return false;\n            } finally {\n                try {\n                    if (!img.isRecycled()) img.recycle();\n                } catch (Throwable ignored) {}\n            }\n        }\n'''
     i = i.replace(anchor, helper, 1)
 image_saver.write_text(i)
 
 # Hard verification.
+g = gradle.read_text()
 s = saver.read_text()
 i = image_saver.read_text()
+if "versionName '0.97-m10rcapture1b-jpegsave1'" not in g:
+    raise SystemExit('CAPTURE1B JPEGSAVE1 build identity missing')
 for needle in [
     'capture1Dng.resolveSibling(capture1Stem + ".jpg")',
     'saveBitmapAsJPGM10R(',
@@ -76,6 +87,7 @@ for needle in [
         raise SystemExit('CAPTURE1B JPEGSAVE1 verify ImageSaver missing: ' + needle)
 
 print('M10-R CAPTURE1B JPEGSAVE1 applied')
+print(' - build identity: 0.97-m10rcapture1b-jpegsave1')
 print(' - JPEG path now reuses proven-writable DNG directory')
 print(' - JPEG gets identical capture stem and explicit .jpg extension')
 print(' - JPEG byte persistence is authoritative success')
