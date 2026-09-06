@@ -10,6 +10,7 @@ on:
       - 'tools/m10r_direct_gain_consumer_v055_strict.py'
       - 'tools/m10r_direct_gain_consumer_v055_callprobe.py'
       - 'tools/m10r_direct_gain_consumer_v055_svcprobe.py'
+      - 'tools/m10r_direct_gain_consumer_v055_svchandlerprobe.py'
       - '.github/workflows/m10r-direct-gain-consumer-v055.yml'
   workflow_dispatch:
 
@@ -33,6 +34,7 @@ jobs:
           python3 -m py_compile tools/m10r_direct_gain_consumer_v055_strict.py
           python3 -m py_compile tools/m10r_direct_gain_consumer_v055_callprobe.py
           python3 -m py_compile tools/m10r_direct_gain_consumer_v055_svcprobe.py
+          python3 -m py_compile tools/m10r_direct_gain_consumer_v055_svchandlerprobe.py
 
       - name: Fetch and verify archived firmware
         shell: bash
@@ -82,6 +84,12 @@ jobs:
           set -euo pipefail
           python3 tools/m10r_direct_gain_consumer_v055_svcprobe.py /tmp/m10r_sections | tee artifacts/m10r_direct_gain_consumer_v055_svcprobe.txt
 
+      - name: Search SAM7 ARM SVC handler semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/m10r_direct_gain_consumer_v055_svchandlerprobe.py /tmp/m10r_sections | tee artifacts/m10r_direct_gain_consumer_v055_svchandlerprobe.txt
+
       - name: Hard evidence summary
         if: always()
         shell: bash
@@ -97,6 +105,9 @@ jobs:
           fi
           if [ -f artifacts/m10r_direct_gain_consumer_v055_svcprobe.txt ]; then
             grep -E '^(SVCPROBE_|SWI_|VECTOR_TARGET|SWI_SCAN_)' artifacts/m10r_direct_gain_consumer_v055_svcprobe.txt || true
+          fi
+          if [ -f artifacts/m10r_direct_gain_consumer_v055_svchandlerprobe.txt ]; then
+            grep -E '^(SVCHANDLER_(SECTION|RUNTIME_BASE_KNOWN|ARM_INSNS|LR_TRAP_LOAD_COUNT|MRS_SPSR_COUNT|MSR_SPSR_COUNT|EXCEPTION_RETURN_COUNT|CLUSTER_COUNT|STRONG_CANDIDATES|BEST_START|BEST_END|VERDICT)=)' artifacts/m10r_direct_gain_consumer_v055_svchandlerprobe.txt || true
           fi
 
       - name: Upload v0.55 evidence
