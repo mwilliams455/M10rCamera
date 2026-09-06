@@ -34,10 +34,7 @@ def pattern_letters(raw_pattern: np.ndarray, color_desc) -> str:
         desc = color_desc.decode("ascii", "replace")
     else:
         desc = str(color_desc)
-    letters = "".join(desc[int(i)].upper() for i in raw_pattern.reshape(-1))
-    # Treat any secondary green label as G; rawpy color_desc normally already
-    # presents both green indices as G.
-    return letters
+    return "".join(desc[int(i)].upper() for i in raw_pattern.reshape(-1))
 
 
 def cv_code(pattern: str) -> int:
@@ -50,6 +47,24 @@ def cv_code(pattern: str) -> int:
     if pattern not in table:
         raise RuntimeError(f"unsupported Bayer pattern {pattern}")
     return table[pattern]
+
+
+def orient_libraw(arr: np.ndarray, flip: int) -> np.ndarray:
+    """Apply LibRaw/dcraw orientation codes used by rawpy sizes.flip.
+
+    The M10-R public fixtures encountered here use 0 and 6.  Keep explicit
+    support for the standard dcraw 3/5/6 rotations and reject anything else so
+    orientation can never be silently guessed.
+    """
+    if flip == 0:
+        return arr
+    if flip == 3:
+        return np.rot90(arr, 2)
+    if flip == 5:
+        return np.rot90(arr, 1)  # 90 degrees CCW
+    if flip == 6:
+        return np.rot90(arr, 3)  # 90 degrees CW
+    raise RuntimeError(f"unsupported rawpy/LibRaw flip code {flip}")
 
 
 def load_v058_alignment(path: Path, sample: str) -> dict:
@@ -109,27 +124,27 @@ def preclip_patch_metric(mosaic_crop: np.ndarray, color_crop: np.ndarray,
     m = mosaic_crop[y0:y0+block, x0:x0+block].astype(np.uint32)
     c = color_crop[y0:y0+block, x0:x0+block]
     vals = (m * lut[c]).astype(np.float64) / UNITY_Q8
-    # q95 is robust to isolated hot/saturated sites while still identifying a
-    # patch with substantial candidate clipping pressure.
     return float(np.percentile(vals, 95.0)), float(vals.mean())
 
 
 def candidate_patch_rgb(mosaic: np.ndarray, colors: np.ndarray, lut: np.ndarray,
-                        rounding: str, ceiling: int, code: int,
+                        rounding: str, ceiling: int, code: int, raw_flip: int,
                         k: int, dx: int, dy: int, jh: int, jw: int,
                         positions, block: int) -> np.ndarray:
     wb = apply_wb_cfa(mosaic, colors, lut, rounding, ceiling)
     rgb = cv2.cvtColor(wb, code)
     del wb
+    # rawpy postprocess (used by v0.58) presents the LibRaw orientation already
+    # applied. Reproduce that transform before reusing v0.58's residual rot/crop.
+    rgb = orient_libraw(rgb, raw_flip)
     rgb = np.rot90(rgb, k)
     crop = rgb[dy:dy+jh, dx:dx+jw, :]
     if crop.shape[:2] != (jh, jw):
         raise RuntimeError(f"candidate crop mismatch {crop.shape[:2]} vs {(jh,jw)}")
-    vals = np.asarray([
+    return np.asarray([
         crop[y0:y0+block, x0:x0+block].reshape(-1,3).mean(0) / float(ceiling)
         for y0, x0, _ in positions
     ], dtype=np.float64)
-    return vals
 
 
 def main() -> int:
@@ -163,22 +178,21 @@ def main() -> int:
                  "top_margin":int(r.sizes.top_margin), "left_margin":int(r.sizes.left_margin),
                  "flip":int(r.sizes.flip)}
 
+    raw_flip = sizes["flip"]
     pattern = pattern_letters(raw_pattern, color_desc)
     code = cv_code(pattern)
     gains, gain_source = q8_from_asn(asn, raw_wb)
     lut = gain_lut_for_rawpy(gains, color_desc)
 
-    # M10-R fixture invariants established by the raw/CFA track.  Do not silently
-    # continue if a public fixture presents a materially different sensor schema.
     schema_ok = (mosaic.shape == (5208, 7872) and pattern == "GBRG" and
                  white == 15000 and max(abs(x) for x in black) == 0.0)
 
-    oriented_m = np.rot90(mosaic, k)
-    oriented_c = np.rot90(colors, k)
+    oriented_m = np.rot90(orient_libraw(mosaic, raw_flip), k)
+    oriented_c = np.rot90(orient_libraw(colors, raw_flip), k)
     mcrop = oriented_m[dy:dy+jh, dx:dx+jw]
     ccrop = oriented_c[dy:dy+jh, dx:dx+jw]
     if mcrop.shape != (jh, jw):
-        raise RuntimeError(f"native CFA crop mismatch {mcrop.shape} vs {(jh,jw)}; v0.58 geometry not transferable")
+        raise RuntimeError(f"native CFA crop mismatch {mcrop.shape} vs {(jh,jw)} after flip={raw_flip}; v0.58 geometry not transferable")
 
     block = 48
     positions = patch_positions(jpg, block=block)
@@ -191,16 +205,13 @@ def main() -> int:
     ], dtype=np.float64)
     q95, pmean = metrics[:,0], metrics[:,1]
 
-    # Unlike v0.58's post-demosaic channel mean, use the native WB-amplified CFA
-    # q95 to select clipping-sensitive blocks. Midtone fitting remains safely
-    # below both candidate ceilings.
     train = (q95 < white*0.72) & (jmean.max(1) < 0.92) & (jmean.mean(1) > 0.02)
     test = (q95 > white*0.92) & (jmean.mean(1) > 0.04) & (jmean.min(1) < 0.995)
 
     result = {
         "sample": args.sample,
         "metadata": meta,
-        "alignment": align,
+        "alignment": {**align, "native_cfa_libraw_flip_applied":raw_flip},
         "raw": {"shape":list(mosaic.shape), "sizes":sizes, "white_level":white,
                 "black_level_per_channel":black, "raw_pattern_indices":raw_pattern.tolist(),
                 "color_desc":color_desc.decode("ascii","replace"), "pattern_letters":pattern,
@@ -225,7 +236,7 @@ def main() -> int:
         for cname, ceiling in (("dng_white",white),("b2y_14bit",B2Y_14BIT_MAX)):
             for rounding in ("trunc","nearest"):
                 x = candidate_patch_rgb(mosaic, colors, lut, rounding, ceiling, code,
-                                        k, dx, dy, jh, jw, positions, block)
+                                        raw_flip, k, dx, dy, jh, jw, positions, block)
                 result["fits"][f"{cname}|{rounding}"] = fit_eval(x, jmean, train, test)
         for rounding in ("trunc","nearest"):
             a=result["fits"][f"dng_white|{rounding}"]["rgb_rmse"]
