@@ -8,6 +8,12 @@ inspects that exact callee, reports its bounded Thumb body and follows the three
 incoming argument registers conservatively through simple register transfers,
 arithmetic, stores and calls.
 
+The firmware section table records IMG-System with image_base=0.  Archived
+research disassembly consistently labels this section as 0x42000000 + section
+offset; that label convention is used only to map already-proven archived code
+addresses back into the extracted IMG-System bytes.  It is not presented as a
+section-table runtime base.
+
 No renderer/application files are touched.
 """
 from __future__ import annotations
@@ -15,9 +21,10 @@ from __future__ import annotations
 from pathlib import Path
 import csv, struct, sys
 from capstone import Cs, CS_ARCH_ARM, CS_MODE_THUMB, CS_MODE_LITTLE_ENDIAN
-from capstone.arm import ARM_OP_IMM, ARM_OP_MEM, ARM_OP_REG, ARM_REG_PC
+from capstone.arm import ARM_OP_MEM, ARM_OP_REG, ARM_REG_PC
 
 TARGET = 0x420D4380
+ARCHIVE_IMG_LABEL_BASE = 0x42000000
 WINDOW = 0x280
 
 
@@ -25,11 +32,16 @@ def load_sections(root: Path):
     rows = list(csv.DictReader((root / 'sections.csv').open(encoding='utf-8')))
     out=[]
     for row in rows:
-        base=int(row['image_base'],16)
+        table_base=int(row['image_base'],16)
         p=root/row['file']
         data=p.read_bytes()
-        if base and base <= TARGET < base+len(data):
-            out.append((row,base,data))
+        if table_base and table_base <= TARGET < table_base+len(data):
+            out.append((row,table_base,data,'section-table-base'))
+            continue
+        if row['name'] == 'IMG-System' and table_base == 0:
+            off=TARGET-ARCHIVE_IMG_LABEL_BASE
+            if 0 <= off < len(data):
+                out.append((row,ARCHIVE_IMG_LABEL_BASE,data,'archived-img-label-base'))
     return out
 
 
@@ -45,14 +57,14 @@ def op_regs(ins, md):
         return set(),set()
 
 
-def literal_value(ins, op, data, base):
+def literal_value(ins, op, data, label_base):
     if op.type != ARM_OP_MEM:
         return None
     mem=op.mem
     if mem.base != ARM_REG_PC:
         return None
     addr=((ins.address+4)&~3)+int(mem.disp)
-    off=addr-base
+    off=addr-label_base
     if 0 <= off <= len(data)-4:
         return addr, struct.unpack_from('<I',data,off)[0]
     return None
@@ -69,10 +81,13 @@ def main():
     if len(matches)!=1:
         print('OVERALL_VERDICT=UNRESOLVED_SECTION_MAPPING')
         return 0
-    row,base,data=matches[0]
-    off=TARGET-base
+    row,label_base,data,mapping=matches[0]
+    off=TARGET-label_base
+    table_base=int(row['image_base'],16)
     print(f"V056_SECTION={row['index']}:{row['name']}")
-    print(f'V056_SECTION_BASE=0x{base:08x}')
+    print(f'V056_SECTION_TABLE_BASE=0x{table_base:08x}')
+    print(f'V056_ADDRESS_MAPPING={mapping}')
+    print(f'V056_ARCHIVE_LABEL_BASE=0x{label_base:08x}')
     print(f'V056_CALLEE_OFFSET=0x{off:x}')
 
     md=Cs(CS_ARCH_ARM, CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN)
@@ -97,9 +112,8 @@ def main():
         for r in reads:
             used |= taint.get(r,set())
 
-        # literal pool reporting
         for op in ops:
-            lv=literal_value(ins,op,data,base)
+            lv=literal_value(ins,op,data,label_base)
             if lv:
                 addr,val=lv; literals.append((ins.address,addr,val))
                 print(f'  V056_LITERAL@0x{ins.address:08x}=0x{val:08x} pool=0x{addr:08x}')
@@ -109,7 +123,6 @@ def main():
             taint_ops.append((ins.address,mn,ins.op_str,sorted(used)))
             print(f"  V056_TAINT_USE labels={','.join(sorted(used))}")
 
-        # Stores: operand 0 is stored value; report taint and address form.
         if mn.startswith('str') and ops:
             src_labels=set()
             if ops[0].type==ARM_OP_REG:
@@ -117,16 +130,13 @@ def main():
             stores.append((ins.address,ins.op_str,sorted(src_labels)))
             print(f"  V056_STORE labels={','.join(sorted(src_labels)) or '-'} op='{ins.op_str}'")
 
-        # Calls: ARM AAPCS argument registers are r0-r3. Report exact live taint.
         if mn in ('bl','blx'):
             argmap={r:sorted(taint.get(r,set())) for r in ('r0','r1','r2','r3') if taint.get(r)}
             calls.append((ins.address,ins.op_str,argmap))
             print(f'  V056_CALL_TAINT={argmap}')
-            # conservative boundary: call may clobber r0-r3; preserve callee-saved only.
             for r in ('r0','r1','r2','r3','r12','lr'):
                 taint.pop(r,None)
         else:
-            # Simple transfer propagation using Capstone read/write sets.
             src_labels=set()
             for r in reads:
                 src_labels |= taint.get(r,set())
@@ -157,8 +167,6 @@ def main():
         print(f"V056_TAINTED_STORE=0x{a:08x}|{','.join(labs)}|{op}")
     for a,op,argmap in tainted_calls:
         print(f'V056_TAINTED_CALL=0x{a:08x}|{op}|{argmap}')
-    # Do not infer pixel semantics from a write alone.  This first pass only
-    # resolves whether the canonical WB triplet demonstrably leaves the helper.
     if labeled_stores:
         print('OVERALL_VERDICT=CANONICAL_WB_REACHES_STORE_NEEDS_TARGET_CLASSIFICATION')
     elif tainted_calls:
