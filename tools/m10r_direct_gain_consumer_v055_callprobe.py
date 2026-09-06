@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-"""Bounded disassembly probe for the only unresolved v0.55 call-argument sink.
+"""Bounded probe for the only unresolved v0.55 call-argument sink.
 
-The strict v0.55 trace proves that MEM[0x20020090] is read at IMG-SAM7
-+0x4fb02, bitfield-modified, stored back to the same address, and is still in
-r2 when the caller executes BL to analysis address 0x6286d118.  This probe
-recovers the callee entry from the same synthetic section mapping and prints a
-small, exact-offset Thumb listing so the r2 parameter can be modeled next.
+Besides listing the exact caller/callee, this pass characterizes IMG-SAM7's
+SVC #7 / SVC #6 usage.  The target callee executes SVC #7 before clobbering
+incoming r2, so the exception boundary must be modeled rather than silently
+ignored.  A repeated save-r0 / restore-r0 pairing around SVC #7/#6 is reported
+as firmware evidence for a token-style critical-section guard ABI.
 """
 from __future__ import annotations
 
 from pathlib import Path
 import argparse
+import re
 
 from capstone import Cs, CS_ARCH_ARM, CS_MODE_LITTLE_ENDIAN, CS_MODE_THUMB
 
@@ -22,6 +23,9 @@ CALL_ANALYSIS_TARGET = 0x6286D118
 CALLEE_BYTES = 0x280
 CALLER_BEFORE = 0x30
 CALLER_AFTER = 0x40
+PAIR_LOOKAHEAD = 96
+
+MOV_SAVE_RE = re.compile(r"^(r(?:[4-9]|1[01])),\s*r0$")
 
 
 def print_listing(md: Cs, sec, start_off: int, size: int, tag: str) -> None:
@@ -38,6 +42,80 @@ def print_listing(md: Cs, sec, start_off: int, size: int, tag: str) -> None:
         print(f"{tag} +0x{off:06x} 0x{ins.address:08x} {raw:<10} {ins.mnemonic:<8} {ins.op_str}")
         count += 1
     print(f"{tag}_INSNS={count}")
+
+
+def characterize_svc_pairs(sec) -> None:
+    md = Cs(CS_ARCH_ARM, CS_MODE_THUMB | CS_MODE_LITTLE_ENDIAN)
+    md.detail = False
+    md.skipdata = True
+    insns = list(md.disasm(sec.data, sec.analysis_base))
+    svc7_idx = [i for i, ins in enumerate(insns) if ins.mnemonic == "svc" and ins.op_str.strip() in {"#7", "#0x7"}]
+    svc6_idx = [i for i, ins in enumerate(insns) if ins.mnemonic == "svc" and ins.op_str.strip() in {"#6", "#0x6"}]
+
+    pairs = []
+    for idx in svc7_idx:
+        saved = None
+        save_i = None
+        # The observed wrappers save SVC7's return token from r0 into a callee-saved register.
+        for j in range(idx + 1, min(len(insns), idx + 8)):
+            ins = insns[j]
+            if ins.mnemonic.startswith("mov"):
+                m = MOV_SAVE_RE.match(ins.op_str.replace(" ", ""))
+                if m:
+                    saved, save_i = m.group(1), j
+                    break
+            if ins.mnemonic in {"pop", "bx"}:
+                break
+        if saved is None:
+            continue
+
+        restore = None
+        svc6 = None
+        for j in range(save_i + 1, min(len(insns), idx + PAIR_LOOKAHEAD)):
+            ins = insns[j]
+            if ins.mnemonic.startswith("mov") and ins.op_str.replace(" ", "") == f"r0,{saved}":
+                restore = j
+                continue
+            if restore is not None and ins.mnemonic == "svc" and ins.op_str.strip() in {"#6", "#0x6"}:
+                svc6 = j
+                break
+            if ins.mnemonic == "pop" and "pc" in ins.op_str:
+                break
+        if restore is not None and svc6 is not None:
+            pairs.append((idx, saved, restore, svc6))
+
+    print("\n=== SVC ABI CHARACTERIZATION ===")
+    print(f"SVC7_COUNT={len(svc7_idx)}")
+    print(f"SVC6_COUNT={len(svc6_idx)}")
+    print(f"SVC7_TOKEN_PAIR_COUNT={len(pairs)}")
+    print(f"SVC7_TOKEN_PAIR_COVERAGE={len(pairs)}/{len(svc7_idx)}")
+    for n, (idx, saved, restore, svc6) in enumerate(pairs[:64]):
+        a = insns[idx].address - sec.analysis_base
+        r = insns[restore].address - sec.analysis_base
+        s = insns[svc6].address - sec.analysis_base
+        print(f"SVC7_TOKEN_PAIR[{n}]=svc7+0x{a:x};save={saved};restore+0x{r:x};svc6+0x{s:x}")
+
+    target_idx = next((i for i, ins in enumerate(insns) if ins.address == CALL_ANALYSIS_TARGET), None)
+    if target_idx is not None:
+        target_svc = next((i for i in range(target_idx, min(len(insns), target_idx + 8)) if insns[i].mnemonic == "svc"), None)
+        first_r2 = None
+        if target_svc is not None:
+            for i in range(target_svc + 1, min(len(insns), target_svc + 16)):
+                compact = insns[i].op_str.replace(" ", "")
+                if compact.startswith("r2,") or ",r2" in compact or compact == "r2":
+                    first_r2 = i
+                    break
+        print(f"TARGET_CALLEE_ENTRY_OFFSET=0x{CALL_ANALYSIS_TARGET - sec.analysis_base:x}")
+        if target_svc is not None:
+            print(f"TARGET_CALLEE_SVC={insns[target_svc].mnemonic} {insns[target_svc].op_str}")
+        if first_r2 is not None:
+            ins = insns[first_r2]
+            off = ins.address - sec.analysis_base
+            compact = ins.op_str.replace(" ", "")
+            clobber = ins.mnemonic.startswith("mov") and compact.startswith("r2,")
+            print(f"TARGET_CALLEE_FIRST_POST_SVC_R2_OFFSET=0x{off:x}")
+            print(f"TARGET_CALLEE_FIRST_POST_SVC_R2_INSN={ins.mnemonic} {ins.op_str}")
+            print(f"TARGET_CALLEE_FIRST_POST_SVC_R2_ACTION={'CLOBBER' if clobber else 'READ_OR_TRANSFORM'}")
 
 
 def main() -> int:
@@ -65,6 +143,7 @@ def main() -> int:
     print_listing(md, sec, CALLER_OFFSET - CALLER_BEFORE, CALLER_BEFORE + CALLER_AFTER, "CALLER")
     print("\n=== CALLEE ENTRY ===")
     print_listing(md, sec, callee_off, CALLEE_BYTES, "CALLEE")
+    characterize_svc_pairs(sec)
     return 0
 
 
