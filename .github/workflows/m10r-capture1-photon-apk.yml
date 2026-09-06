@@ -1,4 +1,4 @@
-name: M10-R CAPTURE1B RGBORDER1A SOURCECM1A APK
+name: M10-R CAPTURE1B RGBORDER1A SOURCECM1A TONEDG1A APK
 
 on:
   workflow_dispatch:
@@ -25,7 +25,10 @@ jobs:
           python3 -m py_compile patches/fix-m10r-capture1b-jpegsave1.py
           python3 -m py_compile patches/fix-m10r-capture1b-rgborder1a.py
           python3 -m py_compile patches/fix-m10r-capture1b-sourcecm1a.py
+          python3 -m py_compile patches/fix-m10r-capture1b-tonedg1a.py
           python3 -m py_compile patches/verify-m10r-capture1b.py
+          python3 -m py_compile tools/m10r_sections.py
+          python3 -m py_compile tools/m10r_b2y_assets.py
 
       - name: Clone exact Photon baseline proven by current M9 project
         run: |
@@ -36,6 +39,27 @@ jobs:
           git -C PhotonCamera checkout --detach FETCH_HEAD
           test "$(git -C PhotonCamera rev-parse HEAD)" = "$PHOTON_SHA"
           git -C PhotonCamera rev-parse HEAD | tee PHOTON_UPSTREAM_COMMIT.txt
+
+      - name: Extract exact M10-R MEDIUM tone and Differential Gamma assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          rm -rf /tmp/m10r_b2y_assets
+          python3 tools/m10r_b2y_assets.py /tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin /tmp/m10r_b2y_assets >/tmp/m10r_b2y_manifest.stdout.json
+          echo '2fd6ca209f290c75aa96976b3d7692e55c41a55c0017a063aba9808da3b41a00  /tmp/m10r_b2y_assets/tone_medium_q15.u32le' | sha256sum -c -
+          echo '9e65de24d52271be0783f4e2728f20f482c0ba43b63159b75033b4a4fc75457d  /tmp/m10r_b2y_assets/dg_expanded_u16le.bin' | sha256sum -c -
 
       - name: Apply CAPTURE1 single-frame foundation
         run: |
@@ -88,6 +112,21 @@ jobs:
           grep -F 'sourceForwardMatrixNormalizationApplied", true' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
           ! grep -F 't.copyElements(r,0);' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
 
+      - name: Apply and verify TONEDG1A nonlinear renderer
+        run: |
+          set -euo pipefail
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-tonedg1a.py" "$GITHUB_WORKSPACE/PhotonCamera" /tmp/m10r_b2y_assets
+          grep -F "versionName '0.97-m10rcapture1b-rgborder1a-sourcecm1a-tonedg1a'" "$GITHUB_WORKSPACE/PhotonCamera/app/build.gradle"
+          grep -F 'nonlinearRenderer", "TONEDG1A"' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
+          grep -F 'nonlinearOrder", "MEDIUM_THEN_DIFFERENTIAL_GAMMA"' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
+          grep -F 'b2yLiveSignalNormalizationFrozen", false' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
+          grep -F 'toneDg1aSignalStatistics' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
+          grep -F 'TONE_SHA256="2fd6ca209f290c75aa96976b3d7692e55c41a55c0017a063aba9808da3b41a00"' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RToneDg1A.java"
+          grep -F 'DG_SHA256="9e65de24d52271be0783f4e2728f20f482c0ba43b63159b75033b4a4fc75457d"' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RToneDg1A.java"
+          grep -F 'INPUT_MAX=0x3fff' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RToneDg1A.java"
+          grep -F 'hdrEnabled", false' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
+          grep -F 'sourceFrameCount", 1' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -102,26 +141,27 @@ jobs:
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platforms;android-36" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.0.12077973"
 
-      - name: Build CAPTURE1B RGBORDER1A SOURCECM1A debug APK
+      - name: Build CAPTURE1B RGBORDER1A SOURCECM1A TONEDG1A debug APK
         run: |
           set -o pipefail
           cd PhotonCamera
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_CAPTURE1B_RGBORDER1A_SOURCECM1A_GRADLE.log"
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_CAPTURE1B_RGBORDER1A_SOURCECM1A_TONEDG1A_GRADLE.log"
 
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: M10R-CAPTURE1B-RGBORDER1A-SOURCECM1A-buildlog
-          path: M10R_CAPTURE1B_RGBORDER1A_SOURCECM1A_GRADLE.log
+          name: M10R-CAPTURE1B-RGBORDER1A-SOURCECM1A-TONEDG1A-buildlog
+          path: M10R_CAPTURE1B_RGBORDER1A_SOURCECM1A_TONEDG1A_GRADLE.log
           if-no-files-found: ignore
 
-      - name: Upload CAPTURE1B RGBORDER1A SOURCECM1A APK and provenance
+      - name: Upload CAPTURE1B RGBORDER1A SOURCECM1A TONEDG1A APK and provenance
         uses: actions/upload-artifact@v4
         with:
-          name: M10RCam-CAPTURE1B-RGBORDER1A-SOURCECM1A-debug-apk
+          name: M10RCam-CAPTURE1B-RGBORDER1A-SOURCECM1A-TONEDG1A-debug-apk
           path: |
             PhotonCamera/app/build/outputs/apk/debug/*.apk
             PHOTON_UPSTREAM_COMMIT.txt
+            /tmp/m10r_b2y_assets/manifest.json
           if-no-files-found: error
