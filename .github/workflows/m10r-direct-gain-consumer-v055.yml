@@ -6,6 +6,7 @@ on:
     paths:
       - 'tools/m10r_direct_gain_consumer_v055.py'
       - 'tools/m10r_direct_gain_consumer_v055_seeded.py'
+      - 'tools/m10r_direct_gain_consumer_v055_rawseed.py'
       - '.github/workflows/m10r-direct-gain-consumer-v055.yml'
   workflow_dispatch:
 
@@ -25,6 +26,7 @@ jobs:
         run: |
           python3 -m py_compile tools/m10r_direct_gain_consumer_v055.py
           python3 -m py_compile tools/m10r_direct_gain_consumer_v055_seeded.py
+          python3 -m py_compile tools/m10r_direct_gain_consumer_v055_rawseed.py
 
       - name: Fetch and verify archived firmware
         shell: bash
@@ -60,7 +62,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p artifacts
-          python3 tools/m10r_direct_gain_consumer_v055_seeded.py /tmp/m10r_sections --json artifacts/m10r_direct_gain_consumer_v055.json | tee artifacts/m10r_direct_gain_consumer_v055.txt
+          python3 tools/m10r_direct_gain_consumer_v055_rawseed.py /tmp/m10r_sections --json artifacts/m10r_direct_gain_consumer_v055.json | tee artifacts/m10r_direct_gain_consumer_v055.txt
 
       - name: Hard evidence summary
         if: always()
@@ -68,7 +70,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -f artifacts/m10r_direct_gain_consumer_v055.txt ]; then
-            grep -E '^(V055_MODE=|V055_SECTIONS_SCANNED=|V055_RAW_SEEDS=|V055_LITE_IMMEDIATE_SEEDS=|V055_SEED_WINDOWS=|V055_WINDOW_BYTES=|TARGET_[0-9A-F]+_(READS|WRITES|ADDRESS_ONLY|ARITHMETIC_CONSUMERS|UNRESOLVED|VERDICT)=|OVERALL_VERDICT=)' artifacts/m10r_direct_gain_consumer_v055.txt || true
+            grep -E '^(V055_DISCOVERY=|V055_MODE=|V055_SECTIONS_SCANNED=|V055_RAW_SEEDS=|V055_LITE_IMMEDIATE_SEEDS=|V055_SEED_WINDOWS=|V055_WINDOW_BYTES=|TARGET_[0-9A-F]+_(READS|WRITES|ADDRESS_ONLY|ARITHMETIC_CONSUMERS|UNRESOLVED|VERDICT)=|OVERALL_VERDICT=)' artifacts/m10r_direct_gain_consumer_v055.txt || true
           else
             echo 'V055_REPORT_MISSING=1'
           fi
