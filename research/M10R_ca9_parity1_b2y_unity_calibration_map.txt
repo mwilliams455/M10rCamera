@@ -1,0 +1,25 @@
+M10-R CA9_PARITY1 B2Y PACKED UNITY CALIBRATION MAP
+section_size 0x134fb0 count 168 payload_base 0x6ee94 sha256 ea935a8006ea3b0a765660bd1d89f6a52c9f60508ee5ba76650005d80372335b
+candidate packed WB-unity word = 0x01000100 (two 11-bit channel codes both 256)
+
+=== selector records containing packed 0x01000100 ===
+rec=143 id=0x1c rel=0xb09a0 payload=0x11f834 extent=0x10000 x8=0x10000 keys=4 unity_words=564 adjacent_pairs=155
+  word_offsets ['0x13c1', '0x13c9', '0x1421', '0x1429', '0x1441', '0x1449', '0x1451', '0x1459', '0x1481', '0x1489', '0x1491', '0x1499', '0x14a1', '0x14a9', '0x14b1', '0x14b9', '0x14c1', '0x14c9', '0x14d1', '0x14d9', '0x14e1', '0x14e9', '0x14f1', '0x14f9', '0x1501', '0x1509', '0x1511', '0x1519', '0x1521', '0x1529', '0x1531', '0x1539']
+  pair_offsets ['0x1541', '0x1571', '0x15b1', '0x15c1', '0x15e1', '0x15f1', '0x1601', '0x1611', '0x1631', '0x1641', '0x1651', '0x1661', '0x1671', '0x1681', '0x1683', '0x1685', '0x1687', '0x16a1', '0x16b1', '0x16c1', '0x16c3', '0x16c5', '0x16c7', '0x16d1', '0x16d3', '0x16d5', '0x16d7', '0x16e1', '0x16f1', '0x1701', '0x1703', '0x1705']
+  key[0] _B2YMODE:STILL
+  key[1] _B2YMODE:STILLLINK
+  key[2] _B2YMODE:SLIVE
+  key[3] _B2YMODE:SMAGNI
+
+=== packed-unity totals by selector id ===
+0x1c 564
+
+=== records with unity pair at payload offset 0 or small fixed offsets ===
+
+=== direct selector-key search for WB/gain terminology ===
+
+=== interpretation guard ===
+Packed 0x01000100 inside calibration is not itself sufficient to identify a WB-gain record. A useful unity proof requires the value to reside in a selector/record structurally connected to the gain words programmed at 0x2002008C/0x20020090.
+
+=== target ===
+Use selector concentration, payload offsets and key semantics to identify whether any calibration record initializes the B2Y gain pair to 256/256; otherwise pursue code-side reset/init writes.
