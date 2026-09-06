@@ -19,6 +19,7 @@ jobs:
           python3 -m py_compile patches/apply-m10r-capture1-foundation.py
           python3 -m py_compile patches/apply-m10r-capture1b-renderer.py
           python3 -m py_compile patches/fix-m10r-capture1b-compile1.py
+          python3 -m py_compile patches/fix-m10r-capture1b-opencv1.py
           python3 -m py_compile patches/verify-m10r-capture1b.py
 
       - name: Clone exact Photon baseline proven by current M9 project
@@ -41,11 +42,15 @@ jobs:
           set -euo pipefail
           python3 "$GITHUB_WORKSPACE/patches/apply-m10r-capture1b-renderer.py" "$GITHUB_WORKSPACE/PhotonCamera"
           python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-compile1.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-opencv1.py" "$GITHUB_WORKSPACE/PhotonCamera"
 
       - name: Verify CAPTURE1B invariants
         run: |
           set -euo pipefail
           python3 "$GITHUB_WORKSPACE/patches/verify-m10r-capture1b.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          grep -F "implementation 'org.opencv:opencv:4.10.0'" "$GITHUB_WORKSPACE/PhotonCamera/app/build.gradle"
+          grep -F "OpenCVLoader.initDebug()" "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
+          grep -F 'single_frame_Bayer_EA_demosaic_only' "$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
