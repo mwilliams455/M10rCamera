@@ -4,8 +4,17 @@
 Keeps the candidate-seeded coverage from rawseed/seeded but refuses to call
 bitfield read-modify-write traffic a gain consumer.  A target-derived value
 that is only shifted/masked/ORed and written back to the same target is
-classified as SELF_RMW.  A target-derived value reaching a BL/BLX argument is
-reported as CALL_ARG_UNRESOLVED until the callee is explicitly modeled.
+classified as SELF_RMW.  Generic tainted values live across BL/BLX remain
+CALL_ARG_UNRESOLVED unless the exact callee has been explicitly modeled.
+
+One exact firmware path is now modeled from v0.55 evidence:
+  IMG-SAM7 +0x4fb02, MEM[0x20020090] -> r2 -> self-RMW -> helper +0x4d118.
+The helper is a structurally validated SVC #7/#6 token-guard wrapper.  Across
+72 near-prologue token wrappers, 62 enter SVC #7 with r2 unprepared (86.11%),
+contradicting an r2 argument ABI; this target helper likewise does not prepare
+r2 and its first ordinary post-SVC r2 action is an unconditional clobber.
+Therefore this *exact* live-across-call case is classified as a proven guard
+non-consumer, not generalized to other calls or SVC sites.
 
 This script does not modify renderer/color/tone behavior; it is analysis only.
 """
@@ -39,6 +48,22 @@ CALL_RE = re.compile(r":\s+blx?\s", re.I)
 STORE_RE = re.compile(r":\s+(?:str|strb|strh|strd|vstr)\b", re.I)
 MN_RE = re.compile(r":\s+([a-z0-9.]+)\b", re.I)
 
+# Exact evidence-backed exception to the otherwise conservative call rule.
+# Do not broaden this to other offsets/calls without equivalent callee + ABI proof.
+PROVEN_GUARD_NONCONSUMER_READS = {
+    (0x20020090, "100", 0x4FB02): {
+        "consumer_class": "SVC7_GUARD_R2_CLOBBER",
+        "callee_section_offset": "0x4d118",
+        "svc7_section_offset": "0x4d11a",
+        "target_helper_r2_prepared": False,
+        "target_helper_first_post_svc_r2": "CLOBBER",
+        "svc7_near_prologue_wrappers": 72,
+        "svc7_near_prologue_r2_unprepared": 62,
+        "svc7_r2_unprepared_ratio": 62 / 72,
+        "evidence": "v0.55 callprobe + SVC7 wrapper ABI probe",
+    }
+}
+
 
 def mnemonic(text: str) -> str:
     match = MN_RE.search(text)
@@ -66,7 +91,12 @@ def classify_read(read: Access, writes: List[Access]) -> dict:
     field_only = bool(op_mnemonics) and all(mn in FIELD_OPS for mn in op_mnemonics)
     self_rmw = bool(self_store_lines) and not other_store_lines and field_only
 
-    if call_lines:
+    guard_key = (read.target, read.section.index, read.instruction_offset)
+    guard_evidence = PROVEN_GUARD_NONCONSUMER_READS.get(guard_key)
+
+    if call_lines and guard_evidence is not None:
+        consumer_class = guard_evidence["consumer_class"]
+    elif call_lines:
         consumer_class = "CALL_ARG_UNRESOLVED"
     elif other_store_lines:
         consumer_class = "STORE_OTHER_UNRESOLVED"
@@ -81,9 +111,8 @@ def classify_read(read: Access, writes: List[Access]) -> dict:
     else:
         consumer_class = "NO_MEANINGFUL_CONSUMER"
 
-    # Strict direct-gain gate.  None of the generic unresolved classes proves
-    # image arithmetic.  A future stage may promote a path only after identifying
-    # a pixel/image sink or explicitly modeled callee behavior.
+    # Strict direct-gain gate. None of the generic unresolved classes proves
+    # image arithmetic. The exact SVC7 guard path is explicitly a non-consumer.
     direct_gain_consumer = False
 
     return {
@@ -92,7 +121,9 @@ def classify_read(read: Access, writes: List[Access]) -> dict:
         "self_rmw": self_rmw,
         "self_target_stores": self_store_lines,
         "other_tainted_stores": other_store_lines,
-        "tainted_call_arguments": call_lines,
+        "tainted_call_arguments": [] if guard_evidence is not None else call_lines,
+        "guard_call_lines": call_lines if guard_evidence is not None else [],
+        "guard_nonconsumer_evidence": guard_evidence,
         "raw_arithmetic_operations": list(read.consumer_operations),
     }
 
@@ -123,7 +154,7 @@ def main() -> int:
     window_bytes = sum(end - start for values in windows.values() for start, end in values)
 
     print("V055_DISCOVERY=TIGHT_RAW_TARGET_BASE_PLUS_PAIRED_THUMB_CONSTRUCTORS")
-    print("V055_MODE=CANDIDATE_SEEDED_STRICT_CONSUMER_GATE")
+    print("V055_MODE=CANDIDATE_SEEDED_STRICT_CONSUMER_GATE_SVC7_MODELED")
     print(f"V055_SECTIONS_SCANNED={len(sections)}")
     print(f"V055_KNOWN_BASE_SECTIONS={known}")
     print(f"V055_UNKNOWN_BASE_SECTIONS={unknown}")
@@ -164,7 +195,7 @@ def main() -> int:
 
     result = {
         "coverage": {
-            "mode": "candidate-seeded-strict-consumer-gate",
+            "mode": "candidate-seeded-strict-consumer-gate-svc7-modeled",
             "sections_scanned": len(sections),
             "known_runtime_base_sections": known,
             "unknown_runtime_base_sections": unknown,
@@ -191,7 +222,8 @@ def main() -> int:
 
         classes = {a.key(): classify_read(a, all_writes) for a in reads}
         direct = [a for a in reads if classes[a.key()]["direct_gain_consumer"]]
-        self_rmw = [a for a in reads if classes[a.key()]["consumer_class"] == "BITFIELD_SELF_RMW"]
+        self_rmw = [a for a in reads if classes[a.key()]["self_rmw"]]
+        svc_guard = [a for a in reads if classes[a.key()]["consumer_class"] == "SVC7_GUARD_R2_CLOBBER"]
         call_arg = [a for a in reads if classes[a.key()]["consumer_class"] == "CALL_ARG_UNRESOLVED"]
         other_unresolved = [
             a for a in reads
@@ -254,6 +286,7 @@ def main() -> int:
         print(f"TARGET_{key}_ADDRESS_ONLY={len(address_evidence)}")
         print(f"TARGET_{key}_ARITHMETIC_CONSUMERS={len(direct)}")
         print(f"TARGET_{key}_SELF_RMW_READS={len(self_rmw)}")
+        print(f"TARGET_{key}_SVC7_GUARD_NONCONSUMERS={len(svc_guard)}")
         print(f"TARGET_{key}_CALL_ARG_SINKS={len(call_arg)}")
         print(f"TARGET_{key}_OTHER_UNRESOLVED_CONSUMERS={len(other_unresolved)}")
         print(f"TARGET_{key}_UNRESOLVED={len(unresolved)}")
