@@ -1,0 +1,75 @@
+name: M10-R v0.85 earlier-firmware WBCLIPLEVEL stability
+on:
+  push:
+    branches: [m10r-wbcliplevel-v085]
+    paths:
+      - '.github/workflows/m10r-wbcliplevel-v085.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build common M10-generation firmware decoder
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat >/tmp/m10decode.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std;
+          static uint32_t u32(const vector<uint8_t>&b,size_t o){if(o+4>b.size())throw runtime_error("u32 eof");return b[o]|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);}
+          struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("bit eof");return(p[bit>>3]>>(7-(bit++&7)))&1;}};
+          static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;}
+          int main(int argc,char**argv){if(argc!=3)throw runtime_error("usage in out");ifstream f(argv[1],ios::binary);vector<uint8_t>w((istreambuf_iterator<char>(f)),{});size_t C=0x38;uint32_t h=u32(w,C+8),e=u32(w,C+0x10);if(C+0x54+256>w.size())throw runtime_error("table eof");const uint8_t*t=&w[C+0x54];vector<uint8_t>o;o.reserve(e);size_t st=C+h;for(int i=0;i<8;i++){size_t q=st+i*16;uint32_t ro=u32(w,q+4),ps=u32(w,q+8),us=u32(w,q+12);if(C+ro+ps>w.size())throw runtime_error("stream eof");BR br{&w[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=x>=(1<<(k-1))?x:x-((1<<k)-1);int ti=v+128;if(ti<0||ti>255)throw runtime_error("table index");o.push_back(t[ti]);}}ofstream g(argv[2],ios::binary);g.write((char*)o.data(),o.size());}
+          CPP
+          g++ -O3 -std=c++17 /tmp/m10decode.cpp -o /tmp/m10decode
+      - name: Fetch May 2022 M10-generation firmware set
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R-30.22.11.52-Customer.FW' -o /tmp/M10R.FW
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-P-4.22.11.52-Customer.FW' -o /tmp/M10P.FW
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-M-4.22.11.52-Customer.FW' -o /tmp/M10M.FW
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-3.22.11.52-Customer.FW' -o /tmp/M10.FW
+          for f in /tmp/M10R.FW /tmp/M10P.FW /tmp/M10M.FW /tmp/M10.FW; do
+            echo "V085_FIRMWARE_FILE=$f|size=$(stat -c%s "$f")|sha256=$(sha256sum "$f" | awk '{print $1}')"
+          done | tee /tmp/v085_identity.txt
+      - name: Decode and extract earlier firmware sections
+        shell: bash
+        run: |
+          set -euo pipefail
+          for m in M10R M10P M10M M10; do
+            /tmp/m10decode "/tmp/${m}.FW" "/tmp/${m}_unpacked.bin"
+            echo "V085_UNPACKED=$m|size=$(stat -c%s "/tmp/${m}_unpacked.bin")|sha256=$(sha256sum "/tmp/${m}_unpacked.bin" | awk '{print $1}')" | tee -a /tmp/v085_identity.txt
+            python3 tools/m10r_sections.py "/tmp/${m}_unpacked.bin" "/tmp/sec_${m}" >/dev/null
+          done
+      - name: Compare earlier WBCLIP record ID 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat /tmp/v085_identity.txt | tee research/M10R_v085_wbcliplevel_earlier_firmware.txt
+          python3 tools/m10r_wbcliplevel_family_compare_v084.py \
+            M10R=/tmp/sec_M10R M10P=/tmp/sec_M10P M10M=/tmp/sec_M10M M10=/tmp/sec_M10 \
+            | sed 's/V084_/V085_/g; s/OVERALL_VERDICT=/V085_COMPARATOR_VERDICT=/' \
+            | tee -a research/M10R_v085_wbcliplevel_earlier_firmware.txt
+          if grep -q '^V085_ALL_COMPARABLE_F82F_X4=1$' research/M10R_v085_wbcliplevel_earlier_firmware.txt; then
+            echo 'V085_CROSS_REVISION_WITH_V084_F82F_X4_STABLE=1' | tee -a research/M10R_v085_wbcliplevel_earlier_firmware.txt
+            echo 'V085_HARDWARE_TRANSFER_FUNCTION_PROVEN=0' | tee -a research/M10R_v085_wbcliplevel_earlier_firmware.txt
+            echo 'V085_RENDERER_CHANGE_JUSTIFIED=0' | tee -a research/M10R_v085_wbcliplevel_earlier_firmware.txt
+            echo 'OVERALL_VERDICT=M10_GENERATION_WBCLIP_F82F_X4_STABLE_ACROSS_BODIES_AND_2022_FIRMWARE_REVISIONS' | tee -a research/M10R_v085_wbcliplevel_earlier_firmware.txt
+          else
+            echo 'V085_CROSS_REVISION_WITH_V084_F82F_X4_STABLE=0' | tee -a research/M10R_v085_wbcliplevel_earlier_firmware.txt
+            echo 'OVERALL_VERDICT=EARLIER_FIRMWARE_WBCLIP_REQUIRES_FOLLOWUP' | tee -a research/M10R_v085_wbcliplevel_earlier_firmware.txt
+          fi
+      - name: Commit evidence
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v085_wbcliplevel_earlier_firmware.txt
+          git commit -m 'research: record v085 earlier-firmware WBCLIPLEVEL stability' || exit 0
+          git pull --rebase origin m10r-wbcliplevel-v085 && git push
