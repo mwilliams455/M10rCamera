@@ -5,7 +5,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 
-/** Host-side real-DNG validator for the v0.5.3 2x2 highlight-boundary experiment. */
+/** Host-side real-DNG validator for the canonical RENDER_PARITY1A 2x2 experiment. */
 public final class M10RLinearReferenceCli {
     private M10RLinearReferenceCli() {}
 
@@ -16,12 +16,14 @@ public final class M10RLinearReferenceCli {
             DngMetadataReader.DngInfo info = DngMetadataReader.read(channel);
             DngRawDecoder.RawImage raw = DngRawDecoder.decode(channel);
             SensorPreviewCore.PreviewResult sensor = SensorPreviewCore.render(raw, info);
-            M10RLinearReferenceRenderer.Result a = M10RLinearReferenceRenderer.render(raw, info);
+            M10RHighlightFactorialRenderer.Result a = M10RHighlightFactorialRenderer.render(
+                    raw, info, M10RHighlightFactorialRenderer.Mode.A_BASELINE);
             M10RHighlightFactorialRenderer.Result b = M10RHighlightFactorialRenderer.render(
-                    raw, info, M10RHighlightFactorialRenderer.Mode.WHITELEVEL_CLAMP_ONLY);
+                    raw, info, M10RHighlightFactorialRenderer.Mode.B_HEADROOM);
             M10RHighlightFactorialRenderer.Result c = M10RHighlightFactorialRenderer.render(
-                    raw, info, M10RHighlightFactorialRenderer.Mode.HEADROOM_NEUTRAL_CLIP_ONLY);
-            M10RNeutralClipReferenceRenderer.Result d = M10RNeutralClipReferenceRenderer.render(raw, info);
+                    raw, info, M10RHighlightFactorialRenderer.Mode.C_CA9_CLIP);
+            M10RHighlightFactorialRenderer.Result d = M10RHighlightFactorialRenderer.render(
+                    raw, info, M10RHighlightFactorialRenderer.Mode.D_HEADROOM_CA9);
 
             System.out.println(info.summary());
             System.out.println(raw.diagnosticSummary());
