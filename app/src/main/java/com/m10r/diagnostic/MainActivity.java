@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
                 "Boundary: full Leica xy→temperature / NeutralToXY and RAW/DNG decoding are not wired in this diagnostic build.",
                 "Boundary: ColorSpec self-check core only; RAW/DNG decoding and NeutralToXY are wired downstream.");
         status.setText(coreStatus +
-                "\n\nRENDER_PARITY1A canonical 2x2 highlight experiment. Only RAW headroom retention and the CA9 neutral-domain clipping candidate vary. CFA, demosaic, DNG black/white metadata, NeutralToXY/ColorSpec, output matrix and display encoding remain unchanged. No candidate is firmware-parity claimed. MEDIUM tone and Differential Gamma remain disabled.");
+                "\n\nRENDER_PARITY1A is closed for mechanism selection: canonical C is promoted as the default candidate (RAW headroom OFF, CA9 neutral clip ON). A/B/C/D remain available as regression diagnostics. CFA, demosaic, DNG black/white metadata, NeutralToXY/ColorSpec, output matrix and display encoding remain unchanged. Exact Leica firmware arithmetic/stage parity is not claimed. MEDIUM tone and Differential Gamma remain disabled.");
         status.setTextSize(15f);
         status.setPadding(0, pad / 2, 0, pad);
         root.addView(status);
@@ -93,14 +93,14 @@ public class MainActivity extends Activity {
         addLabel(root, "B — RAW HEADROOM ON / CA9 CLIP OFF", pad);
         bPreviewView = addPreview(root, "B raw headroom on, CA9 clip off");
 
-        addLabel(root, "C — RAW HEADROOM OFF / CA9 CLIP ON", pad);
-        cPreviewView = addPreview(root, "C raw headroom off, CA9 clip on");
+        addLabel(root, "C — PROMOTED DEFAULT CANDIDATE: RAW HEADROOM OFF / CA9 CLIP ON", pad);
+        cPreviewView = addPreview(root, "C promoted default: raw headroom off, CA9 clip on");
 
         addLabel(root, "D — RAW HEADROOM ON / CA9 CLIP ON", pad);
         dPreviewView = addPreview(root, "D raw headroom on, CA9 clip on");
 
         fileStatus = new TextView(this);
-        fileStatus.setText("No DNG selected. Canonical RENDER_PARITY1A matrix: A=headroom OFF/CA9 OFF, B=headroom ON/CA9 OFF, C=headroom OFF/CA9 ON, D=headroom ON/CA9 ON. A↔B and C↔D isolate RAW headroom; A↔C and B↔D isolate CA9 clipping. This is controlled variable isolation only; exact Leica integer arithmetic and stage order remain to be recovered.");
+        fileStatus.setText("No DNG selected. Canonical RENDER_PARITY1A matrix: A=headroom OFF/CA9 OFF, B=headroom ON/CA9 OFF, C=headroom OFF/CA9 ON, D=headroom ON/CA9 ON. Production default now resolves to C; A/B/C/D remain diagnostic controls. A↔B and C↔D isolate RAW headroom; A↔C and B↔D isolate CA9 clipping. Exact Leica integer arithmetic and stage order remain to be recovered.");
         fileStatus.setPadding(0, pad / 2, 0, 0);
         fileStatus.setTextIsSelectable(true);
         root.addView(fileStatus);
@@ -207,13 +207,12 @@ public class MainActivity extends Activity {
                             M10RHighlightFactorialRenderer.Mode.A_BASELINE);
                     bPreview = M10RHighlightFactorialRenderer.render(raw, info,
                             M10RHighlightFactorialRenderer.Mode.B_HEADROOM);
-                    cPreview = M10RHighlightFactorialRenderer.render(raw, info,
-                            M10RHighlightFactorialRenderer.Mode.C_CA9_CLIP);
+                    cPreview = M10RProductionRenderer.render(raw, info);
                     dPreview = M10RHighlightFactorialRenderer.render(raw, info,
                             M10RHighlightFactorialRenderer.Mode.D_HEADROOM_CA9);
                     rawDiagnostic = raw.diagnosticSummary() +
                             "\n\nLEGACY NOTE: the decoder summary's RGGB parity names are diagnostic-only; actual CFA is resolved separately." +
-                            "\n\nDECODER STATUS: PIXEL-EXACT CFA PRESERVED; RENDER_PARITY1A CANONICAL A/B/C/D BUILT.";
+                            "\n\nDECODER STATUS: PIXEL-EXACT CFA PRESERVED; RENDER_PARITY1A CANONICAL A/B/C/D BUILT; DEFAULT C PROMOTED.";
                 } else {
                     sensorPreview = null;
                     aPreview = null;
@@ -266,7 +265,7 @@ public class MainActivity extends Activity {
                 "\n\nB — " + bDiagnostic +
                 "\n\nC — " + cDiagnostic +
                 "\n\nD — " + dDiagnostic +
-                "\n\nINTERPRETATION KEY: A↔B and C↔D isolate RAW headroom. A↔C and B↔D isolate CA9 neutral clipping. A↔D shows the combined effect. If both factors are near zero, neither belongs. If one produces coherent highlight-only changes while the other is near zero, isolate that mechanism. If D contains a meaningful interaction beyond the independent effects, the combined mechanism matters. This is variable isolation only; exact Leica integer arithmetic/stage order remains to be recovered. MEDIUM tone and Differential Gamma remain disabled.");
+                "\n\nINTERPRETATION KEY: C is the promoted default candidate. A↔B and C↔D isolate RAW headroom. A↔C and B↔D isolate CA9 neutral clipping. A↔D shows the combined effect. A/B/C/D remain regression diagnostics; exact Leica integer arithmetic/stage order remains to be recovered. MEDIUM tone and Differential Gamma remain disabled.");
     }
 
     private String setSensorPreview(SensorPreviewCore.PreviewResult preview) {
