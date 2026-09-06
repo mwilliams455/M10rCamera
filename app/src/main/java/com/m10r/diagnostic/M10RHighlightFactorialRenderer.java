@@ -3,24 +3,41 @@ package com.m10r.diagnostic;
 import java.util.Locale;
 
 /**
- * v0.5.3 controlled highlight-boundary experiment.
+ * RENDER_PARITY1A controlled 2x2 highlight-boundary experiment.
  *
- * Together with frozen v0.5.1 (headroom/no neutral clip) and unchanged v0.5.2
- * (WhiteLevel clamp + neutral clip), these two modes complete a 2x2 isolation:
- *   A headroom + no neutral clip   = v0.5.1
- *   B WhiteLevel clamp only        = WHITELEVEL_CLAMP_ONLY
- *   C headroom + neutral clip only = HEADROOM_NEUTRAL_CLIP_ONLY
- *   D WhiteLevel clamp + neutral   = v0.5.2
+ * Canonical matrix (authoritative for this experiment):
+ *   A_BASELINE      = RAW headroom OFF, CA9 neutral clip OFF
+ *   B_HEADROOM      = RAW headroom ON,  CA9 neutral clip OFF
+ *   C_CA9_CLIP      = RAW headroom OFF, CA9 neutral clip ON
+ *   D_HEADROOM_CA9  = RAW headroom ON,  CA9 neutral clip ON
  *
- * This is diagnostic variable isolation only. It does not claim the exact Leica
- * 11-bit B2Y front-end arithmetic or stage ordering.
+ * Only these two switches vary. CFA, demosaic, DNG black/white metadata,
+ * NeutralToXY/ColorSpec, output matrix and display encoding are unchanged.
+ * Legacy v0.5.3 enum names are retained as aliases so the existing diagnostic
+ * activity remains source-compatible while callers migrate to the canonical
+ * A/B/C/D names.
  */
 public final class M10RHighlightFactorialRenderer {
     private M10RHighlightFactorialRenderer() {}
 
     public enum Mode {
-        WHITELEVEL_CLAMP_ONLY,
-        HEADROOM_NEUTRAL_CLIP_ONLY
+        A_BASELINE(false, false),
+        B_HEADROOM(true, false),
+        C_CA9_CLIP(false, true),
+        D_HEADROOM_CA9(true, true),
+
+        /** @deprecated use A_BASELINE */
+        @Deprecated WHITELEVEL_CLAMP_ONLY(false, false),
+        /** @deprecated use D_HEADROOM_CA9 */
+        @Deprecated HEADROOM_NEUTRAL_CLIP_ONLY(true, true);
+
+        public final boolean retainRawHeadroom;
+        public final boolean applyCa9NeutralClip;
+
+        Mode(boolean retainRawHeadroom, boolean applyCa9NeutralClip) {
+            this.retainRawHeadroom = retainRawHeadroom;
+            this.applyCa9NeutralClip = applyCa9NeutralClip;
+        }
     }
 
     public static final class Result {
@@ -54,19 +71,18 @@ public final class M10RHighlightFactorialRenderer {
         }
 
         public String diagnosticSummary() {
-            String policy = mode == Mode.WHITELEVEL_CLAMP_ONLY
-                    ? "WhiteLevel clamp only; no CA9 neutral-domain clip"
-                    : "positive headroom preserved; CA9 neutral-domain clip only";
             return String.format(Locale.US,
-                    "v0.5.3 FACTORIAL %s: %dx%d from CFA stride=%d, CFA=%s\n" +
-                    "Candidate only; variable-isolation diagnostic, NOT firmware-parity claimed.\n" +
-                    "Policy: %s -> unchanged v0.5.1 ColorSpec.\n" +
+                    "RENDER_PARITY1A %s: %dx%d from CFA stride=%d, CFA=%s\n" +
+                    "Candidate only; controlled 2x2 variable isolation, NOT firmware-parity claimed.\n" +
+                    "RAW headroom: %s; CA9 neutral clip: %s; ColorSpec unchanged.\n" +
                     "CA9 gains: [%d, %d, %d]\n" +
-                    "Camera RGB >1 counts before optional neutral clip: R=%d G=%d B=%d\n" +
+                    "Camera RGB >1 counts: R=%d G=%d B=%d\n" +
                     "Neutral-domain clip counts: R=%d G=%d B=%d\n" +
                     "Linear sRGB <0 counts: R=%d G=%d B=%d\n" +
                     "Linear sRGB >1 counts: R=%d G=%d B=%d",
-                    mode.name(), width, height, sourceStride, cfaPattern.name(), policy,
+                    mode.name(), width, height, sourceStride, cfaPattern.name(),
+                    mode.retainRawHeadroom ? "ON" : "OFF",
+                    mode.applyCa9NeutralClip ? "ON" : "OFF",
                     ca9Gains[0], ca9Gains[1], ca9Gains[2],
                     cameraAboveOneCounts[0], cameraAboveOneCounts[1], cameraAboveOneCounts[2],
                     neutralClipCounts[0], neutralClipCounts[1], neutralClipCounts[2],
@@ -113,7 +129,6 @@ public final class M10RHighlightFactorialRenderer {
         long[] neutralClips = new long[3];
         long[] belowZero = new long[3];
         long[] aboveOne = new long[3];
-        boolean preserveHeadroom = mode == Mode.HEADROOM_NEUTRAL_CLIP_ONLY;
 
         for (int oy = 0; oy < outHeight; oy++) {
             int sy = Math.min(oy * stride, raw.height - 1);
@@ -122,20 +137,20 @@ public final class M10RHighlightFactorialRenderer {
                 double[] camera = {
                         interpolate(raw.samples, raw.width, raw.height, sx, sy,
                                 SensorPreviewCore.Channel.R, cfa, info.blackLevel, info.whiteLevel,
-                                preserveHeadroom),
+                                mode.retainRawHeadroom),
                         interpolate(raw.samples, raw.width, raw.height, sx, sy,
                                 SensorPreviewCore.Channel.G, cfa, info.blackLevel, info.whiteLevel,
-                                preserveHeadroom),
+                                mode.retainRawHeadroom),
                         interpolate(raw.samples, raw.width, raw.height, sx, sy,
                                 SensorPreviewCore.Channel.B, cfa, info.blackLevel, info.whiteLevel,
-                                preserveHeadroom)
+                                mode.retainRawHeadroom)
                 };
                 for (int c = 0; c < 3; c++) {
                     if (camera[c] > 1.0) cameraAboveOne[c]++;
                 }
 
                 double[] colorInput = camera;
-                if (mode == Mode.HEADROOM_NEUTRAL_CLIP_ONLY) {
+                if (mode.applyCa9NeutralClip) {
                     for (int c = 0; c < 3; c++) {
                         if (camera[c] * gains[c] / M10RColorSpecCore.ASN_SCALE > 1.0) {
                             neutralClips[c]++;
