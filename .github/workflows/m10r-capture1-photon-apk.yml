@@ -18,6 +18,7 @@ jobs:
         run: |
           python3 -m py_compile patches/apply-m10r-capture1-foundation.py
           python3 -m py_compile patches/apply-m10r-capture1b-renderer.py
+          python3 -m py_compile patches/fix-m10r-capture1b-compile1.py
           python3 -m py_compile patches/verify-m10r-capture1b.py
 
       - name: Clone exact Photon baseline proven by current M9 project
@@ -39,6 +40,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 "$GITHUB_WORKSPACE/patches/apply-m10r-capture1b-renderer.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-compile1.py" "$GITHUB_WORKSPACE/PhotonCamera"
 
       - name: Verify CAPTURE1B invariants
         run: |
