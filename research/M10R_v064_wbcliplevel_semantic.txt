@@ -1,0 +1,287 @@
+V064_IMG_SECTIONS=1
+V064_MAP_BIAS=0x41fffffc
+V064_SECTION=92:IMG-System
+
+=== V064_WBCLIP_WRAPPER 0x42154d58-0x42154db0 ===
+42154d58: push     {r4, r5, r6, r7, lr}
+42154d5a: sub      sp, #0x44
+42154d5c: movs     r7, r0
+42154d5e: movs     r5, r1
+42154d60: movs     r6, #0
+42154d62: ldr      r0, [pc, #0x4c] ; pool=0x42154db0->0x408cedaa:VALUE:str=None
+42154d64: ldrb     r0, [r0]
+42154d66: cmp      r0, #1
+42154d68: bne      #0x42154d6e
+42154d6a: cmp      r5, #1
+42154d6c: beq      #0x42154dac
+42154d6e: movs     r0, #1
+42154d70: ldr      r1, [pc, #0x3c] ; pool=0x42154db0->0x408cedaa:VALUE:str=None
+42154d72: strb     r0, [r1]
+42154d74: adr      r0, #0x3c ; adr=0x42154db4:str=None
+42154d76: ldrb     r0, [r0]
+42154d78: mov      r1, sp
+42154d7a: strb     r0, [r1, #4]
+42154d7c: add      r2, sp, #4
+42154d7e: adr      r1, #0x38 ; adr=0x42154db8:str='WBCLIPLEVEL     String:%s'
+42154d80: movs     r0, #2
+42154d82: bl       #0x42140150
+42154d86: add      r2, sp, #4
+42154d88: movs     r1, #4
+42154d8a: adr      r0, #0x48 ; adr=0x42154dd4:str='B2Y.bin'
+42154d8c: bl       #0x421a0fc0
+42154d90: movs     r4, r0
+42154d92: cmp      r4, #0
+42154d94: bne      #0x42154da4
+42154d96: movs     r6, #1
+42154d98: ldr      r1, [pc, #0x14] ; pool=0x42154db0->0x408cedaa:VALUE:str=None
+42154d9a: strb     r0, [r1]
+42154d9c: adr      r1, #0x3c ; adr=0x42154ddc:str='NO VALID STRING   img_b2y_select_wbcliplevel_paraset'
+42154d9e: movs     r0, #4
+42154da0: bl       #0x42140150
+42154da4: movs     r1, r6
+42154da6: movs     r0, r4
+42154da8: bl       #0x420d42dc
+42154dac: add      sp, #0x44
+42154dae: pop      {r4, r5, r6, r7, pc}
+V064_CALL=WBCLIP_WRAPPER|0x42154d82->0x42140150
+V064_CALL=WBCLIP_WRAPPER|0x42154d8c->0x421a0fc0
+V064_CALL=WBCLIP_WRAPPER|0x42154da0->0x42140150
+V064_CALL=WBCLIP_WRAPPER|0x42154da8->0x420d42dc
+V064_LITERAL=WBCLIP_WRAPPER|ins=0x42154d62|pool=0x42154db0|value=0x408cedaa
+V064_LITERAL=WBCLIP_WRAPPER|ins=0x42154d70|pool=0x42154db0|value=0x408cedaa
+V064_LITERAL=WBCLIP_WRAPPER|ins=0x42154d98|pool=0x42154db0|value=0x408cedaa
+V064_ADR=WBCLIP_WRAPPER|ins=0x42154d74|target=0x42154db4
+V064_ADR=WBCLIP_WRAPPER|ins=0x42154d7e|target=0x42154db8
+V064_ADR=WBCLIP_WRAPPER|ins=0x42154d8a|target=0x42154dd4
+V064_ADR=WBCLIP_WRAPPER|ins=0x42154d9c|target=0x42154ddc
+
+=== V064_WBCLIP_DRIVER 0x420d42dc-0x420d4376 ===
+420d42dc: cmp      r1, #0
+420d42de: bne      #0x420d4336
+420d42e0: ldr      r2, [pc, #0x94] ; pool=0x420d4378->0x20020080:MMIO:str=None
+420d42e2: ldr      r2, [r2, #0x14]
+420d42e4: lsrs     r2, r2, #0x10
+420d42e6: lsls     r2, r2, #0x10
+420d42e8: ldrh     r3, [r0, #4]
+420d42ea: lsls     r3, r3, #0x10
+420d42ec: lsrs     r3, r3, #0x10
+420d42ee: orrs     r2, r3
+420d42f0: ldr      r3, [pc, #0x84] ; pool=0x420d4378->0x20020080:MMIO:str=None
+420d42f2: str      r2, [r3, #0x14]
+420d42f4: movs     r2, r3
+420d42f6: ldr      r2, [r2, #0x14]
+420d42f8: lsls     r2, r2, #0x10
+420d42fa: lsrs     r2, r2, #0x10
+420d42fc: ldrh     r3, [r0]
+420d42fe: lsls     r3, r3, #0x10
+420d4300: lsrs     r3, r3, #0x10
+420d4302: lsls     r3, r3, #0x10
+420d4304: orrs     r2, r3
+420d4306: ldr      r3, [pc, #0x70] ; pool=0x420d4378->0x20020080:MMIO:str=None
+420d4308: str      r2, [r3, #0x14]
+420d430a: movs     r2, r3
+420d430c: ldr      r2, [r2, #0x18]
+420d430e: lsrs     r2, r2, #0x10
+420d4310: lsls     r2, r2, #0x10
+420d4312: ldrh     r3, [r0, #0xc]
+420d4314: lsls     r3, r3, #0x10
+420d4316: lsrs     r3, r3, #0x10
+420d4318: orrs     r2, r3
+420d431a: ldr      r3, [pc, #0x5c] ; pool=0x420d4378->0x20020080:MMIO:str=None
+420d431c: str      r2, [r3, #0x18]
+420d431e: movs     r2, r3
+420d4320: ldr      r2, [r2, #0x18]
+420d4322: lsls     r2, r2, #0x10
+420d4324: lsrs     r2, r2, #0x10
+420d4326: ldrh     r3, [r0, #8]
+420d4328: lsls     r3, r3, #0x10
+420d432a: lsrs     r3, r3, #0x10
+420d432c: lsls     r3, r3, #0x10
+420d432e: orrs     r2, r3
+420d4330: ldr      r3, [pc, #0x44] ; pool=0x420d4378->0x20020080:MMIO:str=None
+420d4332: str      r2, [r3, #0x18]
+420d4334: b        #0x420d4374
+420d4336: ldr      r2, [pc, #0x40] ; pool=0x420d4378->0x20020080:MMIO:str=None
+420d4338: ldr      r2, [r2, #0x14]
+420d433a: lsrs     r2, r2, #0x10
+420d433c: lsls     r2, r2, #0x10
+420d433e: ldr      r3, [pc, #0x3c] ; pool=0x420d437c->0x0000ffff:VALUE:str=None
+420d4340: adds     r3, r2, r3
+420d4342: ldr      r2, [pc, #0x34] ; pool=0x420d4378->0x20020080:MMIO:str=None
+420d4344: str      r3, [r2, #0x14]
+420d4346: ldr      r2, [r2, #0x14]
+420d4348: lsls     r2, r2, #0x10
+420d434a: lsrs     r2, r2, #0x10
+420d434c: movs     r3, #1
+420d434e: lsls     r3, r3, #0x10
+420d4350: subs     r3, r2, r3
+420d4352: ldr      r2, [pc, #0x24] ; pool=0x420d4378->0x20020080:MMIO:str=None
+420d4354: str      r3, [r2, #0x14]
+420d4356: ldr      r2, [r2, #0x18]
+420d4358: lsrs     r2, r2, #0x10
+420d435a: lsls     r2, r2, #0x10
+420d435c: ldr      r3, [pc, #0x1c] ; pool=0x420d437c->0x0000ffff:VALUE:str=None
+420d435e: adds     r3, r2, r3
+420d4360: ldr      r2, [pc, #0x14] ; pool=0x420d4378->0x20020080:MMIO:str=None
+420d4362: str      r3, [r2, #0x18]
+420d4364: ldr      r2, [r2, #0x18]
+420d4366: lsls     r2, r2, #0x10
+420d4368: lsrs     r2, r2, #0x10
+420d436a: movs     r3, #1
+420d436c: lsls     r3, r3, #0x10
+420d436e: subs     r3, r2, r3
+420d4370: ldr      r2, [pc, #4] ; pool=0x420d4378->0x20020080:MMIO:str=None
+420d4372: str      r3, [r2, #0x18]
+420d4374: bx       lr
+V064_LITERAL=WBCLIP_DRIVER|ins=0x420d42e0|pool=0x420d4378|value=0x20020080
+V064_LITERAL=WBCLIP_DRIVER|ins=0x420d42f0|pool=0x420d4378|value=0x20020080
+V064_LITERAL=WBCLIP_DRIVER|ins=0x420d4306|pool=0x420d4378|value=0x20020080
+V064_LITERAL=WBCLIP_DRIVER|ins=0x420d431a|pool=0x420d4378|value=0x20020080
+V064_LITERAL=WBCLIP_DRIVER|ins=0x420d4330|pool=0x420d4378|value=0x20020080
+V064_LITERAL=WBCLIP_DRIVER|ins=0x420d4336|pool=0x420d4378|value=0x20020080
+V064_LITERAL=WBCLIP_DRIVER|ins=0x420d433e|pool=0x420d437c|value=0x0000ffff
+V064_LITERAL=WBCLIP_DRIVER|ins=0x420d4342|pool=0x420d4378|value=0x20020080
+V064_LITERAL=WBCLIP_DRIVER|ins=0x420d4352|pool=0x420d4378|value=0x20020080
+V064_LITERAL=WBCLIP_DRIVER|ins=0x420d435c|pool=0x420d437c|value=0x0000ffff
+V064_LITERAL=WBCLIP_DRIVER|ins=0x420d4360|pool=0x420d4378|value=0x20020080
+V064_LITERAL=WBCLIP_DRIVER|ins=0x420d4370|pool=0x420d4378|value=0x20020080
+
+=== V064_PARASET_LOOKUP 0x421a0fc0-0x421a108e ===
+421a0fc0: push     {r0, r1, r2, r4, r5, r6, r7, lr}
+421a0fc2: sub      sp, #0x10
+421a0fc4: movs     r7, r1
+421a0fc6: movs     r0, #0
+421a0fc8: str      r0, [sp, #0xc]
+421a0fca: ldr      r0, [sp, #0x10]
+421a0fcc: bl       #0x421a0c7c
+421a0fd0: movs     r4, r0
+421a0fd2: cmp      r4, #0
+421a0fd4: beq      #0x421a1068
+421a0fd6: movs     r0, #0x41
+421a0fd8: lsls     r0, r0, #3
+421a0fda: ldr      r5, [r0, r4]
+421a0fdc: ldr      r1, [pc, #0xb0] ; pool=0x421a1090->0xca11bf11:VALUE:str=None
+421a0fde: ldr      r0, [r5]
+421a0fe0: cmp      r0, r1
+421a0fe2: bne      #0x421a105c
+421a0fe4: movs     r0, #0x41
+421a0fe6: lsls     r0, r0, #3
+421a0fe8: ldr      r0, [r0, r4]
+421a0fea: adds     r0, #0x10
+421a0fec: str      r0, [sp, #8]
+421a0fee: movs     r0, #0
+421a0ff0: str      r0, [sp, #4]
+421a0ff2: b        #0x421a1052
+421a0ff4: movs     r1, #0xa9
+421a0ff6: lsls     r1, r1, #4
+421a0ff8: ldr      r0, [sp, #4]
+421a0ffa: muls     r0, r1, r0
+421a0ffc: ldr      r1, [sp, #8]
+421a0ffe: adds     r6, r0, r1
+421a1000: ldr      r0, [r6]
+421a1002: cmp      r0, r7
+421a1004: bne      #0x421a104c
+421a1006: movs     r0, #0
+421a1008: str      r0, [sp]
+421a100a: b        #0x421a1042
+421a100c: ldr      r1, [sp]
+421a100e: lsls     r2, r1, #6
+421a1010: movs     r1, r6
+421a1012: adds     r1, #0x10
+421a1014: adds     r0, r2, r1
+421a1016: movs     r2, #0x40
+421a1018: ldr      r1, [sp, #0x18]
+421a101a: bl       #0x4204f160
+421a101e: cmp      r0, #0
+421a1020: bne      #0x421a103c
+421a1022: ldr      r1, [r6, #4]
+421a1024: movs     r2, #0xa9
+421a1026: lsls     r2, r2, #4
+421a1028: ldr      r0, [r5, #8]
+421a102a: muls     r0, r2, r0
+421a102c: adds     r0, r1, r0
+421a102e: adds     r0, #0x10
+421a1030: movs     r1, #0x41
+421a1032: lsls     r1, r1, #3
+421a1034: ldr      r1, [r1, r4]
+421a1036: adds     r0, r0, r1
+421a1038: str      r0, [sp, #0xc]
+421a103a: b        #0x421a104a
+421a103c: ldr      r0, [sp]
+421a103e: adds     r0, r0, #1
+421a1040: str      r0, [sp]
+421a1042: ldr      r1, [r6, #0xc]
+421a1044: ldr      r0, [sp]
+421a1046: cmp      r1, r0
+421a1048: bhi      #0x421a100c
+421a104a: mov      r8, r8
+421a104c: ldr      r0, [sp, #4]
+421a104e: adds     r0, r0, #1
+421a1050: str      r0, [sp, #4]
+421a1052: ldr      r1, [r5, #8]
+421a1054: ldr      r0, [sp, #4]
+421a1056: cmp      r1, r0
+421a1058: bhi      #0x421a0ff4
+421a105a: b        #0x421a1066
+421a105c: ldr      r1, [pc, #0x34] ; pool=0x421a1094->0x4284509c:CODE/DATA:str='sd1_FindImageSettingsByName: FileHeader MagiicNumber 0x%08X != 0xCA11BF11'
+421a105e: movs     r0, #4
+421a1060: ldr      r2, [r5]
+421a1062: bl       #0x42140150
+421a1066: b        #0x421a1072
+421a1068: ldr      r1, [pc, #0x2c] ; pool=0x421a1098->0x428455d0:CODE/DATA:str='sd1_FindImageSettingsByName: Calibration File [%s] was not found'
+421a106a: movs     r0, #4
+421a106c: ldr      r2, [sp, #0x10]
+421a106e: bl       #0x42140150
+421a1072: ldr      r0, [sp, #0xc]
+421a1074: cmp      r0, #0
+421a1076: bne      #0x421a1088
+421a1078: ldr      r0, [sp, #0x18]
+421a107a: movs     r3, r7
+421a107c: str      r0, [sp]
+421a107e: ldr      r1, [pc, #0x1c] ; pool=0x421a109c->0x42845440:CODE/DATA:str='sd1_FindImageSettingsByName: NOT Found Entry [%s] | CAT=[%d] | PAR=[%s]'
+421a1080: movs     r0, #4
+421a1082: ldr      r2, [sp, #0x10]
+421a1084: bl       #0x42140150
+421a1088: ldr      r0, [sp, #0xc]
+421a108a: add      sp, #0x1c
+421a108c: pop      {r4, r5, r6, r7, pc}
+V064_CALL=PARASET_LOOKUP|0x421a0fcc->0x421a0c7c
+V064_CALL=PARASET_LOOKUP|0x421a101a->0x4204f160
+V064_CALL=PARASET_LOOKUP|0x421a1062->0x42140150
+V064_CALL=PARASET_LOOKUP|0x421a106e->0x42140150
+V064_CALL=PARASET_LOOKUP|0x421a1084->0x42140150
+V064_LITERAL=PARASET_LOOKUP|ins=0x421a0fdc|pool=0x421a1090|value=0xca11bf11
+V064_LITERAL=PARASET_LOOKUP|ins=0x421a105c|pool=0x421a1094|value=0x4284509c
+V064_LITERAL=PARASET_LOOKUP|ins=0x421a1068|pool=0x421a1098|value=0x428455d0
+V064_LITERAL=PARASET_LOOKUP|ins=0x421a107e|pool=0x421a109c|value=0x42845440
+
+=== V064_INLINE_DESCRIPTOR_HEXDUMP ===
+V064_HEX=0x42154db0|aa ed 8c 40 00 00 00 00 57 42 43 4c 49 50 4c 45|...@....WBCLIPLE
+V064_HEX=0x42154dc0|56 45 4c 20 20 20 20 20 53 74 72 69 6e 67 3a 25|VEL     String:%
+V064_HEX=0x42154dd0|73 00 00 00 42 32 59 2e 62 69 6e 00 4e 4f 20 56|s...B2Y.bin.NO V
+V064_HEX=0x42154de0|41 4c 49 44 20 53 54 52 49 4e 47 20 20 20 69 6d|ALID STRING   im
+V064_HEX=0x42154df0|67 5f 62 32 79 5f 73 65 6c 65 63 74 5f 77 62 63|g_b2y_select_wbc
+V064_HEX=0x42154e00|6c 69 70 6c 65 76 65 6c 5f 70 61 72 61 73 65 74|liplevel_paraset
+V064_HEX=0x42154e10|00 00 00 00 f0 b5 91 b0 07 00 0d 00 00 26 13 48|.............&.H
+V064_CALLERS=WBCLIP_WRAPPER|count=1|0x42154fd8
+V064_CALLERS=WBCLIP_DRIVER|count=1|0x42154da8
+V064_CALLERS=PARASET_LOOKUP|count=40|0x420e2738,0x420e2af4,0x4210f496,0x42153978,0x42153a30,0x42153af0,0x42153bcc,0x42153cbc,0x42153d58,0x42153e20,0x42153ee8,0x42153f9e,0x42153fc4,0x42153fea,0x421540b4,0x421541da,0x42154208,0x42154232,0x4215425c,0x4215428c,0x42154386,0x42154440,0x4215456e,0x4215459c,0x421545c6,0x421545f0,0x42154620,0x42154740,0x421547f2,0x4215489e,0x4215496e,0x42154a38,0x42154b18,0x42154c06,0x42154c2c,0x42154c64,0x42154d8c,0x42154e48,0x42154efc,0x421a25a8
+V064_WBCLIP_STRING_SECTION_HITS=2
+V064_SECTION_HIT=section=92:IMG-System|offset=0x154dbc|context_start=0x154d7c|ascii=iF.q..... .......!..L......,...&.I.p... ....1. ............@....WBCLIPLEVEL     String:%s...B2Y.bin.NO VALID STRING   img_b2y_select_wbcliplevel_paraset.............&.H.x.(...-... .I.p...xiF.q..... .......!..L......,...&.I.p
+V064_SECTION_HIT_HEX=section=92|offset=0x154dbc|69 46 08 71 01 aa 0e a1 02 20 eb f7 e5 f9 01 aa 04 21 12 a0 4c f0 18 f9 04 00 00 2c 06 d1 01 26 05 49 08 70 0f a1 04 20 eb f7 d6 f9 31 00 20 00 7f f7 98 fa 11 b0 f0 bd aa ed 8c 40 00 00 00 00 57 42 43 4c 49 50 4c 45 56 45 4c 20 20 20 20 20 53 74 72 69 6e 67 3a 25 73 00 00 00 42 32 59 2e
+V064_SECTION_HIT=section=92:IMG-System|offset=0x154e01|context_start=0x154dc1|ascii=PLEVEL     String:%s...B2Y.bin.NO VALID STRING   img_b2y_select_wbcliplevel_paraset.............&.H.x.(...-... .I.p...xiF.q..... .......!..L......,...&.I.p... ..x.1. ............@....Y BLEND     String:%s...B2Y.bin.NO VALID 
+V064_SECTION_HIT_HEX=section=92|offset=0x154e01|50 4c 45 56 45 4c 20 20 20 20 20 53 74 72 69 6e 67 3a 25 73 00 00 00 42 32 59 2e 62 69 6e 00 4e 4f 20 56 41 4c 49 44 20 53 54 52 49 4e 47 20 20 20 69 6d 67 5f 62 32 79 5f 73 65 6c 65 63 74 5f 77 62 63 6c 69 70 6c 65 76 65 6c 5f 70 61 72 61 73 65 74 00 00 00 00 f0 b5 91 b0 07 00 0d 00 00
+V064_CHECK=normal_branch_mode_zero|PASS|('cmp', 'r1,#0')
+V064_CHECK=mmio_base|PASS|0x20020080
+V064_CHECK=reg0_low_from_input_plus4|PASS|input+4 -> reg+14 low16
+V064_CHECK=reg0_high_from_input_plus0|PASS|input+0 -> reg+14 high16
+V064_CHECK=reg1_low_from_input_plus12|PASS|input+12 -> reg+18 low16
+V064_CHECK=normal_branch_writes_reg1|PASS|fourth halfword -> reg+18 high16
+V064_DRIVER_ABI=0x20020094:upper=input[0],lower=input[1]|0x20020098:upper=input[2],lower=input[3]
+V064_DRIVER_CHECKS=6/6
+V064_WBCLIP_NAMED_SELECTOR=1
+V064_WBCLIP_SELECTOR_CALLS_LOOKUP=1
+V064_WBCLIP_SELECTOR_CALLS_DRIVER=1
+V064_WBCLIP_DRIVER_MMIO_PAGE_OK=1
+V064_DRIVER_NONADDRESS_LITERALS=0x0000ffff
+OVERALL_VERDICT=WBCLIPLEVEL_DRIVER_AND_DATA_ABI_PROVEN_NEEDS_ACTIVE_PARASET_VALUES
