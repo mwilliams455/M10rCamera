@@ -1,0 +1,275 @@
+M10-R OUTPUTSPACE TRANSFER2W
+
+=== ASCII CONFIG IDENTIFIERS 0x421E9C40..0x421E9E80 ===
+0x421e9c52 '    '
+0x421e9c58 'ca9_cm_Get_BinFileData'
+0x421e9c6f 'ca9_cm_Get_BinFileTfRemappingData'
+0x421e9c91 'ca9_cm_config_fill'
+0x421e9cb4 'ca9_StartColorManagement'
+0x421e9ccd 'ca9_cm_ColorManagementFinished'
+0x421e9cec 'ca9_cm_reset_parameter'
+0x421e9d0c 'ca9_cm_fill_parameter'
+0x421e9d22 'ca9_cm_module_debug_asn'
+0x421e9d3a 'ca9_dark_stain_calib_if_ProcessImage'
+0x421e9d5f 'ca9_dark_stain_calib_module_ProcessImageFinished'
+0x421e9d90 'ca9_dark_stain_calib_if_PreprareProcessImage'
+0x421e9dbd 'ca9_dark_stain_calib_module_DebugObjectMessage'
+0x421e9dec 'ca9_dark_stain_calib_module_TransferResultsToPCRequest'
+0x421e9e23 'ca9_dark_stain_calib_module_TransferResultsToPC'
+0x421e9e53 'ca9_dust_detection_module_DebugObjectMessage'
+
+=== ARM-MODE MATH HELPERS FROM REMAP-DERIVED SCALAR ===
+
+-- 0x421e6648 0 --
+421e6648: clz        r3, r0
+421e664c: lsls       r1, r0, r3
+421e6650: beq        #0x421e666c
+421e6654: rsb        r3, r3, #0x1d
+421e6658: add        r3, r3, #0x400
+421e665c: lsl        r0, r1, #0x15
+421e6660: lsl        r2, r3, #0x14
+421e6664: add        r1, r2, r1, lsr #11
+421e6668: bx         lr
+421e666c: mov        r0, #0
+421e6670: bx         lr
+421e6674: clz        r3, r1
+421e6678: subs       r3, r3, #0xb
+421e667c: blo        #0x421e66c8
+421e6680: lsls       r1, r1, r3
+421e6684: bne        #0x421e66ac
+421e6688: clz        r3, r0
+421e668c: lsls       r1, r0, r3
+421e6690: bxeq       lr
+421e6694: rsb        r3, r3, #0x1d
+421e6698: add        r3, r3, #0x400
+421e669c: lsr        r2, r1, #0xb
+421e66a0: lsl        r0, r1, #0x15
+421e66a4: add        r1, r2, r3, lsl #20
+421e66a8: bx         lr
+421e66ac: rsb        ip, r3, #0x20
+421e66b0: orr        r1, r1, r0, lsr ip
+421e66b4: lsls       r0, r0, r3
+421e66b8: rsb        r3, r3, #0x32
+421e66bc: add        r3, r3, #0x400
+421e66c0: add        r1, r1, r3, lsl #20
+421e66c4: bx         lr
+
+-- 0x421e6050 0 --
+421e6050: teq        r1, r3
+421e6054: push       {r4, lr}
+421e6058: eormi      r3, r3, #0x80000000
+421e605c: bmi        #0x421e6d54
+421e6060: subs       r4, r0, r2
+421e6064: sbcs       ip, r1, r3
+421e6068: bhs        #0x421e607c
+421e606c: adds       r2, r2, r4
+421e6070: adc        r3, r3, ip
+421e6074: subs       r0, r0, r4
+421e6078: sbc        r1, r1, ip
+421e607c: ldr        lr, [pc, #0x11c]
+421e6080: lsr        r4, r1, #0x14
+421e6084: sub        ip, r4, r3, lsr #20
+421e6088: tst        lr, r3, lsl #1
+421e608c: teqne      lr, r4, lsl #21
+421e6090: beq        #0x421e6174
+421e6094: bic        r3, r3, lr
+421e6098: rsbs       lr, ip, #0x20
+421e609c: bic        r1, r1, r4, lsl #20
+421e60a0: orr        r3, r3, #0x100000
+421e60a4: blo        #0x421e60fc
+421e60a8: adds       r0, r0, r2, lsr ip
+421e60ac: adc        r1, r1, r3, lsr ip
+421e60b0: adds       r0, r0, r3, lsl lr
+421e60b4: adcs       r1, r1, #0
+421e60b8: cmp        r1, #0x100000
+421e60bc: bhs        #0x421e6124
+421e60c0: add        r1, r1, r4, lsl #20
+421e60c4: lsls       r2, r2, lr
+421e60c8: pop        {r4, lr}
+421e60cc: bxpl       lr
+
+-- 0x42172544 0 --
+42172544: push       {r3, r4, r5, lr}
+42172548: mov        r5, r1
+4217254c: movs       r4, r0
+42172550: ldr        r3, [pc, #0xc0]
+42172554: movne      r0, #1
+42172558: moveq      r0, #0
+4217255c: orr        r0, r0, r5
+42172560: bic        r0, r0, #0x80000000
+42172564: sub        r0, r3, r0
+42172568: lsrs       r0, r0, #0x1f
+4217256c: bne        #0x42172580
+42172570: mov        r2, #0
+42172574: mov        r0, r4
+42172578: bl         #0x421e64a0
+4217257c: bne        #0x42172590
+42172580: mov        r0, r4
+42172584: mov        r1, r5
+42172588: bl         #0x420a06d4
+4217258c: pop        {r3, r4, r5, pc}
+42172590: mov        r2, #0
+42172594: mov        r0, r4
+42172598: mov        r1, r5
+4217259c: mov        r3, r2
+421725a0: bl         #0x421e670c
+421725a4: bhs        #0x421725b8
+421725a8: mov        r0, #1
+421725ac: blx        #0x4204fbde
+421725b0: bl         #0x420a06e0
+421725b4: pop        {r3, r4, r5, pc}
+421725b8: mov        r2, sp
+421725bc: mov        r0, r4
+421725c0: mov        r1, r5
+421725c4: bl         #0x421138e4
+421725c8: ldr        r2, [sp]
+421725cc: cmp        r2, #0
+421725d0: ble        #0x421725e4
+421725d4: sub        r2, r2, #1
+421725d8: str        r2, [sp]
+421725dc: mov        r2, #1
+421725e0: bl         #0x421e79e0
+421725e4: bl         #0x42171edc
+421725e8: ldr        r2, [pc, #0x2c]
+421725ec: ldr        r3, [pc, #0x2c]
+421725f0: bl         #0x421e61d0
+421725f4: mov        r4, r0
+421725f8: ldr        r0, [sp]
+421725fc: mov        r5, r1
+42172600: bl         #0x421e6614
+
+-- 0x420a957c 0 --
+420a957c: ldr        r3, [pc, #0x110]
+420a9580: lsl        r2, r1, #1
+420a9584: push       {r4, r5, r6, r7, r8, lr}
+420a9588: mov        r5, r1
+420a958c: mov        r4, r0
+420a9590: add        r6, r3, r2, lsr #21
+420a9594: ldr        r2, [pc, #0xfc]
+420a9598: ldr        r3, [pc, #0xfc]
+420a959c: cmp        r6, #0x14
+420a95a0: bge        #0x420a9628
+420a95a4: cmp        r6, #0
+420a95a8: bge        #0x420a95e0
+420a95ac: bl         #0x421e6050
+420a95b0: mov        r2, #0
+420a95b4: mov        r3, r2
+420a95b8: bl         #0x421e69e0
+420a95bc: bhs        #0x420a9688
+420a95c0: cmp        r5, #0
+420a95c4: movlt      r5, #0x80000000
+420a95c8: movlt      r4, #0
+420a95cc: blt        #0x420a9688
+420a95d0: orrs       r0, r5, r4
+420a95d4: ldrne      r5, [pc, #0xc4]
+420a95d8: bne        #0x420a9620
+420a95dc: b          #0x420a9688
+420a95e0: ldr        ip, [pc, #0xbc]
+420a95e4: lsr        r7, ip, r6
+420a95e8: and        ip, r5, r7
+420a95ec: orrs       ip, ip, r4
+420a95f0: popeq      {r4, r5, r6, r7, r8, pc}
+420a95f4: bl         #0x421e6050
+420a95f8: mov        r2, #0
+420a95fc: mov        r3, r2
+420a9600: bl         #0x421e69e0
+420a9604: bhs        #0x420a9688
+420a9608: cmp        r5, #0
+420a960c: ble        #0x420a961c
+420a9610: mov        r0, #0x100000
+420a9614: lsr        r0, r0, r6
+420a9618: add        r5, r5, r0
+420a961c: bic        r5, r5, r7
+420a9620: mov        r4, #0
+420a9624: b          #0x420a9688
+420a9628: cmp        r6, #0x33
+420a962c: popgt      {r4, r5, r6, r7, r8, pc}
+420a9630: mvn        r7, #0
+420a9634: sub        ip, r6, #0x14
+420a9638: lsr        r7, r7, ip
+420a963c: tst        r4, r7
+420a9640: popeq      {r4, r5, r6, r7, r8, pc}
+420a9644: bl         #0x421e6b2c
+420a9648: mov        r2, #0
+420a964c: mov        r3, r2
+420a9650: bl         #0x421e69e0
+420a9654: bhs        #0x420a9688
+420a9658: cmp        r5, #0
+420a965c: ble        #0x420a9684
+420a9660: cmp        r6, #0x14
+420a9664: addeq      r5, r5, #1
+420a9668: beq        #0x420a9684
+420a966c: mov        r1, #1
+420a9670: rsb        r0, r6, #0x34
+420a9674: add        r0, r4, r1, lsl r0
+420a9678: cmp        r0, r4
+
+-- 0x421e65a4 0 --
+421e65a4: lsr        r3, r1, #0x14
+421e65a8: sub        r3, r3, #0x400
+421e65ac: rsbs       r3, r3, #0x1e
+421e65b0: rsbsge     ip, r3, #0x20
+421e65b4: blt        #0x421e65cc
+421e65b8: mov        r2, #0x80000000
+421e65bc: orr        r2, r2, r1, lsl #11
+421e65c0: orrs       r2, r2, r0, lsr #21
+421e65c4: lsrs       r0, r2, r3
+421e65c8: bx         lr
+421e65cc: tst        r1, r1
+421e65d0: bmi        #0x421e65f4
+421e65d4: cmp        r3, #0x10
+421e65d8: movgt      r0, #0
+421e65dc: bxgt       lr
+421e65e0: add        ip, r3, #0x3e0
+421e65e4: cmn        ip, #1
+421e65e8: beq        #0x421e65fc
+421e65ec: mvn        r0, #0
+421e65f0: bx         lr
+421e65f4: mov        r0, #0
+421e65f8: bx         lr
+421e65fc: push       {r4, r5, r6, lr}
+421e6600: bl         #0x421e6918
+421e6604: umaalhi    r2, sb, r2, r4
+421e6608: mov        r0, #0
+421e660c: bx         lr
+421e6610: b          #0x421e65ec
+421e6614: ands       r2, r0, #0x80000000
+421e6618: rsbmi      r0, r0, #0
+421e661c: clz        r3, r0
+421e6620: lsls       r1, r0, r3
+
+=== THUMB COMPARISON FOR 0x420A957C ONLY ===
+
+-- 0x420a957c 16 --
+420a957c: adds       r1, #0x10
+420a957e: b          #0x420a90c0
+420a9580: movs       r0, #0x81
+420a9582: b          #0x420a98c6
+420a9584: rors       r0, r6
+420a9586: push.w     {r0, ip, lr}
+420a958a: b          #0x420a98ce
+420a958c: ands       r0, r0
+420a958e: b          #0x420a98d2
+420a9590: ldr        r2, [r4, #0x28]
+420a9592: b          #0x420a969c
+420a9594: movs       r0, #0xfc
+420a9596: b          #0x420a90d8
+420a9598: adds       r0, #0xfc
+420a959a: b          #0x420a90dc
+420a959c: movs       r4, r2
+420a959e: b          #0x420a9c4e
+420a95a0: movs       r0, r4
+420a95a2: add        r2, sp, #0
+420a95a4: movs       r0, r0
+420a95a6: b          #0x420a9c56
+420a95a8: movs       r4, r1
+420a95aa: add        r2, sp, #0
+420a95ac: blx        #0x42350bb8
+420a95b0: movs       r0, #0
+420a95b2: b          #0x420a9cf6
+420a95b4: adds       r0, #2
+420a95b6: b          #0x420a98fa
+420a95b8: blx        #0x41db1bc4
+
+=== FALLBACK SEMANTIC HYPOTHESES ===
+points=(2000,4117),(12000,6138). Test as Kelvin-keyed interpolation; inspect identifiers nearby for CCT/MIRED/TINT/TF terminology.
