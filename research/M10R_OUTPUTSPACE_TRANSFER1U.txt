@@ -1,0 +1,1069 @@
+M10-R OUTPUTSPACE TRANSFER1U
+
+=== RELEVANT STRINGS ===
+0x40006469 'j\x02@ca9_control_Manager() - CA9 ready'
+0x4000646b '@ca9_control_Manager() - CA9 ready'
+0x40013cff '?ca9_cm_XYCoord_XYtoXYZ'
+0x40013d17 'ca9_cm_XYCoord_XYZtoXY'
+0x4001421a 'v%\x13\x1d]@ca9_cm_Temperature_FromXYCoord'
+0x4001421e ']@ca9_cm_Temperature_FromXYCoord'
+0x4001423f 'ca9_cm_Temperature_FromXYCoord_binarySearch'
+0x4001426b 'ca9_cm_Temperature_ToXYCoord'
+0x4001433f '?ca9_cm_ColorSpec_MapWhiteMatrix'
+0x40014360 'ca9_cm_ColorSpec_SetWhiteXY'
+0x4001437c 'ca9_cm_ColorSpec_NeutralToXY'
+0x40014399 'ca9_cm_ColorSpec_MatrixInterpolate'
+0x4001c5e8 'CA9: ca9_shared_memory_test: set ca9_test_structure variable_1 to %i'
+0x4001c630 'CA9: ca9_shared_memory_test: set ca9_test_structure variable_2 to %i'
+0x4001c678 'CA9: ca9_shared_memory_test: set ca9_test_structure variable_3 to %i'
+0x4001c6c0 'CA9: ca9_shared_memory_test: set ca9_test_structure variable_4 to %i'
+
+=== CORRECTED MIXED-MODE STRING XREFS ===
+HIT_COUNT 15
+ARM 0x40004974 -> 0x40013d17 ldr r2, [pc, #0x58] 'ca9_cm_XYCoord_XYZtoXY'
+ARM 0x40004e70 -> 0x4001423f ldr r2, [pc, #0x2f8] 'ca9_cm_Temperature_FromXYCoord_binarySearch'
+ARM 0x40005198 -> 0x4001423f ldr r2, [pc, #-0x30] 'ca9_cm_Temperature_FromXYCoord_binarySearch'
+ARM 0x400051c0 -> 0x4001423f ldr r2, [pc, #-0x58] 'ca9_cm_Temperature_FromXYCoord_binarySearch'
+ARM 0x40005274 -> 0x4001426b ldr r2, [pc, #0x16c] 'ca9_cm_Temperature_ToXYCoord'
+ARM 0x400053b8 -> 0x4001426b ldr r2, [pc, #0x28] 'ca9_cm_Temperature_ToXYCoord'
+ARM 0x40005cb8 -> 0x40014399 ldr r2, [pc, #0xac] 'ca9_cm_ColorSpec_MatrixInterpolate'
+ARM 0x40005df4 -> 0x40014399 ldr r2, [pc, #-0x90] 'ca9_cm_ColorSpec_MatrixInterpolate'
+ARM 0x40006078 -> 0x40014360 ldr r2, [pc, #0x54] 'ca9_cm_ColorSpec_SetWhiteXY'
+ARM 0x40006094 -> 0x40014360 ldr r2, [pc, #0x38] 'ca9_cm_ColorSpec_SetWhiteXY'
+ARM 0x4000621c -> 0x4001437c ldr r2, [pc, #0xac] 'ca9_cm_ColorSpec_NeutralToXY'
+ARM 0x4000df78 -> 0x4001c5e8 ldr r1, [pc, #0x78] 'CA9: ca9_shared_memory_test: set ca9_test_structure variable_1 to %i'
+ARM 0x4000dfb4 -> 0x4001c630 ldr r1, [pc, #0x40] 'CA9: ca9_shared_memory_test: set ca9_test_structure variable_2 to %i'
+ARM 0x4000dfc4 -> 0x4001c678 ldr r1, [pc, #0x34] 'CA9: ca9_shared_memory_test: set ca9_test_structure variable_3 to %i'
+ARM 0x4000dfd4 -> 0x4001c6c0 ldr r1, [pc, #0x28] 'CA9: ca9_shared_memory_test: set ca9_test_structure variable_4 to %i'
+
+=== XREF FUNCTION WINDOWS ===
+
+FUNCTION ARM 0x4000492c HITS 0x40004974->ca9_cm_XYCoord_XYZtoXY
+4000492c: push       {r3, r4, r5, lr}
+40004930: mov        r4, r1
+40004934: vldr       d2, [r0, #8]
+40004938: vldr       d1, [r0]
+4000493c: vldr       d0, [r0, #0x10]
+40004940: mov        r1, #0
+40004944: vadd.f64   d3, d1, d2
+40004948: vmov.f64   d2, #1.000000e+00
+4000494c: vadd.f64   d0, d3, d0
+40004950: vcmpe.f64  d0, d2
+40004954: vmrs       apsr_nzcv, fpscr
+40004958: ble        #0x40004974
+4000495c: vdiv.f64   d2, d1, d0
+40004960: vstr       d2, [r4]
+40004964: vldr       d1, [r0, #8]
+40004968: vdiv.f64   d2, d1, d0
+4000496c: vstr       d2, [r4, #8]
+40004970: b          #0x400049a4
+40004974: ldr        r2, [pc, #0x58]
+40004978: add        r0, pc, #0x30
+4000497c: str        r0, [sp]
+40004980: mov        r3, #0x9f
+40004984: sub        r1, pc, #0x78
+40004988: mov        r0, #4
+4000498c: bl         #0x4000ded4
+40004990: vldr       d0, [pc, #0x40]
+40004994: vldr       d1, [pc, #0x44]
+40004998: vstr       d0, [r4]
+4000499c: movw       r1, #0x408
+400049a0: vstr       d1, [r4, #8]
+400049a4: mov        r0, r1
+400049a8: pop        {r3, r4, r5, pc}
+
+FUNCTION ARM 0x40004d00 HITS 0x40004e70->ca9_cm_Temperature_FromXYCoord_binarySearch
+40004d00: push       {r0, r1, r4, r5, r6, r7, r8, sb, sl, fp, lr}
+40004d04: mov        r4, r0
+40004d08: vmov.f64   d3, #1.500000e+00
+40004d0c: vpush      {d8, d9, d10, d11, d12, d13, d14, d15}
+40004d10: vmov.f64   d2, #6.000000e+00
+40004d14: sub        sp, sp, #0xbc
+40004d18: vldr       d0, [r0]
+40004d1c: vldr       d1, [r0, #8]
+40004d20: mov        r0, #0
+40004d24: vsub.f64   d10, d3, d0
+40004d28: vmov.i32   d0, #0
+40004d2c: str        r0, [sp, #0x68]
+40004d30: ldr        r0, [sp, #0x100]
+40004d34: vstr       d0, [r0]
+40004d38: ldr        r0, [sp, #0x100]
+40004d3c: vmla.f64   d10, d1, d2
+40004d40: vstr       d0, [r0, #8]
+40004d44: vmov.f64   d0, d10
+40004d48: bl         #0x40012fd0
+40004d4c: cmp        r0, #1
+40004d50: beq        #0x40004e70
+40004d54: mov        r6, #0
+40004d58: vmov.f64   d3, #2.000000e+00
+40004d5c: vldr       d1, [r4]
+40004d60: vmov.f64   d2, #3.000000e+00
+40004d64: vldr       d0, [r4, #8]
+40004d68: ldr        r1, [pc, #-0xd8]
+40004d6c: mov        ip, #0
+40004d70: str        r6, [sp, #0x20]
+40004d74: str        r6, [sp, #0x28]
+40004d78: str        r6, [sp, #0x30]
+40004d7c: str        r6, [sp, #0x24]
+40004d80: str        r6, [sp, #0x2c]
+40004d84: vmul.f64   d1, d1, d3
+40004d88: str        r6, [sp, #0x34]
+40004d8c: vmul.f64   d0, d0, d2
+40004d90: str        r6, [sp, #8]
+40004d94: str        r6, [sp, #0x14]
+40004d98: str        r6, [sp, #0xc]
+40004d9c: str        r6, [sp, #0x10]
+40004da0: str        r6, [sp, #0x18]
+40004da4: str        r6, [sp, #0x1c]
+40004da8: str        r6, [sp, #0x50]
+40004dac: str        r6, [sp, #0x54]
+40004db0: str        r6, [sp, #0x58]
+40004db4: vdiv.f64   d8, d0, d10
+40004db8: str        r6, [sp, #0x5c]
+40004dbc: str        r6, [sp, #0x60]
+40004dc0: str        r6, [sp, #0x64]
+40004dc4: ldr        r3, [r1, #4]
+40004dc8: ldr        lr, [r1]
+40004dcc: str        r6, [sp, #8]
+40004dd0: str        r6, [sp, #0xc]
+40004dd4: mov        r1, r3
+40004dd8: str        r6, [sp, #0x10]
+40004ddc: mov        r0, lr
+40004de0: str        r6, [sp, #0x14]
+40004de4: sub        r4, r3, r0
+40004de8: str        r6, [sp, #0x18]
+40004dec: mov        r2, r3
+40004df0: str        r6, [sp, #0x1c]
+40004df4: add        r4, r4, r4, lsr #31
+40004df8: ldr        r6, [pc, #-0x1a8]
+40004dfc: str        ip, [sp, #0x48]
+40004e00: add        r4, lr, r4, asr #1
+40004e04: mov        r5, r4
+40004e08: add        r8, r6, #0x3e0
+40004e0c: add        r7, r6, r0, lsl #5
+40004e10: add        sb, r8, r0, lsl #3
+40004e14: vldr       d3, [r7, #0x18]
+40004e18: vldr       d0, [sb]
+40004e1c: vdiv.f64   d9, d1, d10
+40004e20: vmov.f64   d10, #1.000000e+00
+40004e24: vdiv.f64   d1, d10, d0
+40004e28: vstr       d1, [sp, #0x18]
+40004e2c: vdiv.f64   d2, d3, d0
+40004e30: vstr       d2, [sp, #0x10]
+40004e34: vldr       d0, [r7, #0x10]
+40004e38: vldr       d3, [r7, #8]
+40004e3c: vsub.f64   d0, d8, d0
+40004e40: vsub.f64   d3, d9, d3
+40004e44: vmul.f64   d0, d1, d0
+40004e48: vmls.f64   d0, d3, d2
+40004e4c: vstr       d0, [sp, #8]
+40004e50: vcmpe.f64  d0, #0
+40004e54: vmrs       apsr_nzcv, fpscr
+40004e58: vldrhs     d14, [pc, #-0x1d0]
+40004e5c: bhs        #0x40004e98
+40004e60: ldr        r0, [sp, #0x100]
+40004e64: vldr       d0, [pc, #0x2fc]
+40004e68: vstr       d0, [r0]
+40004e6c: b          #0x40005148
+40004e70: ldr        r2, [pc, #0x2f8]
+40004e74: sub        r0, pc, #0x220
+40004e78: str        r0, [sp]
+40004e7c: mov        r3, #0x128
+40004e80: sub        r1, pc, #0x214
+40004e84: mov        r0, #4
+40004e88: bl         #0x4000ded4
+40004e8c: movw       r0, #0x401
+40004e90: str        r0, [sp, #0x68]
+40004e94: b          #0x40005148
+40004e98: ldr        r7, [pc, #0x2c0]
+40004e9c: ldr        r6, [pc, #-0x24c]
+40004ea0: add        r7, r7, r4, lsl #3
+40004ea4: add        r6, r6, r4, lsl #5
+40004ea8: vldr       d0, [r7]
+40004eac: vldr       d2, [r6, #0x18]
+40004eb0: vdiv.f64   d1, d10, d0
+40004eb4: vstr       d1, [sp, #0x18]
+40004eb8: vdiv.f64   d3, d2, d0
+40004ebc: vstr       d3, [sp, #0x10]
+40004ec0: vldr       d0, [r6, #0x10]
+40004ec4: vldr       d2, [r6, #8]
+40004ec8: vsub.f64   d0, d8, d0
+40004ecc: vsub.f64   d2, d9, d2
+40004ed0: vmul.f64   d0, d1, d0
+40004ed4: vmls.f64   d0, d2, d3
+40004ed8: vstr       d0, [sp, #8]
+40004edc: vcmpe.f64  d0, #0
+40004ee0: vmrs       apsr_nzcv, fpscr
+40004ee4: bhs        #0x40004f04
+40004ee8: mov        r5, r4
+40004eec: vstr       s0, [sp, #0x50]
+40004ef0: vstr       s1, [sp, #0x54]
+40004ef4: vstr       s6, [sp, #0x58]
+40004ef8: vstr       s7, [sp, #0x5c]
+40004efc: vstr       s2, [sp, #0x60]
+40004f00: vstr       s3, [sp, #0x64]
+40004f04: vcmpe.f64  d0, #0
+40004f08: vmrs       apsr_nzcv, fpscr
+40004f0c: ble        #0x40004f20
+40004f10: cmp        r4, r2
+40004f14: addne      r0, r4, #1
+40004f18: beq        #0x40004f7c
+40004f1c: b          #0x40004f40
+40004f20: vcmpe.f64  d0, #0
+40004f24: vmrs       apsr_nzcv, fpscr
+40004f28: bhi        #0x40004f40
+40004f2c: cmp        r4, lr
+40004f30: mov        r3, #1
+40004f34: str        r3, [sp, #0x48]
+40004f38: subne      r3, r4, #1
+40004f3c: beq        #0x40004f88
+40004f40: sub        r4, r3, r0
+40004f44: add        r4, r4, r4, lsr #31
+40004f48: add        r4, r0, r4, asr #1
+40004f4c: cmp        r4, r1
+40004f50: beq        #0x40004f7c
+40004f54: add        ip, ip, #1
+40004f58: vstr       s0, [sp, #0x20]
+40004f5c: vstr       s1, [sp, #0x24]
+40004f60: vstr       s6, [sp, #0x28]
+40004f64: vstr       s7, [sp, #0x2c]
+40004f68: vstr       s2, [sp, #0x30]
+40004f6c: cmp        ip, #6
+40004f70: mov        r1, r4
+40004f74: vstr       s3, [sp, #0x34]
+40004f78: blo        #0x40004e98
+40004f7c: ldr        r0, [sp, #0x48]
+40004f80: cmp        r0, #0
+40004f84: beq        #0x40005174
+40004f88: vldr       d0, [sp, #0x50]
+40004f8c: vcmpe.f64  d0, #0
+40004f90: vmrs       apsr_nzcv, fpscr
+40004f94: ble        #0x40004fe8
+40004f98: cmp        r5, r2
+40004f9c: bhs        #0x40004fe8
+40004fa0: add        r5, r5, #1
+40004fa4: ldr        r1, [pc, #0x1b4]
+40004fa8: ldr        r0, [pc, #-0x358]
+40004fac: add        r1, r1, r5, lsl #3
+40004fb0: add        r0, r0, r5, lsl #5
+40004fb4: vldr       d0, [r1]
+40004fb8: vldr       d3, [r0, #0x18]
+40004fbc: vdiv.f64   d1, d10, d0
+40004fc0: vstr       d1, [sp, #0x60]
+40004fc4: vdiv.f64   d2, d3, d0
+40004fc8: vstr       d2, [sp, #0x58]
+40004fcc: vldr       d0, [r0, #0x10]
+40004fd0: vldr       d3, [r0, #8]
+40004fd4: vsub.f64   d0, d8, d0
+40004fd8: vsub.f64   d3, d9, d3
+40004fdc: vmul.f64   d0, d1, d0
+40004fe0: vmls.f64   d0, d3, d2
+40004fe4: vstr       d0, [sp, #0x50]
+40004fe8: vcmpe.f64  d0, #0
+40004fec: add        r1, sp, #0x58
+40004ff0: sub        r0, r5, #1
+40004ff4: vmrs       apsr_nzcv, fpscr
+40004ff8: vneglo.f64 d0, d0
+40004ffc: vldrhs     d0, [pc, #-0x37c]
+40005000: vstr       d0, [sp, #0x50]
+40005004: ldm        r1, {r3, r4, r6, ip}
+40005008: add        r1, sp, #0x10
+4000500c: vstr       s0, [sp, #8]
+40005010: vstr       s1, [sp, #0xc]
+40005014: stm        r1, {r3, r4, r6, ip}
+40005018: ldr        r6, [pc, #-0x3c8]
+4000501c: add        r1, r6, #0x3e0
+40005020: add        r4, r6, r0, lsl #5
+40005024: add        r1, r1, r0, lsl #3
+40005028: vldr       d1, [r4, #0x18]
+4000502c: vldr       d0, [r1]
+40005030: vdiv.f64   d12, d10, d0
+40005034: vstr       d12, [sp, #0x30]
+40005038: vdiv.f64   d11, d1, d0
+4000503c: vstr       d11, [sp, #0x28]
+40005040: vldr       d0, [r4, #0x10]
+40005044: vldr       d1, [r4, #8]
+40005048: vsub.f64   d0, d8, d0
+4000504c: vsub.f64   d1, d9, d1
+40005050: vmul.f64   d0, d12, d0
+40005054: vmls.f64   d0, d1, d11
+40005058: vstr       d0, [sp, #0x20]
+4000505c: vldr       d15, [sp, #8]
+40005060: vadd.f64   d13, d0, d15
+40005064: vmov.f64   d0, d13
+40005068: bl         #0x40012fd0
+4000506c: cmp        r0, #1
+40005070: beq        #0x40005190
+40005074: cmp        r5, #1
+40005078: vldreq     d0, [pc, #-0x3f8]
+4000507c: beq        #0x40005084
+40005080: vdiv.f64   d0, d15, d13
+40005084: add        r0, r6, r5, lsl #5
+40005088: ldr        r1, [sp, #0x100]
+4000508c: vldr       d3, [r4]
+40005090: vldr       d2, [r0]
+40005094: vsub.f64   d1, d10, d0
+40005098: vmul.f64   d2, d2, d1
+4000509c: vmla.f64   d2, d3, d0
+400050a0: vdiv.f64   d3, d14, d2
+400050a4: vstr       d3, [r1]
+400050a8: vldr       d2, [sp, #0x18]
+400050ac: vldr       d3, [r0, #0x10]
+400050b0: vldr       d4, [r4, #8]
+400050b4: vmul.f64   d10, d2, d1
+400050b8: vldr       d2, [r0, #8]
+400050bc: vldr       d5, [r4, #0x10]
+400050c0: vmul.f64   d3, d3, d1
+400050c4: vmul.f64   d2, d2, d1
+400050c8: vmla.f64   d10, d12, d0
+400050cc: vmla.f64   d3, d5, d0
+400050d0: vmla.f64   d2, d4, d0
+400050d4: vstr       d10, [sp, #0x18]
+400050d8: vldr       d6, [sp, #0x10]
+400050dc: vmul.f64   d12, d6, d1
+400050e0: vsub.f64   d9, d9, d2
+400050e4: vmla.f64   d12, d11, d0
+400050e8: vmul.f64   d0, d10, d10
+400050ec: vsub.f64   d11, d8, d3
+400050f0: vstr       d12, [sp, #0x10]
+400050f4: vmla.f64   d0, d12, d12
+400050f8: vsqrt.f64  d1, d0
+400050fc: vcmp.f64   d1, d1
+40005100: vmrs       apsr_nzcv, fpscr
+40005104: vmoveq.f64 d0, d1
+40005108: blne       #0x400129e0
+4000510c: vmov.f64   d8, d0
+40005110: bl         #0x40012fd0
+40005114: cmp        r0, #1
+40005118: beq        #0x400051b8
+4000511c: vdiv.f64   d1, d10, d8
+40005120: ldr        r0, [pc, #-0x490]
+40005124: vstr       d1, [sp, #0x18]
+40005128: vmul.f64   d1, d1, d9
+4000512c: vdiv.f64   d0, d12, d8
+40005130: vstr       d0, [sp, #0x10]
+40005134: vmla.f64   d1, d11, d0
+40005138: vldr       d2, [r0, #8]
+4000513c: ldr        r0, [sp, #0x100]
+40005140: vmul.f64   d0, d1, d2
+40005144: vstr       d0, [r0, #8]
+40005148: ldr        r0, [sp, #0x68]
+4000514c: add        sp, sp, #0xbc
+40005150: vpop       {d8, d9, d10, d11, d12, d13, d14, d15}
+40005154: add        sp, sp, #8
+40005158: pop        {r4, r5, r6, r7, r8, sb, sl, fp, pc}
+
+FUNCTION ARM 0x400051e0 HITS 0x40005274->ca9_cm_Temperature_ToXYCoord,0x400053b8->ca9_cm_Temperature_ToXYCoord
+400051e0: push       {r4, r5, r6, lr}
+400051e4: mov        r5, r1
+400051e8: mov        r6, r0
+400051ec: mov        r4, #0
+400051f0: vpush      {d8, d9, d10, d11, d12, d13, d14, d15}
+400051f4: sub        sp, sp, #8
+400051f8: vldr       d0, [r0]
+400051fc: bl         #0x40012fd0
+40005200: cmp        r0, #1
+40005204: beq        #0x4000526c
+40005208: mov        r2, #0
+4000520c: vmov.f64   d8, #1.000000e+00
+40005210: ldr        r0, [pc, #-0x580]
+40005214: vldr       d4, [pc, #0x1c4]
+40005218: vldr       d3, [r6]
+4000521c: vldr       d1, [r6, #8]
+40005220: vldr       d0, [r0, #8]
+40005224: add        r0, r0, #0x10
+40005228: vdiv.f64   d2, d8, d0
+4000522c: vmul.f64   d14, d2, d1
+40005230: vdiv.f64   d0, d4, d3
+40005234: add        r1, r0, r2, lsl #5
+40005238: vldr       d1, [r1, #0x20]
+4000523c: vcmpe.f64  d1, d0
+40005240: vmrs       apsr_nzcv, fpscr
+40005244: bgt        #0x40005290
+40005248: cmp        r2, #0x1d
+4000524c: beq        #0x40005290
+40005250: add        r2, r2, #1
+40005254: cmp        r2, #0x1d
+40005258: bls        #0x40005234
+4000525c: add        sp, sp, #8
+40005260: mov        r0, r4
+40005264: vpop       {d8, d9, d10, d11, d12, d13, d14, d15}
+40005268: pop        {r4, r5, r6, pc}
+4000526c: ldr        r0, [pc, #0x164]
+40005270: movw       r3, #0x1f2
+40005274: ldr        r2, [pc, #0x16c]
+40005278: ldr        r1, [pc, #0x15c]
+4000527c: str        r0, [sp]
+40005280: mov        r0, #4
+40005284: bl         #0x4000ded4
+40005288: movw       r4, #0x401
+4000528c: b          #0x4000525c
+40005290: add        r2, r0, r2, lsl #5
+40005294: vldr       d2, [r2]
+40005298: vldr       d1, [r2, #0x20]
+4000529c: vldr       d12, [r2, #0x18]
+400052a0: vldr       d3, [r2, #0x28]
+400052a4: vsub.f64   d2, d1, d2
+400052a8: vsub.f64   d1, d1, d0
+400052ac: vldr       d0, [r2, #0x30]
+400052b0: vldr       d13, [r2, #0x38]
+400052b4: vdiv.f64   d10, d1, d2
+400052b8: vldr       d1, [r2, #0x10]
+400052bc: vldr       d2, [r2, #8]
+400052c0: vsub.f64   d11, d8, d10
+400052c4: vmul.f64   d0, d0, d11
+400052c8: vmul.f64   d15, d3, d11
+400052cc: vmla.f64   d0, d1, d10
+400052d0: vmov.f64   d1, d8
+400052d4: vmla.f64   d15, d2, d10
+400052d8: vmla.f64   d1, d12, d12
+400052dc: vstr       d0, [sp]
+400052e0: vmov.f64   d0, d1
+400052e4: vsqrt.f64  d9, d0
+400052e8: vcmp.f64   d9, d9
+400052ec: vmrs       apsr_nzcv, fpscr
+400052f0: beq        #0x400052fc
+400052f4: blx        #0x400129e8
+400052f8: vmov.f64   d9, d0
+400052fc: vmov.f64   d0, d8
+40005300: vmla.f64   d0, d13, d13
+40005304: vsqrt.f64  d1, d0
+40005308: vcmp.f64   d1, d1
+4000530c: vmrs       apsr_nzcv, fpscr
+40005310: beq        #0x4000531c
+40005314: blx        #0x400129e8
+40005318: vmov.f64   d1, d0
+4000531c: vmov.f64   d2, d8
+40005320: vdiv.f64   d4, d12, d9
+40005324: vdiv.f64   d0, d2, d9
+40005328: vmul.f64   d9, d0, d10
+4000532c: vdiv.f64   d2, d8, d1
+40005330: vmul.f64   d8, d4, d10
+40005334: vmla.f64   d9, d2, d11
+40005338: vmul.f64   d0, d9, d9
+4000533c: vdiv.f64   d3, d13, d1
+40005340: vmla.f64   d8, d3, d11
+40005344: vmla.f64   d0, d8, d8
+40005348: vsqrt.f64  d1, d0
+4000534c: vcmp.f64   d1, d1
+40005350: vmrs       apsr_nzcv, fpscr
+40005354: vmoveq.f64 d0, d1
+40005358: blne       #0x400129e0
+4000535c: vmov.f64   d3, #4.000000e+00
+40005360: vdiv.f64   d2, d9, d0
+40005364: vldr       d9, [sp]
+40005368: vmla.f64   d15, d2, d14
+4000536c: vdiv.f64   d1, d8, d0
+40005370: vmov.f64   d0, d15
+40005374: vmla.f64   d9, d1, d14
+40005378: vmov.f64   d1, #2.000000e+00
+4000537c: vmls.f64   d0, d9, d3
+40005380: vadd.f64   d8, d0, d1
+40005384: vmov.f64   d0, d8
+40005388: bl         #0x40012fd0
+4000538c: cmp        r0, #1
+40005390: beq        #0x400053b0
+40005394: vmov.f64   d0, #1.500000e+00
+40005398: vdiv.f64   d2, d9, d8
+4000539c: vstr       d2, [r5, #8]
+400053a0: vmul.f64   d0, d15, d0
+400053a4: vdiv.f64   d1, d0, d8
+400053a8: vstr       d1, [r5]
+400053ac: b          #0x4000525c
+400053b0: ldr        r0, [pc, #0x20]
+400053b4: movw       r3, #0x233
+400053b8: ldr        r2, [pc, #0x28]
+400053bc: ldr        r1, [pc, #0x18]
+400053c0: str        r0, [sp]
+400053c4: mov        r0, #4
+400053c8: bl         #0x4000ded4
+400053cc: movw       r4, #0x401
+400053d0: b          #0x4000525c
+400053d4: andeq      r0, r0, r0
+400053d8: andmi      r4, r0, ip, asr ip
+400053dc: andmi      r4, r0, r4, ror ip
+400053e0: andeq      r0, r0, r0
+400053e4: smlawbmi   lr, r0, r4, r8
+400053e8: andmi      r4, r1, fp, ror #4
+400053ec: push       {r0, r1, r4, r5, r6, r7, r8, sb, sl, fp, ip, lr}
+400053f0: mov        r4, r0
+400053f4: mov        sb, #0
+400053f8: vpush      {d8, d9, d10, d11, d12}
+400053fc: vldr       d0, [r0]
+40005400: bl         #0x40012fd0
+40005404: cmp        r0, #1
+40005408: beq        #0x4000546c
+4000540c: mov        r6, #0x1e
+40005410: vmov.f64   d9, #1.000000e+00
+40005414: ldr        r0, [pc, #-0x784]
+40005418: mov        r7, #0
+4000541c: vldr       d1, [r4]
+40005420: vldr       d3, [pc, #-0x48]
+40005424: vldr       d11, [pc, #0x1fc]
+40005428: vldr       d2, [r0, #8]
+4000542c: vdiv.f64   d8, d3, d1
+40005430: vldr       d1, [pc, #0x1f8]
+40005434: mov        r8, r7
+40005438: mov        sl, r6
+4000543c: vdiv.f64   d0, d9, d2
+40005440: vldr       d2, [r4, #8]
+40005444: mov        r4, #0xf
+40005448: mov        r5, r4
+4000544c: vmul.f64   d10, d0, d2
+40005450: vmov.i32   d0, #0
+40005454: vmov.f64   d2, d8
+40005458: bl         #0x40012cc8
+4000545c: cmp        r0, #0
+40005460: moveq      sb, #0x410
+40005464: beq        #0x400055fc
+40005468: b          #0x40005484
+4000546c: movw       r2, #0x251
+40005470: add        r1, pc, #0x1c0
+40005474: mov        r0, #4
+40005478: bl         #0x4000ded4
+4000547c: movw       sb, #0x401
+40005480: b          #0x400055fc
+40005484: ldr        r0, [pc, #-0x834]
+40005488: add        fp, r0, r4, lsl #5
+4000548c: vldr       d0, [fp]
+40005490: vsub.f64   d0, d8, d0
+40005494: bl         #0x40012b18
+40005498: vcmpe.f64  d0, d11
+4000549c: vmrs       apsr_nzcv, fpscr
+400054a0: bhs        #0x400054ac
+400054a4: mov        r5, r4
+400054a8: vmov.f64   d11, d0
+400054ac: vldr       d0, [fp]
+400054b0: vcmpe.f64  d0, d8
+400054b4: vmrs       apsr_nzcv, fpscr
+400054b8: subgt      r6, r4, #1
+400054bc: addle      r8, r4, #1
+400054c0: sub        r0, r6, r8
+400054c4: add        r0, r0, r0, lsr #31
+400054c8: add        r4, r8, r0, asr #1
+400054cc: cmp        r4, sl
+400054d0: beq        #0x400054e4
+400054d4: add        r7, r7, #1
+400054d8: cmp        r7, #6
+400054dc: mov        sl, r4
+400054e0: blo        #0x40005484
+400054e4: ldr        r0, [pc, #-0x894]
+400054e8: add        r1, r0, r5, lsl #5
+400054ec: vldr       d0, [r1]
+400054f0: vcmpe.f64  d0, d8
+400054f4: vmrs       apsr_nzcv, fpscr
+400054f8: ble        #0x40005508
+400054fc: cmp        r5, #0
+40005500: beq        #0x40005514
+40005504: b          #0x40005510
+40005508: cmp        r5, #0x1e
+4000550c: blo        #0x40005514
+40005510: sub        r5, r5, #1
+40005514: ldr        r2, [pc, #-0x3bc]
+40005518: add        r1, r0, r5, lsl #5
+4000551c: vldr       d0, [r1, #0x20]
+40005520: vldr       d1, [r1]
+40005524: add        r0, r2, r5, lsl #3
+40005528: vsub.f64   d5, d0, d8
+4000552c: vsub.f64   d4, d0, d1
+40005530: vldr       d2, [r0]
+40005534: vldr       d3, [r1, #0x18]
+40005538: vldr       d1, [r0, #8]
+4000553c: vdiv.f64   d6, d9, d2
+40005540: vldr       d16, [r1, #0x28]
+40005544: vldr       d7, [r1, #0x30]
+40005548: vdiv.f64   d0, d5, d4
+4000554c: vldr       d5, [r1, #0x38]
+40005550: vmul.f64   d12, d6, d0
+40005554: vldr       d6, [r1, #8]
+40005558: vdiv.f64   d4, d3, d2
+4000555c: vmul.f64   d11, d4, d0
+40005560: vdiv.f64   d3, d9, d1
+40005564: vdiv.f64   d2, d5, d1
+40005568: vsub.f64   d1, d9, d0
+4000556c: vldr       d5, [r1, #0x10]
+40005570: vmla.f64   d12, d3, d1
+40005574: vmul.f64   d9, d16, d1
+40005578: vmul.f64   d8, d7, d1
+4000557c: vmla.f64   d11, d2, d1
+40005580: vmul.f64   d1, d12, d12
+40005584: vmla.f64   d9, d6, d0
+40005588: vmla.f64   d8, d5, d0
+4000558c: vmla.f64   d1, d11, d11
+40005590: vsqrt.f64  d0, d1
+40005594: vcmp.f64   d0, d0
+40005598: vmrs       apsr_nzcv, fpscr
+4000559c: beq        #0x400055a8
+400055a0: vmov.f64   d0, d1
+400055a4: blx        #0x400129e8
+400055a8: vdiv.f64   d2, d12, d0
+400055ac: vmov.f64   d3, #4.000000e+00
+400055b0: vmla.f64   d9, d2, d10
+400055b4: vdiv.f64   d1, d11, d0
+400055b8: vmov.f64   d0, d9
+400055bc: vmla.f64   d8, d1, d10
+400055c0: vmov.f64   d1, #2.000000e+00
+400055c4: vmls.f64   d0, d8, d3
+400055c8: vadd.f64   d10, d0, d1
+400055cc: vmov.f64   d0, d10
+400055d0: bl         #0x40012fd0
+400055d4: cmp        r0, #1
+400055d8: beq        #0x4000560c
+400055dc: ldr        r0, [sp, #0x2c]
+400055e0: vmov.f64   d0, #1.500000e+00
+400055e4: vdiv.f64   d1, d8, d10
+400055e8: vstr       d1, [r0, #8]
+400055ec: ldr        r0, [sp, #0x2c]
+400055f0: vmul.f64   d0, d9, d0
+400055f4: vdiv.f64   d2, d0, d10
+400055f8: vstr       d2, [r0]
+400055fc: mov        r0, sb
+40005600: vpop       {d8, d9, d10, d11, d12}
+40005604: add        sp, sp, #8
+40005608: pop        {r4, r5, r6, r7, r8, sb, sl, fp, ip, pc}
+
+FUNCTION ARM 0x40005c5c HITS 0x40005cb8->ca9_cm_ColorSpec_MatrixInterpolate
+40005c5c: push       {r4, r5, r6, r7, lr}
+40005c60: mov        r7, r2
+40005c64: mov        r4, r1
+40005c68: mov        r6, r0
+40005c6c: mov        r5, #0
+40005c70: vpush      {d8, d9}
+40005c74: sub        sp, sp, #0x94
+40005c78: vldr       d0, [r1]
+40005c7c: bl         #0x40012fd0
+40005c80: cmp        r0, #1
+40005c84: beq        #0x40005cb8
+40005c88: vldr       d0, [r4, #8]
+40005c8c: bl         #0x40012fd0
+40005c90: cmp        r0, #1
+40005c94: beq        #0x40005cb8
+40005c98: vldr       d0, [r6]
+40005c9c: vldr       d2, [r4]
+40005ca0: vcmpe.f64  d0, d2
+40005ca4: vmrs       apsr_nzcv, fpscr
+40005ca8: bhi        #0x40005cdc
+40005cac: mov        r1, r7
+40005cb0: add        r0, r4, #0x10
+40005cb4: b          #0x40005cf4
+40005cb8: ldr        r2, [pc, #0xac]
+40005cbc: add        r0, pc, #0x94
+40005cc0: str        r0, [sp]
+40005cc4: mov        r3, #0x208
+40005cc8: add        r1, pc, #0xa0
+40005ccc: mov        r0, #4
+40005cd0: bl         #0x4000ded4
+40005cd4: movw       r5, #0x401
+40005cd8: b          #0x40005d48
+40005cdc: vldr       d1, [r4, #8]
+40005ce0: vcmpe.f64  d0, d1
+40005ce4: vmrs       apsr_nzcv, fpscr
+40005ce8: blt        #0x40005cfc
+40005cec: mov        r1, r7
+40005cf0: add        r0, r4, #0x58
+40005cf4: bl         #0x40012cf0
+40005cf8: b          #0x40005d48
+40005cfc: vmov.f64   d8, #1.000000e+00
+40005d00: mov        r1, sp
+40005d04: add        r0, r4, #0x10
+40005d08: vdiv.f64   d3, d8, d2
+40005d0c: vdiv.f64   d2, d8, d0
+40005d10: vdiv.f64   d0, d8, d1
+40005d14: vsub.f64   d1, d2, d0
+40005d18: vsub.f64   d0, d3, d0
+40005d1c: vdiv.f64   d9, d1, d0
+40005d20: vmov.f64   d0, d9
+40005d24: bl         #0x40004370
+40005d28: vsub.f64   d0, d8, d9
+40005d2c: add        r1, sp, #0x48
+40005d30: add        r0, r4, #0x58
+40005d34: bl         #0x40004370
+40005d38: mov        r2, r7
+40005d3c: add        r1, sp, #0x48
+40005d40: mov        r0, sp
+40005d44: bl         #0x40004754
+40005d48: add        sp, sp, #0x94
+40005d4c: mov        r0, r5
+40005d50: vpop       {d8, d9}
+40005d54: pop        {r4, r5, r6, r7, pc}
+
+FUNCTION ARM 0x40005d80 HITS 0x40005df4->ca9_cm_ColorSpec_MatrixInterpolate
+40005d80: push       {r4, r5, r6, r7, lr}
+40005d84: mov        r5, r2
+40005d88: mov        r2, r1
+40005d8c: mov        r4, r0
+40005d90: mov        r7, r3
+40005d94: mov        r1, r3
+40005d98: vpush      {d8, d9}
+40005d9c: sub        sp, sp, #0x94
+40005da0: mov        r0, r2
+40005da4: bl         #0x40004d00
+40005da8: cmp        r0, #0x400
+40005dac: bhs        #0x40005e88
+40005db0: mov        r6, #0
+40005db4: vldr       d0, [r4]
+40005db8: bl         #0x40012fd0
+40005dbc: cmp        r0, #1
+40005dc0: beq        #0x40005df4
+40005dc4: vldr       d0, [r4, #8]
+40005dc8: bl         #0x40012fd0
+40005dcc: cmp        r0, #1
+40005dd0: beq        #0x40005df4
+40005dd4: vldr       d0, [r7]
+40005dd8: vldr       d2, [r4]
+40005ddc: vcmpe.f64  d0, d2
+40005de0: vmrs       apsr_nzcv, fpscr
+40005de4: bhi        #0x40005e18
+40005de8: mov        r1, r5
+40005dec: add        r0, r4, #0x10
+40005df0: b          #0x40005e30
+40005df4: ldr        r2, [pc, #-0x90]
+40005df8: sub        r0, pc, #0xa8
+40005dfc: str        r0, [sp]
+40005e00: mov        r3, #0x208
+40005e04: sub        r1, pc, #0x9c
+40005e08: mov        r0, #4
+40005e0c: bl         #0x4000ded4
+40005e10: movw       r6, #0x401
+40005e14: b          #0x40005e84
+40005e18: vldr       d1, [r4, #8]
+40005e1c: vcmpe.f64  d0, d1
+40005e20: vmrs       apsr_nzcv, fpscr
+40005e24: blt        #0x40005e38
+40005e28: mov        r1, r5
+40005e2c: add        r0, r4, #0x58
+40005e30: bl         #0x40012cf0
+40005e34: b          #0x40005e84
+40005e38: vmov.f64   d8, #1.000000e+00
+40005e3c: mov        r1, sp
+40005e40: add        r0, r4, #0x10
+40005e44: vdiv.f64   d3, d8, d2
+40005e48: vdiv.f64   d2, d8, d0
+40005e4c: vdiv.f64   d0, d8, d1
+40005e50: vsub.f64   d1, d2, d0
+40005e54: vsub.f64   d0, d3, d0
+40005e58: vdiv.f64   d9, d1, d0
+40005e5c: vmov.f64   d0, d9
+40005e60: bl         #0x40004370
+40005e64: vsub.f64   d0, d8, d9
+40005e68: add        r1, sp, #0x48
+40005e6c: add        r0, r4, #0x58
+40005e70: bl         #0x40004370
+40005e74: mov        r2, r5
+40005e78: add        r1, sp, #0x48
+40005e7c: mov        r0, sp
+40005e80: bl         #0x40004754
+40005e84: mov        r0, r6
+40005e88: add        sp, sp, #0x94
+40005e8c: vpop       {d8, d9}
+40005e90: pop        {r4, r5, r6, r7, pc}
+
+FUNCTION ARM 0x40005e94 HITS 0x40006078->ca9_cm_ColorSpec_SetWhiteXY,0x40006094->ca9_cm_ColorSpec_SetWhiteXY
+40005e94: push       {r4, r5, r6, r7, r8, sb, lr}
+40005e98: mov        r7, #0
+40005e9c: mov        r6, r1
+40005ea0: mov        r4, r0
+40005ea4: mov        r5, r3
+40005ea8: mov        sb, r2
+40005eac: vpush      {d8, d9}
+40005eb0: sub        sp, sp, #0x9c
+40005eb4: mov        r1, #0x48
+40005eb8: vmov.f64   d8, #1.000000e+00
+40005ebc: ldr        r8, [sp, #0xc8]
+40005ec0: add        r0, sp, #0x38
+40005ec4: str        r7, [sp, #0x28]
+40005ec8: str        r7, [sp, #0x2c]
+40005ecc: str        r7, [sp, #0x30]
+40005ed0: str        r7, [sp, #0x34]
+40005ed4: str        r7, [sp, #0x10]
+40005ed8: str        r7, [sp, #0x14]
+40005edc: str        r7, [sp, #0x18]
+40005ee0: str        r7, [sp, #0x1c]
+40005ee4: str        r7, [sp, #0x20]
+40005ee8: str        r7, [sp, #0x24]
+40005eec: bl         #0x4000fc6c
+40005ef0: str        r7, [sp, #0x80]
+40005ef4: cmp        r8, #0
+40005ef8: str        r7, [sp, #0x84]
+40005efc: str        r7, [sp, #0x88]
+40005f00: str        r7, [sp, #0x8c]
+40005f04: str        r7, [sp, #0x90]
+40005f08: str        r7, [sp, #0x94]
+40005f0c: vldr       d0, [r6]
+40005f10: vstr       d0, [r4]
+40005f14: vldr       d0, [r6, #8]
+40005f18: vstr       d0, [r4, #8]
+40005f1c: beq        #0x4000601c
+40005f20: mov        r0, r5
+40005f24: bl         #0x40013024
+40005f28: vdiv.f64   d1, d8, d0
+40005f2c: vldr       d2, [r5]
+40005f30: vldr       d9, [pc, #0x190]
+40005f34: vmul.f64   d2, d2, d1
+40005f38: vstr       d2, [r4, #0x10]
+40005f3c: vldr       d0, [r5, #8]
+40005f40: vmul.f64   d0, d0, d1
+40005f44: vstr       d0, [r4, #0x18]
+40005f48: vldr       d0, [r5, #0x10]
+40005f4c: vmul.f64   d0, d0, d1
+40005f50: vmov.f64   d1, #1.000000e+00
+40005f54: vstr       d0, [r4, #0x20]
+40005f58: vmov.f64   d0, d9
+40005f5c: bl         #0x40012cc8
+40005f60: vmov.f64   d1, #1.000000e+00
+40005f64: vldr       d2, [r4, #0x18]
+40005f68: vmov.f64   d0, d9
+40005f6c: mov        r5, r0
+40005f70: bl         #0x40012cc8
+40005f74: vmov.f64   d1, #1.000000e+00
+40005f78: vldr       d2, [r4, #0x20]
+40005f7c: vmov.f64   d0, d9
+40005f80: and        r5, r5, r0
+40005f84: bl         #0x40012cc8
+40005f88: and        r0, r0, r5
+40005f8c: cmp        r0, #0
+40005f90: beq        #0x40006070
+40005f94: add        r0, sp, #0x28
+40005f98: bl         #0x400130f0
+40005f9c: add        r2, sp, #0x38
+40005fa0: mov        r1, r4
+40005fa4: add        r0, sp, #0x28
+40005fa8: bl         #0x400058b8
+40005fac: cmp        r0, #0x400
+40005fb0: mov        r5, r0
+40005fb4: bhs        #0x400060b4
+40005fb8: add        r2, r4, #0x70
+40005fbc: add        r1, sp, #0x38
+40005fc0: mov        r0, sb
+40005fc4: bl         #0x40004490
+40005fc8: cmp        r8, #0
+40005fcc: beq        #0x40006004
+40005fd0: add        r0, sp, #0x10
+40005fd4: bl         #0x40013118
+40005fd8: add        r2, sp, #0x80
+40005fdc: add        r1, sp, #0x10
+40005fe0: add        r0, r4, #0x70
+40005fe4: bl         #0x40004678
+40005fe8: add        r0, sp, #0x80
+40005fec: bl         #0x40013024
+40005ff0: vmov.f64   d1, d0
+40005ff4: add        r1, r4, #0x70
+40005ff8: mov        r0, r1
+40005ffc: vdiv.f64   d0, d8, d1
+40006000: bl         #0x40004370
+40006004: add        r1, r4, #0x28
+40006008: add        r0, r4, #0x70
+4000600c: bl         #0x400043e0
+40006010: cmp        r0, #1
+40006014: bne        #0x400060b4
+40006018: b          #0x40006094
+4000601c: add        r1, r4, #0x10
+40006020: mov        r0, r5
+40006024: bl         #0x40012ffc
+40006028: vldr       d0, [r4, #0x10]
+4000602c: vcmpe.f64  d0, #0
+40006030: vmrs       apsr_nzcv, fpscr
+40006034: vldr       d0, [r4, #0x18]
+40006038: movgt      r0, #1
+4000603c: movle      r0, #0
+40006040: vcmpe.f64  d0, #0
+40006044: vmrs       apsr_nzcv, fpscr
+40006048: vldr       d0, [r4, #0x20]
+4000604c: movgt      r1, #1
+40006050: movle      r1, #0
+40006054: vcmpe.f64  d0, #0
+40006058: and        r0, r0, r1
+4000605c: vmrs       apsr_nzcv, fpscr
+40006060: movgt      r1, #1
+40006064: movle      r1, #0
+40006068: and        r0, r0, r1
+4000606c: b          #0x40005f8c
+40006070: ldr        r0, [pc, #0x58]
+40006074: movw       r3, #0x136
+40006078: ldr        r2, [pc, #0x54]
+4000607c: sub        r1, pc, #0x314
+40006080: str        r0, [sp]
+40006084: mov        r0, #4
+40006088: bl         #0x4000ded4
+4000608c: mov        r5, #0x410
+40006090: b          #0x400060b4
+40006094: ldr        r2, [pc, #0x38]
+40006098: add        r0, pc, #0x38
+4000609c: str        r0, [sp]
+400060a0: mov        r3, #0x160
+400060a4: sub        r1, pc, #0x33c
+400060a8: mov        r0, #4
+400060ac: bl         #0x4000ded4
+400060b0: movw       r5, #0x402
+400060b4: add        sp, sp, #0x9c
+400060b8: mov        r0, r5
+400060bc: vpop       {d8, d9}
+400060c0: pop        {r4, r5, r6, r7, r8, sb, pc}
+
+FUNCTION ARM 0x400060f0 HITS 0x4000621c->ca9_cm_ColorSpec_NeutralToXY
+400060f0: push       {r0, r1, r2, r3, r4, r5, r6, r7, r8, sb, sl, fp, lr}
+400060f4: mov        r5, #0
+400060f8: mov        fp, r1
+400060fc: mov        sl, r3
+40006100: mov        r8, r2
+40006104: mov        r6, r5
+40006108: vpush      {d8, d9, d10}
+4000610c: sub        sp, sp, #0x94
+40006110: mov        r1, #0x48
+40006114: add        r0, sp, #0x30
+40006118: ldr        sb, [sp, #0xe0]
+4000611c: str        r5, [sp, #0x24]
+40006120: str        r5, [sp, #0x28]
+40006124: str        r5, [sp, #0x2c]
+40006128: str        r5, [sp, #0x20]
+4000612c: str        r5, [sp, #0x10]
+40006130: str        r5, [sp, #0x14]
+40006134: str        r5, [sp, #0x18]
+40006138: str        r5, [sp, #0x1c]
+4000613c: bl         #0x4000fc6c
+40006140: add        r7, sp, #0x20
+40006144: mov        r0, r7
+40006148: bl         #0x400130c8
+4000614c: vmov.f64   d8, #5.000000e-01
+40006150: vldr       d9, [pc, #0x170]
+40006154: str        r5, [sp, #0x84]
+40006158: mov        r3, sl
+4000615c: ldr        r0, [sp, #0xac]
+40006160: mov        r2, sb
+40006164: str        r5, [sp, #0x78]
+40006168: add        r1, sp, #0x20
+4000616c: str        r5, [sp, #0x7c]
+40006170: str        r5, [sp, #0x80]
+40006174: str        r5, [sp, #0x88]
+40006178: str        r5, [sp, #0x8c]
+4000617c: bl         #0x40005d80
+40006180: cmp        r0, #0x400
+40006184: mov        r4, r0
+40006188: bhs        #0x400062a4
+4000618c: add        r1, sp, #0x30
+40006190: mov        r0, sb
+40006194: bl         #0x400043e0
+40006198: cmp        r0, #1
+4000619c: beq        #0x4000621c
+400061a0: add        r2, sp, #0x78
+400061a4: mov        r1, fp
+400061a8: add        r0, sp, #0x30
+400061ac: bl         #0x40004678
+400061b0: add        r1, sp, #0x10
+400061b4: add        r0, sp, #0x78
+400061b8: bl         #0x4000492c
+400061bc: cmp        r0, #0x400
+400061c0: mov        r4, r0
+400061c4: bhs        #0x400062a4
+400061c8: vldr       d0, [sp, #0x10]
+400061cc: vldr       d1, [sp, #0x20]
+400061d0: vsub.f64   d0, d0, d1
+400061d4: bl         #0x40012b18
+400061d8: vmov.f64   d10, d0
+400061dc: vldr       d0, [sp, #0x18]
+400061e0: vldr       d1, [sp, #0x28]
+400061e4: vsub.f64   d0, d0, d1
+400061e8: bl         #0x40012b18
+400061ec: vadd.f64   d0, d10, d0
+400061f0: vcmpe.f64  d9, d0
+400061f4: vmrs       apsr_nzcv, fpscr
+400061f8: ble        #0x40006240
+400061fc: ldr        r0, [sp, #0xac]
+40006200: add        r7, sp, #0x10
+40006204: mov        r3, sl
+40006208: mov        r2, sb
+4000620c: mov        r1, r7
+40006210: bl         #0x40005d80
+40006214: mov        r4, r0
+40006218: b          #0x400062a4
+4000621c: ldr        r2, [pc, #0xac]
+40006220: sub        r0, pc, #0x150
+40006224: ldr        r1, [pc, #0xa8]
+40006228: movw       r3, #0x192
+4000622c: str        r0, [sp]
+40006230: mov        r0, #4
+40006234: bl         #0x4000ded4
+40006238: movw       r4, #0x402
+4000623c: b          #0x400062a4
+40006240: cmp        r6, #0xe
+40006244: bne        #0x40006288
+40006248: mov        r3, sl
+4000624c: vldr       d0, [sp, #0x20]
+40006250: vldr       d1, [sp, #0x10]
+40006254: mov        r2, sb
+40006258: add        r1, sp, #0x10
+4000625c: vadd.f64   d0, d0, d1
+40006260: vmul.f64   d0, d0, d8
+40006264: vstr       d0, [sp, #0x10]
+40006268: vldr       d0, [sp, #0x28]
+4000626c: vldr       d1, [sp, #0x18]
+40006270: vadd.f64   d0, d0, d1
+40006274: vmul.f64   d0, d0, d8
+40006278: vstr       d0, [sp, #0x18]
+4000627c: ldr        r0, [sp, #0xac]
+40006280: bl         #0x40005d80
+40006284: mov        r4, r0
+40006288: add        r6, r6, #1
+4000628c: vldr       d0, [sp, #0x10]
+40006290: cmp        r6, #0xf
+40006294: vstr       d0, [sp, #0x20]
+40006298: vldr       d0, [sp, #0x18]
+4000629c: vstr       d0, [sp, #0x28]
+400062a0: blo        #0x40006154
+400062a4: mov        r0, r4
+400062a8: vldr       d0, [r7]
+400062ac: vstr       d0, [r8]
+400062b0: vldr       d0, [r7, #8]
+400062b4: vstr       d0, [r8, #8]
+400062b8: add        sp, sp, #0x94
+400062bc: vpop       {d8, d9, d10}
+400062c0: add        sp, sp, #0x10
+400062c4: pop        {r4, r5, r6, r7, r8, sb, sl, fp, pc}
+
+FUNCTION ARM 0x4000df6c HITS 0x4000df78->CA9: ca9_shared_memory_test: set ca9_test_structure variable_1 to %i,0x4000dfb4->CA9: ca9_shared_memory_test: set ca9_test_structure variable_2 to %i,0x4000dfc4->CA9: ca9_shared_memory_test: set ca9_test_structure variable_3 to %i,0x4000dfd4->CA9: ca9_shared_memory_test: set ca9_test_structure variable_4 to %i
+4000df6c: push       {r4, r5, r6, lr}
+4000df70: mov        r5, #0
+4000df74: ldr        r4, [r0, #8]
+4000df78: ldr        r1, [pc, #0x78]
+4000df7c: ldr        r0, [r4, #4]
+4000df80: add        r2, r0, #1
+4000df84: str        r2, [r4, #4]
+4000df88: ldr        r0, [r4, #8]
+4000df8c: add        r0, r0, #1
+4000df90: str        r0, [r4, #8]
+4000df94: ldr        r0, [r4, #0xc]
+4000df98: add        r0, r0, #1
+4000df9c: str        r0, [r4, #0xc]
+4000dfa0: ldr        r0, [r4, #0x10]
+4000dfa4: add        r0, r0, #1
+4000dfa8: str        r0, [r4, #0x10]
+4000dfac: mov        r0, #4
+4000dfb0: bl         #0x4000ded4
+4000dfb4: ldr        r1, [pc, #0x40]
+4000dfb8: mov        r0, #4
+4000dfbc: ldr        r2, [r4, #8]
+4000dfc0: bl         #0x4000ded4
+4000dfc4: ldr        r1, [pc, #0x34]
+4000dfc8: mov        r0, #4
+4000dfcc: ldr        r2, [r4, #0xc]
+4000dfd0: bl         #0x4000ded4
+4000dfd4: ldr        r1, [pc, #0x28]
+4000dfd8: mov        r0, #4
+4000dfdc: ldr        r2, [r4, #0x10]
+4000dfe0: bl         #0x4000ded4
+4000dfe4: mvn        r0, #0xff000000
+4000dfe8: add        r5, r5, #1
+4000dfec: cmp        r5, r0
+4000dff0: blo        #0x4000dfe8
+4000dff4: pop        {r4, r5, r6, pc}
+
+=== MANAGER FUNCTION MMIO / CMP SURFACE ===
+
+=== CA9 RAW OCCURRENCES OF LIKELY IPCU PHYSICAL/ALIASES ===
+0xfff50100 NONE
+0xfff50000 0x4000c070
+0xf50100 NONE
+0x50100 NONE
+
+=== DECISION GATE ===
+Use corrected ADR xrefs to recover ca9_control_Manager and CM functions. Then map mailbox payload handling to the StartColorManagement tuple 4/5/4/3 and nine-word payload; do not infer mode effects from the ARM926 sender alone.
