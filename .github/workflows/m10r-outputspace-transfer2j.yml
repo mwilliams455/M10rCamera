@@ -1,0 +1,114 @@
+name: M10-R output-space transfer 2J
+on:
+  push:
+    branches: [m10r-outputspace-transfer1a]
+    paths: ['.github/workflows/m10r-outputspace-transfer2j.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace CM descriptor into B2Y CC banks
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int bb=r.get();if(!bb)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER2J.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import *
+          ib=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); B=0x42000000; P=4
+          tm=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); tm.detail=True
+          def off(a): return P+a-B
+          def dis(a,z): return list(tm.disasm(ib[off(a):off(z)],a))
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp; o=off(la)
+                if 0<=o<=len(ib)-4:return la,struct.unpack_from('<I',ib,o)[0]
+            except:pass
+          def adr(i):
+            try:
+              if i.mnemonic.startswith('adr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_IMM:return i.operands[1].imm
+            except:pass
+          def call(i):
+            try:
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm
+            except:pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'; x=lit(i)
+            if x:s+=f' ; LIT {x[0]:#x}->{x[1]:#x}'
+            a=adr(i)
+            if a is not None:s+=f' ; ADR={a:#x}'
+            c=call(i)
+            if c is not None:s+=f' ; CALL={c:#x}'
+            return s
+          print('M10-R OUTPUTSPACE TRANSFER2J')
+          print('\n=== B2Y ASSET STRINGS ===')
+          names=[b'B2Y_CC0_CA9_CM.bin',b'B2Y_CC1_CA9_CM.bin',b'B2Y_TF_CA9_CM.bin',b'B2Y.bin']
+          string_addrs={}
+          for n in names:
+            pos=[]; k=0
+            while True:
+              q=ib.find(n,k)
+              if q<0:break
+              a=B+(q-P); pos.append(a);k=q+1
+            string_addrs[n.decode()]=pos
+            print(n.decode(),*[hex(x) for x in pos] if pos else ['NONE'])
+          print('\n=== THUMB REFS TO ASSET STRINGS ===')
+          targets={x for v in string_addrs.values() for x in v}
+          refs=[]
+          for i in dis(B,B+len(ib)-P):
+            x=lit(i); a=adr(i)
+            if (x and x[1] in targets) or (a in targets):
+              refs.append(i); print(fmt(i))
+          print('\n=== WINDOWS AROUND ASSET STRING REFS ===')
+          for r in refs:
+            print('\n-- REF',hex(r.address),'--')
+            for i in dis(max(B,r.address-0x90),min(B+len(ib)-P,r.address+0x150)):print(fmt(i))
+          print('\n=== KNOWN CC0 / TF LOADER WINDOWS ===')
+          for a in (0x420a4628,0x420a4884):
+            print('\n--',hex(a),'--')
+            for i in dis(a,a+0x240):print(fmt(i))
+          print('\n=== ColorManagementFinished CORE 0x420A3D20..0x420A4560 ===')
+          ins=dis(0x420a3d20,0x420a4560)
+          for i in ins: print(fmt(i))
+          print('\n=== CALLBACK SHARED-BASE REFERENCES / MODE / CC-SIZED COPIES ===')
+          for i in ins:
+            x=lit(i); c=call(i)
+            if (x and x[1]==0x43705760) or '#0x20' in i.op_str or '#0x28' in i.op_str or '#0x50' in i.op_str or '#0x54' in i.op_str or '#0x74' in i.op_str or '#0x7c' in i.op_str or '#0x80' in i.op_str or '#0xb0' in i.op_str:
+              print(fmt(i))
+          print('\n=== CALLBACK CALL TARGET WINDOWS ===')
+          tg=[]
+          for i in ins:
+            c=call(i)
+            if c and B<=c<B+len(ib)-P and c not in tg:tg.append(c)
+          for c in tg:
+            if 0x420a0000<=c<0x42100000:
+              print('\n--',hex(c),'--')
+              for i in dis(c,min(B+len(ib)-P,c+0x180)):print(fmt(i))
+          print('\n=== DECISION GATE ===')
+          print('Require an explicit dataflow or asset-loader ownership link before assigning the CA9 output-space descriptor to B2Y CC0 or CC1. Asset-name proximity alone is insufficient.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER2J.txt
+          git commit -m 'research: record output-space descriptor to B2Y CC bank trace 2J' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
