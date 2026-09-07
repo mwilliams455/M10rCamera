@@ -1,0 +1,277 @@
+M10-R OUTPUTSPACE TRANSFER3P
+STRING 0x420d34b7 ' IMG: -----ERROR------drv_img_b2y_set_operation_mode'
+STRING 0x420d42a7 ' ------ERROR------    drv_img_b2y_set_tone_control1'
+STRING 0x420d4404 'IMG: ----------ERROR----------- drv_img_b2y_set_wbgain1'
+STRING 0x420d443c 'IMG: ----------ERROR----------- drv_img_b2y_set_wbgain2'
+STRING 0x428336b7 'f------ERROR------  drv_img_b2y_set_interpolation_gamma_control() '
+
+=== POINTER WORDS INTO TARGET STRINGS ===
+PTRWORD 0x420d2634 -> 0x428336b8 'f------ERROR------  drv_img_b2y_set_interpolation_gamma_control() '
+
+=== TRUE CODE REFS TO TARGET STRINGS ===
+ADRREF 420d34a8: adr        r1, #0xc ; ADR=0x420d34b8 ' IMG: -----ERROR------drv_img_b2y_set_operation_mode'
+ADRREF 420d42a4: adr        r0, #0 ; ADR=0x420d42a8 ' ------ERROR------    drv_img_b2y_set_tone_control1'
+ADRREF 420d4394: adr        r1, #0x6c ; ADR=0x420d4404 'IMG: ----------ERROR----------- drv_img_b2y_set_wbgain1'
+ADRREF 420d43ac: adr        r1, #0x8c ; ADR=0x420d443c 'IMG: ----------ERROR----------- drv_img_b2y_set_wbgain2'
+LITREF 420d25fc: ldr        r1, [pc, #0x34] ; LIT 0x420d2634->0x428336b8 'f------ERROR------  drv_img_b2y_set_interpolation_gamma_control() '
+DIRECTPTR 420d25fc: ldr        r1, [pc, #0x34] ; LIT 0x420d2634->0x428336b8 'f------ERROR------  drv_img_b2y_set_interpolation_gamma_control() '
+
+=== OWNER FUNCTIONS OF STRING REFS ===
+
+OWNER 0x420d3434 REF 0x420d34a8 NAME ' IMG: -----ERROR------drv_img_b2y_set_operation_mode'
+420d3434: push       {r4, lr}
+420d3436: movs       r4, r0
+420d3438: ldrb       r0, [r4, #1]
+420d343a: cmp        r0, #0
+420d343c: bne        #0x420d345e
+420d343e: ldrb       r0, [r4]
+420d3440: cmp        r0, #0
+420d3442: bne        #0x420d345e
+420d3444: ldrb       r0, [r4, #2]
+420d3446: cmp        r0, #0
+420d3448: bne        #0x420d345e
+420d344a: ldrb       r0, [r4, #3]
+420d344c: cmp        r0, #0
+420d344e: bne        #0x420d345e
+420d3450: ldr        r0, [pc, #0x60] ; LIT 0x420d34b4->0x20022000
+420d3452: ldr        r0, [r0, #0x58]
+420d3454: lsrs       r0, r0, #4
+420d3456: lsls       r0, r0, #4
+420d3458: ldr        r1, [pc, #0x58] ; LIT 0x420d34b4->0x20022000
+420d345a: str        r0, [r1, #0x58]
+420d345c: b          #0x420d34b0
+420d345e: ldrb       r0, [r4, #1]
+420d3460: cmp        r0, #1
+420d3462: bne        #0x420d3486
+420d3464: ldrb       r0, [r4]
+420d3466: cmp        r0, #1
+420d3468: bne        #0x420d3486
+420d346a: ldrb       r0, [r4, #2]
+420d346c: cmp        r0, #0
+420d346e: bne        #0x420d3486
+420d3470: ldrb       r0, [r4, #3]
+420d3472: cmp        r0, #0
+420d3474: bne        #0x420d3486
+420d3476: ldr        r0, [pc, #0x3c] ; LIT 0x420d34b4->0x20022000
+420d3478: ldr        r0, [r0, #0x58]
+420d347a: lsrs       r0, r0, #4
+420d347c: lsls       r0, r0, #4
+420d347e: adds       r0, r0, #3
+420d3480: ldr        r1, [pc, #0x30] ; LIT 0x420d34b4->0x20022000
+420d3482: str        r0, [r1, #0x58]
+420d3484: b          #0x420d34b0
+420d3486: ldrb       r0, [r4, #1]
+420d3488: cmp        r0, #1
+420d348a: bne        #0x420d34a8
+420d348c: ldrb       r0, [r4]
+420d348e: cmp        r0, #0
+420d3490: bne        #0x420d34a8
+420d3492: ldrb       r0, [r4, #2]
+420d3494: cmp        r0, #0
+420d3496: bne        #0x420d34a8
+420d3498: ldr        r0, [pc, #0x18] ; LIT 0x420d34b4->0x20022000
+420d349a: ldr        r0, [r0, #0x58]
+420d349c: lsrs       r0, r0, #4
+420d349e: lsls       r0, r0, #4
+420d34a0: adds       r0, r0, #2
+420d34a2: ldr        r1, [pc, #0x10] ; LIT 0x420d34b4->0x20022000
+420d34a4: str        r0, [r1, #0x58]
+420d34a6: b          #0x420d34b0
+420d34a8: adr        r1, #0xc ; ADR=0x420d34b8
+420d34aa: movs       r0, #4
+420d34ac: bl         #0x42140150 ; CALL=0x42140150
+420d34b0: pop        {r4, pc}
+
+OWNER 0x420d4380 REF 0x420d4394 NAME 'IMG: ----------ERROR----------- drv_img_b2y_set_wbgain1'
+420d4380: push       {r4, r5, r6, lr}
+420d4382: movs       r5, r0
+420d4384: movs       r4, r1
+420d4386: movs       r6, r2
+420d4388: cmp        r5, #0
+420d438a: bne        #0x420d439c
+420d438c: cmp        r4, #0
+420d438e: bne        #0x420d439c
+420d4390: cmp        r6, #0
+420d4392: bne        #0x420d439c
+420d4394: adr        r1, #0x6c ; ADR=0x420d4404
+420d4396: movs       r0, #4
+420d4398: bl         #0x42140150 ; CALL=0x42140150
+420d439c: movs       r0, #1
+420d439e: lsls       r0, r0, #0xb
+420d43a0: cmp        r5, r0
+420d43a2: bge        #0x420d43ac
+420d43a4: cmp        r4, r0
+420d43a6: bge        #0x420d43ac
+420d43a8: cmp        r6, r0
+420d43aa: blt        #0x420d43b4
+420d43ac: adr        r1, #0x8c ; ADR=0x420d443c
+420d43ae: movs       r0, #4
+420d43b0: bl         #0x42140150 ; CALL=0x42140150
+420d43b4: ldr        r0, [pc, #0xbc] ; LIT 0x420d4474->0x20020080
+420d43b6: ldr        r0, [r0, #0x10]
+420d43b8: ldr        r1, [pc, #0xbc] ; LIT 0x420d4478->0xf800ffff
+420d43ba: ands       r0, r1
+420d43bc: lsls       r1, r4, #0x10
+420d43be: ldr        r2, [pc, #0xb8] ; LIT 0x420d4478->0xf800ffff
+420d43c0: mvns       r2, r2
+420d43c2: ands       r1, r2
+420d43c4: orrs       r0, r1
+420d43c6: ldr        r1, [pc, #0xac] ; LIT 0x420d4474->0x20020080
+420d43c8: str        r0, [r1, #0x10]
+420d43ca: movs       r0, r1
+420d43cc: ldr        r0, [r0, #0x10]
+420d43ce: lsrs       r0, r0, #0xb
+420d43d0: lsls       r0, r0, #0xb
+420d43d2: lsls       r1, r4, #0x15
+420d43d4: lsrs       r1, r1, #0x15
+420d43d6: orrs       r0, r1
+420d43d8: ldr        r1, [pc, #0x98] ; LIT 0x420d4474->0x20020080
+420d43da: str        r0, [r1, #0x10]
+420d43dc: movs       r0, r1
+420d43de: ldr        r0, [r0, #0xc]
+420d43e0: lsrs       r0, r0, #0xb
+420d43e2: lsls       r0, r0, #0xb
+420d43e4: lsls       r1, r5, #0x15
+420d43e6: lsrs       r1, r1, #0x15
+420d43e8: orrs       r0, r1
+420d43ea: ldr        r1, [pc, #0x88] ; LIT 0x420d4474->0x20020080
+420d43ec: str        r0, [r1, #0xc]
+420d43ee: movs       r0, r1
+420d43f0: ldr        r0, [r0, #0xc]
+420d43f2: mvns       r1, r2
+420d43f4: ands       r0, r1
+420d43f6: lsls       r1, r6, #0x10
+420d43f8: ands       r1, r2
+420d43fa: orrs       r0, r1
+420d43fc: ldr        r1, [pc, #0x74] ; LIT 0x420d4474->0x20020080
+420d43fe: str        r0, [r1, #0xc]
+420d4400: pop        {r4, r5, r6, pc}
+
+OWNER 0x420d25a4 REF 0x420d25fc NAME 'f------ERROR------  drv_img_b2y_set_interpolation_gamma_control() '
+420d25a4: push       {r4, r5, r6, lr}
+420d25a6: movs       r4, r0
+420d25a8: movs       r5, r1
+420d25aa: cmp        r5, #0
+420d25ac: bne        #0x420d2608
+420d25ae: ldr        r0, [pc, #0x78] ; LIT 0x420d2628->0x20020000
+420d25b0: ldr        r0, [r0, #4]
+420d25b2: lsls       r0, r0, #0x1a
+420d25b4: lsrs       r0, r0, #0x1f
+420d25b6: cmp        r0, #0
+420d25b8: bne        #0x420d2608
+420d25ba: ldr        r0, [pc, #0x70] ; LIT 0x420d262c->0x20020800
+420d25bc: ldr        r0, [r0]
+420d25be: movs       r1, #1
+420d25c0: lsls       r1, r1, #0x10
+420d25c2: bics       r0, r1
+420d25c4: ldrh       r1, [r4]
+420d25c6: lsls       r1, r1, #0x10
+420d25c8: movs       r2, #1
+420d25ca: lsls       r2, r2, #0x10
+420d25cc: ands       r1, r2
+420d25ce: orrs       r0, r1
+420d25d0: ldr        r1, [pc, #0x58] ; LIT 0x420d262c->0x20020800
+420d25d2: str        r0, [r1]
+420d25d4: movs       r0, r1
+420d25d6: ldr        r0, [r0]
+420d25d8: lsls       r1, r2, #1
+420d25da: bics       r0, r1
+420d25dc: ldrh       r1, [r4, #4]
+420d25de: lsls       r1, r1, #0x11
+420d25e0: lsls       r2, r2, #1
+420d25e2: ands       r1, r2
+420d25e4: orrs       r0, r1
+420d25e6: ldr        r1, [pc, #0x44] ; LIT 0x420d262c->0x20020800
+420d25e8: str        r0, [r1]
+420d25ea: ldr        r0, [r4, #8]
+420d25ec: cmp        r0, #0
+420d25ee: beq        #0x420d2604
+420d25f0: ldr        r0, [r4, #0xc]
+420d25f2: lsls       r2, r0, #2
+420d25f4: ldr        r0, [pc, #0x38] ; LIT 0x420d2630->0x20a00000
+420d25f6: ldr        r1, [r4, #8]
+420d25f8: blx        #0x4204f2ec ; CALL=0x4204f2ec
+420d25fc: ldr        r1, [pc, #0x34] ; LIT 0x420d2634->0x428336b8
+420d25fe: movs       r0, #4
+420d2600: bl         #0x42140150 ; CALL=0x42140150
+420d2604: movs       r0, #0
+420d2606: pop        {r4, r5, r6, pc}
+
+=== CALLERS OF OWNER FUNCTIONS (SLIDING) ===
+
+OWNER 0x420d3434
+42152466: bl         #0x420d3434 ; CALL=0x420d3434
+
+OWNER 0x420d4380
+42154fce: bl         #0x420d4380 ; CALL=0x420d4380
+
+OWNER 0x420d25a4
+4215445c: bl         #0x420d25a4 ; CALL=0x420d25a4
+
+=== TRUE LOADS OF 0x20022000 ===
+420cf528: ldr        r0, [pc, #0x2c] ; LIT 0x420cf558->0x20022000
+420cf532: ldr        r1, [pc, #0x24] ; LIT 0x420cf558->0x20022000
+420cf53e: ldr        r1, [pc, #0x18] ; LIT 0x420cf558->0x20022000
+420cf55c: ldr        r1, [pc, #0xbc] ; LIT 0x420cf61c->0x20022000
+420cf566: ldr        r2, [pc, #0xb4] ; LIT 0x420cf61c->0x20022000
+420cf86a: ldr        r1, [pc, #4] ; LIT 0x420cf870->0x20022000
+420cf876: ldr        r1, [pc, #0x40] ; LIT 0x420cf8b8->0x20022000
+420cf884: ldr        r1, [pc, #0x30] ; LIT 0x420cf8b8->0x20022000
+420cf892: ldr        r1, [pc, #0x24] ; LIT 0x420cf8b8->0x20022000
+420cf8a0: ldr        r1, [pc, #0x14] ; LIT 0x420cf8b8->0x20022000
+420cf8b0: ldr        r1, [pc, #4] ; LIT 0x420cf8b8->0x20022000
+420cf8be: ldr        r0, [pc, #0x64] ; LIT 0x420cf924->0x20022000
+420cf8c8: ldr        r1, [pc, #0x58] ; LIT 0x420cf924->0x20022000
+420cf8d4: ldr        r1, [pc, #0x4c] ; LIT 0x420cf924->0x20022000
+420cf8e0: ldr        r1, [pc, #0x40] ; LIT 0x420cf924->0x20022000
+420cf8ee: ldr        r1, [pc, #0x34] ; LIT 0x420cf924->0x20022000
+420cf8fc: ldr        r1, [pc, #0x24] ; LIT 0x420cf924->0x20022000
+420cf90c: ldr        r1, [pc, #0x14] ; LIT 0x420cf924->0x20022000
+420cf91c: ldr        r0, [pc, #4] ; LIT 0x420cf924->0x20022000
+420cf92a: ldr        r0, [pc, #0x1d4] ; LIT 0x420cfb00->0x20022000
+420cf930: ldr        r0, [pc, #0x1cc] ; LIT 0x420cfb00->0x20022000
+420cf946: ldr        r0, [pc, #0x1b8] ; LIT 0x420cfb00->0x20022000
+420cf950: ldr        r1, [pc, #0x1ac] ; LIT 0x420cfb00->0x20022000
+420cf95c: ldr        r0, [pc, #0x1a0] ; LIT 0x420cfb00->0x20022000
+420cf972: ldr        r0, [pc, #0x18c] ; LIT 0x420cfb00->0x20022000
+420cf97c: ldr        r1, [pc, #0x180] ; LIT 0x420cfb00->0x20022000
+420cf980: ldr        r0, [pc, #0x17c] ; LIT 0x420cfb00->0x20022000
+420cf996: ldr        r0, [pc, #0x168] ; LIT 0x420cfb00->0x20022000
+420cf9a0: ldr        r1, [pc, #0x15c] ; LIT 0x420cfb00->0x20022000
+420cf9a4: ldr        r0, [pc, #0x158] ; LIT 0x420cfb00->0x20022000
+420cf9ba: ldr        r0, [pc, #0x144] ; LIT 0x420cfb00->0x20022000
+420cf9c4: ldr        r1, [pc, #0x138] ; LIT 0x420cfb00->0x20022000
+420cf9d6: ldr        r0, [pc, #0x128] ; LIT 0x420cfb00->0x20022000
+420cf9ec: ldr        r0, [pc, #0x110] ; LIT 0x420cfb00->0x20022000
+420cf9f8: ldr        r1, [pc, #0x104] ; LIT 0x420cfb00->0x20022000
+420cf9fc: ldr        r0, [pc, #0x100] ; LIT 0x420cfb00->0x20022000
+420cfa12: ldr        r0, [pc, #0xec] ; LIT 0x420cfb00->0x20022000
+420cfa1e: ldr        r1, [pc, #0xe0] ; LIT 0x420cfb00->0x20022000
+420cfa22: ldr        r0, [pc, #0xdc] ; LIT 0x420cfb00->0x20022000
+420cfa38: ldr        r0, [pc, #0xc4] ; LIT 0x420cfb00->0x20022000
+420cfa44: ldr        r1, [pc, #0xb8] ; LIT 0x420cfb00->0x20022000
+420cfa48: ldr        r0, [pc, #0xb4] ; LIT 0x420cfb00->0x20022000
+420cfa5e: ldr        r0, [pc, #0xa0] ; LIT 0x420cfb00->0x20022000
+420cfa68: ldr        r1, [pc, #0x94] ; LIT 0x420cfb00->0x20022000
+420cfa74: ldr        r0, [pc, #0x88] ; LIT 0x420cfb00->0x20022000
+420cfa8a: ldr        r0, [pc, #0x74] ; LIT 0x420cfb00->0x20022000
+420cfa94: ldr        r1, [pc, #0x68] ; LIT 0x420cfb00->0x20022000
+420cfaa0: ldr        r0, [pc, #0x5c] ; LIT 0x420cfb00->0x20022000
+420cfab6: ldr        r0, [pc, #0x48] ; LIT 0x420cfb00->0x20022000
+420cfac2: ldr        r1, [pc, #0x3c] ; LIT 0x420cfb00->0x20022000
+420cface: ldr        r0, [pc, #0x30] ; LIT 0x420cfb00->0x20022000
+420cfae4: ldr        r0, [pc, #0x18] ; LIT 0x420cfb00->0x20022000
+420cfaf0: ldr        r0, [pc, #0xc] ; LIT 0x420cfb00->0x20022000
+420d3450: ldr        r0, [pc, #0x60] ; LIT 0x420d34b4->0x20022000
+420d3458: ldr        r1, [pc, #0x58] ; LIT 0x420d34b4->0x20022000
+420d3476: ldr        r0, [pc, #0x3c] ; LIT 0x420d34b4->0x20022000
+420d3480: ldr        r1, [pc, #0x30] ; LIT 0x420d34b4->0x20022000
+420d3498: ldr        r0, [pc, #0x18] ; LIT 0x420d34b4->0x20022000
+420d34a2: ldr        r1, [pc, #0x10] ; LIT 0x420d34b4->0x20022000
+42155310: ldr        r1, [pc, #0x88] ; LIT 0x4215539c->0x20022000
+
+=== APPLY-STAGE DIRECT CALLS TO NAMED OWNERS ===
+42152466: bl         #0x420d3434 ; CALL=0x420d3434
+
+=== DECISION GATE ===
+Recover exact Tone and Interpolation Gamma setter function addresses, hardware register writes, and callers. Determine whether 0x4215220C or its immediate refresh chain invokes interpolation gamma in an output-space-dependent manner.
