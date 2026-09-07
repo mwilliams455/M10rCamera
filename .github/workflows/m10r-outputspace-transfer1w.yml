@@ -1,0 +1,145 @@
+name: M10-R output-space transfer 1W
+on:
+  push:
+    branches: [m10r-outputspace-transfer1a]
+    paths: ['.github/workflows/m10r-outputspace-transfer1w.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace CA9 CM manager record and IPCU payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER1W.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes();BASE=0x40000000;PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);md.detail=True
+          def off(a):return PFX+a-BASE
+          def one(a):
+            o=off(a)
+            if not 0<=o<len(b)-4:return None
+            q=list(md.disasm(b[o:o+4],a,count=1));return q[0] if q else None
+          def dis(a,z):return list(md.disasm(b[off(a):off(z)],a))
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=i.address+8+i.operands[1].mem.disp;o=off(la)
+                if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+            except:pass
+          def call(i):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';x=lit(i)
+            if x:s+=f' ; LIT {x[0]:#x}->{x[1]:#x}'
+            t=call(i)
+            if t is not None:s+=f' ; CALL={t:#x}'
+            return s
+          def find_start(a,back=0x600):
+            for p in range(a,max(BASE,a-back),-4):
+              i=one(p)
+              if i and ((i.mnemonic=='push' and 'lr' in i.op_str) or (i.mnemonic=='stmdb' and 'sp!' in i.op_str and 'lr' in i.op_str)):return p
+          def until_ret(st,limit=0x1200):
+            out=[]
+            for i in dis(st,min(BASE+len(b)-PFX,st+limit)):
+              out.append(i)
+              if i.address>st and ((i.mnemonic=='pop' and 'pc' in i.op_str) or (i.mnemonic=='bx' and 'lr' in i.op_str)):break
+            return out
+
+          print('M10-R OUTPUTSPACE TRANSFER1W')
+          print('\n=== MANAGER LITERAL POOL VALUES ===')
+          for a in (0x40006324,0x4000632c):
+            i=one(a);print(fmt(i));x=lit(i)
+            if x: print('RAW_POOL',hex(x[0]),b[off(x[0]):off(x[0])+16].hex(' '))
+
+          print('\n=== CM HANDLER 0x40004050 / 0x4000405C ===')
+          for st in (0x40004050,0x4000405c,0x400040a4,0x40004154,0x400041bc,0x400043e4,0x40004494,0x400047ec):
+            print('\n-- FUNCTION',hex(st),'--')
+            for i in until_ret(st,0x700):print(fmt(i))
+
+          print('\n=== CM HANDLER SMALL-CMP / RECORD-OFFSET SURFACE ===')
+          ins=until_ret(0x40004050,0x1000)
+          for i in ins:
+            if i.mnemonic.startswith(('cmp','tst','ldr','ldrb','ldrh','str','strb','strh')) or call(i) is not None:
+              print(fmt(i))
+
+          print('\n=== DIRECT CALLEES FROM CM HANDLER TREE ===')
+          roots=[0x40004050,0x4000405c,0x400040a4,0x40004154,0x400041bc,0x400043e4,0x40004494,0x400047ec]
+          tg=set()
+          for st in roots:
+            for i in until_ret(st,0x900):
+              t=call(i)
+              if t is not None:tg.add(t)
+          for t in sorted(tg):print(hex(t))
+
+          print('\n=== KNOWN CM-MATH CALLEE INTERSECTION ===')
+          known_ranges=[(0x4000492c,0x400049ac,'XYZtoXY'),(0x40004d00,0x40005400,'Temperature'),(0x40005c00,0x40005f00,'MatrixInterpolate'),(0x40006000,0x40006100,'SetWhiteXY'),(0x40006200,0x40006300,'NeutralToXY')]
+          for t in sorted(tg):
+            for lo,hi,n in known_ranges:
+              if lo<=t<hi:print(hex(t),n)
+
+          print('\n=== IPCU RECEIVE AREA 0x4000BD80..0x4000C070 ===')
+          for i in dis(0x4000bd80,0x4000c070):print(fmt(i))
+
+          print('\n=== IPCU XREF FUNCTION STARTS ===')
+          for a in (0x4000bed4,0x4000bee8,0x4000bf8c):print(hex(a),'owner',hex(find_start(a) or 0))
+
+          print('\n=== IPCU PAYLOAD-STYLE OFFSETS ===')
+          for i in dis(0x4000bd80,0x4000c070):
+            if any(x in i.op_str for x in ('#0x40','#0x44','#0x48','#0x4c','#0x50','#0x54','#0x58','#0x5c','#0x60','#0x80','#0x100')):
+              print(fmt(i))
+
+          print('\n=== MANAGER RING GLOBAL RAW XREFS ===')
+          mgr=[]
+          for a in (0x40006324,0x4000632c):
+            x=lit(one(a))
+            if x:mgr.append(x[1])
+          for v in mgr:
+            print('GLOBAL',hex(v))
+            raw=struct.pack('<I',v);p=0;hits=[]
+            while 1:
+              p=b.find(raw,p)
+              if p<0:break
+              hits.append(BASE+p-PFX);p+=1
+            print('RAW_PTR_OCCURS',','.join(hex(x) for x in hits[:100]) or 'NONE')
+            # PC-literal xrefs in ARM code
+            for a in range(BASE,BASE+len(b)-PFX-4,4):
+              i=one(a);x=lit(i) if i else None
+              if x and x[1]==v:print('LIT_XREF',fmt(i),'OWNER',hex(find_start(a) or 0))
+
+          print('\n=== CM HANDLER MODE-CANDIDATE CMPS ===')
+          for st in roots:
+            for i in until_ret(st,0x900):
+              if i.mnemonic.startswith('cmp') and any(k in i.op_str for k in ('#0','#1','#2','#3','#4','#5','#0x0','#0x1','#0x2','#0x3','#0x4','#0x5')):
+                print(hex(st),fmt(i))
+
+          print('\n=== DECISION GATE ===')
+          print('Map 9-word IPC payload into manager record and identify the 0x40004050 handler record offsets. A 0/1/2 field feeding matrix selection but not nonlinear math would close output-space switching as color-management-only.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER1W.txt
+          git commit -m 'research: record CA9 CM manager record and IPCU payload trace 1W' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
