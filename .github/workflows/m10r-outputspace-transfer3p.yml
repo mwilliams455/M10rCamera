@@ -1,0 +1,149 @@
+name: M10-R output-space transfer 3P
+on:
+  push:
+    branches: [m10r-outputspace-transfer1a]
+    paths: ['.github/workflows/m10r-outputspace-transfer3p.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace named B2Y Tone and Interpolation Gamma setters
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int bb=r.get();if(!bb)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER3P.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();B=0x42000000;P=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True
+          def off(a): return P+a-B
+          def one(a):
+            q=off(a)
+            if q<0 or q>=len(b): return None
+            xs=list(md.disasm(b[q:q+4],a,count=1));return xs[0] if xs else None
+          def ds(a,z): return list(md.disasm(b[off(a):off(z)],a))
+          def call(i):
+            try:
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm
+            except: pass
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;q=off(la)
+                if 0<=q<=len(b)-4:return la,struct.unpack_from('<I',b,q)[0]
+            except: pass
+          def adr(i):
+            try:
+              if i.mnemonic=='adr' and len(i.operands)>1 and i.operands[1].type==ARM_OP_IMM:return ((i.address+4)&~3)+i.operands[1].imm
+            except: pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';x=lit(i);a=adr(i);c=call(i)
+            if x:s+=f' ; LIT {x[0]:#x}->{x[1]:#x}'
+            if a is not None:s+=f' ; ADR={a:#x}'
+            if c is not None:s+=f' ; CALL={c:#x}'
+            return s
+          print('M10-R OUTPUTSPACE TRANSFER3P')
+          targets=[]
+          for m in re.finditer(rb'[ -~]{5,}',b):
+            t=m.group().decode('latin1','replace');tl=t.lower()
+            if 'drv_img_b2y_' in tl and any(k in tl for k in ('operation_mode','tone_control','interpolation_gamma','wbgain','dg','knee','color','colour','cc')):
+              a=B+m.start()-P;targets.append((a,t));print('STRING',hex(a),repr(t[:260]))
+          print('\n=== POINTER WORDS INTO TARGET STRINGS ===')
+          ptr_words=[]
+          ranges=[(a,a+len(t)+1,t) for a,t in targets]
+          for q in range(0,len(b)-3,4):
+            v=struct.unpack_from('<I',b,q)[0]
+            for lo,hi,t in ranges:
+              if lo<=v<hi:
+                wa=B+q-P;ptr_words.append((wa,v,t));print('PTRWORD',hex(wa),'->',hex(v),repr(t[:180]))
+          print('\n=== TRUE CODE REFS TO TARGET STRINGS ===')
+          refs=[]
+          # direct ADR refs: only plausible when code and string within +-4KB; sliding decode throughout relevant code region
+          for a in range(0x42000000,0x42220000,2):
+            i=one(a)
+            if not i: continue
+            p=adr(i)
+            if p is not None:
+              for lo,hi,t in ranges:
+                if lo<=p<hi: refs.append((a,t));print('ADRREF',fmt(i),repr(t[:180]))
+          # literal pointer refs: for each pointer word, inspect possible literal-load instructions within previous 4KB
+          for wa,v,t in ptr_words:
+            for a in range(max(B,wa-0x1000),wa+2,2):
+              i=one(a)
+              if not i: continue
+              x=lit(i)
+              if x and x[0]==wa:
+                refs.append((a,t));print('LITREF',fmt(i),repr(t[:180]))
+          # direct literal loads whose value itself enters a string range
+          for a in range(0x42000000,0x42220000,2):
+            i=one(a)
+            if not i: continue
+            x=lit(i)
+            if x:
+              for lo,hi,t in ranges:
+                if lo<=x[1]<hi:
+                  refs.append((a,t));print('DIRECTPTR',fmt(i),repr(t[:180]))
+          print('\n=== OWNER FUNCTIONS OF STRING REFS ===')
+          owners=[]
+          for a,t in refs:
+            cand=None
+            for x in range(max(B,a-0x400),a+2,2):
+              i=one(x)
+              if i and i.mnemonic=='push' and 'lr' in i.op_str:cand=x
+            if cand is not None and cand not in [x[0] for x in owners]:owners.append((cand,t,a))
+          for s,t,a in owners:
+            print('\nOWNER',hex(s),'REF',hex(a),'NAME',repr(t[:200]))
+            for i in ds(s,min(B+len(b)-P,s+0x500)):
+              print(fmt(i))
+              if i.address>s and i.mnemonic=='pop' and 'pc' in i.op_str:break
+          print('\n=== CALLERS OF OWNER FUNCTIONS (SLIDING) ===')
+          ost=[x[0] for x in owners]
+          for s in ost:
+            print('\nOWNER',hex(s))
+            for a in range(0x42000000,0x42220000,2):
+              i=one(a)
+              if i and call(i)==s:print(fmt(i))
+          print('\n=== TRUE LOADS OF 0x20022000 ===')
+          words=[];pat=struct.pack('<I',0x20022000);q=0
+          while True:
+            z=b.find(pat,q)
+            if z<0:break
+            words.append(B+z-P);q=z+1
+          for wa in words:
+            for a in range(max(B,wa-0x1000),wa+2,2):
+              i=one(a)
+              if not i:continue
+              x=lit(i)
+              if x and x[0]==wa:print(fmt(i))
+          print('\n=== APPLY-STAGE DIRECT CALLS TO NAMED OWNERS ===')
+          for i in ds(0x4215220c,0x42152a00):
+            c=call(i)
+            if c in ost: print(fmt(i))
+          print('\n=== DECISION GATE ===')
+          print('Recover exact Tone and Interpolation Gamma setter function addresses, hardware register writes, and callers. Determine whether 0x4215220C or its immediate refresh chain invokes interpolation gamma in an output-space-dependent manner.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER3P.txt
+          git commit -m 'research: trace named B2Y tone and interpolation gamma setters 3P' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
