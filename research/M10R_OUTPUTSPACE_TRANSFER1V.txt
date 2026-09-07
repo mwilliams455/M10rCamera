@@ -1,0 +1,231 @@
+M10-R OUTPUTSPACE TRANSFER1V
+
+=== RAW 0xFFF50000 LITERAL CONTEXT ===
+4000c020: 11 24 a0 e1 40 10 9f e5 14 21 83 e5 00 c0 91 e5
+4000c030: 00 00 5c e3 e1 ff ff 0a 2c 50 8d e2 1e 00 95 e8
+4000c040: 08 50 8d e2 1e 00 85 e8 24 10 9d e5 28 20 9d e5
+4000c050: 00 10 8d e5 04 20 8d e5 18 10 9d e5 dc 21 cd e1
+4000c060: 3c ff 2f e1 3c d0 8d e2 30 80 bd e8 10 68 02 40
+4000c070: 00 00 f5 ff 0f 00 2d e9 02 04 50 e3 f0 4f 2d e9
+4000c080: 00 40 a0 e1 14 d0 4d e2 01 50 a0 e1 02 b0 a0 e1
+4000c090: d8 64 cd e1 d0 85 cd e1 58 a0 9d e5 09 00 00 1a
+4000c0a0: 00 10 a0 e3 c8 00 9f e5 01 30 a0 e1 01 20 a0 e1
+
+=== XREFS TO 0xFFF50000 / 0xFFF50100 ===
+ARM 0x4000bed4 pool 0x4000c070 -> 0xfff50000 ldr r2, [pc, #0x194]
+ARM 0x4000bee8 pool 0x4000c070 -> 0xfff50000 ldr ip, [pc, #0x180]
+ARM 0x4000bf8c pool 0x4000c070 -> 0xfff50000 ldr r1, [pc, #0xdc]
+HIT_COUNT 3
+
+=== IPCU FUNCTION WINDOWS ===
+
+FUNCTION ARM 0x4000bf84
+4000bf84: push       {r4, r5, lr}
+4000bf88: mov        r4, r0
+4000bf8c: ldr        r1, [pc, #0xdc] ; LIT 0x4000c070->0xfff50000
+4000bf90: sub        sp, sp, #0x3c
+4000bf94: add        r0, r1, r4, lsl #2
+4000bf98: ldr        r2, [r0, #0x80]
+4000bf9c: tst        r2, #0x2000
+4000bfa0: beq        #0x4000bfc8
+4000bfa4: ldr        r0, [r0, #0x80]
+4000bfa8: mov        r2, #0
+4000bfac: bfc        r0, #0xc, #0x14
+4000bfb0: sub        r0, r0, #0x100
+4000bfb4: asr        r0, r0, #7
+4000bfb8: add        r0, r1, r0, lsl #7
+4000bfbc: str        r2, [r0, #0x100]
+4000bfc0: add        sp, sp, #0x3c
+4000bfc4: pop        {r4, r5, pc}
+
+=== CALLERS OF IPCU FUNCTIONS ===
+
+=== MANAGER RAW REGION ARM/THUMB ===
+
+MODE ARM
+40006300: and        r0, r0, #0xff
+40006304: strb       r0, [r4]
+40006308: cmp        r0, #0x1e
+4000630c: bne        #0x40006318
+40006310: mov        r0, #0
+40006314: strb       r0, [r4]
+40006318: pop        {r4, r5, r6, r7, r8, sb, sl, fp}
+4000631c: bx         lr
+40006320: push       {r4, r5, r6, r7, r8, sb, lr}
+40006324: ldr        r5, [pc, #0x138]
+40006328: sub        sp, sp, #0x14
+4000632c: ldr        r4, [pc, #0x134]
+40006330: ldrb       r0, [r5, #1]
+40006334: add        r1, r0, r0, lsl #3
+40006338: ldr        r0, [r4, r1, lsl #2]
+4000633c: cmn        r0, #0x80000001
+40006340: beq        #0x4000645c
+40006344: cmp        r0, #0x2000000
+40006348: beq        #0x40006388
+4000634c: cmp        r0, #1
+40006350: beq        #0x40006398
+40006354: cmp        r0, #0x10
+40006358: beq        #0x400063dc
+4000635c: cmp        r0, #0x20
+40006360: beq        #0x400063a4
+40006364: cmp        r0, #0x40
+40006368: beq        #0x400063b0
+4000636c: cmp        r0, #0x30
+40006370: beq        #0x400063bc
+40006374: cmp        r0, #0x50
+40006378: beq        #0x400063c8
+4000637c: cmp        r0, #0x70
+40006380: beq        #0x400063d4
+40006384: b          #0x400063dc
+40006388: add        r1, pc, #0xdc
+4000638c: mov        r0, #4
+40006390: bl         #0x4000ded4
+40006394: b          #0x400063dc
+40006398: add        r0, r4, r1, lsl #2
+4000639c: bl         #0x4000df6c
+400063a0: b          #0x400063dc
+400063a4: add        r0, r4, r1, lsl #2
+400063a8: bl         #0x4000b59c
+400063ac: b          #0x400063dc
+400063b0: add        r0, r4, r1, lsl #2
+400063b4: bl         #0x40004050
+400063b8: b          #0x400063dc
+400063bc: add        r0, r4, r1, lsl #2
+400063c0: bl         #0x40000790
+400063c4: b          #0x400063dc
+400063c8: add        r0, r4, r1, lsl #2
+400063cc: bl         #0x4000dc74
+400063d0: b          #0x400063dc
+400063d4: add        r0, r4, r1, lsl #2
+400063d8: bl         #0x40007618
+400063dc: ldrb       r0, [r5, #1]
+400063e0: add        r0, r0, r0, lsl #3
+400063e4: add        ip, r4, r0, lsl #2
+400063e8: ldr        r1, [ip, #4]
+400063ec: cmp        r1, #0
+400063f0: beq        #0x40006410
+400063f4: ldr        r0, [r4, r0, lsl #2]
+400063f8: ldrd       r2, r3, [ip, #8]
+400063fc: add        ip, ip, #0x10
+40006400: ldm        ip, {r6, r7, r8, sb, ip}
+40006404: str        ip, [sp, #0x10]
+40006408: stm        sp, {r6, r7, r8, sb}
+4000640c: bl         #0x4000de1c
+40006410: ldrb       r1, [r5, #1]
+40006414: mov        r0, #0
+40006418: mvn        ip, #0x80000000
+4000641c: add        r3, r1, #1
+40006420: add        r2, r1, r1, lsl #3
+40006424: and        r3, r3, #0xff
+40006428: cmp        r3, #0x1e
+4000642c: add        r1, r4, r2, lsl #2
+40006430: str        r0, [r1, #4]
+40006434: str        r0, [r1, #8]
+40006438: str        r0, [r1, #0xc]
+4000643c: str        r0, [r1, #0x10]
+40006440: str        r0, [r1, #0x14]
+40006444: str        r0, [r1, #0x18]
+40006448: str        r0, [r1, #0x1c]
+4000644c: str        r0, [r1, #0x20]
+40006450: str        ip, [r4, r2, lsl #2]
+40006454: strb       r3, [r5, #1]
+40006458: strbeq     r0, [r5, #1]
+4000645c: add        sp, sp, #0x14
+40006460: pop        {r4, r5, r6, r7, r8, sb, pc}
+40006464: andmi      ip, r1, r4, asr #16
+40006468: andmi      r6, r2, ip, ror #21
+4000646c: svcpl      #0x396163
+40006470: strbtvc    r6, [lr], #-0xf63
+40006474: svcpl      #0x6c6f72
+
+MODE THUMB
+40006300: lsls       r7, r7, #3
+40006302: b          #0x40006706
+40006304: movs       r0, r0
+40006306: b          #0x40005e92
+40006308: movs       r6, r3
+4000630a: b          #0x400069ae
+4000630c: movs       r1, r0
+4000630e: subs       r0, r0, r0
+40006310: movs       r0, r0
+40006312: b          #0x40006a56
+40006314: movs       r0, r0
+40006316: b          #0x40005ea2
+40006318: lsrs       r0, r6, #0x1f
+4000631a: pop.w      {r1, r2, r3, r4, r8, sb, sl, fp, ip, sp, lr, pc}
+4000631e: b          #0x40006580
+40006320: mvns       r0, r6
+40006322: push.w     {r3, r4, r5, r8, ip, lr}
+40006326: b          #0x40005e68
+40006328: beq        #0x40006354
+4000632a: b          #0x400067c8
+4000632c: asrs       r4, r6
+4000632e: b          #0x40005e70
+40006330: movs       r1, r0
+40006332: b          #0x40005ee0
+40006334: asrs       r0, r0, #6
+40006336: b          #0x4000643a
+40006338: lsls       r1, r0, #4
+4000633a: b          #0x40006266
+4000633c: lsls       r6, r0, #4
+4000633e: b          #0x40006a22
+40006340: lsls       r5, r0, #1
+40006342: lsrs       r0, r0, #8
+40006344: lsls       r2, r0, #0x10
+40006346: b          #0x400069ea
+40006348: movs       r6, r1
+4000634a: lsrs       r0, r0, #8
+4000634c: movs       r1, r0
+4000634e: b          #0x400069f2
+40006350: movs       r0, r2
+40006352: lsrs       r0, r0, #8
+40006354: movs       r0, r2
+40006356: b          #0x400069fa
+40006358: movs       r7, r3
+4000635a: lsrs       r0, r0, #8
+4000635c: movs       r0, r4
+4000635e: b          #0x40006a02
+40006360: movs       r7, r1
+40006362: lsrs       r0, r0, #8
+40006364: lsls       r0, r0, #1
+40006366: b          #0x40006a0a
+40006368: movs       r0, r2
+4000636a: lsrs       r0, r0, #8
+4000636c: movs       r0, r6
+4000636e: b          #0x40006a12
+40006370: movs       r1, r2
+40006372: lsrs       r0, r0, #8
+40006374: lsls       r0, r2, #1
+40006376: b          #0x40006a1a
+40006378: movs       r2, r2
+4000637a: lsrs       r0, r0, #8
+4000637c: lsls       r0, r6, #1
+4000637e: b          #0x40006a22
+40006380: movs       r3, r2
+40006382: lsrs       r0, r0, #8
+40006384: movs       r4, r2
+40006386: and.w      r0, r0, ip, lsr #7
+4000638a: b          #0x400068ac
+4000638c: movs       r4, r0
+4000638e: b          #0x40006ad2
+40006390: subs       r7, r1, #3
+40006392: add.w      r0, r0, r0, lsr #32
+40006396: and.w      r1, r0, r1
+4000639a: b          #0x400064a6
+4000639c: subs       r2, r6, #3
+4000639e: add.w      r0, r0, sp
+400063a2: and.w      r1, r0, r1
+400063a6: b          #0x400064b2
+400063a8: asrs       r3, r7, #0x11
+400063aa: add.w      r0, r0, sl
+400063ae: and.w      r1, r0, r1
+400063b2: b          #0x400064be
+
+=== IPC-RELATED ASCII ===
+interrupt 0x4000e970 'Ca9 Watchdog: input param error. [*wdog_interrupt] NULL\n'
+interrupt 0x4000ef24 'Ca9 Private timer: input param error. [*timer_interrupt] NULL\n'
+interrupt 0x4000f4ec 'Ca9 Global timer: input param error. [*gtimer_interrupt] NULL\n'
+ca9_control_manager 0x4000646b '@ca9_control_Manager() - CA9 ready'
+
+=== DECISION GATE ===
+Identify CA9 function(s) that access 0xFFF50000 and their callers. Recover payload register reads/command dispatch before connecting output-space byte to CA9 CM math.
