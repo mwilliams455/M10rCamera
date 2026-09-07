@@ -44,6 +44,29 @@ jobs:
           /tmp/unpack
           echo '859c936b6ac8efe0bc4ce7f05623013644fc5d8aee3c6835f09860f452adc2e0  /tmp/M10R_unpacked.bin' | sha256sum -c -
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/m10r_sections >/tmp/sections.txt
+      - name: Inventory CA9 calibration assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' > research/M10R_CA9_CALIB_SECTION_INVENTORY.txt
+          import csv, pathlib, hashlib, struct
+          root=pathlib.Path('/tmp/m10r_sections')
+          rows=list(csv.DictReader((root/'sections.csv').open()))
+          print('M10-R CA9/B2Y calibration section inventory')
+          print('index\tname\tsize\tkind\timage_base\taux\tsha256')
+          for r in rows:
+              i=int(r['index']); n=r['name']; p=root/r['file']
+              if (60 <= i <= 80) or ('CA9' in n) or ('B2Y' in n):
+                  b=p.read_bytes()
+                  print(f"{i}\t{n}\t{len(b)}\t{r['kind']}\t{r['image_base']}\t{r['aux']}\t{hashlib.sha256(b).hexdigest()}")
+                  if 'CA9' in n:
+                      print('HEX='+b.hex())
+                      if len(b)%2==0:
+                          u16=list(struct.unpack('<'+'H'*(len(b)//2),b)); print('U16_LE='+','.join(map(str,u16)))
+                      if len(b)%4==0:
+                          u32=list(struct.unpack('<'+'I'*(len(b)//4),b)); print('U32_LE='+','.join(map(str,u32)))
+          PY
+          cat research/M10R_CA9_CALIB_SECTION_INVENTORY.txt
       - name: Run CA9 output-space audit
         run: |
           set -euo pipefail
@@ -56,7 +79,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add research/M10R_CA9_OUTPUTSPACE_AUDIT1A.json research/M10R_CA9_OUTPUTSPACE_AUDIT1A.md
+          git add research/M10R_CA9_OUTPUTSPACE_AUDIT1A.json research/M10R_CA9_OUTPUTSPACE_AUDIT1A.md research/M10R_CA9_CALIB_SECTION_INVENTORY.txt
           if ! git diff --cached --quiet; then
             git commit -m 'research: record CA9 output-space audit1A evidence'
             git push
@@ -69,5 +92,6 @@ jobs:
           path: |
             research/M10R_CA9_OUTPUTSPACE_AUDIT1A.json
             research/M10R_CA9_OUTPUTSPACE_AUDIT1A.md
+            research/M10R_CA9_CALIB_SECTION_INVENTORY.txt
             /tmp/summary.txt
           if-no-files-found: warn
