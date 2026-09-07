@@ -1,0 +1,129 @@
+name: M10-R output-space transfer 3E
+on:
+  push:
+    branches: [m10r-outputspace-transfer1a]
+    paths: ['.github/workflows/m10r-outputspace-transfer3e.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Scan downstream rendered transfer and encoder owners
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int bb=r.get();if(!bb)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER3E.txt
+          from pathlib import Path
+          import csv,re,struct
+          from capstone import *
+          from capstone.arm import *
+          root=Path('/tmp/sections')
+          terms=[b'jpeg',b'jpg',b'ycc',b'ycbcr',b'yuv',b'rgb2y',b'b2y',b'gamma',b'transfer',b'srgb',b'adobe rgb',b'adobergb',b'eci-rgb',b'ecirgb',b'color space',b'colour space',b'colorspace',b'output space',b'encode',b'encoder']
+          rows=[]
+          with (root/'sections.csv').open(newline='',encoding='utf-8') as f:
+            for r in csv.DictReader(f): rows.append(r)
+          print('M10-R OUTPUTSPACE TRANSFER3E')
+          print('\n=== FIRMWARE-WIDE ASCII HITS ===')
+          hits=[]
+          for r in rows:
+            fn=root/r['file']; b=fn.read_bytes(); base=int(r['image_base'],16)
+            for m in re.finditer(rb'[ -~]{4,}',b):
+              s=m.group(); low=s.lower()
+              if any(t in low for t in terms):
+                addr=(base+m.start()-4) if base else m.start()
+                item=(int(r['index']),r['name'],base,addr,m.start(),s.decode('latin1','replace')[:260])
+                hits.append(item); print(f"SEC={item[0]:03d} NAME={item[1]!r} BASE={base:#x} ADDR={addr:#x} OFF={m.start():#x} STR={item[5]!r}")
+          print('\n=== EXACT FLOAT/DOUBLE TRANSFER CONSTANT OCCURRENCES ===')
+          vals=[('2.4',2.4),('2.2',2.2),('1/2.4',1/2.4),('1/2.2',1/2.2),('0.055',0.055),('12.92',12.92),('0.04045',0.04045),('0.0031308',0.0031308),('1.055',1.055),('2.19921875',2.19921875)]
+          for r in rows:
+            fn=root/r['file']; b=fn.read_bytes(); base=int(r['image_base'],16)
+            found=[]
+            for nm,v in vals:
+              for typ,pat in [('f32',struct.pack('<f',v)),('f64',struct.pack('<d',v))]:
+                p=0
+                while True:
+                  q=b.find(pat,p)
+                  if q<0: break
+                  a=(base+q-4) if base else q
+                  found.append((nm,typ,a,q)); p=q+1
+            if found:
+              print(f"SEC={int(r['index']):03d} NAME={r['name']!r}")
+              for x in found[:100]: print(' ',x)
+          def setup(sec,base,mode):
+            b=(root/sec).read_bytes(); pref=4
+            md=Cs(CS_ARCH_ARM,mode|CS_MODE_LITTLE_ENDIAN); md.detail=True
+            def off(a): return pref+a-base
+            return b,md,off
+          targets=[('092_IMG-System.bin',0x42000000,CS_MODE_THUMB,'ARM926'),('099_IMG-CA9_System.bin',0x40000000,CS_MODE_ARM,'CA9')]
+          print('\n=== STRING POINTER/LITERAL XREFS IN IMG-SYSTEM + CA9 ===')
+          for sec,base,mode,label in targets:
+            b,md,off=setup(sec,base,mode)
+            local=[h for h in hits if h[1] in sec or (h[0]==92 and '092_' in sec) or (h[0]==99 and '099_' in sec)]
+            print(f'\n-- {label} --')
+            # direct raw 32-bit pointer occurrences to relevant strings
+            for h in local:
+              sa=h[3] & 0xffffffff; pat=struct.pack('<I',sa); pos=0; occ=[]
+              while True:
+                q=b.find(pat,pos)
+                if q<0: break
+                occ.append(base+q-4); pos=q+1
+              if occ: print(f'STR {sa:#x} {h[5]!r} PTRS {[hex(x) for x in occ[:40]]}')
+            # Decode and report PC-relative literal loads resolving exactly to relevant string addresses
+            saddrs={h[3]&0xffffffff:h[5] for h in local}
+            code=b[4:]
+            for i in md.disasm(code,base):
+              try:
+                if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                  la=(i.address+8+i.operands[1].mem.disp) if mode==CS_MODE_ARM else (((i.address+4)&~3)+i.operands[1].mem.disp)
+                  q=off(la)
+                  if 0<=q<=len(b)-4:
+                    v=struct.unpack_from('<I',b,q)[0]
+                    if v in saddrs: print(f'LOAD {i.address:#x}: {i.mnemonic} {i.op_str} -> {v:#x} {saddrs[v]!r}')
+              except Exception: pass
+          print('\n=== KNOWN B2Y HARDWARE BASE LITERAL OCCURRENCES IN ARM926 ===')
+          b=(root/'092_IMG-System.bin').read_bytes(); base=0x42000000
+          for v in (0x20020080,0x20020880,0x20021000,0x20020000,0x20020800):
+            pat=struct.pack('<I',v); pos=0; xs=[]
+            while True:
+              q=b.find(pat,pos)
+              if q<0: break
+              xs.append(base+q-4); pos=q+1
+            print(hex(v),[hex(x) for x in xs[:100]],'COUNT',len(xs))
+          print('\n=== ARM926 ColorManagementFinished WINDOW 0x420A3D00..0x420A4560 ===')
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True
+          def io(a): return 4+a-0x42000000
+          for i in md.disasm(b[io(0x420a3d00):io(0x420a4560)],0x420a3d00):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+            try:
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM: s+=f' ; CALL={i.operands[0].imm:#x}'
+              if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;q=io(la)
+                if 0<=q<=len(b)-4: s+=f' ; LIT {la:#x}->{struct.unpack_from("<I",b,q)[0]:#x}'
+            except Exception: pass
+            print(s)
+          print('\n=== DECISION GATE ===')
+          print('Identify the actual subsystem owning rendered nonlinear transfer after CA9 CC output. Prior TF_REMAPPING is CCT/mired colour-management state, not image OETF. Do not change renderer unless an explicit downstream transfer is recovered.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER3E.txt
+          git commit -m 'research: record downstream rendered transfer scan 3E' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
