@@ -1,0 +1,122 @@
+name: M10-R output-space transfer 3Y
+on:
+  push:
+    branches: [m10r-outputspace-transfer1a]
+    paths: ['.github/workflows/m10r-outputspace-transfer3y.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Reconstruct CC0 CC1 Tone DG selector key composition
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int bb=r.get();if(!bb)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER3Y.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();B=0x42000000;P=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True
+          def off(a):return P+a-B
+          def ds(a,z):return list(md.disasm(b[off(a):off(z)],a))
+          def call(i):
+            try:
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm
+            except:pass
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;q=off(la)
+                if 0<=q<=len(b)-4:return la,struct.unpack_from('<I',b,q)[0]
+            except:pass
+          def adr(i):
+            try:
+              if i.mnemonic=='adr' and len(i.operands)>1 and i.operands[1].type==ARM_OP_IMM:return ((i.address+4)&~3)+i.operands[1].imm
+            except:pass
+          def cstr(a,n=180):
+            q=off(a)
+            if not 0<=q<len(b):return None
+            z=b.find(b'\0',q,min(len(b),q+n));z=min(len(b),q+n) if z<0 else z;x=b[q:z]
+            if x and all(32<=c<127 or c in (9,10,13) for c in x):return x.decode('latin1','replace')
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';c=call(i);x=lit(i);a=adr(i)
+            if c is not None:s+=f' ; CALL={c:#x}'
+            if x:s+=f' ; LIT {x[0]:#x}->{x[1]:#x} PTRSTR={repr(cstr(x[1]))}'
+            if a is not None:s+=f' ; ADR={a:#x} STR={repr(cstr(a))}'
+            return s
+          def trim(s,limit=0x900):
+            out=[]
+            for i in ds(s,min(B+len(b)-P,s+limit)):
+              out.append(i)
+              if i.address>s and i.mnemonic=='pop' and 'pc' in i.op_str:break
+            return out
+          funcs=[('CC0',0x42153d24),('CC1',0x42153dec),('TONE',0x42154bb4),('DG',0x42153f60),('YC',0x42154ec8),('DEKNEE',0x42153eb4)]
+          print('M10-R OUTPUTSPACE TRANSFER3Y')
+          for name,s in funcs:
+            fi=trim(s)
+            print('\n================',name,hex(s),'================')
+            for i in fi:print(fmt(i))
+            print('\n-- FIRST-ARG RELATIVE MEMORY OFFSETS --')
+            # symbolic pointer offsets relative to original r0, better within full body
+            rel={ARM_REG_R0:0};seen=[]
+            for i in fi:
+              try:
+                for o in i.operands:
+                  if o.type==ARM_OP_MEM and o.mem.base in rel and rel[o.mem.base] is not None:
+                    total=rel[o.mem.base]+o.mem.disp
+                    seen.append((i.address,total,i.mnemonic,i.op_str))
+              except:pass
+              try:
+                ops=i.operands
+                if i.mnemonic.startswith('mov') and len(ops)>=2 and ops[0].type==ARM_OP_REG:
+                  d=ops[0].reg
+                  if ops[1].type==ARM_OP_REG:rel[d]=rel.get(ops[1].reg)
+                  else:rel[d]=None
+                elif i.mnemonic in ('add','adds','sub','subs') and len(ops)>=2 and ops[0].type==ARM_OP_REG:
+                  d=ops[0].reg
+                  if len(ops)>=3 and ops[1].type==ARM_OP_REG and ops[2].type==ARM_OP_IMM:
+                    base=rel.get(ops[1].reg);rel[d]=(base+(ops[2].imm if i.mnemonic.startswith('add') else -ops[2].imm)) if base is not None else None
+                  elif ops[1].type==ARM_OP_IMM:
+                    base=rel.get(d);rel[d]=(base+(ops[1].imm if i.mnemonic.startswith('add') else -ops[1].imm)) if base is not None else None
+                  elif ops[1].type==ARM_OP_REG:rel[d]=None
+                elif i.mnemonic.startswith('ldr') and ops and ops[0].type==ARM_OP_REG:rel[ops[0].reg]=None
+              except:pass
+            for a,total,m,o in seen:print(hex(a),'offset',hex(total),m,o)
+            print('\n-- STRING / RESOURCE HELPER WINDOWS --')
+            helpers={0x4204efd4:'COPY',0x4204f1f4:'CONCAT',0x4204f3bc:'ZERO',0x4204f36c:'MEMCPY',0x421a0fc0:'RESOURCE'}
+            for k,i in enumerate(fi):
+              c=call(i)
+              if c in helpers:
+                print('\n',helpers[c],hex(i.address))
+                for x in fi[max(0,k-7):min(len(fi),k+4)]:print(fmt(x))
+            print('\n-- B2Y DRIVER CALLS --')
+            for i in fi:
+              c=call(i)
+              if c is not None and 0x420c0000<=c<0x420e0000:print(fmt(i))
+          print('\n=== DECISION GATE ===')
+          print('For CC0, CC1, Tone, Differential Gamma, YC Conversion and De-knee: enumerate exactly which fields of the shared selector object contribute to selector strings/resource lookup. Confirm whether offsets +0x44/+0x48 are absent and identify the actual key dimensions.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER3Y.txt
+          git commit -m 'research: reconstruct core B2Y selector keys 3Y' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
