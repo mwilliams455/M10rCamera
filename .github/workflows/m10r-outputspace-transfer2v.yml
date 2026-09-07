@@ -1,0 +1,97 @@
+name: M10-R output-space transfer 2V
+on:
+  push:
+    paths:
+      - '.github/workflows/m10r-outputspace-transfer2v.yml'
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Resolve Kelvin/mired xrefs and remap interpolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int bb=r.get();if(!bb)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER2V.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();B=0x42000000;P=4
+          m=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);m.detail=True
+          def o(a):return P+a-B
+          def ds(a,z):return list(m.disasm(b[o(a):o(z)],a))
+          def call(i):
+            try:
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm
+            except:pass
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;q=o(la)
+                if 0<=q<=len(b)-4:return la,struct.unpack_from('<I',b,q)[0]
+            except:pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';c=call(i);x=lit(i)
+            if c is not None:s+=f' ; CALL={c:#x}'
+            if x:s+=f' ; LIT {x[0]:#x}->{x[1]:#x}'
+            return s
+          allins=ds(B,B+len(b)-P)
+          print('M10-R OUTPUTSPACE TRANSFER2V')
+          print('\n=== CORRECTED ADR XREFS TO MIRED/KELVIN/REMAP-NAME STRINGS ===')
+          targets={0x420a5f08:'MIRED',0x420a5f13:'@KELVIN',0x420a5e43:'Bca9_cm_switch_remap_color',0x420a5e63:'Bca9_cm_switch_debug_asn'}
+          for idx,i in enumerate(allins):
+            if i.mnemonic.startswith('adr'):
+              try:
+                imm=i.operands[-1].imm
+                # capstone emits the ADR displacement in this image; also tolerate absolute
+                cand=[imm,((i.address+4)&~3)+imm]
+                for t,name in targets.items():
+                  if t in cand:
+                    print('\nXREF',name,fmt(i),'calc',[hex(x) for x in cand])
+                    for k in allins[max(0,idx-18):min(len(allins),idx+30)]:print(fmt(k))
+              except:pass
+          print('\n=== RAW U32 POINTER XREFS TO STRING ADDRESSES ===')
+          for t,name in targets.items():
+            for val in (t,t|1):
+              pat=struct.pack('<I',val);p=0
+              while True:
+                q=b.find(pat,p)
+                if q<0:break
+                print(name,hex(val),'at',hex(B+q-P));p=q+1
+          print('\n=== FULL 0x420A957C HELPER REGION ===')
+          for i in ds(0x420a9500,0x420a96c0):print(fmt(i))
+          print('\n=== CALLERS OF 0x420A957C ===')
+          for i in allins:
+            if call(i)==0x420a957c:print(fmt(i))
+          print('\n=== REMAP-DERIVED-SCALAR SEQUENCE 0x420A58C8..0x420A5908 ===')
+          for i in ds(0x420a58c8,0x420a5908):print(fmt(i))
+          print('\n=== STRING/LITERAL NEIGHBORHOOD 0x421E9C80..0x421E9D20 ===')
+          raw=b[o(0x421e9c80):o(0x421e9d20)]
+          print(raw.hex())
+          print('\n=== DECISION GATE ===')
+          print('Prove whether the remap function/parser is Kelvin/mired-facing. If yes, remove TF_REMAPPING from output OETF hypothesis; it remains CA9 color-management CCT remapping state.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER2V.txt
+          git commit -m 'research: record Kelvin/mired remap xrefs 2V' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
