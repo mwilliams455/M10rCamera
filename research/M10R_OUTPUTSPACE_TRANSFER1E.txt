@@ -1,0 +1,331 @@
+M10-R OUTPUTSPACE TRANSFER1E
+Scope: TF-remapping caller/consumer plus YC/JPEG selector relationship to live CA9 color-space state.
+
+=== TF LOADER CALLER ===
+call 0x420a583a owner NONE
+
+=== CALLSITE ARGUMENT WINDOW ===
+420a57ea: cdp       p0, #0xd, c0, c12, c2, #0
+420a57ee: ldr       r0, [sp, #0x1b8]
+420a57f0: adds      r0, #0x70
+420a57f2: str       r2, [r0, #0x1c]
+420a57f4: ldr       r0, [sp, #0x1b8]
+420a57f6: adds      r0, #0x70
+420a57f8: ldr       r0, [r0, #0x24]
+420a57fa: str       r0, [sp, #0x14]
+420a57fc: blx       #0x421e6614 ; CALL=0x421e6614
+420a5800: str       r1, [sp, #0x1c]
+420a5802: str       r0, [sp, #0x18]
+420a5804: ldr       r0, [sp, #0x1b8]
+420a5806: movs      r1, r0
+420a5808: adds      r1, #0xe0
+420a580a: ldr       r3, [r1, #0x44]
+420a580c: ldr       r2, [r1, #0x40]
+420a580e: str       r3, [sp, #0x14]
+420a5810: str       r2, [sp, #0x10]
+420a5812: ldr       r1, [sp, #0x1c]
+420a5814: ldr       r0, [sp, #0x18]
+420a5816: blx       #0x421e67a0 ; CALL=0x421e67a0
+420a581a: str       r1, [sp, #0x24]
+420a581c: str       r0, [sp, #0x20]
+420a581e: blx       #0x421e65a4 ; CALL=0x421e65a4
+420a5822: movs      r1, r0
+420a5824: ldr       r0, [sp, #0x1b8]
+420a5826: adds      r0, #0x70
+420a5828: str       r1, [r0, #0x20]
+420a582a: movs      r3, #0xff
+420a582c: adds      r3, #0x7f
+420a582e: ldr       r2, [pc, #0xdc] ; LIT 0x420a590c->0x421e9c91 STRING='ca9_cm_config_fill'
+420a5830: ldr       r1, [pc, #0xdc] ; LIT 0x420a5910->0x42837160 STRING='CA9: %s(), %d - default data loaded for: CM1, CM2 and default CC0'
+420a5832: movs      r0, #4
+420a5834: bl        #0x42140150 ; CALL=0x42140150
+420a5838: add       r0, sp, #0x28
+420a583a: bl        #0x420a4884 ; CALL=0x420a4884
+420a583e: str       r0, [sp, #0x1b4]
+420a5840: movs      r1, #0xf8
+420a5842: ldr       r0, [sp, #0x1b8]
+420a5844: adds      r0, #0xff
+420a5846: adds      r0, #0x35
+420a5848: blx       #0x4204f3bc ; CALL=0x4204f3bc
+420a584c: ldr       r0, [sp, #0x1b4]
+420a584e: cmp       r0, #0
+420a5850: bne       #0x420a5880
+420a5852: ldr       r0, [sp, #0x28]
+420a5854: cmp       r0, #0
+420a5856: beq       #0x420a585c
+420a5858: movs      r1, #1
+420a585a: b         #0x420a585e
+420a585c: movs      r1, #0
+
+=== CA9 LIVE STATE READ/WRITE SURFACE 0x420A5200..0x420A7000 ===
+BASE 420a59f0: ldr       r2, [pc, #0xf8] ; LIT 0x420a5aec->0x43705760
+BASE 420a5a0a: ldr       r2, [pc, #0xe0] ; LIT 0x420a5aec->0x43705760
+BASE 420a5a24: ldr       r2, [pc, #0xc4] ; LIT 0x420a5aec->0x43705760
+BASE 420a5a42: ldr       r0, [pc, #0xa8] ; LIT 0x420a5aec->0x43705760
+BASE 420a5a4e: ldr       r0, [pc, #0x9c] ; LIT 0x420a5aec->0x43705760
+BASE 420a5a68: ldr       r0, [pc, #0x80] ; LIT 0x420a5aec->0x43705760
+BASE 420a5a72: ldr       r0, [pc, #0x78] ; LIT 0x420a5aec->0x43705760
+BASE 420a5a7e: ldr       r0, [pc, #0x6c] ; LIT 0x420a5aec->0x43705760
+BASE 420a5a8c: ldr       r1, [pc, #0x5c] ; LIT 0x420a5aec->0x43705760
+BASE 420a5aa2: ldr       r1, [pc, #0x48] ; LIT 0x420a5aec->0x43705760
+BASE 420a5f3e: ldr       r0, [pc, #0x44] ; LIT 0x420a5f84->0x43705760
+
+=== YC/JPEG HIGH-VALUE STRINGS ===
+0x4201c14b '@I:im_xch_start_ycc. Unknown channel error. Xch = %d'
+0x4201c184 'I:im_xch_start_ycc. DDIM_User_Dly_Tsk error. ret = %d'
+0x4201c1bf '@I:im_xch_start_ycc. DDIM_User_Clr_Flg error. ercd=%d'
+0x4201c6d3 'BI:im_xch_inthand_sub. Unknown ycc error. Xch = %d'
+0x4201c724 'I:im_xch_set_ctrl_ycc: Channel number error. Xch = %d'
+0x4201c75f '@I:im_xch_set_ctrl_ycc. Unknown mode error'
+0x4201c78c 'I:im_xch_set_ctrl_ycc. xch_mng=NULL'
+0x4201dca0 'I:Im_Xch_Ctrl_Common_Ycc: Channel number error. Xch = %d'
+0x4201dcdc 'I:Im_Xch_Ctrl_Common_Ycc. xch_ctrl_ycc_cmn = NULL'
+0x4201dd10 'I:Im_Xch_Ctrl_Common_Ycc: Set Histogram mode error. Xch = %d'
+0x4201dd50 'I:Im_Xch_Ctrl_Thin_Ycc: Channel number error. Xch = %d'
+0x4201dd88 'I:Im_Xch_Ctrl_Thin_Ycc. xch_ctrl_ycc_thin=NULL'
+0x4201ddb8 'I:Im_Xch_Ctrl_Hist_Ycc: Channel number error. Xch = %d'
+0x4201ddf0 'I:Im_Xch_Ctrl_Hist_Ycc. xch_ctrl_ycc_hist=NULL'
+0x4201de20 'I:Im_Xch_Ctrl_Half_Thin_Ycc: Channel number error. Xch = %d'
+0x4201de60 'I:Im_Xch_Ctrl_Half_Thin_Ycc. xch_ctrl_ycc_half_thin=NULL'
+0x4201e218 'I:Im_Xch_Ctrl_Copy_Ycc: Channel number error. Xch = %d'
+0x4201e25b 'BI:Im_Xch_Ctrl_Copy_Ycc. xch_ctrl_ycc_copy=NULL'
+0x4201e290 'I:Im_Xch_Ctrl_Fill_Ycc: Channel number error. Xch = %d'
+0x4201e2c8 'I:Im_Xch_Ctrl_Fill_Ycc. xch_ctrl_ycc_fill=NULL'
+0x42024454 'I:Im_JPEGXR_Open() Error : input param error. tmout = %x'
+0x42024497 '@I:Im_JPEGXR_Open() Error : Semaphore Get Error. ercd = %d'
+0x420244d4 'I:Im_JPEGXR_Open() Error : Semaphore Get Time Out. ercd = %d'
+0x42024517 '@I:Im_JPEGXR_Close() Error : ercd = %d'
+0x42024540 'Im_JPEGXR_Set_DCQ_Tbl(): phpqt address error.'
+0x42024570 'Im_JPEGXR_Set_LPQ_Tbl(): plpqt address error.'
+0x420245a0 'Im_JPEGXR_Set_HPQ_Tbl(): phpqt address error.'
+0x420245d0 'Im_JPEGXR_Set_Enc_Thin(): thin_out value error.'
+0x42024604 'Im_JPEGXR_Set_Enc_CodeEst(): pass1 value error.'
+0x42024638 'Im_JPEGXR_Set_Enc_Cb(): pcallback address error.'
+0x4202466c 'Im_JPEGXR_Set_Enc_Image(): pointer value error.'
+0x42024afb 'BIm_JPEGXR_Set_Enc_Count(): pointer value error.'
+0x42024b4c 'Im_JPEGXR_Set_Enc_Frame(): pointer value error.'
+0x42024b80 'Im_JPEGXR_Start_Enc_Sync(): pointer value error.'
+0x42024faf 'BIm_JPEGXR_Start_Enc_ASync(): pointer value error.'
+0x42025004 'Im_JPEGXR_Wait_End_Enc(): pjpg_enc_mng address error.'
+0x42025058 'Im_JPEGXR_Restart_Enc(): pjpg_enc_mng address error.'
+0x42025090 'Im_JPEGXR_Set_Dec_Cb(): pcallback address error.'
+0x420250c4 'Im_JPEGXR_Set_Dec_Image(): pointer value error.'
+0x42025100 'Im_JPEGXR_Set_Dec_Header(): pointer value error.'
+0x42025513 'BIm_JPEGXR_Set_Dec_Frame(): pointer value error.'
+0x42025563 ' Im_JPEGXR_Start_Dec_Sync(): pointer value error.'
+0x420255af ' E:Im_JPEGXR_Start_Dec_Sync. DDIM_User_Clr_Flg error'
+0x420255ec 'Im_JPEGXR_Start_Dec_ASync(): pointer value error.'
+0x42025620 'Im_JPEGXR_Wait_Dec_End(): pointer value error.'
+0x42025650 'E:Im_JPEGXR_Wait_Dec_End. DDIM_User_Clr_Flg error'
+0x42025688 'Im_JPEGXR_Restart_Dec(): pjpg_dec_mng address error.'
+0x42025ae3 '@E:Im_JPEGXR_Restart_Dec. DDIM_User_Clr_Flg error'
+0x42025b38 'IO_JPEGXR.JXSTATE   = 0x%08X'
+0x42025b58 'IO_JPEGXR.JXPBWSTA  = 0x%08X'
+0x42025b78 'IO_JPEGXR.JXPBRSTA  = 0x%08X'
+0x42025b98 'IO_JPEGXR.JXJBWSTA  = 0x%08X'
+0x42025bb8 'IO_JPEGXR.JXJBRSTA  = 0x%08X'
+0x42025bd8 'IO_JPEGXR.JXQBRSTA  = 0x%08X'
+0x42025bf8 'IO_JPEGXR.JXLBWSTA  = 0x%08X'
+0x42025c18 'IO_JPEGXR.JXLBRSTA  = 0x%08X'
+0x42025eb7 '@I:Im_JPEGXR_Set_Enc_Decim. decim_type unknown ratio error'
+0x42025ef8 'I:Im_JPEGXR_Set_Enc_Decim. ImgHsize size over error'
+0x42025f30 'I:Im_JPEGXR_Set_Enc_Decim. ImgVsize size over error'
+0x42025f7f 'BIm_JPEGXR_Ctrl_Axi(): pjpgxr_ctrl_axi address error.'
+0x42089298 'jpeg'
+0x420896b3 'BPhoto - JPEG'
+0x420c71ff ' drv_img_JPEG: drv_img_JPEG_DEC_SetImageData() - setting mistake'
+0x420c73cb 'Bdrv_img_JPEG: drv_img_JPEG_DEC_StartDecoding() - IMG_JPEG_OK'
+0x420c78ff 'Bdrv_img_JPEG: drv_img_JPEG_ENC1_SetImageData() - Macro Busy'
+0x420c7fe7 '@drv_img_JPEG: drv_img_JPEG_ENC2_InterruptHandler - interrupt'
+0x420c8483 'Bdrv_img_JPEG: drv_img_JPEG_ENC2_SetImageData() - Macro Busy'
+0x420d509b '?img_JPEG: img_JPEG_CalcQuantizationTable() - quality type = %s'
+0x420d50dc 'img_JPEG: img_JPEG_CalcQuantizationTable() - quality type = %i'
+0x420d511c 'img_JPEG: img_JPEG_CalcQuantizationTable() - iso = %i'
+0x420d5157 'Bimg_JPEG: img_JPEG_CalcQuantizationTable() - Macro retries = %i'
+0x420d5273 'Bimg_JPEG: drv_jpeg_config_CalulateYCCSize() - width     = %d'
+0x420d52b4 'img_JPEG: drv_jpeg_config_CalulateYCCSize() - height    = %d'
+0x420d52f4 'img_JPEG: drv_jpeg_config_CalulateYCCSize() - ycc smpl. = %d'
+0x420d5334 'img_JPEG: drv_jpeg_config_CalulateYCCSize() - ycc size  = %d'
+0x420d5484 'img_JPEG: drv_jpeg_config_DEC_CallbackFunction() - decoding OK'
+0x420d5823 'Bdecode was not sucessfull ret=%x IMG_JPEG_OK=%x'
+0x420d5aa7 'Bdecode was not sucessfull ret=%x IMG_JPEG_OK=%x'
+0x420d5bb7 '@img_JPEG: drv_jpeg_config_Decode() - jpeg addr   : 0x%X'
+0x420d5bf0 'img_JPEG: drv_jpeg_config_Decode() - jpeg size   : %i'
+0x420d5c28 'img_JPEG: drv_jpeg_config_Decode() - ycc_addr[0] : 0x%08X'
+0x420d5c64 'img_JPEG: drv_jpeg_config_Decode() - ycc_addr[1] : 0x%08X'
+0x420d5ca0 'img_JPEG: drv_jpeg_config_Decode() - ycc_addr[2] : 0x%08X'
+0x420d612f '@JPEG: JPEG4_encode Started Without Ending'
+0x420d67f7 '@img_JPEG: drv_jpeg_config_Encode() - ycc_addr[0]   : 0x%X'
+0x420d6834 'img_JPEG: drv_jpeg_config_Encode() - ycc_addr[1]   : 0x%X'
+0x420d6870 'img_JPEG: drv_jpeg_config_Encode() - ycc_addr[2]   : 0x%X'
+0x420d68ac 'img_JPEG: drv_jpeg_config_Encode() - image width Y : %i'
+0x420d68e4 'img_JPEG: drv_jpeg_config_Encode() - image width C : %i'
+0x420d691c 'img_JPEG: drv_jpeg_config_Encode() - used width    : %i'
+0x420d6954 'img_JPEG: drv_jpeg_config_Encode() - used height   : %i'
+0x420d698c 'img_JPEG: drv_jpeg_config_Encode() - ycc_smpl      : %i'
+0x420d69c4 'img_JPEG: drv_jpeg_config_Encode() - jpeg core     : %i'
+0x420d69fc 'img_JPEG: drv_jpeg_config_Encode() - jpeg addr     : 0x%X'
+0x420d6a38 'img_JPEG: drv_jpeg_config_Encode() - jpeg quality  : %i'
+0x420d6a70 'img_JPEG: drv_jpeg_config_Encode() - jpeg max size : %i'
+0x420d6aa8 'img_JPEG: drv_jpeg_config_Encode() - jpeg size     : %i'
+0x420d6ae0 'img_JPEG: drv_jpeg_config_Encode() - iso           : %i'
+0x420d6b18 'img_JPEG: drv_jpeg_config_Encode() - retries       : %i'
+0x420d6bcf '@img_JPEG: drv_jpeg_config_Encode() - invalid core: %i'
+0x420d755b '@img_JPEG: drv_jpeg_config_Encode() - ycc_addr[0]      : 0x%X'
+0x420d759c 'img_JPEG: drv_jpeg_config_Encode() - ycc_addr[1]      : 0x%X'
+0x420d75dc 'img_JPEG: drv_jpeg_config_Encode() - ycc_addr[2]      : 0x%X'
+0x420d761c 'img_JPEG: drv_jpeg_config_Encode() - image width Y    : %i'
+0x420d7658 'img_JPEG: drv_jpeg_config_Encode() - image width C    : %i'
+0x420d7694 'img_JPEG: drv_jpeg_config_Encode() - used width       : %i'
+0x420d76d0 'img_JPEG: drv_jpeg_config_Encode() - used height      : %i'
+0x420d770c 'img_JPEG: drv_jpeg_config_Encode() - ycc_smpl         : %i'
+0x420d7748 'img_JPEG: drv_jpeg_config_Encode() - jpeg addr        : 0x%X'
+0x420d7788 'img_JPEG: drv_jpeg_config_Encode() - jpeg max size    : %i'
+0x420d77c4 'img_JPEG: drv_jpeg_config_Encode() - jpeg size        : %i'
+0x420d7800 'img_JPEG: drv_jpeg_config_Encode() - _QualFactor      : %i'
+0x420d783c 'img_JPEG: drv_jpeg_config_Encode() - reinit_checksum  : %i'
+0x420d7c6f '@img_JPEG: drv_jpeg_config_Encode() - ycc_addr[0]      : 0x%X'
+0x420d7cb0 'img_JPEG: drv_jpeg_config_Encode() - ycc_addr[1]      : 0x%X'
+0x420d7cf0 'img_JPEG: drv_jpeg_config_Encode() - ycc_addr[2]      : 0x%X'
+0x420d7d30 'img_JPEG: drv_jpeg_config_Encode() - image width Y    : %i'
+0x420d7d6c 'img_JPEG: drv_jpeg_config_Encode() - image width C    : %i'
+0x420d7da8 'img_JPEG: drv_jpeg_config_Encode() - used width       : %i'
+0x420d7de4 'img_JPEG: drv_jpeg_config_Encode() - used height      : %i'
+0x420d7e20 'img_JPEG: drv_jpeg_config_Encode() - ycc_smpl         : %i'
+0x420d7e5c 'img_JPEG: drv_jpeg_config_Encode() - jpeg addr        : 0x%X'
+0x420d7e9c 'img_JPEG: drv_jpeg_config_Encode() - jpeg max size    : %i'
+0x420d7ed8 'img_JPEG: drv_jpeg_config_Encode() - jpeg size        : %i'
+0x420d7f14 'img_JPEG: drv_jpeg_config_Encode() - _QualFactor      : %i'
+0x420d7f50 'img_JPEG: drv_jpeg_config_Encode() - reinit_checksum  : %i'
+0x420d841f '@img_JPEG: new_quality_factor:%d basic_quality_factor:%d'
+0x42154f28 'YC CONVERSION     String:%s'
+0x42154f4c 'NO VALID STRING   img_b2y_select_yc_conversion_paraset'
+0x4215e0bc 'IMG: E_IMG_WFQ_WSET_DNG_JPEG'
+0x4215e0dc 'IMG: E_IMG_WFQ_WSET_JPEG'
+0x4215e17c 'IMG: E_IMG_WFQ_DNG_JPEG'
+0x4215e194 'IMG: E_IMG_WFQ_JPEG'
+0x421635e7 '@IMG: no valid Busy-Job at JPEG1 Interrupt'
+0x421639c3 '@IMG: no valid Busy-Job at JPEG1 Interrupt'
+0x421686e4 'IMG: -----ERROR----- img_jpeg_fill_if_struct2'
+0x42168714 'IMG: -----ERROR----- img_jpeg_fill_if_struct1'
+0x42168794 'IMG: -----ERROR----- img_jpeg_get_still_scale_factor1'
+0x4216d370 'IMG:-----ERROR------ JPEG_DECODE unknown PlaySubMode'
+0x4216d3ab 'BIMG: ------------ERROR------------- JPEG Decoder '
+0x421a9fc4 'dc:format="image/jpeg" '
+0x421b28d4 'str_images_read_exif_header(): invalid JPEG marker'
+0x421d2ee0 '/data/gui/OTHERS_480_DEBUG_FISHBONE.ycc'
+0x421d2f08 '/data/gui/OTHERS_768_DEBUG_FISHBONE.ycc'
+0x421d2fc8 '/data/OTHERS_480_DEBUG_FISHBONE.ycc'
+0x421d2fec '/data/OTHERS_768_DEBUG_FISHBONE.ycc'
+0x421d30fc '/data/gui/OTHERS_480_BAYONET.ycc'
+0x421d3120 '/data/gui/OTHERS_768_BAYONET.ycc'
+0x421d31e0 '/data/OTHERS_480_BAYONET.ycc'
+0x421d3200 '/data/OTHERS_768_BAYONET.ycc'
+0x421e9814 'drv_jpeg_config_DbgObject'
+0x428336fc 'img_JPEG:iso: %i core_1: %i [kByte] core_2: %i [kByte]- factor = %f  '
+0x42833744 'img_JPEG: E_JPEG_VIDEO_STREAM - g_jpeg_ENC1_image_size: %i [kByte] _FrameSize_kByte:%.0f '
+0x428337a0 'img_JPEG: E_JPEG_VIDEO_4K_PROXY - g_jpeg_ENC1_image_size: %i [kByte] _FrameSize_kByte:%.0f '
+0x428337fc 'img_JPEG: drv_jpeg_config_CalulateYCCSize() - Error: unknown format !!!'
+0x42833844 'img_JPEG: drv_jpeg_config_ENC1_CallbackFunction() - encoding finished : encoding failed (JPEG size = 0)'
+0x428338ac 'img_JPEG: drv_jpeg_config_ENC2_CallbackFunction() - encoding finished : encoding failed (JPEG size = 0)'
+0x42833914 'img_JPEG: drv_jpeg_config_DecodeHeader() - drv_img_JPEG_DEC_SetHeaderData failed (errCode = 0x%X)'
+0x42833978 'img_JPEG:  drv_jpeg_config_DecodeImage() - img_JPEG_SetDecImage failed (errCode = 0x%X)'
+0x428339d0 'img_JPEG: drv_jpeg_config_DEC_HeaderCallbackFunction() - img_JPEG_SetDecImage failed (errCode = 0x%X)'
+0x42833a38 'img_JPEG: drv_jpeg_config_DEC_HeaderCallbackFunction() - decoding header failed (errCode = 0x%X)'
+0x42833a9c 'img_JPEG: drv_jpeg_config_DEC_ImageCallbackFunction() - decoding failed (result = 0x%X)'
+0x42833af4 'img_JPEG: drv_jpeg_config_ENC1_CallbackFunction() - encoding failed (result = 0x%X)'
+0x42833b48 'img_JPEG: drv_jpeg_config_ENC2_CallbackFunction() - encoding failed (result = 0x%X)'
+0x42833b9c 'img_JPEG: drv_jpeg_config_DEC_HeaderCallbackFunction() - decoding header failed (result = 0x%X)'
+0x42833bfc 'img_JPEG: drv_jpeg_config_DEC_ImageCallbackFunction() - decoding failed - not 16 pixel boundary (result = 0x%X)'
+0x42833c6c 'img_JPEG: drv_jpeg_config_DEC_ImageCallbackFunction() - decoding failed - wrong YCC type in header (type = %i)(result = 0x%X)'
+0x42833cec 'img_JPEG: drv_jpeg_config_Encode() - drv_jpeg_config_ENC1_SetImageData of core 1 failed (errCode = %i)'
+0x42833d54 'img_JPEG: drv_jpeg_config_Encode() - drv_jpeg_config_ENC1_SetImageData of core 2 failed (errCode = %i)'
+0x42833dbc 'img_JPEG: drv_jpeg_config_ENC1_CallbackFunction() - encoding failed (err_code = %i)'
+0x42833e10 'img_JPEG: drv_jpeg_config_ENC2_CallbackFunction() - encoding failed (err_code = %i)'
+0x42833e64 'img_JPEG: drv_jpeg_config_CalulateYCCSize() - parameter error(width = %i, height = %i)'
+0x42833ebc 'img_JPEG: img_JPEG_ENC_SetQuality - unsupported ISO format !!! (%i)'
+0x42833f00 'img_JPEG: img_JPEG_ENC_SetQuality - unsupported quality format !!! (%i)'
+0x42833f48 'img_JPEG: drv_jpeg_config_CalulateYCCSize() - YCC format = E_IMG_JPEG_YCC420'
+0x42833f98 'img_JPEG: drv_jpeg_config_CalulateYCCSize() - YCC format = E_IMG_JPEG_YCC422'
+0x42833fe8 'img_JPEG: drv_jpeg_config_CalulateYCCSize() - YCC format = E_IMG_JPEG_YCC444'
+0x42834098 'img_JPEG: drv_jpeg_config_DEC_CallbackFunction(): decoding failed (result = 0x%X'
+0x428340ec 'img_JPEG: drv_jpeg_config_ENC1_SetImageData() - set JPEG encoding image failed (errCode = %0x%X'
+0x4283414c 'img_JPEG: drv_jpeg_config_ENC2_SetImageData() - set JPEG encoding image failed (errCode = %0x%X'
+0x428341ac 'img_JPEG: drv_jpeg_config_Decode() - parameter not valid (_jpeg_addr: 0x%08X, _ycc_addr[0]: 0x%08X, _ycc_addr[1]: 0x%08X, _ycc_addr[2]: 0x%08X, _jpeg_size = %i, _pcallbackFunction = 0x%08X'
+0x4283426c 'img_JPEG: drv_jpeg_config_GetVideoQualityFactor() - core: %d, format: %d, size: % 5.0f[kB], quality: %d'
+0x428342d4 'img_JPEG: drv_jpeg_config_DEC_CallbackFunction() - img_jpeg0_interrupt_handler will be called'
+0x42834334 'img_JPEG: img_JPEG_CalcQuantizationTable() - quality factor = %f'
+0x42834378 'img_JPEG: E_IMG_JPEG_MODE_ENCODE_VIDEO_HD-_FrameSize_kByte: %i [kByte] int32QualityFactor:%.f'
+0x428343d8 'img_JPEG: E_IMG_JPEG_MODE_ENCODE_VIDEO_4K-_FrameSize_kByte: %i [kByte] int32QualityFactor:%.f'
+0x42834438 'img_JPEG: E_IMG_JPEG_MODE_ENCODE_VIDEO_STREAM-_FrameSize_kByte: %i [kByte] int32QualityFactor:%.f'
+0x4283449c 'img_JPEG: E_IMG_JPEG_MODE_ENCODE_VIDEO_4K_PROXY-_FrameSize_kByte: %i [kByte] int32QualityFactor:%.f'
+0x42834500 'img_JPEG: drv_jpeg_config_Encode() - parameter not valid (image width Y: %i, image width C: %i, used width: %i, used height: %i, jpeg max size = %i'
+0x42834594 'img_JPEG: drv_jpeg_config_ENC2_SetJPEGQuality() - do not load quantization table again'
+0x428345ec 'img_JPEG: drv_jpeg_config_ENC2_SetJPEGQuality() - reload quantization table again'
+0x428346c8 'img_JPEG: drv_jpeg_config_DEC_ImageCallbackFunction() - decode image successfully'
+0x4283471c 'img_JPEG: drv_jpeg_config_DEC_HeaderCallbackFunction() - decode header successfully'
+0x4284246c 'STR_IMG: StorageStoreImage: Error writing dngLosslessJPEG_Marker of %s, %x(%d)'
+0x4284e64c 'drv_img_JPEG: drv_img_JPEG_ENC2_InterruptHandler - no callback function!!!'
+0x4284e698 'drv_img_JPEG: drv_img_JPEG_DEC_StartDecoding() - start decoding (async.)'
+0x4284e6e4 'drv_img_JPEG: drv_img_JPEG_DEC_SetCallbackFunction() - set pause callback function for decoding (addr.: 0x%X)'
+0x4284e754 'drv_img_JPEG: drv_img_JPEG_DEC_SetCallbackFunction() - set callback function for decoding (addr.: 0x%X)'
+0x4284e7bc 'drv_img_JPEG: drv_img_JPEG_ENC2_SetCallbackFunction() - set pause callback function for encoding (addr.: 0x%X)'
+0x4284e82c 'drv_img_JPEG: drv_img_JPEG_ENC2_SetCallbackFunction() - set callback function for encoding (addr.: 0x%X)'
+0x4284e898 'drv_img_JPEG: drv_img_JPEG_DEC_StartDecoding() - IMG_JPEG_DECODE_NG'
+0x4284e8dc 'drv_img_JPEG: drv_img_JPEG_DEC_StartDecoding() - IMG_JPEG_DECODE_HEADER_NG'
+0x4284e928 'drv_img_JPEG: drv_img_JPEG_DEC_SetImageData() - _jpg_dec_mng = NULL'
+0x4284e96c 'drv_img_JPEG: drv_img_JPEG_DEC_StartDecoding() - _jpg_dec_mng = NULL'
+0x4284e9b4 'drv_img_JPEG: drv_img_JPEG_ENC1_StartEncoding() - _jpg_enc_mng = NULL'
+0x4284e9fc 'drv_img_JPEG: drv_img_JPEG_ENC2_StartEncoding() - _jpg_enc_mng = NULL'
+0x4284ea44 'drv_img_JPEG: drv_img_JPEG_DEC_StartDecoding() - IMG_JPEG_DECODE_TIMEOUT'
+0x4284ea90 'drv_img_JPEG: drv_img_JPEG_ENC1_SetCallbackFunction() - set pause callback function for encoding : 0x%X'
+0x4284eaf8 'drv_img_JPEG: drv_img_JPEG_ENC1_SetCallbackFunction() - set marker callback function for encoding : 0x%X'
+0x4284eb64 'drv_img_JPEG: drv_img_JPEG_ENC1_SetCallbackFunction() - set callback function for encoding : 0x%X'
+0x4284ebc8 'drv_img_JPEG: drv_img_JPEG_DEC_ENC1_InterruptHandler - decoding header succeeded'
+0x4284ec1c 'drv_img_JPEG: drv_img_JPEG_DEC_SetHeaderData() - set header for decoding failed'
+0x4284ec6c 'drv_img_JPEG: drv_img_JPEG_DEC_ENC1_InterruptHandler - decode continue'
+0x4284ecb4 'drv_img_JPEG: drv_img_JPEG_DEC_ENC1_InterruptHandler - repeat -> decode continue'
+0x4284ed08 'drv_img_JPEG: drv_img_JPEG_DEC_SetHeaderData() - set decoding header flag'
+0x4284ed54 'drv_img_JPEG: drv_img_JPEG_ENC1_SetImageData() - invalid ycc smpl type: %i'
+0x4284eda0 'drv_img_JPEG: drv_img_JPEG_ENC2_SetImageData() - invalid ycc smpl type: %i'
+0x4284edec 'drv_img_JPEG: drv_img_JPEG_ENC1_SetJPEGQuality() - quality type = %i'
+0x4284ee34 'drv_img_JPEG: drv_img_JPEG_ENC2_SetJPEGQuality() - quality type = %i'
+0x4284ee7c 'drv_img_JPEG: drv_img_JPEG_ENC1_SetMaximumJPEGSize() - size to high -> size = %i'
+0x4284eed0 'drv_img_JPEG: drv_img_JPEG_ENC2_SetMaximumJPEGSize() - size to high -> size = %i'
+0x4284ef24 'drv_img_JPEG: drv_img_JPEG_ENC1_SetMaximumJPEGSize() - max JPEG size = %i'
+0x4284ef70 'drv_img_JPEG: drv_img_JPEG_ENC2_SetMaximumJPEGSize() - max JPEG size = %i'
+0x4284efbc 'drv_img_JPEG: drv_img_JPEG_ENC1_GetEncodeSizeOver() - encoding size over = %i'
+0x4284f00c 'drv_img_JPEG: drv_img_JPEG_ENC2_GetEncodeSizeOver() - encoding size over = %i'
+0x4284f05c 'drv_img_JPEG: drv_img_JPEG_DEC_ENC1_InterruptHandler - image size could be read: width = %i, height = %i'
+0x4284f0c8 'drv_img_JPEG: drv_img_JPEG_DEC_ENC1_InterruptHandler - JCF: image data of one frame is completed of JC channel'
+0x4284f138 'drv_img_JPEG: drv_img_JPEG_ENC2_InterruptHandler - JCF: image data of one frame is completed of JC channel'
+0x4284f1a4 'drv_img_JPEG: drv_img_JPEG_DEC_ENC1_InterruptHandler - JIF: image data of one frame is completed of JI channel'
+0x4284f214 'drv_img_JPEG: drv_img_JPEG_ENC2_InterruptHandler - JIF: image data of one frame is completed of JI channel'
+0x4284f280 'drv_img_JPEG: drv_img_JPEG_ENC1_StartEncoding() - clear encoding callback function'
+0x4284f2d4 'drv_img_JPEG: drv_img_JPEG_ENC2_StartEncoding() - clear encoding callback function'
+0x4284f328 'drv_img_JPEG: drv_img_JPEG_ENC2_Initialize() - delete all global structure values, mask interrupt 29 and reset restart JPEG Macro'
+0x4284f3ac 'drv_img_JPEG: drv_img_JPEG_DEC_SetHeaderData() - invalid parameter'
+0x4284f3f0 'drv_img_JPEG: drv_img_JPEG_DEC_ENC1_InterruptHandler - JCSF: JC channel sector over'
+0x4284f444 'drv_img_JPEG: drv_img_JPEG_ENC2_InterruptHandler - JCSF: JC channel sector over'
+0x4284f494 'drv_img_JPEG: drv_img_JPEG_DEC_ENC1_InterruptHandler - the size of width is not 16 byte alignment or it judges image size error'
+0x4284f514 'drv_img_JPEG: drv_img_JPEG_ENC2_SetJPEGQuality() - reload quantization tables'
+0x4284f564 'drv_img_JPEG: drv_img_JPEG_DEC_ENC1_Close() - clear global structures and flags'
+0x4284f5b4 'drv_img_JPEG: drv_img_JPEG_ENC2_Close() - clear global structures and flags'
+0x4284f600 'drv_img_JPEG: drv_img_JPEG_DEC_ENC1_InterruptHandler - JPINTS.bit.ST2 is set -> a compressed data error occurs'
+0x4284f670 'drv_img_JPEG: drv_img_JPEG_DEC_ENC1_InterruptHandler - process end (PE=1) flag set'
+0x4284f6c4 'drv_img_JPEG: drv_img_JPEG_DEC_ENC1_InterruptHandler - decode interrupt'
+0x4284f70c 'drv_img_JPEG: drv_img_JPEG_DEC_ENC1_InterruptHandler - encode interrupt'
+0x4284f754 'drv_img_JPEG: drv_img_JPEG_DEC_ENC1_InterruptHandler - process ends normally'
+0x4285b790 'C:/Workspace/DS-5/MAJA_org/Core/Drivers/Maestro_2/M7_API/Project/ImageMacro/src/im_jpegxr.c'
+
+=== YC SELECTOR XREFS 0x42154C00..0x42155200 ===
+xref_count 0
+
+=== YC OWNER(S) FILTERED SIDE-EFFECT SURFACE ===
+
+=== YC OWNER CA9 COLOR-STATE DEPENDENCY ===
+
+=== YC OWNER KNOWN NONLINEAR CALLS ===
+
+=== DECISION GATE ===
+If TF loader is unconditional and YC owner has no CA9-color dependency, treat TF remapping as calibration/control data rather than evidence for a mode-specific output OETF. Keep Android OETF unchanged until a downstream JPEG/encoder transfer stage is positively identified.
