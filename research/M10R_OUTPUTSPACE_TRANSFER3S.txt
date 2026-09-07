@@ -1,0 +1,399 @@
+M10-R OUTPUTSPACE TRANSFER3S
+
+=== INTERPOLATION GAMMA LOADER WITH RESOLVED ADR STRINGS ===
+4215440c: push       {r4, r5, r6, r7, lr}
+4215440e: sub        sp, #0x44
+42154410: movs       r7, r0
+42154412: movs       r5, r1
+42154414: movs       r6, #0
+42154416: ldr        r0, [pc, #0x4c] ; LIT 0x42154464->0x408cedb6 PTRSTR=None
+42154418: ldrb       r0, [r0]
+4215441a: cmp        r0, #1
+4215441c: bne        #0x42154422
+4215441e: cmp        r5, #1
+42154420: beq        #0x42154460
+42154422: movs       r0, #1
+42154424: ldr        r1, [pc, #0x3c] ; LIT 0x42154464->0x408cedb6 PTRSTR=None
+42154426: strb       r0, [r1]
+42154428: adr        r0, #0x3c ; ADR=0x42154468 STR=None
+4215442a: ldrb       r0, [r0]
+4215442c: mov        r1, sp
+4215442e: strb       r0, [r1, #4]
+42154430: add        r2, sp, #4
+42154432: adr        r1, #0x38 ; ADR=0x4215446c STR='INTERPOLATION GAMMA    String:%s'
+42154434: movs       r0, #2
+42154436: bl         #0x42140150 ; CALL=0x42140150
+4215443a: add        r2, sp, #4
+4215443c: movs       r1, #9
+4215443e: adr        r0, #0x50 ; ADR=0x42154490 STR='B2Y.bin'
+42154440: bl         #0x421a0fc0 ; CALL=0x421a0fc0
+42154444: movs       r4, r0
+42154446: cmp        r4, #0
+42154448: bne        #0x42154458
+4215444a: movs       r6, #1
+4215444c: ldr        r1, [pc, #0x14] ; LIT 0x42154464->0x408cedb6 PTRSTR=None
+4215444e: strb       r0, [r1]
+42154450: adr        r1, #0x44 ; ADR=0x42154498 STR='NO VALID STRING   img_b2y_select_interpolation_gamma_paraset'
+42154452: movs       r0, #4
+42154454: bl         #0x42140150 ; CALL=0x42140150
+42154458: movs       r1, r6
+4215445a: movs       r0, r4
+4215445c: bl         #0x420d25a4 ; CALL=0x420d25a4
+42154460: add        sp, #0x44
+42154462: pop        {r4, r5, r6, r7, pc}
+
+=== RAW DATA/ASCII 0x42154464..0x42154520 ===
+42154464: b6ed8c4000000000494e544552504f4c  ...@....INTERPOL
+42154474: 4154494f4e2047414d4d412020202053  ATION GAMMA    S
+42154484: 7472696e673a2573000000004232592e  tring:%s....B2Y.
+42154494: 62696e004e4f2056414c494420535452  bin.NO VALID STR
+421544a4: 494e47202020696d675f6232795f7365  ING   img_b2y_se
+421544b4: 6c6563745f696e746572706f6c617469  lect_interpolati
+421544c4: 6f6e5f67616d6d615f70617261736574  on_gamma_paraset
+421544d4: 00000000f0b5a1b004000e0000272088  .............' .
+421544e4: 5f49098888420dd18c2000595d490968  _I...B... .Y]I.h
+421544f4: 884207d1b02000595b490968884201d1  .B... .Y[I.h.B..
+42154504: 012e7dd07af7b2ff01287ad120885449  ..}.z....(z. .TI
+42154514: 08808c20005953490860b02000595249  ... .YSI.`. .YRI
+
+=== ASCII STRINGS 0x42154300..0x42154680 ===
+0x42154304 'HIGH FREQ EDGE ENHANCEMENT  StringTABLE:%s'
+0x42154330 'B2Y.bin'
+0x421543af '@INTERPOLATION     String:%s'
+0x421543cc 'B2Y.bin'
+0x421543d4 'NO VALID STRING   img_b2y_select_interploation_paraset'
+0x4215442b 'xiF'
+0x4215446c 'INTERPOLATION GAMMA    String:%s'
+0x42154490 'B2Y.bin'
+0x42154498 'NO VALID STRING   img_b2y_select_interpolation_gamma_paraset'
+0x421544ef 'Y]I'
+0x421544fb 'Y[I'
+0x42154519 'YSI'
+0x42154521 'YRI'
+0x42154579 "':I"
+0x42154581 '`:I'
+0x42154585 '`QI'
+0x42154598 '"!J'
+0x421545a7 "'.I"
+0x421545af '`GI'
+0x421545b8 '"!('
+0x421545c2 '#!?'
+0x421545d1 "'$I"
+0x421545d9 '`>I'
+0x421545e2 '#!('
+0x421545ec '$!5'
+0x42154609 '`3I'
+0x42154612 '$!('
+0x4215461c '%!)'
+0x42154633 '`)I'
+0x4215463c '%!('
+0x42154655 '`"I'
+0x4215466f '@LOW FREQ EDGE EN'
+
+=== NEXT FUNCTION CONTAINING +0xB4 HIT ===
+421544d8: push       {r4, r5, r6, r7, lr}
+421544da: sub        sp, #0x84
+421544dc: movs       r4, r0
+421544de: movs       r6, r1
+421544e0: movs       r7, #0
+421544e2: ldrh       r0, [r4]
+421544e4: ldr        r1, [pc, #0x17c] ; LIT 0x42154664->0x408cedd4 PTRSTR=None
+421544e6: ldrh       r1, [r1]
+421544e8: cmp        r0, r1
+421544ea: bne        #0x42154508
+421544ec: movs       r0, #0x8c
+421544ee: ldr        r0, [r0, r4]
+421544f0: ldr        r1, [pc, #0x174] ; LIT 0x42154668->0x408cedd8 PTRSTR=None
+421544f2: ldr        r1, [r1]
+421544f4: cmp        r0, r1
+421544f6: bne        #0x42154508
+421544f8: movs       r0, #0xb0
+421544fa: ldr        r0, [r0, r4]
+421544fc: ldr        r1, [pc, #0x16c] ; LIT 0x4215466c->0x408ceddc PTRSTR=None
+421544fe: ldr        r1, [r1]
+42154500: cmp        r0, r1
+42154502: bne        #0x42154508
+42154504: cmp        r6, #1
+42154506: beq        #0x42154604
+42154508: bl         #0x420cf470 ; CALL=0x420cf470
+4215450c: cmp        r0, #1
+4215450e: bne        #0x42154606
+42154510: ldrh       r0, [r4]
+42154512: ldr        r1, [pc, #0x150] ; LIT 0x42154664->0x408cedd4 PTRSTR=None
+42154514: strh       r0, [r1]
+42154516: movs       r0, #0x8c
+42154518: ldr        r0, [r0, r4]
+4215451a: ldr        r1, [pc, #0x14c] ; LIT 0x42154668->0x408cedd8 PTRSTR=None
+4215451c: str        r0, [r1]
+4215451e: movs       r0, #0xb0
+42154520: ldr        r0, [r0, r4]
+42154522: ldr        r1, [pc, #0x148] ; LIT 0x4215466c->0x408ceddc PTRSTR=None
+42154524: str        r0, [r1]
+42154526: adds       r1, r4, #2
+42154528: add        r0, sp, #0x44
+4215452a: bl         #0x4204efd4 ; CALL=0x4204efd4
+4215452e: movs       r1, r4
+42154530: adds       r1, #0x90
+42154532: add        r0, sp, #0x44
+42154534: bl         #0x4204f1f4 ; CALL=0x4204f1f4
+42154538: movs       r1, r4
+4215453a: adds       r1, #0xb4
+4215453c: add        r0, sp, #0x44
+4215453e: bl         #0x4204f1f4 ; CALL=0x4204f1f4
+42154542: adds       r1, r4, #2
+42154544: add        r0, sp, #4
+42154546: bl         #0x4204efd4 ; CALL=0x4204efd4
+4215454a: movs       r1, r4
+4215454c: adds       r1, #0x90
+4215454e: add        r0, sp, #4
+42154550: bl         #0x4204f1f4 ; CALL=0x4204f1f4
+42154554: add        r2, sp, #0x44
+42154556: adr        r1, #0x118 ; ADR=0x42154670 STR='LOW FREQ EDGE ENHANCEMENT   String:%s'
+42154558: movs       r0, #2
+4215455a: bl         #0x42140150 ; CALL=0x42140150
+4215455e: add        r2, sp, #4
+42154560: adr        r1, #0x134 ; ADR=0x42154698 STR='LOW FREQ EDGE ENHANCEMENT   StringTABLE:%s'
+42154562: movs       r0, #2
+42154564: bl         #0x42140150 ; CALL=0x42140150
+42154568: add        r2, sp, #0x44
+4215456a: movs       r1, #0x10
+4215456c: adr        r0, #0x154 ; ADR=0x421546c4 STR='B2Y.bin'
+4215456e: bl         #0x421a0fc0 ; CALL=0x421a0fc0
+42154572: movs       r5, r0
+42154574: cmp        r5, #0
+42154576: bne        #0x4215458e
+42154578: movs       r7, #1
+4215457a: ldr        r1, [pc, #0xe8] ; LIT 0x42154664->0x408cedd4 PTRSTR=None
+4215457c: strh       r0, [r1]
+4215457e: ldr        r1, [pc, #0xe8] ; LIT 0x42154668->0x408cedd8 PTRSTR=None
+42154580: str        r0, [r1]
+42154582: ldr        r1, [pc, #0xe8] ; LIT 0x4215466c->0x408ceddc PTRSTR=None
+42154584: str        r0, [r1]
+42154586: ldr        r1, [pc, #0x144] ; LIT 0x421546cc->0x4283cfb8 PTRSTR='NO VALID STRING   img_b2y_select_low_freq_edge_enhancement_paraset'
+42154588: movs       r0, #4
+4215458a: bl         #0x42140150 ; CALL=0x42140150
+4215458e: movs       r1, r7
+42154590: movs       r0, r5
+42154592: bl         #0x420d2638 ; CALL=0x420d2638
+42154596: add        r2, sp, #4
+42154598: movs       r1, #0x22
+4215459a: adr        r0, #0x128 ; ADR=0x421546c4 STR='B2Y.bin'
+4215459c: bl         #0x421a0fc0 ; CALL=0x421a0fc0
+421545a0: movs       r5, r0
+421545a2: cmp        r5, #0
+421545a4: bne        #0x421545b8
+421545a6: movs       r7, #1
+421545a8: ldr        r1, [pc, #0xb8] ; LIT 0x42154664->0x408cedd4 PTRSTR=None
+421545aa: strh       r0, [r1]
+421545ac: ldr        r1, [pc, #0xb8] ; LIT 0x42154668->0x408cedd8 PTRSTR=None
+421545ae: str        r0, [r1]
+421545b0: ldr        r1, [pc, #0x11c] ; LIT 0x421546d0->0x4283cb00 PTRSTR='NO VALID STRING   img_b2y_select_low_freq_edge_enhancement_paraset   SCLP'
+421545b2: movs       r0, #4
+421545b4: bl         #0x42140150 ; CALL=0x42140150
+421545b8: movs       r1, #0x22
+421545ba: movs       r0, r5
+421545bc: bl         #0x420d363c ; CALL=0x420d363c
+421545c0: add        r2, sp, #4
+421545c2: movs       r1, #0x23
+421545c4: adr        r0, #0xfc ; ADR=0x421546c4 STR='B2Y.bin'
+421545c6: bl         #0x421a0fc0 ; CALL=0x421a0fc0
+421545ca: movs       r5, r0
+421545cc: cmp        r5, #0
+421545ce: bne        #0x421545e2
+
+=== GLOBAL INTERPOLATION/GAMMA RESOURCE STRINGS ===
+0x42015a88 'E:Im_DISP_Set_Gamma_Enable: layer error'
+0x42015ab8 'E:Im_DISP_Get_Gamma_Enable: NULL check error or layer error'
+0x42016ef8 'E:Im_DISP_Set_Gamma_Table: parameter error'
+0x42016f3c 'E:Im_DISP_Get_Gamma_Table: parameter error'
+0x420d8944 'GAMMA_ADJ_LV'
+0x420d8954 'SL_GAMMA_ADJ'
+0x420d8a3c 'JDI DISP: GAMMA_ADJ_LV: '
+0x420d8a64 'JDI DISP: SL_GAMMA_ADJ: '
+0x42115e44 'GUI: E_OPT_SETTING_DISPLAY_GAMMA enable'
+0x42115e6c 'GUI: E_OPT_SETTING_DISPLAY_GAMMA disable'
+0x42115e98 'GUI: E_OPT_SETTING_DISPLAY_GAMMA_INV enable'
+0x42115ec4 'GUI: E_OPT_SETTING_DISPLAY_GAMMA_INV disable'
+0x4212441c 'DISP_JDILAM030M084B_main_gamma_full.bin'
+0x42124444 'DISP_JDILAM030M084B_main_gamma_delta.bin'
+0x42124470 'DISP_JDILAM030M084B_main_gamma_reverse_full.bin'
+0x421244a0 'DISP_JDILAM030M084B_main_gamma_reverse_delta.bin'
+0x42154023 '@DIFFERENTIAL GAMMA     String:%s'
+0x421543af '@INTERPOLATION     String:%s'
+0x4215446c 'INTERPOLATION GAMMA    String:%s'
+0x42154498 'NO VALID STRING   img_b2y_select_interpolation_gamma_paraset'
+0x428336b7 'f------ERROR------  drv_img_b2y_set_interpolation_gamma_control() '
+0x4283c8b0 'NO VALID STRING   img_b2y_select_differential_gamma_paraset   TBL'
+0x4283c8f4 'NO VALID STRING   img_b2y_select_differential_gamma_paraset   TBL_FL'
+0x4283cc70 '--- ERROR-----   img_b2y_select_differential_gamma_paraset   no init possible'
+0x4283ce10 'NO VALID STRING   img_b2y_select_differential_gamma_paraset  Control'
+0x4283d2f4 'img_iza_setFrectUnitInfSpecific(): Unknown interpolation mode: %d'
+
+=== CALL 0x421A0FC0 OWNER/STRINGS ===
+421a0f40: ldr        r1, [sp, #8]
+421a0f42: eors       r1, r3
+421a0f44: ldr        r0, [sp, #0xc]
+421a0f46: eors       r0, r2
+421a0f48: orrs       r1, r0
+421a0f4a: beq        #0x421a0f64
+421a0f4c: movs       r0, #0x21
+421a0f4e: lsls       r0, r0, #4
+421a0f50: muls       r0, r4, r0
+421a0f52: ldr        r1, [pc, #0x4c] ; LIT 0x421a0fa0->0x408d5024 PTRSTR=None
+421a0f54: ldr        r1, [r1]
+421a0f56: adds       r0, r0, r1
+421a0f58: movs       r2, r0
+421a0f5a: adds       r2, #8
+421a0f5c: ldr        r1, [pc, #0x5c] ; LIT 0x421a0fbc->0x428451cc PTRSTR='sd1_FindCameraSettingByName: Could not read all bytes. File: [%s]'
+421a0f5e: movs       r0, #4
+421a0f60: bl         #0x42140150 ; CALL=0x42140150
+421a0f64: mov        r8, r8
+421a0f66: movs       r0, #0x21
+421a0f68: lsls       r0, r0, #4
+421a0f6a: muls       r0, r4, r0
+421a0f6c: ldr        r1, [pc, #0x30] ; LIT 0x421a0fa0->0x408d5024 PTRSTR=None
+421a0f6e: ldr        r1, [r1]
+421a0f70: adds       r7, r0, r1
+421a0f72: b          #0x421a0f94
+421a0f74: b          #0x421a0f76
+421a0f76: subs       r0, r4, #1
+421a0f78: lsls       r0, r0, #0x10
+421a0f7a: asrs       r4, r0, #0x10
+421a0f7c: cmp        r4, #0
+421a0f7e: blt        #0x421a0f94
+421a0f80: movs       r0, #0x21
+421a0f82: lsls       r0, r0, #4
+421a0f84: muls       r0, r4, r0
+421a0f86: ldr        r1, [pc, #0x18] ; LIT 0x421a0fa0->0x408d5024 PTRSTR=None
+421a0f88: ldr        r1, [r1]
+421a0f8a: adds       r0, r0, r1
+421a0f8c: adds       r0, #8
+421a0f8e: cmp        r0, #0
+421a0f90: beq        #0x421a0f94
+421a0f92: b          #0x421a0e72
+421a0f94: mov        r8, r8
+421a0f96: movs       r0, r7
+421a0f98: add        sp, #0x1c
+421a0f9a: pop        {r4, r5, r6, r7, pc}
+421a0f9c: str        r0, [r5, r0]
+421a0f9e: lsls       r5, r1
+421a0fa0: str        r4, [r4, r0]
+421a0fa2: lsls       r5, r1
+421a0fa4: strb       r7, [r5, #0xc]
+421a0fa6: strb       r5, [r4, #0x11]
+421a0fa8: ldr        r4, [r6, #0x14]
+421a0faa: str        r6, [r5, #0x74]
+421a0fac: cmp        r7, #0x73
+421a0fae: str        r0, [r6, #0x54]
+421a0fb0: ldr        r2, [r6, #0x54]
+421a0fb2: ldr        r1, [r4, #0x64]
+421a0fb4: ldr        r5, [r4, #0x64]
+421a0fb6: cmp        r7, #0x74
+421a0fb8: movs       r0, r0
+421a0fba: movs       r0, r0
+421a0fbc: str        r4, [r1, r7]
+421a0fbe: cmp        r4, r0
+421a0fc0: push       {r0, r1, r2, r4, r5, r6, r7, lr}
+421a0fc2: sub        sp, #0x10
+421a0fc4: movs       r7, r1
+421a0fc6: movs       r0, #0
+421a0fc8: str        r0, [sp, #0xc]
+421a0fca: ldr        r0, [sp, #0x10]
+421a0fcc: bl         #0x421a0c7c ; CALL=0x421a0c7c
+421a0fd0: movs       r4, r0
+421a0fd2: cmp        r4, #0
+421a0fd4: beq        #0x421a1068
+421a0fd6: movs       r0, #0x41
+421a0fd8: lsls       r0, r0, #3
+421a0fda: ldr        r5, [r0, r4]
+421a0fdc: ldr        r1, [pc, #0xb0] ; LIT 0x421a1090->0xca11bf11 PTRSTR=None
+421a0fde: ldr        r0, [r5]
+421a0fe0: cmp        r0, r1
+421a0fe2: bne        #0x421a105c
+421a0fe4: movs       r0, #0x41
+421a0fe6: lsls       r0, r0, #3
+421a0fe8: ldr        r0, [r0, r4]
+421a0fea: adds       r0, #0x10
+421a0fec: str        r0, [sp, #8]
+421a0fee: movs       r0, #0
+421a0ff0: str        r0, [sp, #4]
+421a0ff2: b          #0x421a1052
+421a0ff4: movs       r1, #0xa9
+421a0ff6: lsls       r1, r1, #4
+421a0ff8: ldr        r0, [sp, #4]
+421a0ffa: muls       r0, r1, r0
+421a0ffc: ldr        r1, [sp, #8]
+421a0ffe: adds       r6, r0, r1
+421a1000: ldr        r0, [r6]
+421a1002: cmp        r0, r7
+421a1004: bne        #0x421a104c
+421a1006: movs       r0, #0
+421a1008: str        r0, [sp]
+421a100a: b          #0x421a1042
+421a100c: ldr        r1, [sp]
+421a100e: lsls       r2, r1, #6
+421a1010: movs       r1, r6
+421a1012: adds       r1, #0x10
+421a1014: adds       r0, r2, r1
+421a1016: movs       r2, #0x40
+421a1018: ldr        r1, [sp, #0x18]
+421a101a: bl         #0x4204f160 ; CALL=0x4204f160
+421a101e: cmp        r0, #0
+421a1020: bne        #0x421a103c
+421a1022: ldr        r1, [r6, #4]
+421a1024: movs       r2, #0xa9
+421a1026: lsls       r2, r2, #4
+421a1028: ldr        r0, [r5, #8]
+421a102a: muls       r0, r2, r0
+421a102c: adds       r0, r1, r0
+421a102e: adds       r0, #0x10
+421a1030: movs       r1, #0x41
+421a1032: lsls       r1, r1, #3
+421a1034: ldr        r1, [r1, r4]
+421a1036: adds       r0, r0, r1
+421a1038: str        r0, [sp, #0xc]
+421a103a: b          #0x421a104a
+421a103c: ldr        r0, [sp]
+421a103e: adds       r0, r0, #1
+421a1040: str        r0, [sp]
+421a1042: ldr        r1, [r6, #0xc]
+421a1044: ldr        r0, [sp]
+421a1046: cmp        r1, r0
+421a1048: bhi        #0x421a100c
+421a104a: mov        r8, r8
+421a104c: ldr        r0, [sp, #4]
+421a104e: adds       r0, r0, #1
+421a1050: str        r0, [sp, #4]
+421a1052: ldr        r1, [r5, #8]
+421a1054: ldr        r0, [sp, #4]
+421a1056: cmp        r1, r0
+421a1058: bhi        #0x421a0ff4
+421a105a: b          #0x421a1066
+421a105c: ldr        r1, [pc, #0x34] ; LIT 0x421a1094->0x4284509c PTRSTR='sd1_FindImageSettingsByName: FileHeader MagiicNumber 0x%08X != 0xCA11BF11'
+421a105e: movs       r0, #4
+421a1060: ldr        r2, [r5]
+421a1062: bl         #0x42140150 ; CALL=0x42140150
+421a1066: b          #0x421a1072
+421a1068: ldr        r1, [pc, #0x2c] ; LIT 0x421a1098->0x428455d0 PTRSTR='sd1_FindImageSettingsByName: Calibration File [%s] was not found'
+421a106a: movs       r0, #4
+421a106c: ldr        r2, [sp, #0x10]
+421a106e: bl         #0x42140150 ; CALL=0x42140150
+421a1072: ldr        r0, [sp, #0xc]
+421a1074: cmp        r0, #0
+421a1076: bne        #0x421a1088
+421a1078: ldr        r0, [sp, #0x18]
+421a107a: movs       r3, r7
+421a107c: str        r0, [sp]
+421a107e: ldr        r1, [pc, #0x1c] ; LIT 0x421a109c->0x42845440 PTRSTR='sd1_FindImageSettingsByName: NOT Found Entry [%s] | CAT=[%d] | PAR=[%s]'
+0x421a0e47 '@/data/calib/'
+0x421a0e76 '`CIJ'
+0x421a0e96 '`CAJ'
+0x421a0eb4 '`C:I'
+0x421a0ee4 '`C.J'
+0x421a0f08 '`C%I'
+0x421a0fa3 '@/settings/permanent/'
+0x421a0fdb 'Y,I(h'
+0x421a11c8 '/user/'
+
+=== DECISION GATE ===
+Resolve exact asset/resource requested by 0x4215440C and whether its key contains output-space state. Distinguish fixed interpolation-gamma asset from color-space-selected asset.
