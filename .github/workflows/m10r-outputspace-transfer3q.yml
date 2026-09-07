@@ -1,0 +1,145 @@
+name: M10-R output-space transfer 3Q
+on:
+  push:
+    branches: [m10r-outputspace-transfer1a]
+    paths: ['.github/workflows/m10r-outputspace-transfer3q.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Target B2Y control setter xrefs
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int bb=r.get();if(!bb)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER3Q.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();B=0x42000000;P=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True
+          def off(a):return P+a-B
+          def one(a):
+            q=off(a)
+            if q<0 or q>=len(b):return None
+            z=list(md.disasm(b[q:q+4],a,count=1));return z[0] if z else None
+          def ds(a,z):return list(md.disasm(b[off(a):off(z)],a))
+          def call(i):
+            try:
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm
+            except:pass
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;q=off(la)
+                if 0<=q<=len(b)-4:return la,struct.unpack_from('<I',b,q)[0]
+            except:pass
+          def adr(i):
+            try:
+              if i.mnemonic=='adr' and len(i.operands)>1 and i.operands[1].type==ARM_OP_IMM:return ((i.address+4)&~3)+i.operands[1].imm
+            except:pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:9s} {i.op_str}';x=lit(i);a=adr(i);c=call(i)
+            if x:s+=f' ; LIT {x[0]:#x}->{x[1]:#x}'
+            if a is not None:s+=f' ; ADR={a:#x}'
+            if c is not None:s+=f' ; CALL={c:#x}'
+            return s
+          wanted=('operation_mode','tone_control','interpolation_gamma','wbgain')
+          ts=[]
+          for m in re.finditer(rb'[ -~]{5,}',b):
+            t=m.group().decode('latin1','replace');tl=t.lower()
+            if 'drv_img_b2y_' in tl and any(k in tl for k in wanted):ts.append((B+m.start()-P,t))
+          print('M10-R OUTPUTSPACE TRANSFER3Q')
+          print('\n=== TARGET STRINGS ===')
+          for a,t in ts:print(hex(a),repr(t))
+          print('\n=== POINTER WORD OCCURRENCES INTO TARGET STRINGS ===')
+          ptrs=[]
+          for sa,t in ts:
+            for v in range(sa,sa+len(t)+1):
+              pat=struct.pack('<I',v);p=0
+              while True:
+                q=b.find(pat,p)
+                if q<0:break
+                wa=B+q-P;ptrs.append((wa,v,sa,t));print(hex(wa),'->',hex(v),repr(t));p=q+1
+          # de-dupe
+          tmp={}
+          for x in ptrs:tmp[(x[0],x[1])]=x
+          ptrs=list(tmp.values())
+          print('\n=== CODE REFS ===')
+          refs=[]
+          # local ADR scan in +-0x1200 around each string
+          for sa,t in ts:
+            for a in range(max(B,sa-0x1200),min(B+len(b)-P,sa),2):
+              i=one(a)
+              if i:
+                x=adr(i)
+                if x is not None and sa<=x<sa+len(t)+1:
+                  refs.append((a,sa,t));print('ADR',fmt(i),repr(t))
+          # literal-load refs around each pointer word
+          for wa,v,sa,t in ptrs:
+            for a in range(max(B,wa-0x1200),min(B+len(b)-P,wa+4),2):
+              i=one(a)
+              if i:
+                x=lit(i)
+                if x and x[0]==wa:
+                  refs.append((a,sa,t));print('LDR',fmt(i),repr(t))
+          # de-dupe refs
+          rd={}
+          for x in refs:rd[(x[0],x[1])]=x
+          refs=list(rd.values())
+          print('\n=== OWNER FUNCTIONS ===')
+          owners=[]
+          for a,sa,t in refs:
+            cand=None
+            for x in range(max(B,a-0x300),a+2,2):
+              i=one(x)
+              if i and i.mnemonic=='push' and 'lr' in i.op_str:cand=x
+            if cand is not None:owners.append((cand,sa,t,a))
+          od={}
+          for x in owners:od[x[0]]=x
+          owners=list(od.values())
+          for s,sa,t,a in owners:
+            print('\nOWNER',hex(s),'REF',hex(a),'NAME',repr(t))
+            for i in ds(s,min(B+len(b)-P,s+0x500)):
+              print(fmt(i))
+              if i.address>s and i.mnemonic=='pop' and 'pc' in i.op_str:break
+          print('\n=== CALLERS IN B2Y/IMG RANGE ===')
+          for s,sa,t,a0 in owners:
+            print('\nOWNER',hex(s),repr(t))
+            for a in range(0x420c0000,0x42170000,2):
+              i=one(a)
+              if i and call(i)==s:print(fmt(i))
+          print('\n=== RELATION TO APPLY/NORMALIZE FUNCTIONS ===')
+          for lo,hi in ((0x42151f28,0x42152a00),(0x42169000,0x4216c000)):
+            print('RANGE',hex(lo),hex(hi))
+            for a in range(lo,hi,2):
+              i=one(a)
+              if not i:continue
+              c=call(i)
+              if c in [x[0] for x in owners]:print(fmt(i))
+          print('\n=== DECISION GATE ===')
+          print('Determine exact function and register owner for interpolation gamma and whether it is called by the same refresh/apply chain that consumes settings+0xB4 output-space enum.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER3Q.txt
+          git commit -m 'research: targeted B2Y control setter xrefs 3Q' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
