@@ -1,0 +1,2360 @@
+M10-R OUTPUTSPACE TRANSFER1D
+TF_REMAPPING_STRING 0x420a4984 'B2Y_TF_REMAPPING_CA9_CM.bin'
+
+=== TF STRING XREFS ===
+0x420a4892,0x420a489a
+
+=== TF XREF 0x420a4892 OWNER 0x420a4884 ===
+420a4884: push       {r4, r5, r6, r7, lr}
+420a4886: sub        sp, #0x24
+420a4888: movs       r4, r0
+420a488a: movs       r7, #0
+420a488c: movs       r5, #0
+420a488e: mov        r8, r8
+420a4890: movs       r2, #0x1c
+420a4892: adr        r1, #0xf0 ; ADR=0x420a4984 STRING='B2Y_TF_REMAPPING_CA9_CM.bin'
+420a4894: add        r0, sp, #8
+420a4896: blx        #0x4204f2ec ; CALL=0x4204f2ec
+420a489a: adr        r0, #0xe8 ; ADR=0x420a4984 STRING='B2Y_TF_REMAPPING_CA9_CM.bin'
+420a489c: bl         #0x421a0c7c ; CALL=0x421a0c7c
+420a48a0: movs       r5, r0
+420a48a2: cmp        r5, #0
+420a48a4: bne        #0x420a48c8
+420a48a6: add        r0, sp, #8
+420a48a8: movs       r3, #0x7a
+420a48aa: ldr        r2, [pc, #0xf4] ; LIT 0x420a49a0->0x421e9c6f STRING='ca9_cm_Get_BinFileTfRemappingData'
+420a48ac: adr        r1, #0xf4 ; ADR=0x420a49a4 STRING='CA9: %s(), %d - read error %s, file not found'
+420a48ae: str        r0, [sp]
+420a48b0: movs       r0, #3
+420a48b2: bl         #0x42140150 ; CALL=0x42140150
+420a48b6: add        r0, sp, #8
+420a48b8: movs       r3, #0x7b
+420a48ba: ldr        r2, [pc, #0xe4] ; LIT 0x420a49a0->0x421e9c6f STRING='ca9_cm_Get_BinFileTfRemappingData'
+420a48bc: adr        r1, #0x114 ; ADR=0x420a49d4 STRING='CA9: %s(), %d - read error %s, using defaut values'
+420a48be: str        r0, [sp]
+420a48c0: movs       r0, #3
+420a48c2: bl         #0x42140150 ; CALL=0x42140150
+420a48c6: b          #0x420a497c
+420a48c8: movs       r3, #0xff
+420a48ca: adds       r3, #1
+420a48cc: ldr        r1, [r5]
+420a48ce: eors       r1, r3
+420a48d0: ldr        r0, [r5, #4]
+420a48d2: orrs       r1, r0
+420a48d4: bne        #0x420a4950
+420a48d6: movs       r6, #0
+420a48d8: movs       r0, #0x41
+420a48da: lsls       r0, r0, #3
+420a48dc: ldr        r0, [r0, r5]
+420a48de: ldr        r0, [r0]
+420a48e0: str        r0, [r4]
+420a48e2: movs       r0, #0x41
+420a48e4: lsls       r0, r0, #3
+420a48e6: ldr        r0, [r0, r5]
+420a48e8: ldr        r0, [r0, #4]
+420a48ea: str        r0, [r4, #4]
+420a48ec: ldr        r0, [r4, #4]
+420a48ee: cmp        r0, #0x1f
+420a48f0: bls        #0x420a4906
+420a48f2: add        r0, sp, #8
+420a48f4: movs       r3, #0x87
+420a48f6: ldr        r2, [pc, #0xa8] ; LIT 0x420a49a0->0x421e9c6f STRING='ca9_cm_Get_BinFileTfRemappingData'
+420a48f8: adr        r1, #0x10c ; ADR=0x420a4a08 STRING='CA9: %s(), %d - read error %s, to many remapping entries'
+420a48fa: str        r0, [sp]
+420a48fc: movs       r0, #4
+420a48fe: bl         #0x42140150 ; CALL=0x42140150
+420a4902: subs       r7, r6, #1
+420a4904: b          #0x420a494e
+420a4906: movs       r6, #0
+420a4908: b          #0x420a4938
+420a490a: movs       r0, #0x41
+420a490c: lsls       r0, r0, #3
+420a490e: ldr        r0, [r0, r5]
+420a4910: adds       r0, #8
+420a4912: lsls       r1, r6, #3
+420a4914: ldr        r1, [r0, r1]
+420a4916: lsls       r2, r6, #3
+420a4918: movs       r0, r4
+420a491a: adds       r0, #8
+420a491c: str        r1, [r0, r2]
+420a491e: movs       r0, #0x41
+420a4920: lsls       r0, r0, #3
+420a4922: ldr        r0, [r0, r5]
+420a4924: adds       r0, #8
+420a4926: lsls       r1, r6, #3
+420a4928: adds       r0, r0, r1
+420a492a: lsls       r2, r6, #3
+420a492c: ldr        r1, [r0, #4]
+420a492e: movs       r0, r4
+420a4930: adds       r0, #8
+420a4932: adds       r0, r2, r0
+420a4934: str        r1, [r0, #4]
+420a4936: adds       r6, r6, #1
+420a4938: ldr        r0, [r4, #4]
+420a493a: cmp        r0, r6
+420a493c: bhi        #0x420a490a
+420a493e: add        r0, sp, #8
+420a4940: movs       r3, #0x92
+420a4942: ldr        r2, [pc, #0x5c] ; LIT 0x420a49a0->0x421e9c6f STRING='ca9_cm_Get_BinFileTfRemappingData'
+420a4944: adr        r1, #0xfc ; ADR=0x420a4a44 STRING='CA9: %s(), %d - read successfully %s'
+420a4946: str        r0, [sp]
+420a4948: movs       r0, #2
+420a494a: bl         #0x42140150 ; CALL=0x42140150
+420a494e: b          #0x420a497c
+420a4950: movs       r2, #0xff
+420a4952: adds       r2, #1
+420a4954: movs       r3, #0
+420a4956: ldr        r1, [r5, #4]
+420a4958: ldr        r0, [r5]
+420a495a: subs       r0, r2, r0
+420a495c: sbcs       r3, r1
+420a495e: blt        #0x420a4964
+420a4960: adr        r0, #0x108 ; ADR=0x420a4a6c STRING='small'
+420a4962: b          #0x420a4966
+420a4964: adr        r0, #0x10c ; ADR=0x420a4a74 STRING='large'
+420a4966: add        r1, sp, #8
+420a4968: movs       r3, #0x98
+420a496a: ldr        r2, [pc, #0x34] ; LIT 0x420a49a0->0x421e9c6f STRING='ca9_cm_Get_BinFileTfRemappingData'
+420a496c: str        r1, [sp]
+420a496e: str        r0, [sp, #4]
+420a4970: adr        r1, #0x108 ; ADR=0x420a4a7c STRING='CA9: %s(), %d - read error %s, file size to %s'
+420a4972: movs       r0, #4
+420a4974: bl         #0x42140150 ; CALL=0x42140150
+420a4978: movs       r7, #0
+420a497a: mvns       r7, r7
+420a497c: movs       r0, r7
+420a497e: add        sp, #0x24
+420a4980: pop        {r4, r5, r6, r7, pc}
+420a4982: movs       r0, r0
+420a4984: adds       r2, #0x42
+420a4986: ldrsh      r1, [r3, r5]
+420a4988: mov        r4, sl
+420a498a: strh       r7, [r3, r1]
+420a498c: ldr        r5, [pc, #0x114] ; LIT 0x420a4aa4->0x206f7420
+420a498e: str        r1, [r0, r1]
+420a4990: ldr        r1, [pc, #0x140] ; LIT 0x420a4ad4->0x20011a09
+420a4992: bxns       sb
+420a4994: muls       r7, r3, r7
+420a4996: subs       r1, #0x41
+420a4998: muls       r7, r3, r7
+420a499a: cmp        r6, #0x4d
+420a499c: ldr        r2, [r4, #0x14]
+420a499e: lsls       r6, r5, #1
+420a49a0: ldr        r4, [sp, #0x1bc]
+420a49a2: tst        r6, r3
+420a49a4: adcs       r3, r0
+420a49a6: subs       r2, #0x39
+420a49a8: movs       r5, #0x20
+420a49aa: cmp        r0, #0x73
+420a49ac: cmp        r4, #0x29
+420a49ae: movs       r5, #0x20
+420a49b0: movs       r0, #0x64
+420a49b2: movs       r0, #0x2d
+420a49b4: str        r2, [r6, #0x54]
+420a49b6: str        r1, [r4, #0x44]
+420a49b8: str        r0, [r4, #0x50]
+420a49ba: strb       r2, [r6, #9]
+420a49bc: strb       r7, [r5, #9]
+420a49be: movs       r5, #0x20
+420a49c0: cmp        r4, #0x73
+420a49c2: str        r0, [r4, #0x60]
+420a49c4: ldr        r1, [r5, #0x44]
+420a49c6: movs       r0, #0x65
+420a49c8: ldr        r6, [r5, #0x74]
+420a49ca: movs       r0, #0x74
+420a49cc: ldr        r6, [r4, #0x74]
+420a49ce: ldr        r5, [r6, #0x64]
+420a49d0: lsls       r4, r4, #1
+420a49d2: movs       r0, r0
+420a49d4: adcs       r3, r0
+420a49d6: subs       r2, #0x39
+420a49d8: movs       r5, #0x20
+420a49da: cmp        r0, #0x73
+420a49dc: cmp        r4, #0x29
+420a49de: movs       r5, #0x20
+420a49e0: movs       r0, #0x64
+420a49e2: movs       r0, #0x2d
+420a49e4: str        r2, [r6, #0x54]
+420a49e6: str        r1, [r4, #0x44]
+420a49e8: str        r0, [r4, #0x50]
+420a49ea: strb       r2, [r6, #9]
+420a49ec: strb       r7, [r5, #9]
+420a49ee: movs       r5, #0x20
+420a49f0: cmp        r4, #0x73
+420a49f2: strb       r0, [r4, #0x14]
+420a49f4: ldr        r3, [r6, #0x14]
+420a49f6: str        r6, [r5, #0x74]
+420a49f8: str        r0, [r4, #0x40]
+420a49fa: str        r5, [r4, #0x64]
+420a49fc: strb       r1, [r4, #0x15]
+420a49fe: movs       r0, #0x74
+420a4a00: str        r6, [r6, #0x14]
+420a4a02: strb       r4, [r5, #0x15]
+420a4a04: strb       r5, [r4, #0xd]
+420a4a06: movs       r0, r0
+420a4a08: adcs       r3, r0
+420a4a0a: subs       r2, #0x39
+420a4a0c: movs       r5, #0x20
+420a4a0e: cmp        r0, #0x73
+420a4a10: cmp        r4, #0x29
+420a4a12: movs       r5, #0x20
+420a4a14: movs       r0, #0x64
+420a4a16: movs       r0, #0x2d
+420a4a18: str        r2, [r6, #0x54]
+420a4a1a: str        r1, [r4, #0x44]
+420a4a1c: str        r0, [r4, #0x50]
+420a4a1e: strb       r2, [r6, #9]
+420a4a20: strb       r7, [r5, #9]
+420a4a22: movs       r5, #0x20
+420a4a24: cmp        r4, #0x73
+420a4a26: strb       r0, [r4, #0x10]
+420a4a28: movs       r0, #0x6f
+420a4a2a: str        r5, [r5, #0x14]
+420a4a2c: ldrb       r6, [r5, #5]
+420a4a2e: strb       r0, [r4, #8]
+420a4a30: ldr        r5, [r4, #0x54]
+420a4a32: strb       r1, [r4, #1]
+420a4a34: ldr        r0, [r6, #0x14]
+420a4a36: str        r6, [r5, #0x74]
+420a4a38: str        r0, [r4, #0x50]
+420a4a3a: strb       r6, [r5, #0x11]
+420a4a3c: ldr        r2, [r6, #0x14]
+420a4a3e: strb       r5, [r4, #0xd]
+420a4a40: movs       r0, r0
+420a4a42: movs       r0, r0
+420a4a44: adcs       r3, r0
+420a4a46: subs       r2, #0x39
+420a4a48: movs       r5, #0x20
+420a4a4a: cmp        r0, #0x73
+420a4a4c: cmp        r4, #0x29
+420a4a4e: movs       r5, #0x20
+420a4a50: movs       r0, #0x64
+420a4a52: movs       r0, #0x2d
+420a4a54: str        r2, [r6, #0x54]
+420a4a56: str        r1, [r4, #0x44]
+420a4a58: strb       r0, [r4, #0xc]
+420a4a5a: str        r5, [r6, #0x34]
+420a4a5c: str        r3, [r4, #0x54]
+420a4a5e: strb       r3, [r6, #0xd]
+420a4a60: strb       r6, [r4, #0x15]
+420a4a62: ldr        r4, [r5, #0x44]
+420a4a64: movs       r0, #0x79
+420a4a66: strb       r5, [r4, #0xc]
+420a4a68: movs       r0, r0
+420a4a6a: movs       r0, r0
+420a4a6c: ldr        r3, [r6, #0x54]
+420a4a6e: ldr        r1, [r4, #0x44]
+420a4a70: lsls       r4, r5, #1
+420a4a72: movs       r0, r0
+420a4a74: str        r4, [r5, #0x14]
+420a4a76: str        r2, [r6, #0x74]
+420a4a78: lsls       r5, r4, #1
+420a4a7a: movs       r0, r0
+420a4a7c: adcs       r3, r0
+420a4a7e: subs       r2, #0x39
+420a4a80: movs       r5, #0x20
+420a4a82: cmp        r0, #0x73
+420a4a84: cmp        r4, #0x29
+420a4a86: movs       r5, #0x20
+420a4a88: movs       r0, #0x64
+420a4a8a: movs       r0, #0x2d
+420a4a8c: str        r2, [r6, #0x54]
+420a4a8e: str        r1, [r4, #0x44]
+420a4a90: str        r0, [r4, #0x50]
+420a4a92: strb       r2, [r6, #9]
+420a4a94: strb       r7, [r5, #9]
+420a4a96: movs       r5, #0x20
+420a4a98: cmp        r4, #0x73
+420a4a9a: str        r0, [r4, #0x60]
+420a4a9c: ldr        r1, [r5, #0x44]
+420a4a9e: movs       r0, #0x65
+420a4aa0: ldr        r3, [r6, #0x14]
+420a4aa2: str        r2, [r7, #0x54]
+420a4aa4: strb       r0, [r4, #0x10]
+420a4aa6: movs       r0, #0x6f
+420a4aa8: strb       r5, [r4, #0xc]
+420a4aaa: movs       r0, r0
+420a4aac: push       {r0, lr}
+420a4aae: sub        sp, #0x1b8
+420a4ab0: movs       r0, #0
+420a4ab2: str        r0, [sp, #0x1b4]
+420a4ab4: movs       r1, #0x84
+420a4ab6: add        r0, sp, #0x130
+420a4ab8: blx        #0x4204f3bc ; CALL=0x4204f3bc
+420a4abc: mov        r8, r8
+420a4abe: movs       r1, #0xff
+420a4ac0: adds       r1, #1
+420a4ac2: add        r0, sp, #0x28
+420a4ac4: blx        #0x4204f3bc ; CALL=0x4204f3bc
+420a4ac8: movs       r1, #0
+420a4aca: ldr        r0, [sp, #0x1b8]
+420a4acc: str        r1, [r0, #0x2c]
+420a4ace: ldr        r0, [sp, #0x1b8]
+420a4ad0: ldrh       r0, [r0, #0x2c]
+420a4ad2: movs       r1, #9
+420a4ad4: subs       r1, r1, r0
+420a4ad6: movs       r0, #1
+420a4ad8: lsls       r0, r1
+420a4ada: str        r0, [sp, #0x24]
+420a4adc: blx        #0x421e6614 ; CALL=0x421e6614
+420a4ae0: ldr        r2, [sp, #0x1b8]
+420a4ae2: str        r1, [r2, #0x34]
+420a4ae4: str        r0, [r2, #0x30]
+420a4ae6: add        r0, sp, #0x130
+420a4ae8: bl         #0x420a4628 ; CALL=0x420a4628
+420a4aec: str        r0, [sp, #0x1b4]
+420a4aee: ldr        r0, [sp, #0x1b4]
+420a4af0: cmp        r0, #0
+420a4af2: bne        #0x420a4bf0
+420a4af4: ldr        r1, [sp, #0x188]
+420a4af6: ldr        r0, [sp, #0x1b8]
+420a4af8: str        r1, [r0]
+420a4afa: ldr        r1, [sp, #0x18c]
+420a4afc: ldr        r0, [sp, #0x1b8]
+420a4afe: str        r1, [r0, #4]
+420a4b00: ldr        r1, [sp, #0x190]
+420a4b02: ldr        r0, [sp, #0x1b8]
+420a4b04: str        r1, [r0, #8]
+420a4b06: ldr        r1, [sp, #0x194]
+420a4b08: ldr        r0, [sp, #0x1b8]
+420a4b0a: str        r1, [r0, #0xc]
+420a4b0c: ldr        r1, [sp, #0x198]
+420a4b0e: ldr        r0, [sp, #0x1b8]
+420a4b10: str        r1, [r0, #0x10]
+420a4b12: ldr        r1, [sp, #0x19c]
+420a4b14: ldr        r0, [sp, #0x1b8]
+420a4b16: str        r1, [r0, #0x14]
+420a4b18: ldr        r1, [sp, #0x1a0]
+420a4b1a: ldr        r0, [sp, #0x1b8]
+420a4b1c: str        r1, [r0, #0x18]
+420a4b1e: ldr        r1, [sp, #0x1a4]
+420a4b20: ldr        r0, [sp, #0x1b8]
+420a4b22: str        r1, [r0, #0x1c]
+420a4b24: ldr        r1, [sp, #0x1a8]
+420a4b26: ldr        r0, [sp, #0x1b8]
+420a4b28: str        r1, [r0, #0x20]
+420a4b2a: ldr        r1, [sp, #0x1ac]
+420a4b2c: ldr        r0, [sp, #0x1b8]
+420a4b2e: str        r1, [r0, #0x24]
+420a4b30: ldr        r1, [sp, #0x1b0]
+420a4b32: ldr        r0, [sp, #0x1b8]
+420a4b34: str        r1, [r0, #0x28]
+420a4b36: movs       r0, #1
+420a4b38: ldr        r1, [sp, #0x154]
+420a4b3a: lsls       r0, r1
+420a4b3c: str        r0, [sp, #0x24]
+420a4b3e: blx        #0x421e6614 ; CALL=0x421e6614
+420a4b42: str        r1, [sp, #0x12c]
+420a4b44: str        r0, [sp, #0x128]
+420a4b46: ldr        r0, [sp, #0x158]
+420a4b48: str        r0, [sp, #0x24]
+420a4b4a: blx        #0x421e6614 ; CALL=0x421e6614
+420a4b4e: ldr        r2, [sp, #0x1b8]
+420a4b50: str        r1, [r2, #0x3c]
+420a4b52: str        r0, [r2, #0x38]
+420a4b54: ldr        r0, [sp, #0x130]
+420a4b56: str        r0, [sp, #0x1c]
+420a4b58: blx        #0x421e6614 ; CALL=0x421e6614
+420a4b5c: str        r1, [sp, #0x24]
+420a4b5e: str        r0, [sp, #0x20]
+420a4b60: ldr        r3, [sp, #0x12c]
+420a4b62: ldr        r2, [sp, #0x128]
+420a4b64: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4b68: movs       r3, #0x98
+420a4b6a: ldr        r2, [sp, #0x1b8]
+420a4b6c: str        r0, [r3, r2]
+420a4b6e: adds       r2, #0x80
+420a4b70: str        r1, [r2, #0x1c]
+420a4b72: ldr        r0, [sp, #0x134]
+420a4b74: str        r0, [sp, #0x1c]
+420a4b76: blx        #0x421e6614 ; CALL=0x421e6614
+420a4b7a: str        r1, [sp, #0x24]
+420a4b7c: str        r0, [sp, #0x20]
+420a4b7e: ldr        r3, [sp, #0x12c]
+420a4b80: ldr        r2, [sp, #0x128]
+420a4b82: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4b86: ldr        r2, [sp, #0x1b8]
+420a4b88: adds       r2, #0x98
+420a4b8a: str        r1, [r2, #0xc]
+420a4b8c: str        r0, [r2, #8]
+420a4b8e: ldr        r0, [sp, #0x138]
+420a4b90: str        r0, [sp, #0x1c]
+420a4b92: blx        #0x421e6614 ; CALL=0x421e6614
+420a4b96: str        r1, [sp, #0x24]
+420a4b98: str        r0, [sp, #0x20]
+420a4b9a: ldr        r3, [sp, #0x12c]
+420a4b9c: ldr        r2, [sp, #0x128]
+420a4b9e: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4ba2: ldr        r2, [sp, #0x1b8]
+420a4ba4: adds       r2, #0x98
+420a4ba6: str        r1, [r2, #0x14]
+420a4ba8: str        r0, [r2, #0x10]
+420a4baa: ldr        r0, [sp, #0x13c]
+420a4bac: str        r0, [sp, #0x1c]
+420a4bae: blx        #0x421e6614 ; CALL=0x421e6614
+420a4bb2: str        r1, [sp, #0x24]
+420a4bb4: str        r0, [sp, #0x20]
+420a4bb6: ldr        r3, [sp, #0x12c]
+420a4bb8: ldr        r2, [sp, #0x128]
+420a4bba: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4bbe: ldr        r2, [sp, #0x1b8]
+420a4bc0: adds       r2, #0x98
+420a4bc2: str        r1, [r2, #0x1c]
+420a4bc4: str        r0, [r2, #0x18]
+420a4bc6: ldr        r0, [sp, #0x140]
+420a4bc8: str        r0, [sp, #0x1c]
+420a4bca: blx        #0x421e6614 ; CALL=0x421e6614
+420a4bce: str        r1, [sp, #0x24]
+420a4bd0: str        r0, [sp, #0x20]
+420a4bd2: ldr        r3, [sp, #0x12c]
+420a4bd4: ldr        r2, [sp, #0x128]
+420a4bd6: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4bda: ldr        r2, [sp, #0x1b8]
+420a4bdc: adds       r2, #0x98
+420a4bde: str        r1, [r2, #0x24]
+420a4be0: str        r0, [r2, #0x20]
+420a4be2: ldr        r0, [sp, #0x144]
+420a4be4: str        r0, [sp, #0x1c]
+420a4be6: blx        #0x421e6614 ; CALL=0x421e6614
+420a4bea: str        r1, [sp, #0x24]
+420a4bec: str        r0, [sp, #0x20]
+420a4bee: b          #0x420a4bf2
+420a4bf0: b          #0x420a50aa
+420a4bf2: ldr        r3, [sp, #0x12c]
+420a4bf4: ldr        r2, [sp, #0x128]
+420a4bf6: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4bfa: ldr        r2, [sp, #0x1b8]
+420a4bfc: adds       r2, #0x98
+420a4bfe: str        r1, [r2, #0x2c]
+420a4c00: str        r0, [r2, #0x28]
+420a4c02: ldr        r0, [sp, #0x148]
+420a4c04: str        r0, [sp, #0x1c]
+420a4c06: blx        #0x421e6614 ; CALL=0x421e6614
+420a4c0a: str        r1, [sp, #0x24]
+420a4c0c: str        r0, [sp, #0x20]
+420a4c0e: ldr        r3, [sp, #0x12c]
+420a4c10: ldr        r2, [sp, #0x128]
+420a4c12: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4c16: ldr        r2, [sp, #0x1b8]
+420a4c18: adds       r2, #0x98
+420a4c1a: str        r1, [r2, #0x34]
+420a4c1c: str        r0, [r2, #0x30]
+420a4c1e: ldr        r0, [sp, #0x14c]
+420a4c20: str        r0, [sp, #0x1c]
+420a4c22: blx        #0x421e6614 ; CALL=0x421e6614
+420a4c26: str        r1, [sp, #0x24]
+420a4c28: str        r0, [sp, #0x20]
+420a4c2a: ldr        r3, [sp, #0x12c]
+420a4c2c: ldr        r2, [sp, #0x128]
+420a4c2e: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4c32: ldr        r2, [sp, #0x1b8]
+420a4c34: adds       r2, #0x98
+420a4c36: str        r1, [r2, #0x3c]
+420a4c38: str        r0, [r2, #0x38]
+420a4c3a: ldr        r0, [sp, #0x150]
+420a4c3c: str        r0, [sp, #0x1c]
+420a4c3e: blx        #0x421e6614 ; CALL=0x421e6614
+420a4c42: str        r1, [sp, #0x24]
+420a4c44: str        r0, [sp, #0x20]
+420a4c46: ldr        r3, [sp, #0x12c]
+420a4c48: ldr        r2, [sp, #0x128]
+420a4c4a: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4c4e: ldr        r2, [sp, #0x1b8]
+420a4c50: adds       r2, #0x98
+420a4c52: str        r1, [r2, #0x44]
+420a4c54: str        r0, [r2, #0x40]
+420a4c56: movs       r1, #1
+420a4c58: ldr        r0, [sp, #0x154]
+420a4c5a: lsls       r1, r0
+420a4c5c: ldr        r0, [sp, #0x1b8]
+420a4c5e: str        r1, [r0, #0x64]
+420a4c60: ldr        r1, [sp, #0x130]
+420a4c62: ldr        r0, [sp, #0x1b8]
+420a4c64: str        r1, [r0, #0x40]
+420a4c66: ldr        r1, [sp, #0x134]
+420a4c68: ldr        r0, [sp, #0x1b8]
+420a4c6a: str        r1, [r0, #0x44]
+420a4c6c: ldr        r1, [sp, #0x138]
+420a4c6e: ldr        r0, [sp, #0x1b8]
+420a4c70: str        r1, [r0, #0x48]
+420a4c72: ldr        r1, [sp, #0x13c]
+420a4c74: ldr        r0, [sp, #0x1b8]
+420a4c76: str        r1, [r0, #0x4c]
+420a4c78: ldr        r1, [sp, #0x140]
+420a4c7a: ldr        r0, [sp, #0x1b8]
+420a4c7c: str        r1, [r0, #0x50]
+420a4c7e: ldr        r1, [sp, #0x144]
+420a4c80: ldr        r0, [sp, #0x1b8]
+420a4c82: str        r1, [r0, #0x54]
+420a4c84: ldr        r1, [sp, #0x148]
+420a4c86: ldr        r0, [sp, #0x1b8]
+420a4c88: str        r1, [r0, #0x58]
+420a4c8a: ldr        r1, [sp, #0x14c]
+420a4c8c: ldr        r0, [sp, #0x1b8]
+420a4c8e: str        r1, [r0, #0x5c]
+420a4c90: ldr        r1, [sp, #0x150]
+420a4c92: ldr        r0, [sp, #0x1b8]
+420a4c94: str        r1, [r0, #0x60]
+420a4c96: movs       r1, #1
+420a4c98: ldr        r0, [sp, #0x180]
+420a4c9a: lsls       r1, r0
+420a4c9c: str        r1, [sp, #0x24]
+420a4c9e: ldr        r0, [sp, #0x24]
+420a4ca0: blx        #0x421e6614 ; CALL=0x421e6614
+420a4ca4: str        r1, [sp, #0x12c]
+420a4ca6: str        r0, [sp, #0x128]
+420a4ca8: ldr        r0, [sp, #0x184]
+420a4caa: str        r0, [sp, #0x24]
+420a4cac: blx        #0x421e6614 ; CALL=0x421e6614
+420a4cb0: ldr        r2, [sp, #0x1b8]
+420a4cb2: str        r1, [r2, #0x6c]
+420a4cb4: str        r0, [r2, #0x68]
+420a4cb6: ldr        r0, [sp, #0x15c]
+420a4cb8: str        r0, [sp, #0x1c]
+420a4cba: blx        #0x421e6614 ; CALL=0x421e6614
+420a4cbe: str        r1, [sp, #0x24]
+420a4cc0: str        r0, [sp, #0x20]
+420a4cc2: ldr        r3, [sp, #0x12c]
+420a4cc4: ldr        r2, [sp, #0x128]
+420a4cc6: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4cca: movs       r3, #0xe0
+420a4ccc: ldr        r2, [sp, #0x1b8]
+420a4cce: str        r0, [r3, r2]
+420a4cd0: adds       r2, #0x80
+420a4cd2: str        r1, [r2, #0x64]
+420a4cd4: ldr        r0, [sp, #0x160]
+420a4cd6: str        r0, [sp, #0x1c]
+420a4cd8: blx        #0x421e6614 ; CALL=0x421e6614
+420a4cdc: str        r1, [sp, #0x24]
+420a4cde: str        r0, [sp, #0x20]
+420a4ce0: ldr        r3, [sp, #0x12c]
+420a4ce2: ldr        r2, [sp, #0x128]
+420a4ce4: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4ce8: ldr        r2, [sp, #0x1b8]
+420a4cea: adds       r2, #0xe0
+420a4cec: str        r1, [r2, #0xc]
+420a4cee: str        r0, [r2, #8]
+420a4cf0: ldr        r0, [sp, #0x164]
+420a4cf2: str        r0, [sp, #0x1c]
+420a4cf4: blx        #0x421e6614 ; CALL=0x421e6614
+420a4cf8: str        r1, [sp, #0x24]
+420a4cfa: str        r0, [sp, #0x20]
+420a4cfc: ldr        r3, [sp, #0x12c]
+420a4cfe: ldr        r2, [sp, #0x128]
+420a4d00: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d04: ldr        r2, [sp, #0x1b8]
+420a4d06: adds       r2, #0xe0
+420a4d08: str        r1, [r2, #0x14]
+420a4d0a: str        r0, [r2, #0x10]
+420a4d0c: ldr        r0, [sp, #0x168]
+420a4d0e: str        r0, [sp, #0x1c]
+420a4d10: blx        #0x421e6614 ; CALL=0x421e6614
+420a4d14: str        r1, [sp, #0x24]
+420a4d16: str        r0, [sp, #0x20]
+420a4d18: ldr        r3, [sp, #0x12c]
+420a4d1a: ldr        r2, [sp, #0x128]
+420a4d1c: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d20: ldr        r2, [sp, #0x1b8]
+420a4d22: adds       r2, #0xe0
+420a4d24: str        r1, [r2, #0x1c]
+420a4d26: str        r0, [r2, #0x18]
+420a4d28: ldr        r0, [sp, #0x16c]
+420a4d2a: str        r0, [sp, #0x1c]
+420a4d2c: blx        #0x421e6614 ; CALL=0x421e6614
+420a4d30: str        r1, [sp, #0x24]
+420a4d32: str        r0, [sp, #0x20]
+420a4d34: ldr        r3, [sp, #0x12c]
+420a4d36: ldr        r2, [sp, #0x128]
+420a4d38: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d3c: ldr        r2, [sp, #0x1b8]
+420a4d3e: adds       r2, #0xe0
+420a4d40: str        r1, [r2, #0x24]
+420a4d42: str        r0, [r2, #0x20]
+420a4d44: ldr        r0, [sp, #0x170]
+420a4d46: str        r0, [sp, #0x1c]
+420a4d48: blx        #0x421e6614 ; CALL=0x421e6614
+420a4d4c: str        r1, [sp, #0x24]
+420a4d4e: str        r0, [sp, #0x20]
+420a4d50: ldr        r3, [sp, #0x12c]
+420a4d52: ldr        r2, [sp, #0x128]
+420a4d54: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d58: ldr        r2, [sp, #0x1b8]
+420a4d5a: adds       r2, #0xe0
+420a4d5c: str        r1, [r2, #0x2c]
+420a4d5e: str        r0, [r2, #0x28]
+420a4d60: ldr        r0, [sp, #0x174]
+420a4d62: str        r0, [sp, #0x1c]
+420a4d64: blx        #0x421e6614 ; CALL=0x421e6614
+420a4d68: str        r1, [sp, #0x24]
+420a4d6a: str        r0, [sp, #0x20]
+420a4d6c: ldr        r3, [sp, #0x12c]
+420a4d6e: ldr        r2, [sp, #0x128]
+420a4d70: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d74: ldr        r2, [sp, #0x1b8]
+420a4d76: adds       r2, #0xe0
+420a4d78: str        r1, [r2, #0x34]
+420a4d7a: str        r0, [r2, #0x30]
+420a4d7c: ldr        r0, [sp, #0x178]
+420a4d7e: str        r0, [sp, #0x1c]
+420a4d80: blx        #0x421e6614 ; CALL=0x421e6614
+420a4d84: str        r1, [sp, #0x24]
+420a4d86: str        r0, [sp, #0x20]
+420a4d88: ldr        r3, [sp, #0x12c]
+420a4d8a: ldr        r2, [sp, #0x128]
+420a4d8c: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d90: ldr        r2, [sp, #0x1b8]
+420a4d92: adds       r2, #0xe0
+420a4d94: str        r1, [r2, #0x3c]
+420a4d96: str        r0, [r2, #0x38]
+420a4d98: ldr        r0, [sp, #0x17c]
+420a4d9a: str        r0, [sp, #0x1c]
+420a4d9c: blx        #0x421e6614 ; CALL=0x421e6614
+420a4da0: str        r1, [sp, #0x24]
+420a4da2: str        r0, [sp, #0x20]
+420a4da4: ldr        r3, [sp, #0x12c]
+420a4da6: ldr        r2, [sp, #0x128]
+420a4da8: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4dac: ldr        r2, [sp, #0x1b8]
+420a4dae: adds       r2, #0xe0
+420a4db0: str        r1, [r2, #0x44]
+420a4db2: str        r0, [r2, #0x40]
+420a4db4: movs       r1, #1
+420a4db6: ldr        r0, [sp, #0x180]
+420a4db8: lsls       r1, r0
+420a4dba: ldr        r0, [sp, #0x1b8]
+420a4dbc: adds       r0, #0x70
+420a4dbe: str        r1, [r0, #0x24]
+420a4dc0: ldr        r1, [sp, #0x15c]
+420a4dc2: ldr        r0, [sp, #0x1b8]
+420a4dc4: str        r1, [r0, #0x70]
+420a4dc6: ldr        r1, [sp, #0x160]
+420a4dc8: ldr        r0, [sp, #0x1b8]
+420a4dca: str        r1, [r0, #0x74]
+420a4dcc: ldr        r1, [sp, #0x164]
+420a4dce: ldr        r0, [sp, #0x1b8]
+420a4dd0: str        r1, [r0, #0x78]
+420a4dd2: ldr        r1, [sp, #0x168]
+420a4dd4: ldr        r0, [sp, #0x1b8]
+420a4dd6: str        r1, [r0, #0x7c]
+420a4dd8: ldr        r0, [sp, #0x1b8]
+420a4dda: adds       r0, #0x70
+420a4ddc: ldr        r1, [sp, #0x16c]
+420a4dde: str        r1, [r0, #0x10]
+420a4de0: ldr        r0, [sp, #0x1b8]
+420a4de2: adds       r0, #0x70
+420a4de4: ldr        r1, [sp, #0x170]
+420a4de6: str        r1, [r0, #0x14]
+420a4de8: ldr        r0, [sp, #0x1b8]
+420a4dea: adds       r0, #0x70
+420a4dec: ldr        r1, [sp, #0x174]
+420a4dee: str        r1, [r0, #0x18]
+420a4df0: ldr        r0, [sp, #0x1b8]
+420a4df2: adds       r0, #0x70
+420a4df4: ldr        r1, [sp, #0x178]
+420a4df6: str        r1, [r0, #0x1c]
+420a4df8: ldr        r0, [sp, #0x1b8]
+420a4dfa: adds       r0, #0x70
+420a4dfc: ldr        r1, [sp, #0x17c]
+420a4dfe: str        r1, [r0, #0x20]
+420a4e00: ldr        r2, [pc, #0x3e8] ; LIT 0x420a51ec->0x421e9c91 STRING='ca9_cm_config_fill'
+420a4e02: adr        r1, #0x3ec ; ADR=0x420a51f0 STRING='CA9: %s() - binFileData:'
+420a4e04: movs       r0, #2
+420a4e06: bl         #0x42140150 ; CALL=0x42140150
+420a4e0a: ldr        r1, [sp, #0x158]
+420a4e0c: str        r1, [sp, #0x24]
+420a4e0e: ldr        r2, [sp, #0x154]
+420a4e10: str        r2, [sp, #0x20]
+420a4e12: adr        r1, #0x3f8 ; ADR=0x420a520c STRING='CA9: Matrix_LT RoundUpBits: %i  Temp:%iK'
+420a4e14: movs       r0, #2
+420a4e16: ldr        r3, [sp, #0x24]
+420a4e18: bl         #0x42140150 ; CALL=0x42140150
+420a4e1c: ldr        r0, [sp, #0x1b8]
+420a4e1e: adds       r0, #0x98
+420a4e20: ldr        r1, [r0, #0x14]
+420a4e22: ldr        r0, [r0, #0x10]
+420a4e24: str        r1, [sp, #0xc]
+420a4e26: str        r0, [sp, #8]
+420a4e28: ldr        r0, [sp, #0x1b8]
+420a4e2a: movs       r1, r0
+420a4e2c: adds       r1, #0x98
+420a4e2e: ldr        r0, [r1, #8]
+420a4e30: ldr        r1, [r1, #0xc]
+420a4e32: str        r1, [sp, #4]
+420a4e34: str        r0, [sp]
+420a4e36: movs       r1, #0x98
+420a4e38: ldr        r0, [sp, #0x1b8]
+420a4e3a: ldr        r1, [r1, r0]
+420a4e3c: adds       r0, #0x80
+420a4e3e: ldr        r2, [r0, #0x1c]
+420a4e40: movs       r0, r1
+420a4e42: str        r2, [sp, #0x24]
+420a4e44: str        r0, [sp, #0x20]
+420a4e46: adr        r1, #0x3f0 ; ADR=0x420a5238 STRING='CA9: [%11.8f] [%11.8f] [%11.8f]'
+420a4e48: movs       r0, #2
+420a4e4a: ldr        r3, [sp, #0x24]
+420a4e4c: ldr        r2, [sp, #0x20]
+420a4e4e: bl         #0x42140150 ; CALL=0x42140150
+420a4e52: ldr        r0, [sp, #0x1b8]
+420a4e54: movs       r1, r0
+420a4e56: adds       r1, #0x98
+420a4e58: ldr        r0, [r1, #0x28]
+420a4e5a: ldr        r1, [r1, #0x2c]
+420a4e5c: str        r1, [sp, #0xc]
+420a4e5e: str        r0, [sp, #8]
+420a4e60: ldr        r0, [sp, #0x1b8]
+420a4e62: movs       r1, r0
+420a4e64: adds       r1, #0x98
+420a4e66: ldr        r0, [r1, #0x20]
+420a4e68: ldr        r1, [r1, #0x24]
+420a4e6a: str        r1, [sp, #4]
+420a4e6c: str        r0, [sp]
+420a4e6e: ldr        r0, [sp, #0x1b8]
+420a4e70: movs       r1, r0
+420a4e72: adds       r1, #0x98
+420a4e74: ldr        r3, [r1, #0x1c]
+420a4e76: ldr        r2, [r1, #0x18]
+420a4e78: adr        r1, #0x3bc ; ADR=0x420a5238 STRING='CA9: [%11.8f] [%11.8f] [%11.8f]'
+420a4e7a: movs       r0, #2
+420a4e7c: str        r3, [sp, #0x24]
+420a4e7e: str        r2, [sp, #0x20]
+420a4e80: bl         #0x42140150 ; CALL=0x42140150
+420a4e84: ldr        r0, [sp, #0x1b8]
+420a4e86: adds       r0, #0x98
+420a4e88: ldr        r1, [r0, #0x44]
+420a4e8a: ldr        r0, [r0, #0x40]
+420a4e8c: str        r1, [sp, #0xc]
+420a4e8e: str        r0, [sp, #8]
+420a4e90: ldr        r0, [sp, #0x1b8]
+420a4e92: adds       r0, #0x98
+420a4e94: ldr        r1, [r0, #0x3c]
+420a4e96: ldr        r0, [r0, #0x38]
+420a4e98: str        r1, [sp, #4]
+420a4e9a: str        r0, [sp]
+420a4e9c: ldr        r0, [sp, #0x1b8]
+420a4e9e: adds       r0, #0x98
+420a4ea0: ldr        r3, [r0, #0x34]
+420a4ea2: ldr        r2, [r0, #0x30]
+420a4ea4: adr        r1, #0x390 ; ADR=0x420a5238 STRING='CA9: [%11.8f] [%11.8f] [%11.8f]'
+420a4ea6: movs       r0, #2
+420a4ea8: str        r3, [sp, #0x24]
+420a4eaa: str        r2, [sp, #0x20]
+420a4eac: bl         #0x42140150 ; CALL=0x42140150
+420a4eb0: ldr        r1, [sp, #0x184]
+420a4eb2: str        r1, [sp, #0x24]
+420a4eb4: ldr        r2, [sp, #0x180]
+420a4eb6: str        r2, [sp, #0x20]
+420a4eb8: adr        r1, #0x39c ; ADR=0x420a5258 STRING='CA9: Matrix_HT RoundUpBits: %i  Temp:%iK'
+420a4eba: movs       r0, #2
+420a4ebc: ldr        r3, [sp, #0x24]
+420a4ebe: bl         #0x42140150 ; CALL=0x42140150
+420a4ec2: ldr        r0, [sp, #0x1b8]
+420a4ec4: movs       r1, r0
+420a4ec6: adds       r1, #0xe0
+420a4ec8: ldr        r0, [r1, #0x10]
+420a4eca: ldr        r1, [r1, #0x14]
+420a4ecc: str        r1, [sp, #0xc]
+420a4ece: str        r0, [sp, #8]
+420a4ed0: ldr        r0, [sp, #0x1b8]
+420a4ed2: movs       r1, r0
+420a4ed4: adds       r1, #0xe0
+420a4ed6: ldr        r0, [r1, #8]
+420a4ed8: ldr        r1, [r1, #0xc]
+420a4eda: str        r1, [sp, #4]
+420a4edc: str        r0, [sp]
+420a4ede: movs       r1, #0xe0
+420a4ee0: ldr        r0, [sp, #0x1b8]
+420a4ee2: ldr        r1, [r1, r0]
+420a4ee4: adds       r0, #0x80
+420a4ee6: ldr        r2, [r0, #0x64]
+420a4ee8: movs       r0, r1
+420a4eea: str        r2, [sp, #0x24]
+420a4eec: str        r0, [sp, #0x20]
+420a4eee: adr        r1, #0x348 ; ADR=0x420a5238 STRING='CA9: [%11.8f] [%11.8f] [%11.8f]'
+420a4ef0: movs       r0, #2
+420a4ef2: ldr        r3, [sp, #0x24]
+420a4ef4: ldr        r2, [sp, #0x20]
+420a4ef6: bl         #0x42140150 ; CALL=0x42140150
+420a4efa: ldr        r0, [sp, #0x1b8]
+420a4efc: movs       r1, r0
+420a4efe: adds       r1, #0xe0
+420a4f00: ldr        r0, [r1, #0x28]
+420a4f02: ldr        r1, [r1, #0x2c]
+420a4f04: str        r1, [sp, #0xc]
+420a4f06: str        r0, [sp, #8]
+420a4f08: ldr        r0, [sp, #0x1b8]
+420a4f0a: adds       r0, #0xe0
+420a4f0c: ldr        r1, [r0, #0x24]
+420a4f0e: ldr        r0, [r0, #0x20]
+420a4f10: str        r1, [sp, #4]
+420a4f12: str        r0, [sp]
+420a4f14: ldr        r0, [sp, #0x1b8]
+420a4f16: adds       r0, #0xe0
+420a4f18: ldr        r3, [r0, #0x1c]
+420a4f1a: ldr        r2, [r0, #0x18]
+420a4f1c: adr        r1, #0x318 ; ADR=0x420a5238 STRING='CA9: [%11.8f] [%11.8f] [%11.8f]'
+420a4f1e: movs       r0, #2
+420a4f20: str        r3, [sp, #0x24]
+420a4f22: str        r2, [sp, #0x20]
+420a4f24: bl         #0x42140150 ; CALL=0x42140150
+420a4f28: ldr        r0, [sp, #0x1b8]
+420a4f2a: movs       r1, r0
+420a4f2c: adds       r1, #0xe0
+420a4f2e: ldr        r0, [r1, #0x40]
+420a4f30: ldr        r1, [r1, #0x44]
+420a4f32: str        r1, [sp, #0xc]
+420a4f34: str        r0, [sp, #8]
+420a4f36: ldr        r0, [sp, #0x1b8]
+420a4f38: movs       r1, r0
+420a4f3a: adds       r1, #0xe0
+420a4f3c: ldr        r0, [r1, #0x38]
+420a4f3e: ldr        r1, [r1, #0x3c]
+420a4f40: str        r1, [sp, #4]
+420a4f42: str        r0, [sp]
+420a4f44: ldr        r0, [sp, #0x1b8]
+420a4f46: adds       r0, #0xe0
+420a4f48: ldr        r3, [r0, #0x34]
+420a4f4a: ldr        r2, [r0, #0x30]
+420a4f4c: adr        r1, #0x2e8 ; ADR=0x420a5238 STRING='CA9: [%11.8f] [%11.8f] [%11.8f]'
+420a4f4e: movs       r0, #2
+420a4f50: str        r3, [sp, #0x24]
+420a4f52: str        r2, [sp, #0x20]
+420a4f54: bl         #0x42140150 ; CALL=0x42140150
+420a4f58: ldr        r1, [sp, #0x1b0]
+420a4f5a: str        r1, [sp, #0x24]
+420a4f5c: ldr        r2, [sp, #0x1ac]
+420a4f5e: str        r2, [sp, #0x20]
+420a4f60: adr        r1, #0x320 ; ADR=0x420a5284 STRING='CA9: Matrix_DT DecimalPointPos: %i  Temp:%iK'
+420a4f62: movs       r0, #2
+420a4f64: ldr        r3, [sp, #0x24]
+420a4f66: bl         #0x42140150 ; CALL=0x42140150
+420a4f6a: ldr        r0, [sp, #0x190]
+420a4f6c: str        r0, [sp, #4]
+420a4f6e: blx        #0x421e6614 ; CALL=0x421e6614
+420a4f72: movs       r2, #0
+420a4f74: movs       r3, #0x81
+420a4f76: lsls       r3, r3, #0x17
+420a4f78: str        r1, [sp, #0xc]
+420a4f7a: str        r0, [sp, #8]
+420a4f7c: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4f80: str        r1, [sp, #0x24]
+420a4f82: str        r0, [sp, #0x20]
+420a4f84: ldr        r0, [sp, #0x18c]
+420a4f86: str        r0, [sp, #4]
+420a4f88: blx        #0x421e6614 ; CALL=0x421e6614
+420a4f8c: movs       r2, #0
+420a4f8e: movs       r3, #0x81
+420a4f90: lsls       r3, r3, #0x17
+420a4f92: str        r1, [sp, #0xc]
+420a4f94: str        r0, [sp, #8]
+420a4f96: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4f9a: str        r1, [sp, #0x1c]
+420a4f9c: str        r0, [sp, #0x18]
+420a4f9e: ldr        r0, [sp, #0x188]
+420a4fa0: str        r0, [sp, #4]
+420a4fa2: blx        #0x421e6614 ; CALL=0x421e6614
+420a4fa6: movs       r2, #0
+420a4fa8: movs       r3, #0x81
+420a4faa: lsls       r3, r3, #0x17
+420a4fac: str        r1, [sp, #0xc]
+420a4fae: str        r0, [sp, #8]
+420a4fb0: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4fb4: str        r1, [sp, #0x14]
+420a4fb6: str        r0, [sp, #0x10]
+420a4fb8: ldr        r1, [sp, #0x24]
+420a4fba: ldr        r0, [sp, #0x20]
+420a4fbc: str        r1, [sp, #0xc]
+420a4fbe: str        r0, [sp, #8]
+420a4fc0: ldr        r1, [sp, #0x1c]
+420a4fc2: ldr        r0, [sp, #0x18]
+420a4fc4: str        r1, [sp, #4]
+420a4fc6: str        r0, [sp]
+420a4fc8: adr        r1, #0x26c ; ADR=0x420a5238 STRING='CA9: [%11.8f] [%11.8f] [%11.8f]'
+420a4fca: movs       r0, #2
+420a4fcc: ldr        r3, [sp, #0x14]
+420a4fce: ldr        r2, [sp, #0x10]
+420a4fd0: bl         #0x42140150 ; CALL=0x42140150
+420a4fd4: ldr        r0, [sp, #0x19c]
+420a4fd6: str        r0, [sp, #4]
+420a4fd8: blx        #0x421e6614 ; CALL=0x421e6614
+420a4fdc: movs       r2, #0
+420a4fde: movs       r3, #0x81
+420a4fe0: lsls       r3, r3, #0x17
+420a4fe2: str        r1, [sp, #0xc]
+420a4fe4: str        r0, [sp, #8]
+420a4fe6: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4fea: str        r1, [sp, #0x24]
+420a4fec: str        r0, [sp, #0x20]
+420a4fee: ldr        r0, [sp, #0x198]
+420a4ff0: str        r0, [sp, #4]
+420a4ff2: blx        #0x421e6614 ; CALL=0x421e6614
+420a4ff6: movs       r2, #0
+420a4ff8: movs       r3, #0x81
+420a4ffa: lsls       r3, r3, #0x17
+420a4ffc: str        r1, [sp, #0xc]
+420a4ffe: str        r0, [sp, #8]
+420a5000: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a5004: str        r1, [sp, #0x1c]
+420a5006: str        r0, [sp, #0x18]
+420a5008: ldr        r0, [sp, #0x194]
+420a500a: str        r0, [sp, #4]
+420a500c: blx        #0x421e6614 ; CALL=0x421e6614
+420a5010: movs       r2, #0
+420a5012: movs       r3, #0x81
+420a5014: lsls       r3, r3, #0x17
+420a5016: str        r1, [sp, #0xc]
+420a5018: str        r0, [sp, #8]
+420a501a: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a501e: str        r1, [sp, #0x14]
+420a5020: str        r0, [sp, #0x10]
+420a5022: ldr        r1, [sp, #0x24]
+420a5024: ldr        r0, [sp, #0x20]
+420a5026: str        r1, [sp, #0xc]
+420a5028: str        r0, [sp, #8]
+420a502a: ldr        r1, [sp, #0x1c]
+420a502c: ldr        r0, [sp, #0x18]
+420a502e: str        r1, [sp, #4]
+420a5030: str        r0, [sp]
+420a5032: adr        r1, #0x204 ; ADR=0x420a5238 STRING='CA9: [%11.8f] [%11.8f] [%11.8f]'
+420a5034: movs       r0, #2
+420a5036: ldr        r3, [sp, #0x14]
+420a5038: ldr        r2, [sp, #0x10]
+420a503a: bl         #0x42140150 ; CALL=0x42140150
+420a503e: ldr        r0, [sp, #0x1a8]
+420a5040: str        r0, [sp, #4]
+420a5042: blx        #0x421e6614 ; CALL=0x421e6614
+420a5046: movs       r2, #0
+420a5048: movs       r3, #0x81
+420a504a: lsls       r3, r3, #0x17
+420a504c: str        r1, [sp, #0xc]
+420a504e: str        r0, [sp, #8]
+420a5050: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a5054: str        r1, [sp, #0x24]
+420a5056: str        r0, [sp, #0x20]
+420a5058: ldr        r0, [sp, #0x1a4]
+420a505a: str        r0, [sp, #4]
+420a505c: blx        #0x421e6614 ; CALL=0x421e6614
+420a5060: movs       r2, #0
+420a5062: movs       r3, #0x81
+420a5064: lsls       r3, r3, #0x17
+420a5066: str        r1, [sp, #0xc]
+420a5068: str        r0, [sp, #8]
+420a506a: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a506e: str        r1, [sp, #0x1c]
+420a5070: str        r0, [sp, #0x18]
+420a5072: ldr        r0, [sp, #0x1a0]
+420a5074: str        r0, [sp, #4]
+420a5076: blx        #0x421e6614 ; CALL=0x421e6614
+420a507a: movs       r2, #0
+420a507c: movs       r3, #0x81
+420a507e: lsls       r3, r3, #0x17
+420a5080: str        r1, [sp, #0xc]
+420a5082: str        r0, [sp, #8]
+
+=== TF XREF 0x420a489a OWNER 0x420a4884 ===
+420a4884: push       {r4, r5, r6, r7, lr}
+420a4886: sub        sp, #0x24
+420a4888: movs       r4, r0
+420a488a: movs       r7, #0
+420a488c: movs       r5, #0
+420a488e: mov        r8, r8
+420a4890: movs       r2, #0x1c
+420a4892: adr        r1, #0xf0 ; ADR=0x420a4984 STRING='B2Y_TF_REMAPPING_CA9_CM.bin'
+420a4894: add        r0, sp, #8
+420a4896: blx        #0x4204f2ec ; CALL=0x4204f2ec
+420a489a: adr        r0, #0xe8 ; ADR=0x420a4984 STRING='B2Y_TF_REMAPPING_CA9_CM.bin'
+420a489c: bl         #0x421a0c7c ; CALL=0x421a0c7c
+420a48a0: movs       r5, r0
+420a48a2: cmp        r5, #0
+420a48a4: bne        #0x420a48c8
+420a48a6: add        r0, sp, #8
+420a48a8: movs       r3, #0x7a
+420a48aa: ldr        r2, [pc, #0xf4] ; LIT 0x420a49a0->0x421e9c6f STRING='ca9_cm_Get_BinFileTfRemappingData'
+420a48ac: adr        r1, #0xf4 ; ADR=0x420a49a4 STRING='CA9: %s(), %d - read error %s, file not found'
+420a48ae: str        r0, [sp]
+420a48b0: movs       r0, #3
+420a48b2: bl         #0x42140150 ; CALL=0x42140150
+420a48b6: add        r0, sp, #8
+420a48b8: movs       r3, #0x7b
+420a48ba: ldr        r2, [pc, #0xe4] ; LIT 0x420a49a0->0x421e9c6f STRING='ca9_cm_Get_BinFileTfRemappingData'
+420a48bc: adr        r1, #0x114 ; ADR=0x420a49d4 STRING='CA9: %s(), %d - read error %s, using defaut values'
+420a48be: str        r0, [sp]
+420a48c0: movs       r0, #3
+420a48c2: bl         #0x42140150 ; CALL=0x42140150
+420a48c6: b          #0x420a497c
+420a48c8: movs       r3, #0xff
+420a48ca: adds       r3, #1
+420a48cc: ldr        r1, [r5]
+420a48ce: eors       r1, r3
+420a48d0: ldr        r0, [r5, #4]
+420a48d2: orrs       r1, r0
+420a48d4: bne        #0x420a4950
+420a48d6: movs       r6, #0
+420a48d8: movs       r0, #0x41
+420a48da: lsls       r0, r0, #3
+420a48dc: ldr        r0, [r0, r5]
+420a48de: ldr        r0, [r0]
+420a48e0: str        r0, [r4]
+420a48e2: movs       r0, #0x41
+420a48e4: lsls       r0, r0, #3
+420a48e6: ldr        r0, [r0, r5]
+420a48e8: ldr        r0, [r0, #4]
+420a48ea: str        r0, [r4, #4]
+420a48ec: ldr        r0, [r4, #4]
+420a48ee: cmp        r0, #0x1f
+420a48f0: bls        #0x420a4906
+420a48f2: add        r0, sp, #8
+420a48f4: movs       r3, #0x87
+420a48f6: ldr        r2, [pc, #0xa8] ; LIT 0x420a49a0->0x421e9c6f STRING='ca9_cm_Get_BinFileTfRemappingData'
+420a48f8: adr        r1, #0x10c ; ADR=0x420a4a08 STRING='CA9: %s(), %d - read error %s, to many remapping entries'
+420a48fa: str        r0, [sp]
+420a48fc: movs       r0, #4
+420a48fe: bl         #0x42140150 ; CALL=0x42140150
+420a4902: subs       r7, r6, #1
+420a4904: b          #0x420a494e
+420a4906: movs       r6, #0
+420a4908: b          #0x420a4938
+420a490a: movs       r0, #0x41
+420a490c: lsls       r0, r0, #3
+420a490e: ldr        r0, [r0, r5]
+420a4910: adds       r0, #8
+420a4912: lsls       r1, r6, #3
+420a4914: ldr        r1, [r0, r1]
+420a4916: lsls       r2, r6, #3
+420a4918: movs       r0, r4
+420a491a: adds       r0, #8
+420a491c: str        r1, [r0, r2]
+420a491e: movs       r0, #0x41
+420a4920: lsls       r0, r0, #3
+420a4922: ldr        r0, [r0, r5]
+420a4924: adds       r0, #8
+420a4926: lsls       r1, r6, #3
+420a4928: adds       r0, r0, r1
+420a492a: lsls       r2, r6, #3
+420a492c: ldr        r1, [r0, #4]
+420a492e: movs       r0, r4
+420a4930: adds       r0, #8
+420a4932: adds       r0, r2, r0
+420a4934: str        r1, [r0, #4]
+420a4936: adds       r6, r6, #1
+420a4938: ldr        r0, [r4, #4]
+420a493a: cmp        r0, r6
+420a493c: bhi        #0x420a490a
+420a493e: add        r0, sp, #8
+420a4940: movs       r3, #0x92
+420a4942: ldr        r2, [pc, #0x5c] ; LIT 0x420a49a0->0x421e9c6f STRING='ca9_cm_Get_BinFileTfRemappingData'
+420a4944: adr        r1, #0xfc ; ADR=0x420a4a44 STRING='CA9: %s(), %d - read successfully %s'
+420a4946: str        r0, [sp]
+420a4948: movs       r0, #2
+420a494a: bl         #0x42140150 ; CALL=0x42140150
+420a494e: b          #0x420a497c
+420a4950: movs       r2, #0xff
+420a4952: adds       r2, #1
+420a4954: movs       r3, #0
+420a4956: ldr        r1, [r5, #4]
+420a4958: ldr        r0, [r5]
+420a495a: subs       r0, r2, r0
+420a495c: sbcs       r3, r1
+420a495e: blt        #0x420a4964
+420a4960: adr        r0, #0x108 ; ADR=0x420a4a6c STRING='small'
+420a4962: b          #0x420a4966
+420a4964: adr        r0, #0x10c ; ADR=0x420a4a74 STRING='large'
+420a4966: add        r1, sp, #8
+420a4968: movs       r3, #0x98
+420a496a: ldr        r2, [pc, #0x34] ; LIT 0x420a49a0->0x421e9c6f STRING='ca9_cm_Get_BinFileTfRemappingData'
+420a496c: str        r1, [sp]
+420a496e: str        r0, [sp, #4]
+420a4970: adr        r1, #0x108 ; ADR=0x420a4a7c STRING='CA9: %s(), %d - read error %s, file size to %s'
+420a4972: movs       r0, #4
+420a4974: bl         #0x42140150 ; CALL=0x42140150
+420a4978: movs       r7, #0
+420a497a: mvns       r7, r7
+420a497c: movs       r0, r7
+420a497e: add        sp, #0x24
+420a4980: pop        {r4, r5, r6, r7, pc}
+420a4982: movs       r0, r0
+420a4984: adds       r2, #0x42
+420a4986: ldrsh      r1, [r3, r5]
+420a4988: mov        r4, sl
+420a498a: strh       r7, [r3, r1]
+420a498c: ldr        r5, [pc, #0x114] ; LIT 0x420a4aa4->0x206f7420
+420a498e: str        r1, [r0, r1]
+420a4990: ldr        r1, [pc, #0x140] ; LIT 0x420a4ad4->0x20011a09
+420a4992: bxns       sb
+420a4994: muls       r7, r3, r7
+420a4996: subs       r1, #0x41
+420a4998: muls       r7, r3, r7
+420a499a: cmp        r6, #0x4d
+420a499c: ldr        r2, [r4, #0x14]
+420a499e: lsls       r6, r5, #1
+420a49a0: ldr        r4, [sp, #0x1bc]
+420a49a2: tst        r6, r3
+420a49a4: adcs       r3, r0
+420a49a6: subs       r2, #0x39
+420a49a8: movs       r5, #0x20
+420a49aa: cmp        r0, #0x73
+420a49ac: cmp        r4, #0x29
+420a49ae: movs       r5, #0x20
+420a49b0: movs       r0, #0x64
+420a49b2: movs       r0, #0x2d
+420a49b4: str        r2, [r6, #0x54]
+420a49b6: str        r1, [r4, #0x44]
+420a49b8: str        r0, [r4, #0x50]
+420a49ba: strb       r2, [r6, #9]
+420a49bc: strb       r7, [r5, #9]
+420a49be: movs       r5, #0x20
+420a49c0: cmp        r4, #0x73
+420a49c2: str        r0, [r4, #0x60]
+420a49c4: ldr        r1, [r5, #0x44]
+420a49c6: movs       r0, #0x65
+420a49c8: ldr        r6, [r5, #0x74]
+420a49ca: movs       r0, #0x74
+420a49cc: ldr        r6, [r4, #0x74]
+420a49ce: ldr        r5, [r6, #0x64]
+420a49d0: lsls       r4, r4, #1
+420a49d2: movs       r0, r0
+420a49d4: adcs       r3, r0
+420a49d6: subs       r2, #0x39
+420a49d8: movs       r5, #0x20
+420a49da: cmp        r0, #0x73
+420a49dc: cmp        r4, #0x29
+420a49de: movs       r5, #0x20
+420a49e0: movs       r0, #0x64
+420a49e2: movs       r0, #0x2d
+420a49e4: str        r2, [r6, #0x54]
+420a49e6: str        r1, [r4, #0x44]
+420a49e8: str        r0, [r4, #0x50]
+420a49ea: strb       r2, [r6, #9]
+420a49ec: strb       r7, [r5, #9]
+420a49ee: movs       r5, #0x20
+420a49f0: cmp        r4, #0x73
+420a49f2: strb       r0, [r4, #0x14]
+420a49f4: ldr        r3, [r6, #0x14]
+420a49f6: str        r6, [r5, #0x74]
+420a49f8: str        r0, [r4, #0x40]
+420a49fa: str        r5, [r4, #0x64]
+420a49fc: strb       r1, [r4, #0x15]
+420a49fe: movs       r0, #0x74
+420a4a00: str        r6, [r6, #0x14]
+420a4a02: strb       r4, [r5, #0x15]
+420a4a04: strb       r5, [r4, #0xd]
+420a4a06: movs       r0, r0
+420a4a08: adcs       r3, r0
+420a4a0a: subs       r2, #0x39
+420a4a0c: movs       r5, #0x20
+420a4a0e: cmp        r0, #0x73
+420a4a10: cmp        r4, #0x29
+420a4a12: movs       r5, #0x20
+420a4a14: movs       r0, #0x64
+420a4a16: movs       r0, #0x2d
+420a4a18: str        r2, [r6, #0x54]
+420a4a1a: str        r1, [r4, #0x44]
+420a4a1c: str        r0, [r4, #0x50]
+420a4a1e: strb       r2, [r6, #9]
+420a4a20: strb       r7, [r5, #9]
+420a4a22: movs       r5, #0x20
+420a4a24: cmp        r4, #0x73
+420a4a26: strb       r0, [r4, #0x10]
+420a4a28: movs       r0, #0x6f
+420a4a2a: str        r5, [r5, #0x14]
+420a4a2c: ldrb       r6, [r5, #5]
+420a4a2e: strb       r0, [r4, #8]
+420a4a30: ldr        r5, [r4, #0x54]
+420a4a32: strb       r1, [r4, #1]
+420a4a34: ldr        r0, [r6, #0x14]
+420a4a36: str        r6, [r5, #0x74]
+420a4a38: str        r0, [r4, #0x50]
+420a4a3a: strb       r6, [r5, #0x11]
+420a4a3c: ldr        r2, [r6, #0x14]
+420a4a3e: strb       r5, [r4, #0xd]
+420a4a40: movs       r0, r0
+420a4a42: movs       r0, r0
+420a4a44: adcs       r3, r0
+420a4a46: subs       r2, #0x39
+420a4a48: movs       r5, #0x20
+420a4a4a: cmp        r0, #0x73
+420a4a4c: cmp        r4, #0x29
+420a4a4e: movs       r5, #0x20
+420a4a50: movs       r0, #0x64
+420a4a52: movs       r0, #0x2d
+420a4a54: str        r2, [r6, #0x54]
+420a4a56: str        r1, [r4, #0x44]
+420a4a58: strb       r0, [r4, #0xc]
+420a4a5a: str        r5, [r6, #0x34]
+420a4a5c: str        r3, [r4, #0x54]
+420a4a5e: strb       r3, [r6, #0xd]
+420a4a60: strb       r6, [r4, #0x15]
+420a4a62: ldr        r4, [r5, #0x44]
+420a4a64: movs       r0, #0x79
+420a4a66: strb       r5, [r4, #0xc]
+420a4a68: movs       r0, r0
+420a4a6a: movs       r0, r0
+420a4a6c: ldr        r3, [r6, #0x54]
+420a4a6e: ldr        r1, [r4, #0x44]
+420a4a70: lsls       r4, r5, #1
+420a4a72: movs       r0, r0
+420a4a74: str        r4, [r5, #0x14]
+420a4a76: str        r2, [r6, #0x74]
+420a4a78: lsls       r5, r4, #1
+420a4a7a: movs       r0, r0
+420a4a7c: adcs       r3, r0
+420a4a7e: subs       r2, #0x39
+420a4a80: movs       r5, #0x20
+420a4a82: cmp        r0, #0x73
+420a4a84: cmp        r4, #0x29
+420a4a86: movs       r5, #0x20
+420a4a88: movs       r0, #0x64
+420a4a8a: movs       r0, #0x2d
+420a4a8c: str        r2, [r6, #0x54]
+420a4a8e: str        r1, [r4, #0x44]
+420a4a90: str        r0, [r4, #0x50]
+420a4a92: strb       r2, [r6, #9]
+420a4a94: strb       r7, [r5, #9]
+420a4a96: movs       r5, #0x20
+420a4a98: cmp        r4, #0x73
+420a4a9a: str        r0, [r4, #0x60]
+420a4a9c: ldr        r1, [r5, #0x44]
+420a4a9e: movs       r0, #0x65
+420a4aa0: ldr        r3, [r6, #0x14]
+420a4aa2: str        r2, [r7, #0x54]
+420a4aa4: strb       r0, [r4, #0x10]
+420a4aa6: movs       r0, #0x6f
+420a4aa8: strb       r5, [r4, #0xc]
+420a4aaa: movs       r0, r0
+420a4aac: push       {r0, lr}
+420a4aae: sub        sp, #0x1b8
+420a4ab0: movs       r0, #0
+420a4ab2: str        r0, [sp, #0x1b4]
+420a4ab4: movs       r1, #0x84
+420a4ab6: add        r0, sp, #0x130
+420a4ab8: blx        #0x4204f3bc ; CALL=0x4204f3bc
+420a4abc: mov        r8, r8
+420a4abe: movs       r1, #0xff
+420a4ac0: adds       r1, #1
+420a4ac2: add        r0, sp, #0x28
+420a4ac4: blx        #0x4204f3bc ; CALL=0x4204f3bc
+420a4ac8: movs       r1, #0
+420a4aca: ldr        r0, [sp, #0x1b8]
+420a4acc: str        r1, [r0, #0x2c]
+420a4ace: ldr        r0, [sp, #0x1b8]
+420a4ad0: ldrh       r0, [r0, #0x2c]
+420a4ad2: movs       r1, #9
+420a4ad4: subs       r1, r1, r0
+420a4ad6: movs       r0, #1
+420a4ad8: lsls       r0, r1
+420a4ada: str        r0, [sp, #0x24]
+420a4adc: blx        #0x421e6614 ; CALL=0x421e6614
+420a4ae0: ldr        r2, [sp, #0x1b8]
+420a4ae2: str        r1, [r2, #0x34]
+420a4ae4: str        r0, [r2, #0x30]
+420a4ae6: add        r0, sp, #0x130
+420a4ae8: bl         #0x420a4628 ; CALL=0x420a4628
+420a4aec: str        r0, [sp, #0x1b4]
+420a4aee: ldr        r0, [sp, #0x1b4]
+420a4af0: cmp        r0, #0
+420a4af2: bne        #0x420a4bf0
+420a4af4: ldr        r1, [sp, #0x188]
+420a4af6: ldr        r0, [sp, #0x1b8]
+420a4af8: str        r1, [r0]
+420a4afa: ldr        r1, [sp, #0x18c]
+420a4afc: ldr        r0, [sp, #0x1b8]
+420a4afe: str        r1, [r0, #4]
+420a4b00: ldr        r1, [sp, #0x190]
+420a4b02: ldr        r0, [sp, #0x1b8]
+420a4b04: str        r1, [r0, #8]
+420a4b06: ldr        r1, [sp, #0x194]
+420a4b08: ldr        r0, [sp, #0x1b8]
+420a4b0a: str        r1, [r0, #0xc]
+420a4b0c: ldr        r1, [sp, #0x198]
+420a4b0e: ldr        r0, [sp, #0x1b8]
+420a4b10: str        r1, [r0, #0x10]
+420a4b12: ldr        r1, [sp, #0x19c]
+420a4b14: ldr        r0, [sp, #0x1b8]
+420a4b16: str        r1, [r0, #0x14]
+420a4b18: ldr        r1, [sp, #0x1a0]
+420a4b1a: ldr        r0, [sp, #0x1b8]
+420a4b1c: str        r1, [r0, #0x18]
+420a4b1e: ldr        r1, [sp, #0x1a4]
+420a4b20: ldr        r0, [sp, #0x1b8]
+420a4b22: str        r1, [r0, #0x1c]
+420a4b24: ldr        r1, [sp, #0x1a8]
+420a4b26: ldr        r0, [sp, #0x1b8]
+420a4b28: str        r1, [r0, #0x20]
+420a4b2a: ldr        r1, [sp, #0x1ac]
+420a4b2c: ldr        r0, [sp, #0x1b8]
+420a4b2e: str        r1, [r0, #0x24]
+420a4b30: ldr        r1, [sp, #0x1b0]
+420a4b32: ldr        r0, [sp, #0x1b8]
+420a4b34: str        r1, [r0, #0x28]
+420a4b36: movs       r0, #1
+420a4b38: ldr        r1, [sp, #0x154]
+420a4b3a: lsls       r0, r1
+420a4b3c: str        r0, [sp, #0x24]
+420a4b3e: blx        #0x421e6614 ; CALL=0x421e6614
+420a4b42: str        r1, [sp, #0x12c]
+420a4b44: str        r0, [sp, #0x128]
+420a4b46: ldr        r0, [sp, #0x158]
+420a4b48: str        r0, [sp, #0x24]
+420a4b4a: blx        #0x421e6614 ; CALL=0x421e6614
+420a4b4e: ldr        r2, [sp, #0x1b8]
+420a4b50: str        r1, [r2, #0x3c]
+420a4b52: str        r0, [r2, #0x38]
+420a4b54: ldr        r0, [sp, #0x130]
+420a4b56: str        r0, [sp, #0x1c]
+420a4b58: blx        #0x421e6614 ; CALL=0x421e6614
+420a4b5c: str        r1, [sp, #0x24]
+420a4b5e: str        r0, [sp, #0x20]
+420a4b60: ldr        r3, [sp, #0x12c]
+420a4b62: ldr        r2, [sp, #0x128]
+420a4b64: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4b68: movs       r3, #0x98
+420a4b6a: ldr        r2, [sp, #0x1b8]
+420a4b6c: str        r0, [r3, r2]
+420a4b6e: adds       r2, #0x80
+420a4b70: str        r1, [r2, #0x1c]
+420a4b72: ldr        r0, [sp, #0x134]
+420a4b74: str        r0, [sp, #0x1c]
+420a4b76: blx        #0x421e6614 ; CALL=0x421e6614
+420a4b7a: str        r1, [sp, #0x24]
+420a4b7c: str        r0, [sp, #0x20]
+420a4b7e: ldr        r3, [sp, #0x12c]
+420a4b80: ldr        r2, [sp, #0x128]
+420a4b82: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4b86: ldr        r2, [sp, #0x1b8]
+420a4b88: adds       r2, #0x98
+420a4b8a: str        r1, [r2, #0xc]
+420a4b8c: str        r0, [r2, #8]
+420a4b8e: ldr        r0, [sp, #0x138]
+420a4b90: str        r0, [sp, #0x1c]
+420a4b92: blx        #0x421e6614 ; CALL=0x421e6614
+420a4b96: str        r1, [sp, #0x24]
+420a4b98: str        r0, [sp, #0x20]
+420a4b9a: ldr        r3, [sp, #0x12c]
+420a4b9c: ldr        r2, [sp, #0x128]
+420a4b9e: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4ba2: ldr        r2, [sp, #0x1b8]
+420a4ba4: adds       r2, #0x98
+420a4ba6: str        r1, [r2, #0x14]
+420a4ba8: str        r0, [r2, #0x10]
+420a4baa: ldr        r0, [sp, #0x13c]
+420a4bac: str        r0, [sp, #0x1c]
+420a4bae: blx        #0x421e6614 ; CALL=0x421e6614
+420a4bb2: str        r1, [sp, #0x24]
+420a4bb4: str        r0, [sp, #0x20]
+420a4bb6: ldr        r3, [sp, #0x12c]
+420a4bb8: ldr        r2, [sp, #0x128]
+420a4bba: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4bbe: ldr        r2, [sp, #0x1b8]
+420a4bc0: adds       r2, #0x98
+420a4bc2: str        r1, [r2, #0x1c]
+420a4bc4: str        r0, [r2, #0x18]
+420a4bc6: ldr        r0, [sp, #0x140]
+420a4bc8: str        r0, [sp, #0x1c]
+420a4bca: blx        #0x421e6614 ; CALL=0x421e6614
+420a4bce: str        r1, [sp, #0x24]
+420a4bd0: str        r0, [sp, #0x20]
+420a4bd2: ldr        r3, [sp, #0x12c]
+420a4bd4: ldr        r2, [sp, #0x128]
+420a4bd6: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4bda: ldr        r2, [sp, #0x1b8]
+420a4bdc: adds       r2, #0x98
+420a4bde: str        r1, [r2, #0x24]
+420a4be0: str        r0, [r2, #0x20]
+420a4be2: ldr        r0, [sp, #0x144]
+420a4be4: str        r0, [sp, #0x1c]
+420a4be6: blx        #0x421e6614 ; CALL=0x421e6614
+420a4bea: str        r1, [sp, #0x24]
+420a4bec: str        r0, [sp, #0x20]
+420a4bee: b          #0x420a4bf2
+420a4bf0: b          #0x420a50aa
+420a4bf2: ldr        r3, [sp, #0x12c]
+420a4bf4: ldr        r2, [sp, #0x128]
+420a4bf6: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4bfa: ldr        r2, [sp, #0x1b8]
+420a4bfc: adds       r2, #0x98
+420a4bfe: str        r1, [r2, #0x2c]
+420a4c00: str        r0, [r2, #0x28]
+420a4c02: ldr        r0, [sp, #0x148]
+420a4c04: str        r0, [sp, #0x1c]
+420a4c06: blx        #0x421e6614 ; CALL=0x421e6614
+420a4c0a: str        r1, [sp, #0x24]
+420a4c0c: str        r0, [sp, #0x20]
+420a4c0e: ldr        r3, [sp, #0x12c]
+420a4c10: ldr        r2, [sp, #0x128]
+420a4c12: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4c16: ldr        r2, [sp, #0x1b8]
+420a4c18: adds       r2, #0x98
+420a4c1a: str        r1, [r2, #0x34]
+420a4c1c: str        r0, [r2, #0x30]
+420a4c1e: ldr        r0, [sp, #0x14c]
+420a4c20: str        r0, [sp, #0x1c]
+420a4c22: blx        #0x421e6614 ; CALL=0x421e6614
+420a4c26: str        r1, [sp, #0x24]
+420a4c28: str        r0, [sp, #0x20]
+420a4c2a: ldr        r3, [sp, #0x12c]
+420a4c2c: ldr        r2, [sp, #0x128]
+420a4c2e: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4c32: ldr        r2, [sp, #0x1b8]
+420a4c34: adds       r2, #0x98
+420a4c36: str        r1, [r2, #0x3c]
+420a4c38: str        r0, [r2, #0x38]
+420a4c3a: ldr        r0, [sp, #0x150]
+420a4c3c: str        r0, [sp, #0x1c]
+420a4c3e: blx        #0x421e6614 ; CALL=0x421e6614
+420a4c42: str        r1, [sp, #0x24]
+420a4c44: str        r0, [sp, #0x20]
+420a4c46: ldr        r3, [sp, #0x12c]
+420a4c48: ldr        r2, [sp, #0x128]
+420a4c4a: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4c4e: ldr        r2, [sp, #0x1b8]
+420a4c50: adds       r2, #0x98
+420a4c52: str        r1, [r2, #0x44]
+420a4c54: str        r0, [r2, #0x40]
+420a4c56: movs       r1, #1
+420a4c58: ldr        r0, [sp, #0x154]
+420a4c5a: lsls       r1, r0
+420a4c5c: ldr        r0, [sp, #0x1b8]
+420a4c5e: str        r1, [r0, #0x64]
+420a4c60: ldr        r1, [sp, #0x130]
+420a4c62: ldr        r0, [sp, #0x1b8]
+420a4c64: str        r1, [r0, #0x40]
+420a4c66: ldr        r1, [sp, #0x134]
+420a4c68: ldr        r0, [sp, #0x1b8]
+420a4c6a: str        r1, [r0, #0x44]
+420a4c6c: ldr        r1, [sp, #0x138]
+420a4c6e: ldr        r0, [sp, #0x1b8]
+420a4c70: str        r1, [r0, #0x48]
+420a4c72: ldr        r1, [sp, #0x13c]
+420a4c74: ldr        r0, [sp, #0x1b8]
+420a4c76: str        r1, [r0, #0x4c]
+420a4c78: ldr        r1, [sp, #0x140]
+420a4c7a: ldr        r0, [sp, #0x1b8]
+420a4c7c: str        r1, [r0, #0x50]
+420a4c7e: ldr        r1, [sp, #0x144]
+420a4c80: ldr        r0, [sp, #0x1b8]
+420a4c82: str        r1, [r0, #0x54]
+420a4c84: ldr        r1, [sp, #0x148]
+420a4c86: ldr        r0, [sp, #0x1b8]
+420a4c88: str        r1, [r0, #0x58]
+420a4c8a: ldr        r1, [sp, #0x14c]
+420a4c8c: ldr        r0, [sp, #0x1b8]
+420a4c8e: str        r1, [r0, #0x5c]
+420a4c90: ldr        r1, [sp, #0x150]
+420a4c92: ldr        r0, [sp, #0x1b8]
+420a4c94: str        r1, [r0, #0x60]
+420a4c96: movs       r1, #1
+420a4c98: ldr        r0, [sp, #0x180]
+420a4c9a: lsls       r1, r0
+420a4c9c: str        r1, [sp, #0x24]
+420a4c9e: ldr        r0, [sp, #0x24]
+420a4ca0: blx        #0x421e6614 ; CALL=0x421e6614
+420a4ca4: str        r1, [sp, #0x12c]
+420a4ca6: str        r0, [sp, #0x128]
+420a4ca8: ldr        r0, [sp, #0x184]
+420a4caa: str        r0, [sp, #0x24]
+420a4cac: blx        #0x421e6614 ; CALL=0x421e6614
+420a4cb0: ldr        r2, [sp, #0x1b8]
+420a4cb2: str        r1, [r2, #0x6c]
+420a4cb4: str        r0, [r2, #0x68]
+420a4cb6: ldr        r0, [sp, #0x15c]
+420a4cb8: str        r0, [sp, #0x1c]
+420a4cba: blx        #0x421e6614 ; CALL=0x421e6614
+420a4cbe: str        r1, [sp, #0x24]
+420a4cc0: str        r0, [sp, #0x20]
+420a4cc2: ldr        r3, [sp, #0x12c]
+420a4cc4: ldr        r2, [sp, #0x128]
+420a4cc6: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4cca: movs       r3, #0xe0
+420a4ccc: ldr        r2, [sp, #0x1b8]
+420a4cce: str        r0, [r3, r2]
+420a4cd0: adds       r2, #0x80
+420a4cd2: str        r1, [r2, #0x64]
+420a4cd4: ldr        r0, [sp, #0x160]
+420a4cd6: str        r0, [sp, #0x1c]
+420a4cd8: blx        #0x421e6614 ; CALL=0x421e6614
+420a4cdc: str        r1, [sp, #0x24]
+420a4cde: str        r0, [sp, #0x20]
+420a4ce0: ldr        r3, [sp, #0x12c]
+420a4ce2: ldr        r2, [sp, #0x128]
+420a4ce4: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4ce8: ldr        r2, [sp, #0x1b8]
+420a4cea: adds       r2, #0xe0
+420a4cec: str        r1, [r2, #0xc]
+420a4cee: str        r0, [r2, #8]
+420a4cf0: ldr        r0, [sp, #0x164]
+420a4cf2: str        r0, [sp, #0x1c]
+420a4cf4: blx        #0x421e6614 ; CALL=0x421e6614
+420a4cf8: str        r1, [sp, #0x24]
+420a4cfa: str        r0, [sp, #0x20]
+420a4cfc: ldr        r3, [sp, #0x12c]
+420a4cfe: ldr        r2, [sp, #0x128]
+420a4d00: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d04: ldr        r2, [sp, #0x1b8]
+420a4d06: adds       r2, #0xe0
+420a4d08: str        r1, [r2, #0x14]
+420a4d0a: str        r0, [r2, #0x10]
+420a4d0c: ldr        r0, [sp, #0x168]
+420a4d0e: str        r0, [sp, #0x1c]
+420a4d10: blx        #0x421e6614 ; CALL=0x421e6614
+420a4d14: str        r1, [sp, #0x24]
+420a4d16: str        r0, [sp, #0x20]
+420a4d18: ldr        r3, [sp, #0x12c]
+420a4d1a: ldr        r2, [sp, #0x128]
+420a4d1c: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d20: ldr        r2, [sp, #0x1b8]
+420a4d22: adds       r2, #0xe0
+420a4d24: str        r1, [r2, #0x1c]
+420a4d26: str        r0, [r2, #0x18]
+420a4d28: ldr        r0, [sp, #0x16c]
+420a4d2a: str        r0, [sp, #0x1c]
+420a4d2c: blx        #0x421e6614 ; CALL=0x421e6614
+420a4d30: str        r1, [sp, #0x24]
+420a4d32: str        r0, [sp, #0x20]
+420a4d34: ldr        r3, [sp, #0x12c]
+420a4d36: ldr        r2, [sp, #0x128]
+420a4d38: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d3c: ldr        r2, [sp, #0x1b8]
+420a4d3e: adds       r2, #0xe0
+420a4d40: str        r1, [r2, #0x24]
+420a4d42: str        r0, [r2, #0x20]
+420a4d44: ldr        r0, [sp, #0x170]
+420a4d46: str        r0, [sp, #0x1c]
+420a4d48: blx        #0x421e6614 ; CALL=0x421e6614
+420a4d4c: str        r1, [sp, #0x24]
+420a4d4e: str        r0, [sp, #0x20]
+420a4d50: ldr        r3, [sp, #0x12c]
+420a4d52: ldr        r2, [sp, #0x128]
+420a4d54: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d58: ldr        r2, [sp, #0x1b8]
+420a4d5a: adds       r2, #0xe0
+420a4d5c: str        r1, [r2, #0x2c]
+420a4d5e: str        r0, [r2, #0x28]
+420a4d60: ldr        r0, [sp, #0x174]
+420a4d62: str        r0, [sp, #0x1c]
+420a4d64: blx        #0x421e6614 ; CALL=0x421e6614
+420a4d68: str        r1, [sp, #0x24]
+420a4d6a: str        r0, [sp, #0x20]
+420a4d6c: ldr        r3, [sp, #0x12c]
+420a4d6e: ldr        r2, [sp, #0x128]
+420a4d70: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d74: ldr        r2, [sp, #0x1b8]
+420a4d76: adds       r2, #0xe0
+420a4d78: str        r1, [r2, #0x34]
+420a4d7a: str        r0, [r2, #0x30]
+420a4d7c: ldr        r0, [sp, #0x178]
+420a4d7e: str        r0, [sp, #0x1c]
+420a4d80: blx        #0x421e6614 ; CALL=0x421e6614
+420a4d84: str        r1, [sp, #0x24]
+420a4d86: str        r0, [sp, #0x20]
+420a4d88: ldr        r3, [sp, #0x12c]
+420a4d8a: ldr        r2, [sp, #0x128]
+420a4d8c: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d90: ldr        r2, [sp, #0x1b8]
+420a4d92: adds       r2, #0xe0
+420a4d94: str        r1, [r2, #0x3c]
+420a4d96: str        r0, [r2, #0x38]
+420a4d98: ldr        r0, [sp, #0x17c]
+420a4d9a: str        r0, [sp, #0x1c]
+420a4d9c: blx        #0x421e6614 ; CALL=0x421e6614
+420a4da0: str        r1, [sp, #0x24]
+420a4da2: str        r0, [sp, #0x20]
+420a4da4: ldr        r3, [sp, #0x12c]
+420a4da6: ldr        r2, [sp, #0x128]
+420a4da8: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4dac: ldr        r2, [sp, #0x1b8]
+420a4dae: adds       r2, #0xe0
+420a4db0: str        r1, [r2, #0x44]
+420a4db2: str        r0, [r2, #0x40]
+420a4db4: movs       r1, #1
+420a4db6: ldr        r0, [sp, #0x180]
+420a4db8: lsls       r1, r0
+420a4dba: ldr        r0, [sp, #0x1b8]
+420a4dbc: adds       r0, #0x70
+420a4dbe: str        r1, [r0, #0x24]
+420a4dc0: ldr        r1, [sp, #0x15c]
+420a4dc2: ldr        r0, [sp, #0x1b8]
+420a4dc4: str        r1, [r0, #0x70]
+420a4dc6: ldr        r1, [sp, #0x160]
+420a4dc8: ldr        r0, [sp, #0x1b8]
+420a4dca: str        r1, [r0, #0x74]
+420a4dcc: ldr        r1, [sp, #0x164]
+420a4dce: ldr        r0, [sp, #0x1b8]
+420a4dd0: str        r1, [r0, #0x78]
+420a4dd2: ldr        r1, [sp, #0x168]
+420a4dd4: ldr        r0, [sp, #0x1b8]
+420a4dd6: str        r1, [r0, #0x7c]
+420a4dd8: ldr        r0, [sp, #0x1b8]
+420a4dda: adds       r0, #0x70
+420a4ddc: ldr        r1, [sp, #0x16c]
+420a4dde: str        r1, [r0, #0x10]
+420a4de0: ldr        r0, [sp, #0x1b8]
+420a4de2: adds       r0, #0x70
+420a4de4: ldr        r1, [sp, #0x170]
+420a4de6: str        r1, [r0, #0x14]
+420a4de8: ldr        r0, [sp, #0x1b8]
+420a4dea: adds       r0, #0x70
+420a4dec: ldr        r1, [sp, #0x174]
+420a4dee: str        r1, [r0, #0x18]
+420a4df0: ldr        r0, [sp, #0x1b8]
+420a4df2: adds       r0, #0x70
+420a4df4: ldr        r1, [sp, #0x178]
+420a4df6: str        r1, [r0, #0x1c]
+420a4df8: ldr        r0, [sp, #0x1b8]
+420a4dfa: adds       r0, #0x70
+420a4dfc: ldr        r1, [sp, #0x17c]
+420a4dfe: str        r1, [r0, #0x20]
+420a4e00: ldr        r2, [pc, #0x3e8] ; LIT 0x420a51ec->0x421e9c91 STRING='ca9_cm_config_fill'
+420a4e02: adr        r1, #0x3ec ; ADR=0x420a51f0 STRING='CA9: %s() - binFileData:'
+420a4e04: movs       r0, #2
+420a4e06: bl         #0x42140150 ; CALL=0x42140150
+420a4e0a: ldr        r1, [sp, #0x158]
+420a4e0c: str        r1, [sp, #0x24]
+420a4e0e: ldr        r2, [sp, #0x154]
+420a4e10: str        r2, [sp, #0x20]
+420a4e12: adr        r1, #0x3f8 ; ADR=0x420a520c STRING='CA9: Matrix_LT RoundUpBits: %i  Temp:%iK'
+420a4e14: movs       r0, #2
+420a4e16: ldr        r3, [sp, #0x24]
+420a4e18: bl         #0x42140150 ; CALL=0x42140150
+420a4e1c: ldr        r0, [sp, #0x1b8]
+420a4e1e: adds       r0, #0x98
+420a4e20: ldr        r1, [r0, #0x14]
+420a4e22: ldr        r0, [r0, #0x10]
+420a4e24: str        r1, [sp, #0xc]
+420a4e26: str        r0, [sp, #8]
+420a4e28: ldr        r0, [sp, #0x1b8]
+420a4e2a: movs       r1, r0
+420a4e2c: adds       r1, #0x98
+420a4e2e: ldr        r0, [r1, #8]
+420a4e30: ldr        r1, [r1, #0xc]
+420a4e32: str        r1, [sp, #4]
+420a4e34: str        r0, [sp]
+420a4e36: movs       r1, #0x98
+420a4e38: ldr        r0, [sp, #0x1b8]
+420a4e3a: ldr        r1, [r1, r0]
+420a4e3c: adds       r0, #0x80
+420a4e3e: ldr        r2, [r0, #0x1c]
+420a4e40: movs       r0, r1
+420a4e42: str        r2, [sp, #0x24]
+420a4e44: str        r0, [sp, #0x20]
+420a4e46: adr        r1, #0x3f0 ; ADR=0x420a5238 STRING='CA9: [%11.8f] [%11.8f] [%11.8f]'
+420a4e48: movs       r0, #2
+420a4e4a: ldr        r3, [sp, #0x24]
+420a4e4c: ldr        r2, [sp, #0x20]
+420a4e4e: bl         #0x42140150 ; CALL=0x42140150
+420a4e52: ldr        r0, [sp, #0x1b8]
+420a4e54: movs       r1, r0
+420a4e56: adds       r1, #0x98
+420a4e58: ldr        r0, [r1, #0x28]
+420a4e5a: ldr        r1, [r1, #0x2c]
+420a4e5c: str        r1, [sp, #0xc]
+420a4e5e: str        r0, [sp, #8]
+420a4e60: ldr        r0, [sp, #0x1b8]
+420a4e62: movs       r1, r0
+420a4e64: adds       r1, #0x98
+420a4e66: ldr        r0, [r1, #0x20]
+420a4e68: ldr        r1, [r1, #0x24]
+420a4e6a: str        r1, [sp, #4]
+420a4e6c: str        r0, [sp]
+420a4e6e: ldr        r0, [sp, #0x1b8]
+420a4e70: movs       r1, r0
+420a4e72: adds       r1, #0x98
+420a4e74: ldr        r3, [r1, #0x1c]
+420a4e76: ldr        r2, [r1, #0x18]
+420a4e78: adr        r1, #0x3bc ; ADR=0x420a5238 STRING='CA9: [%11.8f] [%11.8f] [%11.8f]'
+420a4e7a: movs       r0, #2
+420a4e7c: str        r3, [sp, #0x24]
+420a4e7e: str        r2, [sp, #0x20]
+420a4e80: bl         #0x42140150 ; CALL=0x42140150
+420a4e84: ldr        r0, [sp, #0x1b8]
+420a4e86: adds       r0, #0x98
+420a4e88: ldr        r1, [r0, #0x44]
+420a4e8a: ldr        r0, [r0, #0x40]
+420a4e8c: str        r1, [sp, #0xc]
+420a4e8e: str        r0, [sp, #8]
+420a4e90: ldr        r0, [sp, #0x1b8]
+420a4e92: adds       r0, #0x98
+420a4e94: ldr        r1, [r0, #0x3c]
+420a4e96: ldr        r0, [r0, #0x38]
+420a4e98: str        r1, [sp, #4]
+420a4e9a: str        r0, [sp]
+420a4e9c: ldr        r0, [sp, #0x1b8]
+420a4e9e: adds       r0, #0x98
+420a4ea0: ldr        r3, [r0, #0x34]
+420a4ea2: ldr        r2, [r0, #0x30]
+420a4ea4: adr        r1, #0x390 ; ADR=0x420a5238 STRING='CA9: [%11.8f] [%11.8f] [%11.8f]'
+420a4ea6: movs       r0, #2
+420a4ea8: str        r3, [sp, #0x24]
+420a4eaa: str        r2, [sp, #0x20]
+420a4eac: bl         #0x42140150 ; CALL=0x42140150
+420a4eb0: ldr        r1, [sp, #0x184]
+420a4eb2: str        r1, [sp, #0x24]
+420a4eb4: ldr        r2, [sp, #0x180]
+420a4eb6: str        r2, [sp, #0x20]
+420a4eb8: adr        r1, #0x39c ; ADR=0x420a5258 STRING='CA9: Matrix_HT RoundUpBits: %i  Temp:%iK'
+420a4eba: movs       r0, #2
+420a4ebc: ldr        r3, [sp, #0x24]
+420a4ebe: bl         #0x42140150 ; CALL=0x42140150
+420a4ec2: ldr        r0, [sp, #0x1b8]
+420a4ec4: movs       r1, r0
+420a4ec6: adds       r1, #0xe0
+420a4ec8: ldr        r0, [r1, #0x10]
+420a4eca: ldr        r1, [r1, #0x14]
+420a4ecc: str        r1, [sp, #0xc]
+420a4ece: str        r0, [sp, #8]
+420a4ed0: ldr        r0, [sp, #0x1b8]
+420a4ed2: movs       r1, r0
+420a4ed4: adds       r1, #0xe0
+420a4ed6: ldr        r0, [r1, #8]
+420a4ed8: ldr        r1, [r1, #0xc]
+420a4eda: str        r1, [sp, #4]
+420a4edc: str        r0, [sp]
+420a4ede: movs       r1, #0xe0
+420a4ee0: ldr        r0, [sp, #0x1b8]
+420a4ee2: ldr        r1, [r1, r0]
+420a4ee4: adds       r0, #0x80
+420a4ee6: ldr        r2, [r0, #0x64]
+420a4ee8: movs       r0, r1
+420a4eea: str        r2, [sp, #0x24]
+420a4eec: str        r0, [sp, #0x20]
+420a4eee: adr        r1, #0x348 ; ADR=0x420a5238 STRING='CA9: [%11.8f] [%11.8f] [%11.8f]'
+420a4ef0: movs       r0, #2
+420a4ef2: ldr        r3, [sp, #0x24]
+420a4ef4: ldr        r2, [sp, #0x20]
+420a4ef6: bl         #0x42140150 ; CALL=0x42140150
+420a4efa: ldr        r0, [sp, #0x1b8]
+420a4efc: movs       r1, r0
+420a4efe: adds       r1, #0xe0
+420a4f00: ldr        r0, [r1, #0x28]
+420a4f02: ldr        r1, [r1, #0x2c]
+420a4f04: str        r1, [sp, #0xc]
+420a4f06: str        r0, [sp, #8]
+420a4f08: ldr        r0, [sp, #0x1b8]
+420a4f0a: adds       r0, #0xe0
+420a4f0c: ldr        r1, [r0, #0x24]
+420a4f0e: ldr        r0, [r0, #0x20]
+420a4f10: str        r1, [sp, #4]
+420a4f12: str        r0, [sp]
+420a4f14: ldr        r0, [sp, #0x1b8]
+420a4f16: adds       r0, #0xe0
+420a4f18: ldr        r3, [r0, #0x1c]
+420a4f1a: ldr        r2, [r0, #0x18]
+420a4f1c: adr        r1, #0x318 ; ADR=0x420a5238 STRING='CA9: [%11.8f] [%11.8f] [%11.8f]'
+420a4f1e: movs       r0, #2
+420a4f20: str        r3, [sp, #0x24]
+420a4f22: str        r2, [sp, #0x20]
+420a4f24: bl         #0x42140150 ; CALL=0x42140150
+420a4f28: ldr        r0, [sp, #0x1b8]
+420a4f2a: movs       r1, r0
+420a4f2c: adds       r1, #0xe0
+420a4f2e: ldr        r0, [r1, #0x40]
+420a4f30: ldr        r1, [r1, #0x44]
+420a4f32: str        r1, [sp, #0xc]
+420a4f34: str        r0, [sp, #8]
+420a4f36: ldr        r0, [sp, #0x1b8]
+420a4f38: movs       r1, r0
+420a4f3a: adds       r1, #0xe0
+420a4f3c: ldr        r0, [r1, #0x38]
+420a4f3e: ldr        r1, [r1, #0x3c]
+420a4f40: str        r1, [sp, #4]
+420a4f42: str        r0, [sp]
+420a4f44: ldr        r0, [sp, #0x1b8]
+420a4f46: adds       r0, #0xe0
+420a4f48: ldr        r3, [r0, #0x34]
+420a4f4a: ldr        r2, [r0, #0x30]
+420a4f4c: adr        r1, #0x2e8 ; ADR=0x420a5238 STRING='CA9: [%11.8f] [%11.8f] [%11.8f]'
+420a4f4e: movs       r0, #2
+420a4f50: str        r3, [sp, #0x24]
+420a4f52: str        r2, [sp, #0x20]
+420a4f54: bl         #0x42140150 ; CALL=0x42140150
+420a4f58: ldr        r1, [sp, #0x1b0]
+420a4f5a: str        r1, [sp, #0x24]
+420a4f5c: ldr        r2, [sp, #0x1ac]
+420a4f5e: str        r2, [sp, #0x20]
+420a4f60: adr        r1, #0x320 ; ADR=0x420a5284 STRING='CA9: Matrix_DT DecimalPointPos: %i  Temp:%iK'
+420a4f62: movs       r0, #2
+420a4f64: ldr        r3, [sp, #0x24]
+420a4f66: bl         #0x42140150 ; CALL=0x42140150
+420a4f6a: ldr        r0, [sp, #0x190]
+420a4f6c: str        r0, [sp, #4]
+420a4f6e: blx        #0x421e6614 ; CALL=0x421e6614
+420a4f72: movs       r2, #0
+420a4f74: movs       r3, #0x81
+420a4f76: lsls       r3, r3, #0x17
+420a4f78: str        r1, [sp, #0xc]
+420a4f7a: str        r0, [sp, #8]
+420a4f7c: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4f80: str        r1, [sp, #0x24]
+420a4f82: str        r0, [sp, #0x20]
+420a4f84: ldr        r0, [sp, #0x18c]
+420a4f86: str        r0, [sp, #4]
+420a4f88: blx        #0x421e6614 ; CALL=0x421e6614
+420a4f8c: movs       r2, #0
+420a4f8e: movs       r3, #0x81
+420a4f90: lsls       r3, r3, #0x17
+420a4f92: str        r1, [sp, #0xc]
+420a4f94: str        r0, [sp, #8]
+420a4f96: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4f9a: str        r1, [sp, #0x1c]
+420a4f9c: str        r0, [sp, #0x18]
+420a4f9e: ldr        r0, [sp, #0x188]
+420a4fa0: str        r0, [sp, #4]
+420a4fa2: blx        #0x421e6614 ; CALL=0x421e6614
+420a4fa6: movs       r2, #0
+420a4fa8: movs       r3, #0x81
+420a4faa: lsls       r3, r3, #0x17
+420a4fac: str        r1, [sp, #0xc]
+420a4fae: str        r0, [sp, #8]
+420a4fb0: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4fb4: str        r1, [sp, #0x14]
+420a4fb6: str        r0, [sp, #0x10]
+420a4fb8: ldr        r1, [sp, #0x24]
+420a4fba: ldr        r0, [sp, #0x20]
+420a4fbc: str        r1, [sp, #0xc]
+420a4fbe: str        r0, [sp, #8]
+420a4fc0: ldr        r1, [sp, #0x1c]
+420a4fc2: ldr        r0, [sp, #0x18]
+420a4fc4: str        r1, [sp, #4]
+420a4fc6: str        r0, [sp]
+420a4fc8: adr        r1, #0x26c ; ADR=0x420a5238 STRING='CA9: [%11.8f] [%11.8f] [%11.8f]'
+420a4fca: movs       r0, #2
+420a4fcc: ldr        r3, [sp, #0x14]
+420a4fce: ldr        r2, [sp, #0x10]
+420a4fd0: bl         #0x42140150 ; CALL=0x42140150
+420a4fd4: ldr        r0, [sp, #0x19c]
+420a4fd6: str        r0, [sp, #4]
+420a4fd8: blx        #0x421e6614 ; CALL=0x421e6614
+420a4fdc: movs       r2, #0
+420a4fde: movs       r3, #0x81
+420a4fe0: lsls       r3, r3, #0x17
+420a4fe2: str        r1, [sp, #0xc]
+420a4fe4: str        r0, [sp, #8]
+420a4fe6: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4fea: str        r1, [sp, #0x24]
+420a4fec: str        r0, [sp, #0x20]
+420a4fee: ldr        r0, [sp, #0x198]
+420a4ff0: str        r0, [sp, #4]
+420a4ff2: blx        #0x421e6614 ; CALL=0x421e6614
+420a4ff6: movs       r2, #0
+420a4ff8: movs       r3, #0x81
+420a4ffa: lsls       r3, r3, #0x17
+420a4ffc: str        r1, [sp, #0xc]
+420a4ffe: str        r0, [sp, #8]
+420a5000: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a5004: str        r1, [sp, #0x1c]
+420a5006: str        r0, [sp, #0x18]
+420a5008: ldr        r0, [sp, #0x194]
+420a500a: str        r0, [sp, #4]
+420a500c: blx        #0x421e6614 ; CALL=0x421e6614
+420a5010: movs       r2, #0
+420a5012: movs       r3, #0x81
+420a5014: lsls       r3, r3, #0x17
+420a5016: str        r1, [sp, #0xc]
+420a5018: str        r0, [sp, #8]
+420a501a: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a501e: str        r1, [sp, #0x14]
+420a5020: str        r0, [sp, #0x10]
+420a5022: ldr        r1, [sp, #0x24]
+420a5024: ldr        r0, [sp, #0x20]
+420a5026: str        r1, [sp, #0xc]
+420a5028: str        r0, [sp, #8]
+420a502a: ldr        r1, [sp, #0x1c]
+420a502c: ldr        r0, [sp, #0x18]
+420a502e: str        r1, [sp, #4]
+420a5030: str        r0, [sp]
+420a5032: adr        r1, #0x204 ; ADR=0x420a5238 STRING='CA9: [%11.8f] [%11.8f] [%11.8f]'
+420a5034: movs       r0, #2
+420a5036: ldr        r3, [sp, #0x14]
+420a5038: ldr        r2, [sp, #0x10]
+420a503a: bl         #0x42140150 ; CALL=0x42140150
+420a503e: ldr        r0, [sp, #0x1a8]
+420a5040: str        r0, [sp, #4]
+420a5042: blx        #0x421e6614 ; CALL=0x421e6614
+420a5046: movs       r2, #0
+420a5048: movs       r3, #0x81
+420a504a: lsls       r3, r3, #0x17
+420a504c: str        r1, [sp, #0xc]
+420a504e: str        r0, [sp, #8]
+420a5050: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a5054: str        r1, [sp, #0x24]
+420a5056: str        r0, [sp, #0x20]
+420a5058: ldr        r0, [sp, #0x1a4]
+420a505a: str        r0, [sp, #4]
+420a505c: blx        #0x421e6614 ; CALL=0x421e6614
+420a5060: movs       r2, #0
+420a5062: movs       r3, #0x81
+420a5064: lsls       r3, r3, #0x17
+420a5066: str        r1, [sp, #0xc]
+420a5068: str        r0, [sp, #8]
+420a506a: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a506e: str        r1, [sp, #0x1c]
+420a5070: str        r0, [sp, #0x18]
+420a5072: ldr        r0, [sp, #0x1a0]
+420a5074: str        r0, [sp, #4]
+420a5076: blx        #0x421e6614 ; CALL=0x421e6614
+420a507a: movs       r2, #0
+420a507c: movs       r3, #0x81
+420a507e: lsls       r3, r3, #0x17
+420a5080: str        r1, [sp, #0xc]
+420a5082: str        r0, [sp, #8]
+
+=== CALLERS OF TF LOADER ===
+owner 0x420a4884 callers 0x420a583a
+-- caller 0x420a583a --
+420a573a: itte       lt
+420a573c: strblt     r6, [r1, #0x16]
+420a573e: sublt      r1, r6, r5
+420a5740: bge        #0x420a575e
+420a5742: subs       r7, #0xd1
+420a5744: ldrh       r5, [r3, r0]
+420a5746: subs       r3, #0x64
+420a5748: ldr        r7, [pc, #0x37c] ; LIT 0x420a5ac8->0x616d2072
+420a574a: subs       r7, #0xe9
+420a574c: movs       r7, #0x10
+420a574e: movs       r0, r0
+420a5750: str        r0, [r0, #0x40]
+420a5752: lsls       r1, r7
+420a5754: str        r1, [sp]
+
+=== TF LOADER WRITE/CALL SURFACE ===
+420a4896: blx        #0x4204f2ec ; CALL=0x4204f2ec
+420a489c: bl         #0x421a0c7c ; CALL=0x421a0c7c
+420a48ae: str        r0, [sp]
+420a48b2: bl         #0x42140150 ; CALL=0x42140150
+420a48be: str        r0, [sp]
+420a48c2: bl         #0x42140150 ; CALL=0x42140150
+420a48e0: str        r0, [r4]
+420a48ea: str        r0, [r4, #4]
+420a48fa: str        r0, [sp]
+420a48fe: bl         #0x42140150 ; CALL=0x42140150
+420a491c: str        r1, [r0, r2]
+420a4934: str        r1, [r0, #4]
+420a4946: str        r0, [sp]
+420a494a: bl         #0x42140150 ; CALL=0x42140150
+420a496c: str        r1, [sp]
+420a496e: str        r0, [sp, #4]
+420a4974: bl         #0x42140150 ; CALL=0x42140150
+420a498a: strh       r7, [r3, r1]
+420a498c: ldr        r5, [pc, #0x114] ; LIT 0x420a4aa4->0x206f7420
+420a498e: str        r1, [r0, r1]
+420a4990: ldr        r1, [pc, #0x140] ; LIT 0x420a4ad4->0x20011a09
+420a49b4: str        r2, [r6, #0x54]
+420a49b6: str        r1, [r4, #0x44]
+420a49b8: str        r0, [r4, #0x50]
+420a49ba: strb       r2, [r6, #9]
+420a49bc: strb       r7, [r5, #9]
+420a49c2: str        r0, [r4, #0x60]
+420a49e4: str        r2, [r6, #0x54]
+420a49e6: str        r1, [r4, #0x44]
+420a49e8: str        r0, [r4, #0x50]
+420a49ea: strb       r2, [r6, #9]
+420a49ec: strb       r7, [r5, #9]
+420a49f2: strb       r0, [r4, #0x14]
+420a49f6: str        r6, [r5, #0x74]
+420a49f8: str        r0, [r4, #0x40]
+420a49fa: str        r5, [r4, #0x64]
+420a49fc: strb       r1, [r4, #0x15]
+420a4a00: str        r6, [r6, #0x14]
+420a4a02: strb       r4, [r5, #0x15]
+420a4a04: strb       r5, [r4, #0xd]
+420a4a18: str        r2, [r6, #0x54]
+420a4a1a: str        r1, [r4, #0x44]
+420a4a1c: str        r0, [r4, #0x50]
+420a4a1e: strb       r2, [r6, #9]
+420a4a20: strb       r7, [r5, #9]
+420a4a26: strb       r0, [r4, #0x10]
+420a4a2a: str        r5, [r5, #0x14]
+420a4a2e: strb       r0, [r4, #8]
+420a4a32: strb       r1, [r4, #1]
+420a4a36: str        r6, [r5, #0x74]
+420a4a38: str        r0, [r4, #0x50]
+420a4a3a: strb       r6, [r5, #0x11]
+420a4a3e: strb       r5, [r4, #0xd]
+420a4a54: str        r2, [r6, #0x54]
+420a4a56: str        r1, [r4, #0x44]
+420a4a58: strb       r0, [r4, #0xc]
+420a4a5a: str        r5, [r6, #0x34]
+420a4a5c: str        r3, [r4, #0x54]
+420a4a5e: strb       r3, [r6, #0xd]
+420a4a60: strb       r6, [r4, #0x15]
+420a4a66: strb       r5, [r4, #0xc]
+420a4a74: str        r4, [r5, #0x14]
+420a4a76: str        r2, [r6, #0x74]
+420a4a8c: str        r2, [r6, #0x54]
+420a4a8e: str        r1, [r4, #0x44]
+420a4a90: str        r0, [r4, #0x50]
+420a4a92: strb       r2, [r6, #9]
+420a4a94: strb       r7, [r5, #9]
+420a4a9a: str        r0, [r4, #0x60]
+420a4aa2: str        r2, [r7, #0x54]
+420a4aa4: strb       r0, [r4, #0x10]
+420a4aa8: strb       r5, [r4, #0xc]
+420a4ab2: str        r0, [sp, #0x1b4]
+420a4ab8: blx        #0x4204f3bc ; CALL=0x4204f3bc
+420a4ac4: blx        #0x4204f3bc ; CALL=0x4204f3bc
+420a4acc: str        r1, [r0, #0x2c]
+420a4ada: str        r0, [sp, #0x24]
+420a4adc: blx        #0x421e6614 ; CALL=0x421e6614
+420a4ae2: str        r1, [r2, #0x34]
+420a4ae4: str        r0, [r2, #0x30]
+420a4ae8: bl         #0x420a4628 ; CALL=0x420a4628
+420a4aec: str        r0, [sp, #0x1b4]
+420a4af8: str        r1, [r0]
+420a4afe: str        r1, [r0, #4]
+420a4b04: str        r1, [r0, #8]
+420a4b0a: str        r1, [r0, #0xc]
+420a4b10: str        r1, [r0, #0x10]
+420a4b16: str        r1, [r0, #0x14]
+420a4b1c: str        r1, [r0, #0x18]
+420a4b22: str        r1, [r0, #0x1c]
+420a4b28: str        r1, [r0, #0x20]
+420a4b2e: str        r1, [r0, #0x24]
+420a4b34: str        r1, [r0, #0x28]
+420a4b3c: str        r0, [sp, #0x24]
+420a4b3e: blx        #0x421e6614 ; CALL=0x421e6614
+420a4b42: str        r1, [sp, #0x12c]
+420a4b44: str        r0, [sp, #0x128]
+420a4b48: str        r0, [sp, #0x24]
+420a4b4a: blx        #0x421e6614 ; CALL=0x421e6614
+420a4b50: str        r1, [r2, #0x3c]
+420a4b52: str        r0, [r2, #0x38]
+420a4b56: str        r0, [sp, #0x1c]
+420a4b58: blx        #0x421e6614 ; CALL=0x421e6614
+420a4b5c: str        r1, [sp, #0x24]
+420a4b5e: str        r0, [sp, #0x20]
+420a4b64: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4b6c: str        r0, [r3, r2]
+420a4b70: str        r1, [r2, #0x1c]
+420a4b74: str        r0, [sp, #0x1c]
+420a4b76: blx        #0x421e6614 ; CALL=0x421e6614
+420a4b7a: str        r1, [sp, #0x24]
+420a4b7c: str        r0, [sp, #0x20]
+420a4b82: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4b8a: str        r1, [r2, #0xc]
+420a4b8c: str        r0, [r2, #8]
+420a4b90: str        r0, [sp, #0x1c]
+420a4b92: blx        #0x421e6614 ; CALL=0x421e6614
+420a4b96: str        r1, [sp, #0x24]
+420a4b98: str        r0, [sp, #0x20]
+420a4b9e: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4ba6: str        r1, [r2, #0x14]
+420a4ba8: str        r0, [r2, #0x10]
+420a4bac: str        r0, [sp, #0x1c]
+420a4bae: blx        #0x421e6614 ; CALL=0x421e6614
+420a4bb2: str        r1, [sp, #0x24]
+420a4bb4: str        r0, [sp, #0x20]
+420a4bba: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4bc2: str        r1, [r2, #0x1c]
+420a4bc4: str        r0, [r2, #0x18]
+420a4bc8: str        r0, [sp, #0x1c]
+420a4bca: blx        #0x421e6614 ; CALL=0x421e6614
+420a4bce: str        r1, [sp, #0x24]
+420a4bd0: str        r0, [sp, #0x20]
+420a4bd6: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4bde: str        r1, [r2, #0x24]
+420a4be0: str        r0, [r2, #0x20]
+420a4be4: str        r0, [sp, #0x1c]
+420a4be6: blx        #0x421e6614 ; CALL=0x421e6614
+420a4bea: str        r1, [sp, #0x24]
+420a4bec: str        r0, [sp, #0x20]
+420a4bf6: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4bfe: str        r1, [r2, #0x2c]
+420a4c00: str        r0, [r2, #0x28]
+420a4c04: str        r0, [sp, #0x1c]
+420a4c06: blx        #0x421e6614 ; CALL=0x421e6614
+420a4c0a: str        r1, [sp, #0x24]
+420a4c0c: str        r0, [sp, #0x20]
+420a4c12: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4c1a: str        r1, [r2, #0x34]
+420a4c1c: str        r0, [r2, #0x30]
+420a4c20: str        r0, [sp, #0x1c]
+420a4c22: blx        #0x421e6614 ; CALL=0x421e6614
+420a4c26: str        r1, [sp, #0x24]
+420a4c28: str        r0, [sp, #0x20]
+420a4c2e: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4c36: str        r1, [r2, #0x3c]
+420a4c38: str        r0, [r2, #0x38]
+420a4c3c: str        r0, [sp, #0x1c]
+420a4c3e: blx        #0x421e6614 ; CALL=0x421e6614
+420a4c42: str        r1, [sp, #0x24]
+420a4c44: str        r0, [sp, #0x20]
+420a4c4a: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4c52: str        r1, [r2, #0x44]
+420a4c54: str        r0, [r2, #0x40]
+420a4c5e: str        r1, [r0, #0x64]
+420a4c64: str        r1, [r0, #0x40]
+420a4c6a: str        r1, [r0, #0x44]
+420a4c70: str        r1, [r0, #0x48]
+420a4c76: str        r1, [r0, #0x4c]
+420a4c7c: str        r1, [r0, #0x50]
+420a4c82: str        r1, [r0, #0x54]
+420a4c88: str        r1, [r0, #0x58]
+420a4c8e: str        r1, [r0, #0x5c]
+420a4c94: str        r1, [r0, #0x60]
+420a4c9c: str        r1, [sp, #0x24]
+420a4ca0: blx        #0x421e6614 ; CALL=0x421e6614
+420a4ca4: str        r1, [sp, #0x12c]
+420a4ca6: str        r0, [sp, #0x128]
+420a4caa: str        r0, [sp, #0x24]
+420a4cac: blx        #0x421e6614 ; CALL=0x421e6614
+420a4cb2: str        r1, [r2, #0x6c]
+420a4cb4: str        r0, [r2, #0x68]
+420a4cb8: str        r0, [sp, #0x1c]
+420a4cba: blx        #0x421e6614 ; CALL=0x421e6614
+420a4cbe: str        r1, [sp, #0x24]
+420a4cc0: str        r0, [sp, #0x20]
+420a4cc6: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4cce: str        r0, [r3, r2]
+420a4cd2: str        r1, [r2, #0x64]
+420a4cd6: str        r0, [sp, #0x1c]
+420a4cd8: blx        #0x421e6614 ; CALL=0x421e6614
+420a4cdc: str        r1, [sp, #0x24]
+420a4cde: str        r0, [sp, #0x20]
+420a4ce4: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4cec: str        r1, [r2, #0xc]
+420a4cee: str        r0, [r2, #8]
+420a4cf2: str        r0, [sp, #0x1c]
+420a4cf4: blx        #0x421e6614 ; CALL=0x421e6614
+420a4cf8: str        r1, [sp, #0x24]
+420a4cfa: str        r0, [sp, #0x20]
+420a4d00: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d08: str        r1, [r2, #0x14]
+420a4d0a: str        r0, [r2, #0x10]
+420a4d0e: str        r0, [sp, #0x1c]
+420a4d10: blx        #0x421e6614 ; CALL=0x421e6614
+420a4d14: str        r1, [sp, #0x24]
+420a4d16: str        r0, [sp, #0x20]
+420a4d1c: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d24: str        r1, [r2, #0x1c]
+420a4d26: str        r0, [r2, #0x18]
+420a4d2a: str        r0, [sp, #0x1c]
+420a4d2c: blx        #0x421e6614 ; CALL=0x421e6614
+420a4d30: str        r1, [sp, #0x24]
+420a4d32: str        r0, [sp, #0x20]
+420a4d38: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d40: str        r1, [r2, #0x24]
+420a4d42: str        r0, [r2, #0x20]
+420a4d46: str        r0, [sp, #0x1c]
+420a4d48: blx        #0x421e6614 ; CALL=0x421e6614
+420a4d4c: str        r1, [sp, #0x24]
+420a4d4e: str        r0, [sp, #0x20]
+420a4d54: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d5c: str        r1, [r2, #0x2c]
+420a4d5e: str        r0, [r2, #0x28]
+420a4d62: str        r0, [sp, #0x1c]
+420a4d64: blx        #0x421e6614 ; CALL=0x421e6614
+420a4d68: str        r1, [sp, #0x24]
+420a4d6a: str        r0, [sp, #0x20]
+420a4d70: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d78: str        r1, [r2, #0x34]
+420a4d7a: str        r0, [r2, #0x30]
+420a4d7e: str        r0, [sp, #0x1c]
+420a4d80: blx        #0x421e6614 ; CALL=0x421e6614
+420a4d84: str        r1, [sp, #0x24]
+420a4d86: str        r0, [sp, #0x20]
+420a4d8c: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4d94: str        r1, [r2, #0x3c]
+420a4d96: str        r0, [r2, #0x38]
+420a4d9a: str        r0, [sp, #0x1c]
+420a4d9c: blx        #0x421e6614 ; CALL=0x421e6614
+420a4da0: str        r1, [sp, #0x24]
+420a4da2: str        r0, [sp, #0x20]
+420a4da8: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4db0: str        r1, [r2, #0x44]
+420a4db2: str        r0, [r2, #0x40]
+420a4dbe: str        r1, [r0, #0x24]
+420a4dc4: str        r1, [r0, #0x70]
+420a4dca: str        r1, [r0, #0x74]
+420a4dd0: str        r1, [r0, #0x78]
+420a4dd6: str        r1, [r0, #0x7c]
+420a4dde: str        r1, [r0, #0x10]
+420a4de6: str        r1, [r0, #0x14]
+420a4dee: str        r1, [r0, #0x18]
+420a4df6: str        r1, [r0, #0x1c]
+420a4dfe: str        r1, [r0, #0x20]
+420a4e06: bl         #0x42140150 ; CALL=0x42140150
+420a4e0c: str        r1, [sp, #0x24]
+420a4e10: str        r2, [sp, #0x20]
+420a4e18: bl         #0x42140150 ; CALL=0x42140150
+420a4e24: str        r1, [sp, #0xc]
+420a4e26: str        r0, [sp, #8]
+420a4e32: str        r1, [sp, #4]
+420a4e34: str        r0, [sp]
+420a4e42: str        r2, [sp, #0x24]
+420a4e44: str        r0, [sp, #0x20]
+420a4e4e: bl         #0x42140150 ; CALL=0x42140150
+420a4e5c: str        r1, [sp, #0xc]
+420a4e5e: str        r0, [sp, #8]
+420a4e6a: str        r1, [sp, #4]
+420a4e6c: str        r0, [sp]
+420a4e7c: str        r3, [sp, #0x24]
+420a4e7e: str        r2, [sp, #0x20]
+420a4e80: bl         #0x42140150 ; CALL=0x42140150
+420a4e8c: str        r1, [sp, #0xc]
+420a4e8e: str        r0, [sp, #8]
+420a4e98: str        r1, [sp, #4]
+420a4e9a: str        r0, [sp]
+420a4ea8: str        r3, [sp, #0x24]
+420a4eaa: str        r2, [sp, #0x20]
+420a4eac: bl         #0x42140150 ; CALL=0x42140150
+420a4eb2: str        r1, [sp, #0x24]
+420a4eb6: str        r2, [sp, #0x20]
+420a4ebe: bl         #0x42140150 ; CALL=0x42140150
+420a4ecc: str        r1, [sp, #0xc]
+420a4ece: str        r0, [sp, #8]
+420a4eda: str        r1, [sp, #4]
+420a4edc: str        r0, [sp]
+420a4eea: str        r2, [sp, #0x24]
+420a4eec: str        r0, [sp, #0x20]
+420a4ef6: bl         #0x42140150 ; CALL=0x42140150
+420a4f04: str        r1, [sp, #0xc]
+420a4f06: str        r0, [sp, #8]
+420a4f10: str        r1, [sp, #4]
+420a4f12: str        r0, [sp]
+420a4f20: str        r3, [sp, #0x24]
+420a4f22: str        r2, [sp, #0x20]
+420a4f24: bl         #0x42140150 ; CALL=0x42140150
+420a4f32: str        r1, [sp, #0xc]
+420a4f34: str        r0, [sp, #8]
+420a4f40: str        r1, [sp, #4]
+420a4f42: str        r0, [sp]
+420a4f50: str        r3, [sp, #0x24]
+420a4f52: str        r2, [sp, #0x20]
+420a4f54: bl         #0x42140150 ; CALL=0x42140150
+420a4f5a: str        r1, [sp, #0x24]
+420a4f5e: str        r2, [sp, #0x20]
+420a4f66: bl         #0x42140150 ; CALL=0x42140150
+420a4f6c: str        r0, [sp, #4]
+420a4f6e: blx        #0x421e6614 ; CALL=0x421e6614
+420a4f78: str        r1, [sp, #0xc]
+420a4f7a: str        r0, [sp, #8]
+420a4f7c: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4f80: str        r1, [sp, #0x24]
+420a4f82: str        r0, [sp, #0x20]
+420a4f86: str        r0, [sp, #4]
+420a4f88: blx        #0x421e6614 ; CALL=0x421e6614
+420a4f92: str        r1, [sp, #0xc]
+420a4f94: str        r0, [sp, #8]
+420a4f96: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4f9a: str        r1, [sp, #0x1c]
+420a4f9c: str        r0, [sp, #0x18]
+420a4fa0: str        r0, [sp, #4]
+420a4fa2: blx        #0x421e6614 ; CALL=0x421e6614
+420a4fac: str        r1, [sp, #0xc]
+420a4fae: str        r0, [sp, #8]
+420a4fb0: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4fb4: str        r1, [sp, #0x14]
+420a4fb6: str        r0, [sp, #0x10]
+420a4fbc: str        r1, [sp, #0xc]
+420a4fbe: str        r0, [sp, #8]
+420a4fc4: str        r1, [sp, #4]
+420a4fc6: str        r0, [sp]
+420a4fd0: bl         #0x42140150 ; CALL=0x42140150
+420a4fd6: str        r0, [sp, #4]
+420a4fd8: blx        #0x421e6614 ; CALL=0x421e6614
+420a4fe2: str        r1, [sp, #0xc]
+420a4fe4: str        r0, [sp, #8]
+420a4fe6: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a4fea: str        r1, [sp, #0x24]
+420a4fec: str        r0, [sp, #0x20]
+420a4ff0: str        r0, [sp, #4]
+420a4ff2: blx        #0x421e6614 ; CALL=0x421e6614
+420a4ffc: str        r1, [sp, #0xc]
+420a4ffe: str        r0, [sp, #8]
+420a5000: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a5004: str        r1, [sp, #0x1c]
+420a5006: str        r0, [sp, #0x18]
+420a500a: str        r0, [sp, #4]
+420a500c: blx        #0x421e6614 ; CALL=0x421e6614
+420a5016: str        r1, [sp, #0xc]
+420a5018: str        r0, [sp, #8]
+420a501a: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a501e: str        r1, [sp, #0x14]
+420a5020: str        r0, [sp, #0x10]
+420a5026: str        r1, [sp, #0xc]
+420a5028: str        r0, [sp, #8]
+420a502e: str        r1, [sp, #4]
+420a5030: str        r0, [sp]
+420a503a: bl         #0x42140150 ; CALL=0x42140150
+420a5040: str        r0, [sp, #4]
+420a5042: blx        #0x421e6614 ; CALL=0x421e6614
+420a504c: str        r1, [sp, #0xc]
+420a504e: str        r0, [sp, #8]
+420a5050: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a5054: str        r1, [sp, #0x24]
+420a5056: str        r0, [sp, #0x20]
+420a505a: str        r0, [sp, #4]
+420a505c: blx        #0x421e6614 ; CALL=0x421e6614
+420a5066: str        r1, [sp, #0xc]
+420a5068: str        r0, [sp, #8]
+420a506a: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a506e: str        r1, [sp, #0x1c]
+420a5070: str        r0, [sp, #0x18]
+420a5074: str        r0, [sp, #4]
+420a5076: blx        #0x421e6614 ; CALL=0x421e6614
+420a5080: str        r1, [sp, #0xc]
+420a5082: str        r0, [sp, #8]
+420a5084: blx        #0x421e61d0 ; CALL=0x421e61d0
+420a5088: str        r1, [sp, #0x14]
+420a508a: str        r0, [sp, #0x10]
+420a5090: str        r1, [sp, #0xc]
+420a5092: str        r0, [sp, #8]
+420a5098: str        r1, [sp, #4]
+420a509a: str        r0, [sp]
+420a50a4: bl         #0x42140150 ; CALL=0x42140150
+420a50ae: str        r1, [r0, #0x24]
+420a50b4: str        r1, [r0, #0x28]
+420a50c2: str        r0, [sp, #0x24]
+420a50c4: blx        #0x421e6614 ; CALL=0x421e6614
+420a50c8: str        r1, [sp, #0x12c]
+420a50ca: str        r0, [sp, #0x128]
+420a50d4: blx        #0x421e67a0 ; CALL=0x421e67a0
+420a50d8: str        r1, [sp, #0x1c]
+420a50da: str        r0, [sp, #0x18]
+420a50dc: blx        #0x421a0a44 ; CALL=0x421a0a44
+420a50e0: str        r1, [sp, #0x24]
+420a50e2: str        r0, [sp, #0x20]
+420a50e4: blx        #0x421e6534 ; CALL=0x421e6534
+420a50ea: str        r0, [r1]
+420a50f4: blx        #0x421e67a0 ; CALL=0x421e67a0
+420a50f8: str        r1, [sp, #0x1c]
+420a50fa: str        r0, [sp, #0x18]
+420a50fc: blx        #0x421a0a44 ; CALL=0x421a0a44
+420a5100: str        r1, [sp, #0x24]
+420a5102: str        r0, [sp, #0x20]
+420a5104: blx        #0x421e6534 ; CALL=0x421e6534
+420a510a: str        r0, [r1, #4]
+420a5114: blx        #0x421e67a0 ; CALL=0x421e67a0
+420a5118: str        r1, [sp, #0x1c]
+420a511a: str        r0, [sp, #0x18]
+420a511c: blx        #0x421a0a44 ; CALL=0x421a0a44
+420a5120: str        r1, [sp, #0x24]
+420a5122: str        r0, [sp, #0x20]
+420a5124: blx        #0x421e6534 ; CALL=0x421e6534
+420a512a: str        r0, [r1, #8]
+420a5134: blx        #0x421e67a0 ; CALL=0x421e67a0
+420a5138: str        r1, [sp, #0x1c]
+420a513a: str        r0, [sp, #0x18]
+420a513c: blx        #0x421a0a44 ; CALL=0x421a0a44
+420a5140: str        r1, [sp, #0x24]
+420a5142: str        r0, [sp, #0x20]
+420a5144: blx        #0x421e6534 ; CALL=0x421e6534
+420a514a: str        r0, [r1, #0xc]
+420a5154: blx        #0x421e67a0 ; CALL=0x421e67a0
+420a5158: str        r1, [sp, #0x1c]
+420a515a: str        r0, [sp, #0x18]
+420a515c: blx        #0x421a0a44 ; CALL=0x421a0a44
+420a5160: str        r1, [sp, #0x24]
+420a5162: str        r0, [sp, #0x20]
+420a5164: blx        #0x421e6534 ; CALL=0x421e6534
+420a516a: str        r0, [r1, #0x10]
+420a5174: blx        #0x421e67a0 ; CALL=0x421e67a0
+420a5178: str        r1, [sp, #0x1c]
+420a517a: str        r0, [sp, #0x18]
+420a517c: blx        #0x421a0a44 ; CALL=0x421a0a44
+420a5180: str        r1, [sp, #0x24]
+420a5182: str        r0, [sp, #0x20]
+
+=== KNOWN NONLINEAR DIRECT CALLS ===
+0x420a4884 NONE
+
+=== INTERPRETATION GATE ===
+Filename proves a CA9 B2Y TF REMAPPING calibration asset exists. Payload shape/consumer must determine whether it is an OETF, a remap control structure, or another transfer-domain object. Do not alter Android output transfer from filename alone.
