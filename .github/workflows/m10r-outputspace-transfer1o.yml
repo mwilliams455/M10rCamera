@@ -1,0 +1,88 @@
+name: M10-R output-space transfer 1O
+on:
+  push:
+    branches: [m10r-outputspace-transfer1a]
+    paths: ['.github/workflows/m10r-outputspace-transfer1o.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inventory decoded sections for CA9 color-management code
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections > /tmp/section_listing.txt
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER1O.txt
+          from pathlib import Path
+          import csv,re,math,collections,subprocess
+          root=Path('/tmp/sections')
+          rows=list(csv.DictReader((root/'sections.csv').open()))
+          print('M10-R OUTPUTSPACE TRANSFER1O')
+          print('\n=== SECTION INVENTORY ===')
+          for r in rows:
+            p=root/r['file']
+            d=p.read_bytes()
+            # printable fraction, simple architecture clues
+            printable=sum(1 for x in d[:min(len(d),1_000_000)] if x in (9,10,13) or 0x20<=x<0x7f)
+            frac=printable/max(1,min(len(d),1_000_000))
+            print(f"{int(r['index']):03d} name={r['name']!r} size={r['size']} kind={r['kind']} base={r['image_base']} aux={r['aux']} file={r['file']} printable={frac:.4f}")
+          terms=[b'ca9_cm',b'ColorManagement',b'color management',b'colour management',b'ARM926',b'CC1',b'CC0',b'StandardColorMode',b'sRGB',b'SRGB',b'AdobeRGB',b'ADOBERGB',b'ECI',b'TF_REMAPPING',b'B2Y_TF_REMAPPING',b'B2Y']
+          print('\n=== CROSS-SECTION SIGNATURE HITS ===')
+          candidates=[]
+          for r in rows:
+            p=root/r['file'];d=p.read_bytes();hits=[]
+            for term in terms:
+              pos=0;cnt=0;loc=[]
+              while True:
+                q=d.find(term,pos)
+                if q<0:break
+                cnt+=1
+                if len(loc)<12:loc.append(q)
+                pos=q+1
+              if cnt:hits.append((term.decode('ascii','replace'),cnt,loc))
+            if hits:
+              candidates.append((r,hits))
+              print(f"\nSECTION {int(r['index']):03d} {r['name']!r} base={r['image_base']} size={r['size']}")
+              for term,cnt,loc in hits:print(f"  {term}: count={cnt} offsets={','.join(hex(x) for x in loc)}")
+              # print bounded ASCII strings containing a signature
+              seen=set()
+              for m in re.finditer(rb'[ -~]{5,220}',d):
+                s=m.group().decode('ascii','replace')
+                if any(t.decode('ascii','replace').lower() in s.lower() for t in terms):
+                  key=(m.start(),s)
+                  if key not in seen:
+                    seen.add(key);print(f"  ASCII +0x{m.start():x}: {s!r}")
+          print('\n=== CANDIDATE SECTIONS EXCLUDING 092 IMG-SYSTEM ===')
+          for r,h in candidates:
+            if int(r['index'])!=92:
+              print(f"{int(r['index']):03d} {r['name']!r} base={r['image_base']} size={r['size']} terms={','.join(x[0] for x in h)}")
+          print('\n=== BASE CLUSTERS ===')
+          by=collections.defaultdict(list)
+          for r in rows:by[r['image_base']].append((int(r['index']),r['name'],int(r['size'])))
+          for base,vals in sorted(by.items()):
+            if len(vals)>1 or base!='0x00000000':print(base,vals)
+          print('\n=== DECISION GATE ===')
+          print('A non-092 executable section with CA9/CM/B2Y signatures becomes the primary CA9 receiver candidate. If signatures exist only in 092, trace IPC target/callback registration and section image bases rather than assuming a separate named CA9 image.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER1O.txt
+          git commit -m 'research: record CA9 section inventory 1O' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
