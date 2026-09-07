@@ -1,0 +1,128 @@
+name: M10-R output-space transfer 1V
+on:
+  push:
+    branches: [m10r-outputspace-transfer1a]
+    paths: ['.github/workflows/m10r-outputspace-transfer1v.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace CA9 IPCU receiver
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER1V.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes();BASE=0x40000000;PFX=4
+          amd=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);amd.detail=True
+          tmd=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);tmd.detail=True
+          def off(a):return PFX+a-BASE
+          def one(md,a):
+            o=off(a)
+            if not 0<=o<len(b)-4:return None
+            q=list(md.disasm(b[o:o+4],a,count=1));return q[0] if q else None
+          def dis(md,a,z):return list(md.disasm(b[off(a):off(z)],a))
+          def lit(mode,i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                pc=((i.address+4)&~3) if mode=='THUMB' else i.address+8
+                la=pc+i.operands[1].mem.disp;o=off(la)
+                if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+            except:pass
+          def call(i):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm
+          def find_start(mode,a,back=0x500):
+            md=tmd if mode=='THUMB' else amd;step=2 if mode=='THUMB' else 4
+            for p in range(a,max(BASE,a-back),-step):
+              i=one(md,p)
+              if not i:continue
+              if mode=='ARM' and ((i.mnemonic=='push') or (i.mnemonic=='stmdb' and 'sp!' in i.op_str)) and 'lr' in i.op_str:return p
+              if mode=='THUMB' and i.mnemonic=='push' and 'lr' in i.op_str:return p
+            return None
+          print('M10-R OUTPUTSPACE TRANSFER1V')
+          print('\n=== RAW 0xFFF50000 LITERAL CONTEXT ===')
+          for a in range(0x4000c020,0x4000c0b0,16):
+            q=b[off(a):off(a)+16];print(f'{a:08x}:',q.hex(' '))
+          print('\n=== XREFS TO 0xFFF50000 / 0xFFF50100 ===')
+          hits=[]
+          for mode,md,step in [('ARM',amd,4),('THUMB',tmd,2)]:
+            for a in range(BASE,BASE+len(b)-PFX-4,step):
+              i=one(md,a)
+              if not i:continue
+              x=lit(mode,i)
+              if x and x[1] in (0xfff50000,0xfff50100):
+                hits.append((mode,a,x[1],x[0],i));print(mode,hex(a),'pool',hex(x[0]),'->',hex(x[1]),i.mnemonic,i.op_str)
+          print('HIT_COUNT',len(hits))
+          funcs={}
+          for mode,a,v,la,i in hits:
+            st=find_start(mode,a)
+            if st is not None:funcs[(mode,st)]=True
+          print('\n=== IPCU FUNCTION WINDOWS ===')
+          for mode,st in sorted(funcs):
+            md=amd if mode=='ARM' else tmd;hi=min(BASE+len(b)-PFX,st+0x900)
+            print('\nFUNCTION',mode,hex(st))
+            for i in md.disasm(b[off(st):off(hi)],st):
+              x=lit(mode,i);s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+              if x:s+=f' ; LIT {x[0]:#x}->{x[1]:#x}'
+              q=call(i)
+              if q is not None:s+=f' ; CALL={q:#x}'
+              print(s)
+              if i.address>max(a for m,a,_,_,_ in hits if m==mode)-4 and ((i.mnemonic=='pop' and 'pc' in i.op_str) or (i.mnemonic=='bx' and 'lr' in i.op_str)):break
+
+          print('\n=== CALLERS OF IPCU FUNCTIONS ===')
+          for mode,st in sorted(funcs):
+            for cmode,md,step in [('ARM',amd,4),('THUMB',tmd,2)]:
+              for a in range(BASE,BASE+len(b)-PFX-4,step):
+                i=one(md,a)
+                if i and call(i)==st:
+                  print('CALLEE',mode,hex(st),'CALLER',cmode,hex(a),'OWNER',hex(find_start(cmode,a) or 0))
+
+          print('\n=== MANAGER RAW REGION ARM/THUMB ===')
+          for mode,md in [('ARM',amd),('THUMB',tmd)]:
+            print('\nMODE',mode)
+            for i in dis(md,0x40006300,0x40006500):print(f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}')
+
+          print('\n=== IPC-RELATED ASCII ===')
+          low=b.lower()
+          for term in (b'ipcu',b'mailbox',b'command',b'interrupt',b'ca9_control_manager'):
+            p=0
+            while 1:
+              p=low.find(term,p)
+              if p<0:break
+              s0=p
+              while s0>PFX and 0x20<=b[s0-1]<0x7f:s0-=1
+              e=b.find(b'\0',p,min(len(b),p+200));q=b[s0:e] if e>p else b''
+              try:s=q.decode('ascii','replace')
+              except:s=''
+              print(term.decode(),hex(BASE+s0-PFX),repr(s));p+=1
+
+          print('\n=== DECISION GATE ===')
+          print('Identify CA9 function(s) that access 0xFFF50000 and their callers. Recover payload register reads/command dispatch before connecting output-space byte to CA9 CM math.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER1V.txt
+          git commit -m 'research: record CA9 IPCU receiver trace 1V' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
