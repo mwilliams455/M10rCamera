@@ -1,0 +1,433 @@
+M10-R OUTPUTSPACE TRANSFER3W
+
+=== MODE-INIT FINAL CALL WINDOW ===
+42152e80: lsls       r0, r0, #3
+42152e82: adds       r0, r4, r0
+42152e84: ldr        r0, [r0, #0xc]
+42152e86: ldr        r1, [pc, #0x70] ; LIT 0x42152ef8->0x2709de0
+42152e88: adds       r1, r0, r1
+42152e8a: add        r0, sp, #0x280
+42152e8c: str        r1, [r0, #0x28]
+42152e8e: add        r0, sp, #0x280
+42152e90: str        r7, [r0, #0x38]
+42152e92: add        r1, sp, #0x280
+42152e94: ldr        r0, [sp]
+42152e96: str        r0, [r1, #0x3c]
+42152e98: movs       r0, r4
+42152e9a: adds       r0, #8
+42152e9c: movs       r1, #5
+42152e9e: lsls       r1, r1, #7
+42152ea0: adds       r0, r0, r1
+42152ea2: str        r7, [r0, #0x64]
+42152ea4: movs       r0, r4
+42152ea6: adds       r0, #8
+42152ea8: movs       r2, #5
+42152eaa: lsls       r2, r2, #7
+42152eac: adds       r0, r0, r2
+42152eae: ldr        r1, [sp]
+42152eb0: str        r1, [r0, #0x68]
+42152eb2: movs       r1, #0
+42152eb4: add        r0, sp, #0x2c0
+42152eb6: strb       r1, [r0]
+42152eb8: add        r0, sp, #0x280
+42152eba: adr        r1, #0x6c ; ADR=0x42152f28 STR='IMG: Still Link B2Y Ch1:   Width:%d    Height:%d'
+42152ebc: ldr        r3, [r0, #0x3c]
+42152ebe: ldr        r2, [r0, #0x38]
+42152ec0: movs       r0, #2
+42152ec2: bl         #0x42140150 ; CALL=0x42140150
+42152ec6: b          #0x42152ed2
+42152ec8: adr        r1, #0x90 ; ADR=0x42152f5c STR='IMG: ----ERROR-----   img_b2y_mode_init 5'
+42152eca: movs       r0, #4
+42152ecc: bl         #0x42140150 ; CALL=0x42140150
+42152ed0: mov        r8, r8
+42152ed2: mov        r8, r8
+42152ed4: ldr        r0, [pc, #0xb0] ; LIT 0x42152f88->0x408ced34
+42152ed6: ldrb       r1, [r0]
+42152ed8: movs       r0, r6
+42152eda: bl         #0x42154f84 ; CALL=0x42154f84
+42152ede: movs       r0, #1
+42152ee0: ldr        r1, [pc, #0xa4] ; LIT 0x42152f88->0x408ced34
+42152ee2: strb       r0, [r1]
+42152ee4: add        sp, #0x1fc
+42152ee6: add        sp, #0xe0
+42152ee8: pop        {r4, r5, r6, r7, pc}
+
+=== APPLY PROLOG POINTER SEED ===
+4215220c: push       {r4, r5, r6, r7, lr}
+4215220e: sub        sp, #0x1fc
+42152210: sub        sp, #0xe0
+42152212: movs       r5, r0
+42152214: movs       r4, r1
+42152216: add        r6, sp, #4
+42152218: movs       r1, #0x5b
+4215221a: lsls       r1, r1, #3
+4215221c: add        r0, sp, #4
+4215221e: blx        #0x4204f3bc ; CALL=0x4204f3bc
+42152222: movs       r3, r5
+42152224: blx        #0x4209f988 ; CALL=0x4209f988
+
+=== BROAD PROGRAMMER 0x42154F84 DIRECT CHILD CALLS ===
+42154fa8: bl         #0x42153eb4 ; CALL=0x42153eb4
+42154fb2: bl         #0x421547bc ; CALL=0x421547bc
+42154fbc: bl         #0x42154938 ; CALL=0x42154938
+42154fd8: bl         #0x42154d58 ; CALL=0x42154d58
+42154fe2: bl         #0x42154350 ; CALL=0x42154350
+42154fec: bl         #0x42153d24 ; CALL=0x42153d24
+42155056: bl         #0x42154bb4 ; CALL=0x42154bb4
+42155068: bl         #0x4215440c ; CALL=0x4215440c
+42155072: bl         #0x42153dec ; CALL=0x42153dec
+4215507c: bl         #0x42153f60 ; CALL=0x42153f60
+42155086: bl         #0x42154ec8 ; CALL=0x42154ec8
+42155090: bl         #0x42154e14 ; CALL=0x42154e14
+4215509a: bl         #0x421546e4 ; CALL=0x421546e4
+421550a4: bl         #0x42154144 ; CALL=0x42154144
+421550ae: bl         #0x421544d8 ; CALL=0x421544d8
+421550b8: bl         #0x42154060 ; CALL=0x42154060
+421550c2: bl         #0x42154ac4 ; CALL=0x42154ac4
+421550cc: bl         #0x421539dc ; CALL=0x421539dc
+421550d6: bl         #0x42153924 ; CALL=0x42153924
+421550e0: bl         #0x42153c68 ; CALL=0x42153c68
+421550ea: bl         #0x42153a9c ; CALL=0x42153a9c
+421550f4: bl         #0x42154868 ; CALL=0x42154868
+421550fe: bl         #0x42153b7c ; CALL=0x42153b7c
+42155134: bl         #0x421549e4 ; CALL=0x421549e4
+CHILDREN ['0x42153eb4', '0x421547bc', '0x42154938', '0x42154d58', '0x42154350', '0x42153d24', '0x42154bb4', '0x4215440c', '0x42153dec', '0x42153f60', '0x42154ec8', '0x42154e14', '0x421546e4', '0x42154144', '0x421544d8', '0x42154060', '0x42154ac4', '0x421539dc', '0x42153924', '0x42153c68', '0x42153a9c', '0x42154868', '0x42153b7c', '0x421549e4']
+
+=== CHILD FUNCTION FIRST-ARG OFFSET +0x48 ANALYSIS ===
+
+CHILD 0x42153eb4 ALIASES ['r7', 'r0'] PLUS48 [] HELPERS [(1108688616, 'resource')]
+  STR 'DEKNEE    String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_deknee_paraset'
+
+CHILD 0x421547bc ALIASES ['r0', 'r4'] PLUS48 [] HELPERS [(1108690910, 'copy'), (1108690930, 'resource')]
+  STR 'OFFSET    String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_offset_paraset'
+
+CHILD 0x42154938 ALIASES ['r0', 'r4'] PLUS48 [] HELPERS [(1108691290, 'copy'), (1108691310, 'resource')]
+  STR 'SHIFT     String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_shift_paraset'
+
+CHILD 0x42154d58 ALIASES ['r7', 'r0'] PLUS48 [] HELPERS [(1108692364, 'resource')]
+  STR 'WBCLIPLEVEL     String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_wbcliplevel_paraset'
+
+CHILD 0x42154350 ALIASES ['r0', 'r4'] PLUS48 [] HELPERS [(1108689778, 'copy'), (1108689798, 'resource')]
+  STR 'INTERPOLATION     String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_interploation_paraset'
+
+CHILD 0x42153d24 ALIASES ['r0', 'r5'] PLUS48 [] HELPERS [(1108688216, 'resource')]
+  STR 'COLORCORRECTION0     String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_colorcorrection0_paraset'
+
+CHILD 0x42154bb4 ALIASES ['r0', 'r4'] PLUS48 [] HELPERS [(1108691944, 'copy'), (1108691954, 'concat'), (1108691974, 'resource'), (1108692012, 'resource'), (1108692068, 'resource')]
+  STR 'TONE     String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_tone_control_paraset   TBL0'
+  STR 'NO VALID STRING   img_b2y_select_tone_control_paraset   TBL1'
+
+CHILD 0x4215440c ALIASES ['r7', 'r0'] PLUS48 [] HELPERS [(1108689984, 'resource')]
+  STR 'INTERPOLATION GAMMA    String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_interpolation_gamma_paraset'
+
+CHILD 0x42153dec ALIASES ['r0', 'r5'] PLUS48 [] HELPERS [(1108688416, 'resource')]
+  STR 'COLORCORRECTION1     String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_colorcorrection1_paraset'
+
+CHILD 0x42153f60 ALIASES ['r0', 'r5'] PLUS48 [] HELPERS [(1108688778, 'copy'), (1108688798, 'resource'), (1108688836, 'resource'), (1108688874, 'resource')]
+  STR 'DIFFERENTIAL GAMMA     String:%s'
+  STR 'B2Y.bin'
+
+CHILD 0x42154ec8 ALIASES ['r7', 'r0'] PLUS48 [] HELPERS [(1108692732, 'resource')]
+  STR 'YC CONVERSION     String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_yc_conversion_paraset'
+
+CHILD 0x42154e14 ALIASES ['r7', 'r0'] PLUS48 [] HELPERS [(1108692552, 'resource')]
+  STR 'Y BLEND     String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_y_blend_paraset'
+
+CHILD 0x421546e4 ALIASES ['r0', 'r4'] PLUS48 [] HELPERS [(1108690722, 'copy'), (1108690732, 'concat'), (1108690752, 'resource')]
+  STR 'LUM NOISE REDUCTION     String:%s'
+  STR 'B2Y.bin'
+
+CHILD 0x42154144 ALIASES ['r0', 'r4'] PLUS48 [] HELPERS [(1108689302, 'copy'), (1108689312, 'concat'), (1108689322, 'concat'), (1108689330, 'copy'), (1108689340, 'concat'), (1108689370, 'resource'), (1108689416, 'resource'), (1108689458, 'resource'), (1108689500, 'resource'), (1108689548, 'resource')]
+  STR 'HIGH FREQ EDGE ENHANCEMENT  String:%s'
+  STR 'HIGH FREQ EDGE ENHANCEMENT  StringTABLE:%s'
+  STR 'B2Y.bin'
+
+CHILD 0x421544d8 ALIASES ['r0', 'r4'] PLUS48 [] HELPERS [(1108690218, 'copy'), (1108690228, 'concat'), (1108690238, 'concat'), (1108690246, 'copy'), (1108690256, 'concat'), (1108690286, 'resource'), (1108690332, 'resource'), (1108690374, 'resource'), (1108690416, 'resource'), (1108690464, 'resource')]
+  STR 'LOW FREQ EDGE ENHANCEMENT   String:%s'
+  STR 'LOW FREQ EDGE ENHANCEMENT   StringTABLE:%s'
+  STR 'B2Y.bin'
+
+CHILD 0x42154060 ALIASES ['r0', 'r4'] PLUS48 [] HELPERS [(1108689046, 'copy'), (1108689056, 'concat'), (1108689076, 'resource')]
+  STR 'EDGE SYNTHESIS     String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_edge_synthesis_paraset'
+
+CHILD 0x42154ac4 ALIASES ['r0', 'r4'] PLUS48 [] HELPERS [(1108691706, 'copy'), (1108691716, 'concat'), (1108691736, 'resource')]
+  STR 'TEXTURE ENHANCEMENT     String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_texture_enhancement_paraset'
+
+CHILD 0x421539dc ALIASES ['r0', 'r4'] PLUS48 [] HELPERS [(1108687378, 'copy'), (1108687388, 'concat'), (1108687408, 'resource')]
+  STR 'COLOR DIF EDGE TEXTURE CORRECTION     String:%s'
+  STR 'B2Y.bin'
+
+CHILD 0x42153924 ALIASES ['r0', 'r4'] PLUS48 [] HELPERS [(1108687194, 'copy'), (1108687204, 'concat'), (1108687224, 'resource')]
+  STR 'COLOR DIF EDGE CORRECTION     String:%s'
+  STR 'B2Y.bin'
+
+CHILD 0x42153c68 ALIASES ['r0', 'r4'] PLUS48 [] HELPERS [(1108688030, 'copy'), (1108688040, 'concat'), (1108688060, 'resource')]
+  STR 'COLOR DIF TEXTURE CORRECTION     String:%s'
+  STR 'B2Y.bin'
+
+CHILD 0x42153a9c ALIASES ['r0', 'r4'] PLUS48 [] HELPERS [(1108687570, 'copy'), (1108687580, 'concat'), (1108687600, 'resource')]
+  STR 'COLOR DIF LPF     String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_color_dif_lpf_paraset'
+
+CHILD 0x42154868 ALIASES ['r0', 'r4'] PLUS48 [] HELPERS [(1108691082, 'copy'), (1108691102, 'resource')]
+  STR 'POST PROCESSING FILTER     String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_post_processing_filter_paraset'
+
+CHILD 0x42153b7c ALIASES ['r0', 'r4'] PLUS48 [] HELPERS [(1108687790, 'copy'), (1108687800, 'concat'), (1108687820, 'resource')]
+  STR 'COLOR DIF SUPPRESSION     String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_color_dif_suppression_paraset'
+
+CHILD 0x421549e4 ALIASES ['r0', 'r4'] PLUS48 [] HELPERS [(1108691482, 'copy'), (1108691492, 'concat'), (1108691512, 'resource')]
+  STR 'SUBPRE_LIGHT     String:%s'
+  STR 'B2Y.bin'
+  STR 'NO VALID STRING   img_b2y_select_subpre_light_paraset'
+
+=== CHILD CALL ARGUMENT WINDOWS ===
+
+CALL 0x42154fa8 -> 0x42153eb4
+42154f9c: movs       r0, r4
+42154f9e: blx        #0x420cf6d4 ; CALL=0x420cf6d4
+42154fa2: movs       r1, r5
+42154fa4: movs       r0, r4
+42154fa6: adds       r0, #0x2c
+42154fa8: bl         #0x42153eb4 ; CALL=0x42153eb4
+42154fac: movs       r1, r5
+
+CALL 0x42154fb2 -> 0x421547bc
+42154fa6: adds       r0, #0x2c
+42154fa8: bl         #0x42153eb4 ; CALL=0x42153eb4
+42154fac: movs       r1, r5
+42154fae: movs       r0, r4
+42154fb0: adds       r0, #0x2c
+42154fb2: bl         #0x421547bc ; CALL=0x421547bc
+42154fb6: movs       r1, r5
+
+CALL 0x42154fbc -> 0x42154938
+42154fb0: adds       r0, #0x2c
+42154fb2: bl         #0x421547bc ; CALL=0x421547bc
+42154fb6: movs       r1, r5
+42154fb8: movs       r0, r4
+42154fba: adds       r0, #0x2c
+42154fbc: bl         #0x42154938 ; CALL=0x42154938
+42154fc0: movs       r3, #0xff
+
+CALL 0x42154fd8 -> 0x42154d58
+42154fcc: ldrh       r0, [r3, r4]
+42154fce: bl         #0x420d4380 ; CALL=0x420d4380
+42154fd2: movs       r1, r5
+42154fd4: movs       r0, r4
+42154fd6: adds       r0, #0x2c
+42154fd8: bl         #0x42154d58 ; CALL=0x42154d58
+42154fdc: movs       r1, r5
+
+CALL 0x42154fe2 -> 0x42154350
+42154fd6: adds       r0, #0x2c
+42154fd8: bl         #0x42154d58 ; CALL=0x42154d58
+42154fdc: movs       r1, r5
+42154fde: movs       r0, r4
+42154fe0: adds       r0, #0x2c
+42154fe2: bl         #0x42154350 ; CALL=0x42154350
+42154fe6: movs       r1, #0
+
+CALL 0x42154fec -> 0x42153d24
+42154fe0: adds       r0, #0x2c
+42154fe2: bl         #0x42154350 ; CALL=0x42154350
+42154fe6: movs       r1, #0
+42154fe8: movs       r0, r4
+42154fea: adds       r0, #0x2c
+42154fec: bl         #0x42153d24 ; CALL=0x42153d24
+42154ff0: ldr        r0, [pc, #0x300] ; LIT 0x421552f4->0x20020400
+
+CALL 0x42155056 -> 0x42154bb4
+4215504c: lsrs       r0, r0, #0x10
+4215504e: str        r0, [r1, #8]
+42155050: movs       r1, r5
+42155052: movs       r0, r4
+42155054: adds       r0, #0x2c
+42155056: bl         #0x42154bb4 ; CALL=0x42154bb4
+4215505a: movs       r1, #0xdc
+
+CALL 0x42155068 -> 0x4215440c
+4215505c: ldr        r0, [r1, r4]
+4215505e: bl         #0x420d038c ; CALL=0x420d038c
+42155062: movs       r1, r5
+42155064: movs       r0, r4
+42155066: adds       r0, #0x2c
+42155068: bl         #0x4215440c ; CALL=0x4215440c
+4215506c: movs       r1, #0
+
+CALL 0x42155072 -> 0x42153dec
+42155066: adds       r0, #0x2c
+42155068: bl         #0x4215440c ; CALL=0x4215440c
+4215506c: movs       r1, #0
+4215506e: movs       r0, r4
+42155070: adds       r0, #0x2c
+42155072: bl         #0x42153dec ; CALL=0x42153dec
+42155076: movs       r1, r5
+
+CALL 0x4215507c -> 0x42153f60
+42155070: adds       r0, #0x2c
+42155072: bl         #0x42153dec ; CALL=0x42153dec
+42155076: movs       r1, r5
+42155078: movs       r0, r4
+4215507a: adds       r0, #0x2c
+4215507c: bl         #0x42153f60 ; CALL=0x42153f60
+42155080: movs       r1, r5
+
+CALL 0x42155086 -> 0x42154ec8
+4215507a: adds       r0, #0x2c
+4215507c: bl         #0x42153f60 ; CALL=0x42153f60
+42155080: movs       r1, r5
+42155082: movs       r0, r4
+42155084: adds       r0, #0x2c
+42155086: bl         #0x42154ec8 ; CALL=0x42154ec8
+4215508a: movs       r1, r5
+
+CALL 0x42155090 -> 0x42154e14
+42155084: adds       r0, #0x2c
+42155086: bl         #0x42154ec8 ; CALL=0x42154ec8
+4215508a: movs       r1, r5
+4215508c: movs       r0, r4
+4215508e: adds       r0, #0x2c
+42155090: bl         #0x42154e14 ; CALL=0x42154e14
+42155094: movs       r1, r5
+
+CALL 0x4215509a -> 0x421546e4
+4215508e: adds       r0, #0x2c
+42155090: bl         #0x42154e14 ; CALL=0x42154e14
+42155094: movs       r1, r5
+42155096: movs       r0, r4
+42155098: adds       r0, #0x2c
+4215509a: bl         #0x421546e4 ; CALL=0x421546e4
+4215509e: movs       r1, r5
+
+CALL 0x421550a4 -> 0x42154144
+42155098: adds       r0, #0x2c
+4215509a: bl         #0x421546e4 ; CALL=0x421546e4
+4215509e: movs       r1, r5
+421550a0: movs       r0, r4
+421550a2: adds       r0, #0x2c
+421550a4: bl         #0x42154144 ; CALL=0x42154144
+421550a8: movs       r1, r5
+
+CALL 0x421550ae -> 0x421544d8
+421550a2: adds       r0, #0x2c
+421550a4: bl         #0x42154144 ; CALL=0x42154144
+421550a8: movs       r1, r5
+421550aa: movs       r0, r4
+421550ac: adds       r0, #0x2c
+421550ae: bl         #0x421544d8 ; CALL=0x421544d8
+421550b2: movs       r1, r5
+
+CALL 0x421550b8 -> 0x42154060
+421550ac: adds       r0, #0x2c
+421550ae: bl         #0x421544d8 ; CALL=0x421544d8
+421550b2: movs       r1, r5
+421550b4: movs       r0, r4
+421550b6: adds       r0, #0x2c
+421550b8: bl         #0x42154060 ; CALL=0x42154060
+421550bc: movs       r1, r5
+
+CALL 0x421550c2 -> 0x42154ac4
+421550b6: adds       r0, #0x2c
+421550b8: bl         #0x42154060 ; CALL=0x42154060
+421550bc: movs       r1, r5
+421550be: movs       r0, r4
+421550c0: adds       r0, #0x2c
+421550c2: bl         #0x42154ac4 ; CALL=0x42154ac4
+421550c6: movs       r1, r5
+
+CALL 0x421550cc -> 0x421539dc
+421550c0: adds       r0, #0x2c
+421550c2: bl         #0x42154ac4 ; CALL=0x42154ac4
+421550c6: movs       r1, r5
+421550c8: movs       r0, r4
+421550ca: adds       r0, #0x2c
+421550cc: bl         #0x421539dc ; CALL=0x421539dc
+421550d0: movs       r1, r5
+
+CALL 0x421550d6 -> 0x42153924
+421550ca: adds       r0, #0x2c
+421550cc: bl         #0x421539dc ; CALL=0x421539dc
+421550d0: movs       r1, r5
+421550d2: movs       r0, r4
+421550d4: adds       r0, #0x2c
+421550d6: bl         #0x42153924 ; CALL=0x42153924
+421550da: movs       r1, r5
+
+CALL 0x421550e0 -> 0x42153c68
+421550d4: adds       r0, #0x2c
+421550d6: bl         #0x42153924 ; CALL=0x42153924
+421550da: movs       r1, r5
+421550dc: movs       r0, r4
+421550de: adds       r0, #0x2c
+421550e0: bl         #0x42153c68 ; CALL=0x42153c68
+421550e4: movs       r1, r5
+
+CALL 0x421550ea -> 0x42153a9c
+421550de: adds       r0, #0x2c
+421550e0: bl         #0x42153c68 ; CALL=0x42153c68
+421550e4: movs       r1, r5
+421550e6: movs       r0, r4
+421550e8: adds       r0, #0x2c
+421550ea: bl         #0x42153a9c ; CALL=0x42153a9c
+421550ee: movs       r1, r5
+
+CALL 0x421550f4 -> 0x42154868
+421550e8: adds       r0, #0x2c
+421550ea: bl         #0x42153a9c ; CALL=0x42153a9c
+421550ee: movs       r1, r5
+421550f0: movs       r0, r4
+421550f2: adds       r0, #0x2c
+421550f4: bl         #0x42154868 ; CALL=0x42154868
+421550f8: movs       r1, r5
+
+CALL 0x421550fe -> 0x42153b7c
+421550f2: adds       r0, #0x2c
+421550f4: bl         #0x42154868 ; CALL=0x42154868
+421550f8: movs       r1, r5
+421550fa: movs       r0, r4
+421550fc: adds       r0, #0x2c
+421550fe: bl         #0x42153b7c ; CALL=0x42153b7c
+42155102: movs       r0, #0xff
+
+CALL 0x42155134 -> 0x421549e4
+42155128: adds       r0, #0x9d
+4215512a: bl         #0x420d4a80 ; CALL=0x420d4a80
+4215512e: movs       r1, r5
+42155130: movs       r0, r4
+42155132: adds       r0, #0x2c
+42155134: bl         #0x421549e4 ; CALL=0x421549e4
+42155138: ldr        r0, [pc, #0x1c4] ; LIT 0x42155300->0x20022400
+
+=== DECISION GATE ===
+Verify 0x42154F84 root pointer equals mode-init sp+4 so child pointer root+0x2c equals selector sp+0x30. Then identify which child selectors truly read first_arg+0x48, the SRGB/ADOBERGB/ECI C-string.
