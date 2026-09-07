@@ -1,0 +1,163 @@
+name: M10-R output-space transfer 1E
+on:
+  push:
+    branches: [m10r-outputspace-transfer1a]
+    paths: ['.github/workflows/m10r-outputspace-transfer1e.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace TF remapping consumer and YC path
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER1E.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); BASE=0x42000000; PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True
+          def off(a): return PFX+a-BASE
+          def valid(a): return BASE<=a<BASE+len(b)-PFX
+          def one(a):
+            if not valid(a): return None
+            q=list(md.disasm(b[off(a):off(a)+4],a,count=1)); return q[0] if q else None
+          def dis(a,z): return list(md.disasm(b[off(a):off(z)],a)) if z>a else []
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp; o=off(la)
+                if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+            except: pass
+          def call(i):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm
+          def astr(v):
+            if not valid(v): return None
+            o=off(v);e=b.find(b'\0',o,min(len(b),o+220));q=b[o:e] if e>o else b''
+            return q.decode('ascii','replace') if len(q)>=4 and all(0x20<=x<=0x7e for x in q) else None
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:9s} {i.op_str}'
+            q=lit(i)
+            if q:
+              s+=f' ; LIT {hex(q[0])}->{hex(q[1])}'; st=astr(q[1])
+              if st:s+=f' STRING={st!r}'
+            t=call(i)
+            if t is not None:s+=f' ; CALL={hex(t)}'
+            return s
+          def prologue(a,lo):
+            for q in range(a,max(lo,a-0x1000),-2):
+              i=one(q)
+              if i and i.mnemonic=='push' and 'lr' in i.op_str:return q
+          print('M10-R OUTPUTSPACE TRANSFER1E')
+          print('Scope: TF-remapping caller/consumer plus YC/JPEG selector relationship to live CA9 color-space state.')
+          TF_LOADER=0x420a4884; TF_CALL=0x420a583a; CA9_BASE=0x43705760; CA9_COLOR=0x43705780
+
+          print('\n=== TF LOADER CALLER ===')
+          p=prologue(TF_CALL,0x420a5200); print('call',hex(TF_CALL),'owner',hex(p) if p else 'NONE')
+          if p:
+            for i in dis(p,min(0x420a591c,p+0x900)):
+              # full short owner is useful for r0 dataflow; suppress obvious nop padding only
+              if i.mnemonic!='nop':print(fmt(i))
+
+          print('\n=== CALLSITE ARGUMENT WINDOW ===')
+          for i in dis(TF_CALL-0x50,TF_CALL+0x24):print(fmt(i))
+
+          # Find literal pools/references to any concrete address loaded immediately before TF call.
+          print('\n=== CA9 LIVE STATE READ/WRITE SURFACE 0x420A5200..0x420A7000 ===')
+          pools=[]
+          for target,name in ((CA9_BASE,'BASE'),(CA9_COLOR,'COLOR')):
+            pat=struct.pack('<I',target);q=0
+            while True:
+              q=b.find(pat,q)
+              if q<0:break
+              pools.append((BASE+q-PFX,target,name));q+=4
+          for pool,target,name in pools:
+            for a in range(max(0x420a5200,pool-0x400),min(0x420a7000,pool+4),2):
+              i=one(a);x=lit(i) if i else None
+              if x and x[0]==pool and x[1]==target:print(name,fmt(i))
+
+          # YC/JPEG strings first, then bounded halfword xrefs.
+          print('\n=== YC/JPEG HIGH-VALUE STRINGS ===')
+          strings=[];q=0
+          terms=('YC CONVERSION','YCC','YCBCR','JPEG','YC_CONVERSION','YC conversion')
+          while q<len(b):
+            if 0x20<=b[q]<=0x7e:
+              e=q
+              while e<len(b) and 0x20<=b[e]<=0x7e:e+=1
+              if e-q>=4:
+                s=b[q:e].decode('ascii','replace')
+                if any(t.lower() in s.lower() for t in terms):strings.append((BASE+q-PFX,s))
+              q=e+1
+            else:q+=1
+          for a,s in strings:print(hex(a),repr(s))
+          saddrs={a for a,_ in strings}
+
+          print('\n=== YC SELECTOR XREFS 0x42154C00..0x42155200 ===')
+          yrefs=[]
+          for a in range(0x42154c00,0x42155200,2):
+            i=one(a)
+            if not i:continue
+            x=lit(i)
+            if x and x[1] in saddrs:
+              yrefs.append(a);print(fmt(i))
+          print('xref_count',len(yrefs))
+
+          print('\n=== YC OWNER(S) FILTERED SIDE-EFFECT SURFACE ===')
+          yowners=[]
+          for a in yrefs:
+            pp=prologue(a,0x42154000)
+            if pp:yowners.append(pp)
+          known={0x420d15e8:'DG_CONTROL',0x420d25a4:'INTERP_GAMMA',0x420d3c1c:'TONE_HELPER',0x420d1170:'DEKNEE_REGION'}
+          for pp in sorted(set(yowners)):
+            print('\nOWNER',hex(pp))
+            for i in dis(pp,min(pp+0x1000,0x42156000)):
+              t=call(i);x=lit(i)
+              if i.mnemonic.startswith('str') or t is not None or i.mnemonic.startswith('cmp') or (x and (0x20000000<=x[1]<0x21000000 or x[1] in (CA9_BASE,CA9_COLOR))):
+                note=' ***'+known[t]+'***' if t in known else ''
+                print(fmt(i)+note)
+
+          print('\n=== YC OWNER CA9 COLOR-STATE DEPENDENCY ===')
+          for pp in sorted(set(yowners)):
+            hits=[]
+            for i in dis(pp,min(pp+0x1000,0x42156000)):
+              x=lit(i)
+              if x and x[1] in (CA9_BASE,CA9_COLOR):hits.append(fmt(i))
+            print(hex(pp),hits if hits else 'NO_DIRECT_CA9_BASE_OR_COLOR_LITERAL')
+
+          print('\n=== YC OWNER KNOWN NONLINEAR CALLS ===')
+          for pp in sorted(set(yowners)):
+            hits=[]
+            for i in dis(pp,min(pp+0x1000,0x42156000)):
+              t=call(i)
+              if t in known:hits.append((hex(i.address),known[t],hex(t)))
+            print(hex(pp),hits if hits else 'NONE')
+
+          print('\n=== DECISION GATE ===')
+          print('If TF loader is unconditional and YC owner has no CA9-color dependency, treat TF remapping as calibration/control data rather than evidence for a mode-specific output OETF. Keep Android OETF unchanged until a downstream JPEG/encoder transfer stage is positively identified.')
+          PY
+      - name: Commit textual result
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER1E.txt
+          git commit -m 'research: record TF consumer and YC output trace 1E' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
