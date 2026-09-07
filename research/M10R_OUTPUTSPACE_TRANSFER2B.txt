@@ -1,0 +1,99 @@
+M10-R OUTPUTSPACE TRANSFER2B
+
+=== MODE INDEX PROOF ===
+40003bc8: str        r7, [sp, #0x164]
+40003bcc: ldrb       r0, [r4, #0x20]
+40003bd0: ldr        r5, [pc, #0x460] ; LIT 0x40004038->0x40013930
+40003bd4: add        r6, r5, #0x10
+40003bd8: add        r0, r0, r0, lsl #1
+40003bdc: ldr        fp, [r5, #8]
+40003be0: add        r0, r6, r0, lsl #2
+40003be4: ldr        r0, [r0, #4]
+40003be8: blx        r0
+40003bec: str        r0, [sp, #4]
+40003bf0: ldrb       r0, [r4, #0x20]
+40003bf4: add        r0, r0, r0, lsl #1
+40003bf8: add        r0, r6, r0, lsl #2
+40003bfc: ldr        r0, [r0, #8]
+40003c00: blx        r0
+40003c04: str        r7, [sp, #0x310]
+
+=== TABLE RAW 0x40013930..0x40013980 ===
+0x40013930 0xfffff800
+0x40013934 0x7ff
+0x40013938 0x0
+0x4001393c 0x3
+0x40013940 0x0
+0x40013944 0x40012ddc
+0x40013948 0x40012fc4
+0x4001394c 0x1
+0x40013950 0x40012db8
+0x40013954 0x40012fa0
+0x40013958 0x2
+0x4001395c 0x40012dc4
+0x40013960 0x40012fac
+0x40013964 0x0
+0x40013968 0x0
+0x4001396c 0x0
+0x40013970 0x0
+0x40013974 0x0
+0x40013978 0x0
+0x4001397c 0x0
+
+=== MODE ENTRIES ===
+MODE 0 ENTRY 0x40013940 WORDS 0x0,0x40012ddc,0x40012fc4
+MODE 1 ENTRY 0x4001394c WORDS 0x1,0x40012db8,0x40012fa0
+MODE 2 ENTRY 0x40013958 WORDS 0x2,0x40012dc4,0x40012fac
+
+=== SIX MODE FUNCTIONS ===
+
+-- FUNCTION 0x40012db8 --
+40012db8: ldr        r0, [pc] ; LIT 0x40012dc0->0x40013b18
+40012dbc: bx         lr
+
+-- FUNCTION 0x40012dc4 --
+40012dc4: ldr        r0, [pc] ; LIT 0x40012dcc->0x40013b60
+40012dc8: bx         lr
+
+-- FUNCTION 0x40012ddc --
+40012ddc: ldr        r0, [pc] ; LIT 0x40012de4->0x40013ad0
+40012de0: bx         lr
+
+-- FUNCTION 0x40012fa0 --
+40012fa0: ldr        r0, [pc] ; LIT 0x40012fa8->0x40013ba8
+40012fa4: bx         lr
+
+-- FUNCTION 0x40012fac --
+40012fac: ldr        r0, [pc] ; LIT 0x40012fb4->0x40013c38
+40012fb0: bx         lr
+
+-- FUNCTION 0x40012fc4 --
+40012fc4: ldr        r0, [pc] ; LIT 0x40012fcc->0x40013bf0
+40012fc8: bx         lr
+
+=== FUNCTION CALL TARGETS / FP OPS ===
+
+FUNCTION 0x40012db8
+40012db8: ldr        r0, [pc] ; LIT 0x40012dc0->0x40013b18
+
+FUNCTION 0x40012dc4
+40012dc4: ldr        r0, [pc] ; LIT 0x40012dcc->0x40013b60
+
+FUNCTION 0x40012ddc
+40012ddc: ldr        r0, [pc] ; LIT 0x40012de4->0x40013ad0
+
+FUNCTION 0x40012fa0
+40012fa0: ldr        r0, [pc] ; LIT 0x40012fa8->0x40013ba8
+
+FUNCTION 0x40012fac
+40012fac: ldr        r0, [pc] ; LIT 0x40012fb4->0x40013c38
+
+FUNCTION 0x40012fc4
+40012fc4: ldr        r0, [pc] ; LIT 0x40012fcc->0x40013bf0
+
+=== SEARCH KNOWN NONLINEAR ADDRESSES ===
+
+=== POW/LOG/EXP-LIKE SHARED TARGETS ===
+
+=== DECISION GATE ===
+Classify mode 0/1/2 function pairs. If they implement XYZ/RGB matrix/whitepoint conversion rather than nonlinear transfer, output-space switching is CM-only and Android sRGB OETF remains downstream behavior for sRGB output.
