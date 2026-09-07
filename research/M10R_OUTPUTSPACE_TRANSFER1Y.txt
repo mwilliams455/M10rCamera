@@ -1,0 +1,286 @@
+M10-R OUTPUTSPACE TRANSFER1Y
+
+=== ARM926 StartColorManagement wrapper ===
+420a3488: push       {r0, r1, r2, r3}
+420a348a: push       {r4, r5, r6, r7, lr}
+420a348c: sub        sp, #0x2c
+420a348e: movs       r4, #0
+420a3490: mvns       r4, r4
+420a3492: movs       r5, #4
+420a3494: movs       r6, #5
+420a3496: movs       r0, #4
+420a3498: str        r0, [sp, #4]
+420a349a: movs       r7, #4
+420a349c: movs       r7, #3
+420a349e: ldr        r0, [pc, #0x5c] ; LIT 0x420a34fc->0x408eeb3c
+420a34a0: ldrb       r0, [r0]
+420a34a2: cmp        r0, #1
+420a34a4: bne        #0x420a34e8
+420a34a6: ldr        r0, [sp, #0x40]
+420a34a8: str        r0, [sp, #8]
+420a34aa: ldr        r0, [sp, #0x44]
+420a34ac: str        r0, [sp, #0xc]
+420a34ae: ldr        r0, [sp, #0x48]
+420a34b0: str        r0, [sp, #0x10]
+420a34b2: ldr        r0, [sp, #0x4c]
+420a34b4: str        r0, [sp, #0x14]
+420a34b6: ldr        r0, [sp, #0x50]
+420a34b8: str        r0, [sp, #0x18]
+420a34ba: ldr        r0, [sp, #0x54]
+420a34bc: str        r0, [sp, #0x1c]
+420a34be: ldr        r0, [sp, #0x58]
+420a34c0: str        r0, [sp, #0x20]
+420a34c2: ldr        r0, [sp, #0x5c]
+420a34c4: str        r0, [sp, #0x24]
+420a34c6: ldr        r0, [sp, #0x60]
+420a34c8: str        r0, [sp, #0x28]
+420a34ca: add        r3, sp, #8
+420a34cc: str        r7, [sp]
+420a34ce: movs       r1, r6
+420a34d0: movs       r0, r5
+420a34d2: ldr        r2, [sp, #4]
+420a34d4: bl         #0x420d4c24 ; CALL=0x420d4c24
+420a34d8: movs       r4, r0
+420a34da: cmp        r4, #0
+420a34dc: beq        #0x420a34f0
+420a34de: ldr        r1, [pc, #0x20] ; LIT 0x420a3500->0x42850f68
+420a34e0: movs       r0, #4
+420a34e2: bl         #0x42140150 ; CALL=0x42140150
+420a34e6: b          #0x420a34f0
+420a34e8: ldr        r1, [pc, #0x18] ; LIT 0x420a3504->0x42850f1c
+420a34ea: movs       r0, #4
+420a34ec: bl         #0x42140150 ; CALL=0x42140150
+420a34f0: movs       r0, r4
+420a34f2: add        sp, #0x2c
+420a34f4: pop        {r4, r5, r6, r7}
+420a34f6: pop        {r3}
+420a34f8: add        sp, #0x10
+420a34fa: bx         r3
+
+=== CALLSITE(S) TO IPC SEND 0x420D4C24 IN CM AREA ===
+CALL 0x420a34d4
+420a3444: ldm        r0, {r0, r1, r2, r3}
+420a3446: bl         #0x420a3264 ; CALL=0x420a3264
+420a344a: b          #0x420a3462
+420a344c: ldr        r0, [sp, #0x14]
+420a344e: cmp        r0, #0
+420a3450: beq        #0x420a3462
+420a3452: add        r0, sp, #0x44
+420a3454: ldm        r0, {r0, r1, r2, r3}
+420a3456: mov        r7, sp
+420a3458: stm        r7!, {r0, r1, r2, r3}
+420a345a: ldr        r7, [sp, #0x14]
+420a345c: add        r0, sp, #0x34
+420a345e: ldm        r0, {r0, r1, r2, r3}
+420a3460: blx        r7
+420a3462: add        sp, #0x64
+420a3464: pop        {r4, r5, r6, r7, pc}
+420a3466: movs       r0, r0
+420a3468: movs       r1, r0
+420a346a: lsls       r0, r0, #8
+420a346c: push       {r4, lr}
+420a346e: movs       r4, #0
+420a3470: mvns       r4, r4
+420a3472: ldr        r0, [pc, #0x10] ; LIT 0x420a3484->0x420a33e5
+420a3474: bl         #0x420d4b10 ; CALL=0x420d4b10
+420a3478: movs       r4, r0
+420a347a: bl         #0x420a3210 ; CALL=0x420a3210
+420a347e: movs       r0, r4
+420a3480: pop        {r4, pc}
+420a3482: movs       r0, r0
+420a3484: adds       r3, #0xe5
+420a3486: tst        r2, r1
+420a3488: push       {r0, r1, r2, r3}
+420a348a: push       {r4, r5, r6, r7, lr}
+420a348c: sub        sp, #0x2c
+420a348e: movs       r4, #0
+420a3490: mvns       r4, r4
+420a3492: movs       r5, #4
+420a3494: movs       r6, #5
+420a3496: movs       r0, #4
+420a3498: str        r0, [sp, #4]
+420a349a: movs       r7, #4
+420a349c: movs       r7, #3
+420a349e: ldr        r0, [pc, #0x5c] ; LIT 0x420a34fc->0x408eeb3c
+420a34a0: ldrb       r0, [r0]
+420a34a2: cmp        r0, #1
+420a34a4: bne        #0x420a34e8
+420a34a6: ldr        r0, [sp, #0x40]
+420a34a8: str        r0, [sp, #8]
+420a34aa: ldr        r0, [sp, #0x44]
+420a34ac: str        r0, [sp, #0xc]
+420a34ae: ldr        r0, [sp, #0x48]
+420a34b0: str        r0, [sp, #0x10]
+420a34b2: ldr        r0, [sp, #0x4c]
+420a34b4: str        r0, [sp, #0x14]
+420a34b6: ldr        r0, [sp, #0x50]
+420a34b8: str        r0, [sp, #0x18]
+420a34ba: ldr        r0, [sp, #0x54]
+420a34bc: str        r0, [sp, #0x1c]
+420a34be: ldr        r0, [sp, #0x58]
+420a34c0: str        r0, [sp, #0x20]
+420a34c2: ldr        r0, [sp, #0x5c]
+420a34c4: str        r0, [sp, #0x24]
+420a34c6: ldr        r0, [sp, #0x60]
+420a34c8: str        r0, [sp, #0x28]
+420a34ca: add        r3, sp, #8
+420a34cc: str        r7, [sp]
+420a34ce: movs       r1, r6
+420a34d0: movs       r0, r5
+420a34d2: ldr        r2, [sp, #4]
+420a34d4: bl         #0x420d4c24 ; CALL=0x420d4c24
+420a34d8: movs       r4, r0
+420a34da: cmp        r4, #0
+420a34dc: beq        #0x420a34f0
+420a34de: ldr        r1, [pc, #0x20] ; LIT 0x420a3500->0x42850f68
+420a34e0: movs       r0, #4
+420a34e2: bl         #0x42140150 ; CALL=0x42140150
+420a34e6: b          #0x420a34f0
+420a34e8: ldr        r1, [pc, #0x18] ; LIT 0x420a3504->0x42850f1c
+420a34ea: movs       r0, #4
+420a34ec: bl         #0x42140150 ; CALL=0x42140150
+420a34f0: movs       r0, r4
+420a34f2: add        sp, #0x2c
+420a34f4: pop        {r4, r5, r6, r7}
+420a34f6: pop        {r3}
+420a34f8: add        sp, #0x10
+420a34fa: bx         r3
+CALL 0x420a3554
+420a34c4: str        r0, [sp, #0x24]
+420a34c6: ldr        r0, [sp, #0x60]
+420a34c8: str        r0, [sp, #0x28]
+420a34ca: add        r3, sp, #8
+420a34cc: str        r7, [sp]
+420a34ce: movs       r1, r6
+420a34d0: movs       r0, r5
+420a34d2: ldr        r2, [sp, #4]
+420a34d4: bl         #0x420d4c24 ; CALL=0x420d4c24
+420a34d8: movs       r4, r0
+420a34da: cmp        r4, #0
+420a34dc: beq        #0x420a34f0
+420a34de: ldr        r1, [pc, #0x20] ; LIT 0x420a3500->0x42850f68
+420a34e0: movs       r0, #4
+420a34e2: bl         #0x42140150 ; CALL=0x42140150
+420a34e6: b          #0x420a34f0
+420a34e8: ldr        r1, [pc, #0x18] ; LIT 0x420a3504->0x42850f1c
+420a34ea: movs       r0, #4
+420a34ec: bl         #0x42140150 ; CALL=0x42140150
+420a34f0: movs       r0, r4
+420a34f2: add        sp, #0x2c
+420a34f4: pop        {r4, r5, r6, r7}
+420a34f6: pop        {r3}
+420a34f8: add        sp, #0x10
+420a34fa: bx         r3
+CALL 0x420a35cc
+420a353c: str        r0, [sp, #0x1c]
+420a353e: ldr        r0, [sp, #0x58]
+420a3540: str        r0, [sp, #0x20]
+420a3542: ldr        r0, [sp, #0x5c]
+420a3544: str        r0, [sp, #0x24]
+420a3546: ldr        r0, [sp, #0x60]
+420a3548: str        r0, [sp, #0x28]
+420a354a: add        r3, sp, #8
+420a354c: str        r7, [sp]
+420a354e: movs       r1, r6
+420a3550: movs       r0, r5
+420a3552: ldr        r2, [sp, #4]
+420a3554: bl         #0x420d4c24 ; CALL=0x420d4c24
+420a3558: movs       r4, r0
+420a355a: cmp        r4, #0
+420a355c: beq        #0x420a3570
+420a355e: ldr        r1, [pc, #0x20] ; LIT 0x420a3580->0x42850fd4
+420a3560: movs       r0, #4
+420a3562: bl         #0x42140150 ; CALL=0x42140150
+420a3566: b          #0x420a3570
+420a3568: ldr        r1, [pc, #0x18] ; LIT 0x420a3584->0x42850ed4
+420a356a: movs       r0, #4
+420a356c: bl         #0x42140150 ; CALL=0x42140150
+420a3570: movs       r0, r4
+420a3572: add        sp, #0x2c
+420a3574: pop        {r4, r5, r6, r7}
+420a3576: pop        {r3}
+420a3578: add        sp, #0x10
+420a357a: bx         r3
+
+=== CA9 manager 0x40 thunk and target ===
+400063a0: b          #0x400063dc
+400063a4: add        r0, r4, r1, lsl #2
+400063a8: bl         #0x4000b59c ; CALL=0x4000b59c
+400063ac: b          #0x400063dc
+400063b0: add        r0, r4, r1, lsl #2
+400063b4: bl         #0x40004050 ; CALL=0x40004050
+400063b8: b          #0x400063dc
+40004050: ldr        r0, [r0, #8]
+40004054: b          #0x40003af4
+
+=== CA9 CM parameter-struct direct accesses ===
+40003bcc: ldrb       r0, [r4, #0x20]
+40003be4: ldr        r0, [r0, #4]
+40003bf0: ldrb       r0, [r4, #0x20]
+40003bfc: ldr        r0, [r0, #8]
+40003c14: ldr        r0, [r4, #0x24]
+40003c38: ldr        sb, [r4, #0x24]
+40003c40: strb       r8, [r4, #0x80]
+40003c48: strb       r8, [r4, #0x81]
+40003c50: ldrb       r0, [r4]
+40003c80: ldr        r0, [r4, #0x24]
+40003c94: ldr        r0, [r4, #0x24]
+40003ca0: ldr        r0, [r4, #0x24]
+40003cb0: ldr        r0, [r4, #0x24]
+40003e00: strb       r7, [r4, #0x80]
+40003e3c: strb       r8, [r4, #0x80]
+40003e40: ldr        sb, [r4, #0x24]
+40003e74: ldr        r2, [sb, #0x28]
+40003e78: ldrd       r0, r1, [sb, #0x20]
+40003e7c: str        r2, [r4, #0x50]
+40003e80: strd       r0, r1, [r4, #0x48]
+40003e9c: str        r2, [r4, #0x7c]
+40003ea0: strd       r0, r1, [r4, #0x74]
+40003ec0: strh       r0, [r4, #0x82]
+40003ed8: strh       r0, [r4, #0x84]
+40003ef4: strh       r0, [r4, #0x86]
+40003ef8: strh       r6, [r4, #0x88]
+40003f18: strh       r0, [r4, #0x8a]
+40003f1c: strh       r6, [r4, #0x8c]
+40003f20: strh       r5, [r4, #0x8e]
+40003f38: strh       r0, [r4, #0x90]
+40003f3c: strh       r5, [r4, #0x92]
+40003f54: strh       r0, [r4, #0x94]
+40003f58: strh       r5, [r4, #0x96]
+40003f70: strh       r0, [r4, #0x98]
+40003f84: strh       r0, [r4, #0x9a]
+40003f98: strh       r0, [r4, #0x9c]
+40003fb0: strh       r0, [r4, #0x9e]
+40003fb4: strh       r6, [r4, #0xa0]
+40003fcc: strh       r0, [r4, #0xa2]
+40003fd0: strh       r6, [r4, #0xa4]
+40003fd4: strh       r5, [r4, #0xa6]
+40003fec: strh       r0, [r4, #0xa8]
+40003ff0: strh       r5, [r4, #0xaa]
+40004008: strh       r0, [r4, #0xac]
+4000400c: strh       r5, [r4, #0xae]
+40004024: strh       r0, [r4, #0xb0]
+
+=== OUTPUTSPACE/CM GLOBALS ON ARM926 ===
+420a59f0: ldr        r2, [pc, #0xf8] ; LIT 0x420a5aec->0x43705760
+420a5a0a: ldr        r2, [pc, #0xe0] ; LIT 0x420a5aec->0x43705760
+420a5a24: ldr        r2, [pc, #0xc4] ; LIT 0x420a5aec->0x43705760
+420a5a42: ldr        r0, [pc, #0xa8] ; LIT 0x420a5aec->0x43705760
+420a5a4e: ldr        r0, [pc, #0x9c] ; LIT 0x420a5aec->0x43705760
+420a5a68: ldr        r0, [pc, #0x80] ; LIT 0x420a5aec->0x43705760
+420a5a72: ldr        r0, [pc, #0x78] ; LIT 0x420a5aec->0x43705760
+420a5a7e: ldr        r0, [pc, #0x6c] ; LIT 0x420a5aec->0x43705760
+420a5a8c: ldr        r1, [pc, #0x5c] ; LIT 0x420a5aec->0x43705760
+420a5aa2: ldr        r1, [pc, #0x48] ; LIT 0x420a5aec->0x43705760
+
+=== ARM926 SHARED/POINTER-LIKE FIELDS AROUND START ===
+420a34a6: ldr        r0, [sp, #0x40]
+420a34a8: str        r0, [sp, #8]
+420a34aa: ldr        r0, [sp, #0x44]
+420a34c0: str        r0, [sp, #0x20]
+420a34c4: str        r0, [sp, #0x24]
+420a34ca: add        r3, sp, #8
+420a34de: ldr        r1, [pc, #0x20] ; LIT 0x420a3500->0x42850f68
+
+=== DECISION GATE ===
+Map StartColorManagement payload words to CA9 manager record. Prove whether record+8 points at the same CM config object containing output-space mode and whether mode selects matrix-only state versus any nonlinear transfer operation.
