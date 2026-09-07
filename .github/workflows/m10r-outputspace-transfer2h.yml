@@ -1,0 +1,110 @@
+name: M10-R output-space transfer 2H
+on:
+  push:
+    branches: [m10r-outputspace-transfer1a]
+    paths: ['.github/workflows/m10r-outputspace-transfer2h.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace CM indirect owner and final matrix builder
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int bb=r.get();if(!bb)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER2H.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import *
+          ib=Path('/tmp/sections/092_IMG-System.bin').read_bytes();IB=0x42000000;IP=4
+          cb=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes();CB=0x40000000;CP=4
+          tm=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);tm.detail=True
+          am=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);am.detail=True
+          def io(a):return IP+a-IB
+          def co(a):return CP+a-CB
+          def tdis(a,z):return list(tm.disasm(ib[io(a):io(z)],a))
+          def adis(a,z):return list(am.disasm(cb[co(a):co(z)],a))
+          def tcall(i):return i.operands[0].imm if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM else None
+          def acall(i):return i.operands[0].imm if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM else None
+          def tlit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;o=io(la)
+                if 0<=o<=len(ib)-4:return la,struct.unpack_from('<I',ib,o)[0]
+            except:pass
+          def alit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=i.address+8+i.operands[1].mem.disp;o=co(la)
+                if 0<=o<=len(cb)-4:return la,struct.unpack_from('<I',cb,o)[0]
+            except:pass
+          def tfmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';x=tlit(i)
+            if x:s+=f' ; LIT {x[0]:#x}->{x[1]:#x}'
+            q=tcall(i)
+            if q is not None:s+=f' ; CALL={q:#x}'
+            return s
+          def afmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';x=alit(i)
+            if x:s+=f' ; LIT {x[0]:#x}->{x[1]:#x}'
+            q=acall(i)
+            if q is not None:s+=f' ; CALL={q:#x}'
+            return s
+          print('M10-R OUTPUTSPACE TRANSFER2H')
+          print('\n=== RAW POINTER OCCURRENCES TO CM START OWNER ===')
+          for v in (0x420a2eb0,0x420a2eb1):
+            raw=struct.pack('<I',v);p=0;hits=[]
+            while 1:
+              p=ib.find(raw,p)
+              if p<0:break
+              hits.append(IB+p-IP);p+=1
+            print(hex(v),','.join(hex(x) for x in hits) or 'NONE')
+            for h in hits:
+              lo=max(IB,h-0x40);hi=min(IB+len(ib)-IP,h+0x60)
+              print('-- CONTEXT',hex(h),'--')
+              print(ib[io(lo):io(hi)].hex(' '))
+          print('\n=== LITERAL LOADS OF CM START OWNER IN IMG-SYSTEM ===')
+          # linear disassembly of likely table/dispatcher neighborhoods only, plus direct raw pools found above
+          for lo,hi in ((0x42080000,0x420b0000),(0x42140000,0x42170000)):
+            for i in tdis(lo,hi):
+              x=tlit(i)
+              if x and x[1] in (0x420a2eb0,0x420a2eb1):print(tfmt(i))
+          print('\n=== CA9 FINAL MATRIX BUILDER 0x400038B0 ===')
+          for i in adis(0x400038b0,0x40003af4):print(afmt(i))
+          print('\n=== BUILDER MATRIX OPERATIONS / CALLS ===')
+          for i in adis(0x400038b0,0x40003af4):
+            if acall(i) is not None or i.mnemonic.startswith(('v','ldr','str','cmp')):print(afmt(i))
+          print('\n=== BUILDER CALLEE SUMMARIES ===')
+          tg=[]
+          for i in adis(0x400038b0,0x40003af4):
+            q=acall(i)
+            if q and CB<=q<CB+len(cb)-CP and q not in tg:tg.append(q)
+          for q in tg:
+            print('\n--',hex(q),'--')
+            for i in adis(q,min(CB+len(cb)-CP,q+0x180)):print(afmt(i))
+          print('\n=== DECISION GATE ===')
+          print('Use raw pointer occurrence to identify indirect registration of 0x420A2EB0. Use 0x400038B0 to classify selected Matrix A as a linear CM coefficient builder and locate the returned/finished coefficient object.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER2H.txt
+          git commit -m 'research: record CM indirect owner and final matrix builder 2H' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
