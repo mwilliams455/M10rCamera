@@ -1,0 +1,130 @@
+name: M10-R output-space transfer 1S
+on:
+  push:
+    branches: [m10r-outputspace-transfer1a]
+    paths: ['.github/workflows/m10r-outputspace-transfer1s.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace ARM-state CA9 CM core
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER1S.txt
+          from pathlib import Path
+          import re,struct
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes();BASE=0x40000000;N=len(b)
+          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);md.detail=True
+          def off(a):return a-BASE
+          def one(a):
+            o=off(a)
+            if not 0<=o<N:return None
+            q=list(md.disasm(b[o:o+4],a,count=1));return q[0] if q else None
+          def cstr(a,n=220):
+            o=off(a)
+            if not 0<=o<N:return ''
+            e=b.find(b'\0',o,min(N,o+n));q=b[o:e] if e>o else b''
+            try:return q.decode('ascii')
+            except:return ''
+          strings=[]
+          for m in re.finditer(rb'[ -~]{4,220}',b):
+            s=m.group().decode('ascii','replace');lo=s.lower()
+            if any(k in lo for k in ('ca9: %s','cm_temperature','division by zero','matrix not invertible','color','colour','cc0','cc1','tint','remap','ca9_control_manager')):strings.append((BASE+m.start(),s))
+          tmap={a:s for a,s in strings}
+          def refs(i):
+            out=[]
+            try:
+              # ARM LDR literal: PC is address+8.
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=i.address+8+i.operands[1].mem.disp;o=off(la)
+                if 0<=o<=N-4:out.append(struct.unpack_from('<I',b,o)[0])
+              # ADR alias or ADD/SUB reg,pc,#imm.
+              if i.mnemonic.startswith('adr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_IMM:out.append(i.operands[1].imm)
+              if i.mnemonic in ('add','sub') and len(i.operands)>=3 and i.operands[1].type==ARM_OP_REG and i.operands[1].reg==ARM_REG_PC and i.operands[2].type==ARM_OP_IMM:
+                out.append(i.address+8+i.operands[2].imm if i.mnemonic=='add' else i.address+8-i.operands[2].imm)
+            except:pass
+            return out
+          def call(i):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';rr=[x for x in refs(i) if x in tmap]
+            if rr:s+=' ; STRREF '+','.join(f'{hex(x)}={tmap[x]!r}' for x in rr)
+            t=call(i)
+            if t is not None:s+=f' ; CALL={hex(t)}'
+            return s
+          print('M10-R OUTPUTSPACE TRANSFER1S')
+          print('\n=== ARM CM RANGE CONTINUOUS DECODE ===')
+          ins=list(md.disasm(b[off(0x40004000):off(0x40006800)],0x40004000))
+          print('INS',len(ins),'FIRST',hex(ins[0].address) if ins else 'NONE','LAST',hex(ins[-1].address) if ins else 'NONE')
+          print('\n=== PC-REL STRING XREFS ===')
+          hits=[]
+          for i in ins:
+            rr=[x for x in refs(i) if x in tmap]
+            if rr:hits.append((i.address,rr));print(fmt(i))
+          print('HIT_COUNT',len(hits))
+          print('\n=== XREF FUNCTION WINDOWS ===')
+          for a,rr in hits:
+            fs=None
+            for x in range(a,a-0x400,-4):
+              j=one(x)
+              if j and ((j.mnemonic=='push' and 'lr' in j.op_str) or (j.mnemonic.startswith('stm') and 'sp!' in j.op_str and 'lr' in j.op_str)):
+                fs=x;break
+            st=fs if fs else max(0x40004000,a-0x80);en=min(0x40006800,a+0x160)
+            print(f'\nXREF {hex(a)} -> {[hex(x) for x in rr]} START={hex(fs) if fs else "UNKNOWN"}')
+            for i in md.disasm(b[off(st):off(en)],st):print(fmt(i))
+          print('\n=== FUNCTION STARTS ===')
+          starts=[]
+          for i in ins:
+            if (i.mnemonic=='push' and 'lr' in i.op_str) or (i.mnemonic.startswith('stm') and 'sp!' in i.op_str and 'lr' in i.op_str):starts.append(i.address)
+          print(','.join(hex(x) for x in starts))
+          print('\n=== BRANCH/CMP/CALL SURFACE OF XREF FUNCTIONS ===')
+          fstarts=[]
+          for a,_ in hits:
+            fs=None
+            for x in range(a,a-0x400,-4):
+              j=one(x)
+              if j and ((j.mnemonic=='push' and 'lr' in j.op_str) or (j.mnemonic.startswith('stm') and 'sp!' in j.op_str and 'lr' in j.op_str)):
+                fs=x;break
+            if fs is not None and fs not in fstarts:fstarts.append(fs)
+          for fs in sorted(fstarts):
+            print('\nFUNC',hex(fs))
+            for i in md.disasm(b[off(fs):off(min(BASE+N,fs+0x700))],fs):
+              if i.mnemonic.startswith(('cmp','tst','b')) or call(i) is not None:print(fmt(i))
+          print('\n=== RAW REFERENCES TO LIVE/ARM926-SIDE SHARED ADDRESSES ===')
+          for target in (0x43705760,0x43705780,0x40818760,0x40700000):
+            pat=struct.pack('<I',target);q=0;loc=[]
+            while True:
+              q=b.find(pat,q)
+              if q<0:break
+              loc.append(BASE+q);q+=1
+            print(hex(target),','.join(hex(x) for x in loc) if loc else 'NONE')
+          print('\n=== DECISION GATE ===')
+          print('Use ARM-state xrefs/functions to identify actual CM math. Shared-address hits can bridge ARM926 config into CA9. Output-space effect is confirmed only when mode-derived data controls CC source/matrix logic.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER1S.txt
+          git commit -m 'research: record ARM-state CA9 CM core 1S' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
