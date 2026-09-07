@@ -1,0 +1,174 @@
+M10-R OUTPUTSPACE TRANSFER2Z
+
+=== KELVIN TABLE CODE ===
+4000ad40: moveq      r5, #0x32
+4000ad44: beq        #0x4000ae14
+4000ad48: movw       r0, #0x2648
+4000ad4c: cmp        r4, r0
+4000ad50: moveq      r5, #0x33
+4000ad54: beq        #0x4000ae14
+4000ad58: movw       r0, #0x2774
+4000ad5c: cmp        r4, r0
+4000ad60: moveq      r5, #0x34
+4000ad64: beq        #0x4000ae14
+4000ad68: movw       r0, #0x28a0
+4000ad6c: cmp        r4, r0
+4000ad70: moveq      r5, #0x35
+4000ad74: beq        #0x4000ae14
+4000ad78: movw       r0, #0x29cc
+4000ad7c: cmp        r4, r0
+4000ad80: moveq      r5, #0x36
+4000ad84: beq        #0x4000ae14
+4000ad88: movw       r0, #0x2af8
+4000ad8c: cmp        r4, r0
+4000ad90: moveq      r5, #0x37
+4000ad94: beq        #0x4000ae14
+4000ad98: movw       r0, #0x2c24
+4000ad9c: cmp        r4, r0
+4000ada0: moveq      r5, #0x38
+4000ada4: beq        #0x4000ae14
+4000ada8: movw       r0, #0x2d50
+4000adac: cmp        r4, r0
+4000adb0: moveq      r5, #0x39
+4000adb4: beq        #0x4000ae14
+4000adb8: movw       r0, #0x2e7c
+4000adbc: cmp        r4, r0
+4000adc0: moveq      r5, #0x3a
+4000adc4: beq        #0x4000ae14
+4000adc8: movw       r0, #0x2fa8
+4000adcc: cmp        r4, r0
+4000add0: moveq      r5, #0x3b
+4000add4: beq        #0x4000ae14
+4000add8: movw       r0, #0x30d4
+4000addc: cmp        r4, r0
+4000ade0: moveq      r5, #0x3c
+4000ade4: beq        #0x4000ae14
+4000ade8: cmp        r4, #0x3200
+4000adec: moveq      r5, #0x3d
+4000adf0: beq        #0x4000ae14
+4000adf4: movw       r0, #0x332c
+4000adf8: cmp        r4, r0
+4000adfc: moveq      r5, #0x3e
+4000ae00: beq        #0x4000ae14
+4000ae04: mov        r2, r4
+4000ae08: add        r1, pc, #0x28
+4000ae0c: mov        r0, #4
+4000ae10: bl         #0x4000ded4 ; CALL=0x4000ded4
+4000ae14: mov        r3, r5
+4000ae18: mov        r2, r4
+4000ae1c: add        r1, pc, #0x4c
+4000ae20: mov        r0, #4
+4000ae24: bl         #0x4000ded4 ; CALL=0x4000ded4
+4000ae28: mov        r0, r5
+4000ae2c: pop        {r4, r5, r6, pc}
+4000ae30: andmi      r7, r2, ip, asr #4
+4000ae34: mvnpl      r8, pc, lsl r5
+4000ae38: blo        #0x40e5b34c
+4000ae3c: strbtvc    r6, [r5], #-0x720
+
+STARTS []
+
+=== TEMPERATURE TO XY ===
+400054c0: sub        r0, r6, r8
+400054c4: add        r0, r0, r0, lsr #31
+400054c8: add        r4, r8, r0, asr #1
+400054cc: cmp        r4, sl
+400054d0: beq        #0x400054e4
+400054d4: add        r7, r7, #1
+400054d8: cmp        r7, #6
+400054dc: mov        sl, r4
+400054e0: blo        #0x40005484
+400054e4: ldr        r0, [pc, #-0x894] ; LIT 0x40004c58->0x40013d48
+400054e8: add        r1, r0, r5, lsl #5
+400054ec: vldr       d0, [r1]
+400054f0: vcmpe.f64  d0, d8
+400054f4: vmrs       apsr_nzcv, fpscr
+400054f8: ble        #0x40005508
+400054fc: cmp        r5, #0
+40005500: beq        #0x40005514
+40005504: b          #0x40005510
+40005508: cmp        r5, #0x1e
+4000550c: blo        #0x40005514
+40005510: sub        r5, r5, #1
+40005514: ldr        r2, [pc, #-0x3bc] ; LIT 0x40005160->0x40014128
+40005518: add        r1, r0, r5, lsl #5
+4000551c: vldr       d0, [r1, #0x20]
+40005520: vldr       d1, [r1]
+40005524: add        r0, r2, r5, lsl #3
+40005528: vsub.f64   d5, d0, d8
+4000552c: vsub.f64   d4, d0, d1
+40005530: vldr       d2, [r0]
+40005534: vldr       d3, [r1, #0x18]
+40005538: vldr       d1, [r0, #8]
+4000553c: vdiv.f64   d6, d9, d2
+40005540: vldr       d16, [r1, #0x28]
+40005544: vldr       d7, [r1, #0x30]
+40005548: vdiv.f64   d0, d5, d4
+4000554c: vldr       d5, [r1, #0x38]
+40005550: vmul.f64   d12, d6, d0
+40005554: vldr       d6, [r1, #8]
+40005558: vdiv.f64   d4, d3, d2
+4000555c: vmul.f64   d11, d4, d0
+40005560: vdiv.f64   d3, d9, d1
+40005564: vdiv.f64   d2, d5, d1
+40005568: vsub.f64   d1, d9, d0
+4000556c: vldr       d5, [r1, #0x10]
+40005570: vmla.f64   d12, d3, d1
+40005574: vmul.f64   d9, d16, d1
+40005578: vmul.f64   d8, d7, d1
+4000557c: vmla.f64   d11, d2, d1
+40005580: vmul.f64   d1, d12, d12
+40005584: vmla.f64   d9, d6, d0
+40005588: vmla.f64   d8, d5, d0
+4000558c: vmla.f64   d1, d11, d11
+40005590: vsqrt.f64  d0, d1
+40005594: vcmp.f64   d0, d0
+40005598: vmrs       apsr_nzcv, fpscr
+4000559c: beq        #0x400055a8
+400055a0: vmov.f64   d0, d1
+400055a4: blx        #0x400129e8 ; CALL=0x400129e8
+400055a8: vdiv.f64   d2, d12, d0
+400055ac: vmov.f64   d3, #4.000000e+00
+400055b0: vmla.f64   d9, d2, d10
+400055b4: vdiv.f64   d1, d11, d0
+400055b8: vmov.f64   d0, d9
+400055bc: vmla.f64   d8, d1, d10
+400055c0: vmov.f64   d1, #2.000000e+00
+400055c4: vmls.f64   d0, d8, d3
+400055c8: vadd.f64   d10, d0, d1
+400055cc: vmov.f64   d0, d10
+400055d0: bl         #0x40012fd0 ; CALL=0x40012fd0
+400055d4: cmp        r0, #1
+400055d8: beq        #0x4000560c
+400055dc: ldr        r0, [sp, #0x2c]
+400055e0: vmov.f64   d0, #1.500000e+00
+400055e4: vdiv.f64   d1, d8, d10
+400055e8: vstr       d1, [r0, #8]
+400055ec: ldr        r0, [sp, #0x2c]
+400055f0: vmul.f64   d0, d9, d0
+400055f4: vdiv.f64   d2, d0, d10
+400055f8: vstr       d2, [r0]
+400055fc: mov        r0, sb
+40005600: vpop       {d8, d9, d10, d11, d12}
+40005604: add        sp, sp, #8
+40005608: pop        {r4, r5, r6, r7, r8, sb, sl, fp, ip, pc}
+4000560c: movw       r2, #0x2d5
+40005610: add        r1, pc, #0x20
+40005614: mov        r0, #4
+40005618: bl         #0x4000ded4 ; CALL=0x4000ded4
+4000561c: movw       sb, #0x401
+40005620: b          #0x400055fc
+40005624: andeq      r0, r0, r0
+
+=== RAW FALLBACK VALUE OCCURRENCES ===
+2000 [] count 0
+4117 [] count 0
+12000 [] count 0
+6138 [] count 0
+
+=== KELVIN REGION LITERAL TARGETS ===
+
+=== CM CORE CALLS INTO KELVIN/CCT ===
+
+=== DECISION ===
+Compare the Kelvin-table domain and CM caller chain to TF fallback x=(2000,12000).
