@@ -1,0 +1,152 @@
+name: M10-R output-space transfer 1T
+on:
+  push:
+    branches: [m10r-outputspace-transfer1a]
+    paths: ['.github/workflows/m10r-outputspace-transfer1t.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Bridge ARM926 CM command to CA9 manager
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER1T.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_OP_REG,ARM_REG_PC
+          img=Path('/tmp/sections/092_IMG-System.bin').read_bytes(); IBASE=0x42000000; IPFX=4
+          ca=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes(); CBASE=0x40000000; CPFX=4
+          tmd=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);tmd.detail=True
+          amd=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);amd.detail=True
+          def ioff(a):return IPFX+a-IBASE
+          def coff(a):return CPFX+a-CBASE
+          def idis(a,z):return list(tmd.disasm(img[ioff(a):ioff(z)],a))
+          def tlit(buf,base,pfx,i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;o=pfx+la-base
+                if 0<=o<=len(buf)-4:return la,struct.unpack_from('<I',buf,o)[0]
+            except:pass
+          def call(i):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm
+          def astr(buf,base,pfx,v):
+            o=pfx+v-base
+            if not 0<=o<len(buf):return None
+            e=buf.find(b'\0',o,min(len(buf),o+220));q=buf[o:e] if e>o else b''
+            return q.decode('ascii','replace') if len(q)>=4 and all(0x20<=x<=0x7e for x in q) else None
+          def ifmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';x=tlit(img,IBASE,IPFX,i)
+            if x:
+              s+=f' ; LIT {x[0]:#x}->{x[1]:#x}';st=astr(img,IBASE,IPFX,x[1])
+              if st:s+=f' STRING={st!r}'
+            q=call(i)
+            if q is not None:s+=f' ; CALL={q:#x}'
+            return s
+          print('M10-R OUTPUTSPACE TRANSFER1T')
+          print('\n=== ARM926 IPC SEND 0x420D4C24 ===')
+          for i in idis(0x420d4c24,0x420d4f80):print(ifmt(i))
+          print('\n=== IPC SEND STATE/GLOBAL LITERALS ===')
+          vals=set()
+          for i in idis(0x420d4c24,0x420d4f80):
+            x=tlit(img,IBASE,IPFX,i)
+            if x and (0x20000000<=x[1]<0x44000000):
+              vals.add(x[1]);print(ifmt(i))
+          print('IPC_LITERAL_VALUES',','.join(hex(x) for x in sorted(vals)))
+
+          # Find relevant CA9 strings.
+          strings=[]
+          for o in range(CPFX,len(ca)):
+            if ca[o] < 0x20 or ca[o] >= 0x7f:continue
+            if o>CPFX and 0x20<=ca[o-1]<0x7f:continue
+            e=ca.find(b'\0',o,min(len(ca),o+220));q=ca[o:e] if e>o else b''
+            try:s=q.decode('ascii')
+            except:continue
+            if len(s)>=5 and any(k in s.lower() for k in ('ca9_control_manager','colormanagement','color management','colorspec','matrixinterpolate','mapwhitematrix','shared_memory','ipcu','mailbox')):
+              strings.append((CBASE+o-CPFX,s))
+          print('\n=== CA9 RELEVANT STRINGS ===')
+          for a,s in strings:print(hex(a),repr(s))
+
+          # Independently decode every aligned candidate instruction, so mixed ARM/Thumb does not hide xrefs.
+          def target_refs(mode,a,i,targets):
+            out=[]
+            # Capstone Thumb ADR is usually immediate target. ARM may render add/sub pc,#imm; calculate simple forms.
+            try:
+              if i.mnemonic=='adr' and len(i.operands)>=2 and i.operands[1].type==ARM_OP_IMM:
+                v=i.operands[1].imm
+                if v in targets:out.append(v)
+              x=tlit(ca,CBASE,CPFX,i) if mode=='THUMB' else None
+              if x and x[1] in targets:out.append(x[1])
+              if mode=='ARM' and i.mnemonic in ('add','sub') and len(i.operands)>=3 and i.operands[1].type==ARM_OP_REG and i.operands[1].reg==ARM_REG_PC and i.operands[2].type==ARM_OP_IMM:
+                pc=a+8;v=pc+i.operands[2].imm if i.mnemonic=='add' else pc-i.operands[2].imm
+                if v in targets:out.append(v)
+            except:pass
+            return out
+          targets={a for a,_ in strings}
+          print('\n=== MIXED-MODE STRING XREF CANDIDATES ===')
+          hits=[]
+          for mode,md,step in [('THUMB',tmd,2),('ARM',amd,4)]:
+            for a in range(CBASE,CBASE+len(ca)-CPFX-4,step):
+              o=coff(a);q=list(md.disasm(ca[o:o+4],a,count=1))
+              if not q:continue
+              for v in target_refs(mode,a,q[0],targets):hits.append((mode,a,v,q[0]))
+          print('HIT_COUNT',len(hits))
+          for mode,a,v,i in hits:print(mode,hex(a),'->',hex(v),i.mnemonic,i.op_str,repr(dict(strings).get(v,'')))
+
+          print('\n=== XREF WINDOWS ===')
+          for mode,a,v,_ in hits:
+            md=tmd if mode=='THUMB' else amd;step=2 if mode=='THUMB' else 4
+            lo=max(CBASE,a-0x80);hi=min(CBASE+len(ca)-CPFX,a+0x100);o=coff(lo)
+            print('\n--',mode,hex(a),'target',hex(v),repr(dict(strings).get(v,'')),'--')
+            for i in md.disasm(ca[o:coff(hi)],lo):
+              if i.address>=hi:break
+              print(f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}')
+
+          print('\n=== IPC LITERAL RAW OCCURRENCES IN CA9 ===')
+          for v in sorted(vals):
+            raw=struct.pack('<I',v);pos=[];p=0
+            while 1:
+              p=ca.find(raw,p)
+              if p<0:break
+              pos.append(CBASE+p-CPFX);p+=1
+            if pos:print(hex(v),','.join(hex(x) for x in pos[:80]))
+
+          print('\n=== COMMAND SIGNATURE SCAN NEAR MANAGER XREFS ===')
+          # Look for comparisons/immediates 3/4/5 in xref windows; start-CM sender uses 4,5,4 and stack 3.
+          for mode,a,v,_ in hits:
+            if 'control_manager' not in dict(strings).get(v,'').lower():continue
+            md=tmd if mode=='THUMB' else amd;lo=max(CBASE,a-0x180);hi=min(CBASE+len(ca)-CPFX,a+0x280)
+            print('\nMANAGER',mode,hex(a))
+            for i in md.disasm(ca[coff(lo):coff(hi)],lo):
+              if i.mnemonic.startswith('cmp') or i.mnemonic.startswith('tst') or i.mnemonic.startswith('b') or i.mnemonic in ('ldr','ldrb','ldrh','str','strb','strh'):
+                if any(x in i.op_str for x in ('#3','#4','#5','#0x3','#0x4','#0x5')) or i.mnemonic.startswith('b'):
+                  print(f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}')
+
+          print('\n=== DECISION GATE ===')
+          print('Bridge start-CM sender tuple (4,5,4,3) to the CA9 manager/handler. Only after identifying the receiving handler should mode byte influence on CC/TF/nonlinear math be inferred.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER1T.txt
+          git commit -m 'research: record ARM926 to CA9 CM IPC bridge 1T' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
