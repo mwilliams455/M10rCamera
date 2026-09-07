@@ -1,0 +1,112 @@
+name: M10-R output-space transfer 1P
+on:
+  push:
+    branches: [m10r-outputspace-transfer1a]
+    paths: ['.github/workflows/m10r-outputspace-transfer1p.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Map IMG-CA9 color-management image
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER1P.txt
+          from pathlib import Path
+          import re,struct,collections
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          p=Path('/tmp/sections/099_IMG-CA9_System.bin');b=p.read_bytes();N=len(b)
+          print('M10-R OUTPUTSPACE TRANSFER1P')
+          print(f'file={p.name} size={N} 0x{N:x}')
+          print('\n=== HEADER / FIRST 256 BYTES ===')
+          for o in range(0,min(256,N),16):print(f'{o:08x}: {b[o:o+16].hex(" ")}')
+          print('\n=== FIRST 32 LE WORDS ===')
+          for o in range(0,min(128,N),4):print(f'{o:04x}: 0x{struct.unpack_from("<I",b,o)[0]:08x}')
+          print('\n=== RELEVANT ASCII INVENTORY ===')
+          strings=[]
+          for m in re.finditer(rb'[ -~]{4,220}',b):
+            s=m.group().decode('ascii','replace');lo=s.lower()
+            if any(k in lo for k in ('ca9','color','colour','cc0','cc1','matrix','b2y','arm926','command','mailbox','temperature','tint','gamma','tone','remap')):
+              strings.append((m.start(),s));print(f'0x{m.start():05x} {s!r}')
+          print('RELEVANT_STRING_COUNT',len(strings))
+          print('\n=== ALL CA9_CM STRINGS + RAW POINTER OCCURRENCES ===')
+          targets=[]
+          for o,s in strings:
+            if 'ca9_cm' in s.lower():
+              targets.append(o)
+              pat=struct.pack('<I',o);occ=[];q=0
+              while True:
+                q=b.find(pat,q)
+                if q<0:break
+                occ.append(q);q+=1
+              print(f'STR 0x{o:x} {s!r} ptr32_offsets={",".join(hex(x) for x in occ) if occ else "NONE"}')
+          print('\n=== DISASSEMBLY PLAUSIBILITY ===')
+          for name,mode,step in [('ARM',CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN,4),('THUMB',CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN,2)]:
+            md=Cs(CS_ARCH_ARM,mode);md.detail=True
+            for start in (0,4,0x100,0x1000):
+              ins=list(md.disasm(b[start:start+0x4000],start))
+              cov=sum(i.size for i in ins);branches=sum(1 for i in ins if i.mnemonic.startswith('b'))
+              print(name,hex(start),'ins',len(ins),'coverage',hex(cov),'last',hex(ins[-1].address) if ins else 'NONE','branches',branches)
+          print('\n=== RAW 32-BIT VALUES THAT LOOK LIKE INTERNAL POINTERS ===')
+          # Frequent aligned values < image size can expose local pointer tables when image is linked at base 0.
+          vals=collections.Counter()
+          for o in range(0,N-3,4):
+            v=struct.unpack_from('<I',b,o)[0]
+            if 0<=v<N and v%2==0:vals[v]+=1
+          for v,c in vals.most_common(80):print(hex(v),c)
+          print('\n=== STRING-XREF RECOVERY, ARM + THUMB, BASE 0 ===')
+          targetset=set(targets)
+          for name,mode,step in [('ARM',CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN,4),('THUMB',CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN,2)]:
+            md=Cs(CS_ARCH_ARM,mode);md.detail=True
+            print('\nMODE',name)
+            # Decode in bounded windows; inspect LDR PC literals whose loaded word equals a target string offset.
+            hits=[]
+            for a in range(0,N-4,step):
+              q=list(md.disasm(b[a:a+4],a,count=1))
+              if not q:continue
+              i=q[0]
+              try:
+                if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                  pc=(i.address+8 if name=='ARM' else ((i.address+4)&~3));la=pc+i.operands[1].mem.disp
+                  if 0<=la<=N-4:
+                    v=struct.unpack_from('<I',b,la)[0]
+                    if v in targetset:hits.append((i.address,la,v,i.mnemonic,i.op_str))
+              except:pass
+            print('XREF_COUNT',len(hits))
+            for h in hits:print(f' ins=0x{h[0]:x} pool=0x{h[1]:x} str=0x{h[2]:x} {h[3]} {h[4]}')
+          print('\n=== RAW REFERENCES TO KNOWN CM STRING OFFSETS ===')
+          for v in targets:
+            pat=struct.pack('<I',v);pos=[];q=0
+            while True:
+              q=b.find(pat,q)
+              if q<0:break
+              pos.append(q);q+=1
+            if pos:print(hex(v),','.join(hex(x) for x in pos))
+          print('\n=== DECISION GATE ===')
+          print('Use the architecture and xrefs above to establish function boundaries around CA9 CM strings. Then trace command dispatch and mode 0/1/2 to CC source/matrix calculations. Do not infer renderer transfer behavior from string presence alone.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER1P.txt
+          git commit -m 'research: record IMG-CA9 color-management image map 1P' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
