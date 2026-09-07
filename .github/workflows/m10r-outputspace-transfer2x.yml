@@ -1,0 +1,105 @@
+name: M10-R output-space transfer 2X
+on:
+  push:
+    paths:
+      - '.github/workflows/m10r-outputspace-transfer2x.yml'
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace CA9 TF remap consumer
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int bb=r.get();if(!bb)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER2X.txt
+          from pathlib import Path
+          import struct,re
+          from capstone import *
+          from capstone.arm import *
+          cb=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes(); B=0x40000000; P=4
+          m=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);m.detail=True
+          def o(a):return P+a-B
+          def ds(a,z):return list(m.disasm(cb[o(a):o(z)],a))
+          def call(i):
+            try:
+              if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm
+            except:pass
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>1 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=i.address+8+i.operands[1].mem.disp;q=o(la)
+                if 0<=q<=len(cb)-4:return la,struct.unpack_from('<I',cb,q)[0]
+            except:pass
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';c=call(i);x=lit(i)
+            if c is not None:s+=f' ; CALL={c:#x}'
+            if x:s+=f' ; LIT {x[0]:#x}->{x[1]:#x}'
+            return s
+          allins=ds(B,B+len(cb)-P)
+          print('M10-R OUTPUTSPACE TRANSFER2X')
+          print('\n=== CA9 ASCII CM/CCT/TF HITS ===')
+          for mt in re.finditer(rb'[ -~]{4,}',cb):
+            s=mt.group().decode('ascii','ignore')
+            if any(k in s.lower() for k in ('mired','kelvin','remap','color management','colour management','tf','cct','temperature','tint','white balance','wb')):
+              print(hex(B+mt.start()-P),repr(s[:300]))
+          print('\n=== CA9 CMP #31 / STRIDE-8 CANDIDATES ===')
+          cand=[]
+          for idx,i in enumerate(allins):
+            op=i.op_str.lower()
+            hit31=(i.mnemonic.startswith('cmp') and ('#0x1f' in op or '#31' in op))
+            hit8=(('#8' in op or '#0x8' in op) and i.mnemonic in ('add','adds','sub','subs','ldr','str','ldm','stm'))
+            if hit31:
+              cand.append(i.address)
+              print('\nCMP31',fmt(i))
+              for k in allins[max(0,idx-20):min(len(allins),idx+45)]:print(fmt(k))
+          print('\n=== LITERALS/IMMEDIATES FALLBACK VALUES ===')
+          vals={2000,12000,4117,6138,500,83,1000000}
+          for i in allins:
+            x=lit(i)
+            if x and x[1] in vals:print('LIT',fmt(i))
+            try:
+              if any(op.type==ARM_OP_IMM and op.imm in vals for op in i.operands):print('IMM',fmt(i))
+            except:pass
+          print('\n=== POTENTIAL PAIR-INTERPOLATION LOOPS ===')
+          # Report regions containing both indexed/offset loads and arithmetic multiply/divide-like calls within 0x80 bytes of a cmp #31.
+          for a in cand:
+            reg=ds(max(B,a-0x80),min(B+len(cb)-P,a+0x100))
+            score=sum(1 for i in reg if any(x in i.mnemonic for x in ('mla','mls','smull','umull','mul')) or i.mnemonic in ('bl','blx'))
+            print('\nCANDIDATE',hex(a),'score',score)
+            for i in reg:print(fmt(i))
+          print('\n=== CA9 CM CORE 0x40003800..0x40004400 ===')
+          for i in ds(0x40003800,0x40004400):print(fmt(i))
+          print('\n=== RAW POINTERS TO KNOWN SHARED BASE 0x43705760 ===')
+          for val in (0x43705760,):
+            pat=struct.pack('<I',val);p=0
+            while True:
+              q=cb.find(pat,p)
+              if q<0:break
+              print(hex(val),'at',hex(B+q-P));p=q+1
+          print('\n=== DECISION GATE ===')
+          print('A confirmed CCT remap requires a CA9 consumer that walks count/8-byte pairs and compares the x coordinate against Kelvin/mired/CCT state. If absent, retain strong inference only and do not alter renderer transfer.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER2X.txt
+          git commit -m 'research: record CA9 TF remap consumer trace 2X' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
