@@ -1,0 +1,111 @@
+name: M10-R output-space transfer 1Q
+on:
+  push:
+    branches: [m10r-outputspace-transfer1a]
+    paths: ['.github/workflows/m10r-outputspace-transfer1q.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Recover CA9 CM xrefs at linked base
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER1Q.txt
+          from pathlib import Path
+          import re,struct,collections
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes();N=len(b);BASE=0x40000000
+          def off(a):return a-BASE
+          def cstr(a,n=220):
+            o=off(a)
+            if not 0<=o<N:return ''
+            e=b.find(b'\0',o,min(N,o+n));q=b[o:e] if e>o else b''
+            try:return q.decode('ascii')
+            except:return ''
+          rel=[]
+          for m in re.finditer(rb'[ -~]{4,220}',b):
+            s=m.group().decode('ascii','replace');lo=s.lower()
+            if any(k in lo for k in ('ca9_cm','cm_temperature','matrix not invertible','ca9_control_manager','color','colour','cc0','cc1','arm926','command','mailbox','remap','tint')):rel.append((BASE+m.start(),s))
+          targets={a:s for a,s in rel}
+          print('M10-R OUTPUTSPACE TRANSFER1Q')
+          print(f'BASE=0x{BASE:08x} size=0x{N:x} end=0x{BASE+N:x}')
+          print('\n=== VECTOR TABLE DECODE ===')
+          for o in range(4,0x40,4):
+            w=struct.unpack_from('<I',b,o)[0];print(f'+0x{o:02x} 0x{w:08x}')
+          print('\n=== RAW ABSOLUTE POINTER OCCURRENCES TO RELEVANT STRINGS ===')
+          ptrhits=[]
+          for a,s in rel:
+            pat=struct.pack('<I',a);q=0;occ=[]
+            while True:
+              q=b.find(pat,q)
+              if q<0:break
+              occ.append(BASE+q);q+=1
+            if occ:
+              ptrhits.extend((x,a) for x in occ);print(f'{hex(a)} {s!r} <- {",".join(hex(x) for x in occ)}')
+          print('PTR_TARGET_COUNT',len(set(a for _,a in ptrhits)))
+          print('\n=== MIXED ARM/THUMB PC-LITERAL XREFS ===')
+          allhits=[]
+          for name,mode,step in [('ARM',CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN,4),('THUMB',CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN,2)]:
+            md=Cs(CS_ARCH_ARM,mode);md.detail=True
+            hits=[]
+            for o in range(0,N-4,step):
+              a=BASE+o;q=list(md.disasm(b[o:o+4],a,count=1))
+              if not q:continue
+              i=q[0]
+              try:
+                if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                  pc=(i.address+8 if name=='ARM' else ((i.address+4)&~3));la=pc+i.operands[1].mem.disp;lo=off(la)
+                  if 0<=lo<=N-4:
+                    v=struct.unpack_from('<I',b,lo)[0]
+                    if v in targets:hits.append((i.address,la,v,i.mnemonic,i.op_str))
+              except:pass
+            print('\nMODE',name,'XREF_COUNT',len(hits));allhits.extend((name,*h) for h in hits)
+            for h in hits:print(f'ins={hex(h[0])} pool={hex(h[1])} str={hex(h[2])} {targets[h[2]]!r} :: {h[3]} {h[4]}')
+          print('\n=== XREF WINDOWS ===')
+          for name,a,la,v,mn,op in allhits:
+            mode=CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN if name=='ARM' else CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN
+            md=Cs(CS_ARCH_ARM,mode);md.detail=True;step=4 if name=='ARM' else 2
+            st=max(BASE,a-0x60);en=min(BASE+N,a+0x80);data=b[off(st):off(en)]
+            print(f'\n[{name}] XREF {hex(a)} -> {hex(v)} {targets[v]!r}')
+            for i in md.disasm(data,st):
+              if i.address>=a-0x40 and i.address<a+0x60:print(f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}')
+          print('\n=== CM/SYMBOL-TABLE RAW REGION 0x40013C80..0x40014440 ===')
+          for o in range(0x13c80,min(N,0x14440),16):
+            asc=''.join(chr(x) if 0x20<=x<0x7f else '.' for x in b[o:o+16])
+            print(f'{BASE+o:08x}: {b[o:o+16].hex(" ")}  {asc}')
+          print('\n=== ABSOLUTE CODE POINTERS NEAR SYMBOL-TABLE REGION ===')
+          for o in range(0x13c00,min(N,0x14500)-3,4):
+            v=struct.unpack_from('<I',b,o)[0]
+            if BASE<=v<BASE+N:print(f'{BASE+o:08x} -> {v:08x}')
+          print('\n=== CONTROL-MANAGER STRING XREF FOCUS ===')
+          for name,a,la,v,mn,op in allhits:
+            if 'control_manager' in targets[v].lower():print(name,hex(a),hex(v),targets[v])
+          print('\n=== DECISION GATE ===')
+          print('Use linked-base xrefs to identify CA9 CM/control-manager function boundaries. Next trace ARM926 command dispatch into the CM entry and mode field into CC0/CC1 computation; preserve renderer defaults until positive nonlinear evidence.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER1Q.txt
+          git commit -m 'research: record linked-base CA9 CM xrefs 1Q' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
