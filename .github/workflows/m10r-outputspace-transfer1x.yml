@@ -1,0 +1,122 @@
+name: M10-R output-space transfer 1X
+on:
+  push:
+    branches: [m10r-outputspace-transfer1a]
+    paths: ['.github/workflows/m10r-outputspace-transfer1x.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Decode CA9 CM subcommand dispatcher
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER1X.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import *
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes();BASE=0x40000000;PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN);md.detail=True
+          def off(a):return PFX+a-BASE
+          def one(a):
+            o=off(a);q=list(md.disasm(b[o:o+4],a,count=1)) if 0<=o<len(b)-4 else []
+            return q[0] if q else None
+          def dis(a,z):return list(md.disasm(b[off(a):off(z)],a))
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=i.address+8+i.operands[1].mem.disp;o=off(la)
+                if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+            except:pass
+          def call(i):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';x=lit(i)
+            if x:s+=f' ; LIT {x[0]:#x}->{x[1]:#x}'
+            t=call(i)
+            if t is not None:s+=f' ; CALL={t:#x}'
+            return s
+          def start(a):
+            for p in range(a,max(BASE,a-0x500),-4):
+              i=one(p)
+              if i and ((i.mnemonic=='push' and 'lr' in i.op_str) or (i.mnemonic=='stmdb' and 'sp!' in i.op_str and 'lr' in i.op_str)):return p
+          def body(st,lim=0x1000):
+            out=[]
+            for i in dis(st,min(BASE+len(b)-PFX,st+lim)):
+              out.append(i)
+              if i.address>st and ((i.mnemonic=='pop' and 'pc' in i.op_str) or (i.mnemonic=='bx' and 'lr' in i.op_str)):break
+            return out
+          print('M10-R OUTPUTSPACE TRANSFER1X')
+          print('\n=== 0x40003AF4 OWNER / RAW ===')
+          print('OWNER',hex(start(0x40003af4) or 0))
+          for i in dis(0x40003980,0x40004058):print(fmt(i))
+
+          print('\n=== SUBCOMMAND CMP/BRANCH SURFACE ===')
+          for i in dis(0x40003a80,0x40004058):
+            if i.mnemonic.startswith(('cmp','tst','b')) or call(i) is not None:print(fmt(i))
+
+          # collect direct branch/call targets inside nearby CM code and decode plausible handlers
+          tg=set()
+          for i in dis(0x40003a80,0x40004058):
+            try:
+              if i.mnemonic.startswith('b') and i.operands and i.operands[0].type==ARM_OP_IMM:
+                t=i.operands[0].imm
+                if 0x40000000<=t<0x40006320:tg.add(t)
+            except:pass
+            t=call(i)
+            if t and 0x40000000<=t<0x40006320:tg.add(t)
+          print('\n=== NEARBY TARGETS ===')
+          for t in sorted(tg):print(hex(t),'owner',hex(start(t) or 0))
+
+          print('\n=== RECORD-POINTER / MODE-LIKE READS IN DISPATCHER ===')
+          for i in dis(0x40003a80,0x40004058):
+            if i.mnemonic.startswith(('ldr','ldrb','ldrh','str','strb','strh','cmp')):print(fmt(i))
+
+          print('\n=== CA9 MANAGER 0x40 THUNK PROOF ===')
+          for i in dis(0x400063a0,0x400063bc):print(fmt(i))
+          for i in dis(0x40004050,0x40004058):print(fmt(i))
+
+          print('\n=== IPC RECEIVE FUNCTIONS FULLER ===')
+          # decode backwards-selected chunks around all fff50000 xrefs
+          for lo,hi in ((0x4000bd00,0x4000bf84),(0x4000bf84,0x4000c070)):
+            print('\n--',hex(lo),hex(hi),'--')
+            for i in dis(lo,hi):print(fmt(i))
+
+          print('\n=== IPC RECEIVE MMIO + DESTINATION STORES ===')
+          for i in dis(0x4000bd00,0x4000c070):
+            x=lit(i)
+            if x or i.mnemonic.startswith(('ldr','str','ldm','stm')):
+              if x and x[1] in (0xfff50000,0x40026aec,0x4001c844,0x40026810):print(fmt(i))
+              elif any(k in i.op_str for k in ('#0x40','#0x44','#0x48','#0x4c','#0x50','#0x54','#0x58','#0x5c','#0x60','#0x100')):print(fmt(i))
+
+          print('\n=== SMALL ENUM CMPS IN 0x40003A80..0x40004058 ===')
+          for i in dis(0x40003a80,0x40004058):
+            if i.mnemonic.startswith('cmp') and any(k in i.op_str for k in ('#0','#1','#2','#3','#4','#5','#6','#7','#0x')):print(fmt(i))
+
+          print('\n=== DECISION GATE ===')
+          print('0x40004050 consumes manager record +8 as a CM subcommand/context pointer/value and branches to 0x40003AF4. Recover the dispatcher cases and identify which case reaches color-space matrix/remapping math. Output-space nonlinear effect remains unproven unless a 0/1/2-derived case reaches transfer/gamma processing.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER1X.txt
+          git commit -m 'research: record CA9 CM subcommand dispatcher trace 1X' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
