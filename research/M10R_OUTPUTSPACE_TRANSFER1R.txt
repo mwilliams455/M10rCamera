@@ -1,0 +1,40 @@
+M10-R OUTPUTSPACE TRANSFER1R
+
+=== RELEVANT STRING ADDRESSES ===
+0x40004917 '@CA9: %s()%d, %s'
+0x40004c5f '@division by zero'
+0x40004c77 '@CA9: %s()%d, %s'
+0x4000563b '@ca9: cm_Temperature_ToXYCoord, line: %d - division by zero'
+0x40005bc7 '@CA9: %s()%d, %s'
+0x40005d5c 'division by zero'
+0x40005d73 '@CA9: %s()%d, %s'
+0x400060db '@matrix not invertible'
+0x4000646f '@ca9_control_Manager() - CA9 ready'
+0x40008167 '@CA9: %s() - | 1: %4i | 2: %4i | 3: %4i | 4: %4i |'
+0x4000819c 'CA9: %s() - Low Threshold failed'
+0x400081c0 'CA9: %s() - High Threshold failed'
+0x4000854f '@CA9: %s() - FIRST_PIXEL_COLOR %i'
+0x40008574 'CA9: %s() - B: %i | Gb: %i | Gr: %i | R: %i |'
+0x4000b44b '@CA9: %s() - White Balance started'
+0x40014222 ']@ca9_cm_Temperature_FromXYCoord'
+0x40014243 'ca9_cm_Temperature_FromXYCoord_binarySearch'
+0x4001426f 'ca9_cm_Temperature_ToXYCoord'
+0x40014343 '?ca9_cm_ColorSpec_MapWhiteMatrix'
+0x40014364 'ca9_cm_ColorSpec_SetWhiteXY'
+0x40014380 'ca9_cm_ColorSpec_NeutralToXY'
+0x4001439d 'ca9_cm_ColorSpec_MatrixInterpolate'
+0x4001c554 'CA9: %s() - WB Preset not implemented! WB set to Preset DAYLIGHT'
+0x4001c598 'CA9: %s() - StartPixel: %i | B: %4i | Gb: %4i | Gr: %4i | R: %4i |'
+
+=== PC-RELATIVE REFERENCES IN THUMB CODE 0x40004000..0x40006800 ===
+HIT_COUNT 0
+
+=== XREF WINDOWS / FUNCTION-START SEARCH ===
+
+=== FUNCTION STARTS 0x40004000..0x40006800 ===
+
+
+=== CMP 0/1/2/3 SURFACE IN CM-RELATED FUNCTIONS ===
+
+=== DECISION GATE ===
+Functions identified through actual executable string xrefs are candidates for CA9 CM math. Next intersect their callers/data pointers with the IPC receiver and mode field; do not treat generic temperature/matrix math as output-space switching without mode dataflow.
