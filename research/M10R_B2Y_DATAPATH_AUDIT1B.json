@@ -1,0 +1,2189 @@
+{
+  "schema": "m10r.b2y.datapath_audit1b.v1",
+  "scope": "synthetic descriptor-bit -> CPU MMIO mapping; B2Y pixels are NOT emulated",
+  "caution": "synthetic bit toggles establish packing/control dependencies, not legal photographic modes or semantic names",
+  "img_section_sha256": "53e307ad2b241e4684f5f9974c1b9780bcbc9e37ac580d8dcaf45cf72aae80d4",
+  "b2y_section_sha256": "ea935a8006ea3b0a765660bd1d89f6a52c9f60508ee5ba76650005d80372335b",
+  "tone_programmer": {
+    "start": "0x420d3c1c",
+    "end": "0x420d4298"
+  },
+  "baseline_descriptor_u32": [
+    "0x1",
+    "0x0",
+    "0x1",
+    "0x1",
+    "0x0",
+    "0x0",
+    "0x0",
+    "0x400",
+    "0xa65",
+    "0x19a",
+    "0x0",
+    "0x8000",
+    "0x0",
+    "0x0",
+    "0x5000",
+    "0x2ca0",
+    "0x2ca0",
+    "0x0",
+    "0x0",
+    "0xffff8000",
+    "0x0",
+    "0x0",
+    "0x0",
+    "0x0",
+    "0x5000",
+    "0x0",
+    "0x0",
+    "0x0",
+    "0x0",
+    "0xffff8000",
+    "0x3fff",
+    "0x3fff",
+    "0x3fff",
+    "0x3fff",
+    "0x3fff",
+    "0x3fff",
+    "0x3fff",
+    "0x3fff",
+    "0x0",
+    "0x0",
+    "0x0",
+    "0x0",
+    "0x0",
+    "0x0"
+  ],
+  "baseline_focus_registers": {
+    "0x20020800": "0x00000001",
+    "0x20020804": "0x00000011",
+    "0x20020808": "0x0a650400",
+    "0x2002080c": "0x0000019a"
+  },
+  "baseline_0804_write_pcs": [
+    "0x420d3cbc",
+    "0x420d3ce0",
+    "0x420d3d04",
+    "0x420d3d28",
+    "0x420d3d4c"
+  ],
+  "probe_counts": {
+    "successful": 1376,
+    "failed": 32
+  },
+  "fields": [
+    {
+      "index": 0,
+      "descriptor_offset": "0x0",
+      "baseline_value": "0x00000001",
+      "influence_masks": {
+        "0x20020800": "0x00000001"
+      },
+      "focus_input_bits": [
+        {
+          "input_bit": 0,
+          "input_mask": "0x00000001",
+          "focus_delta": {
+            "0x20020800": {
+              "baseline": "0x00000001",
+              "test": "0x00000000",
+              "xor": "0x00000001"
+            }
+          }
+        }
+      ],
+      "failed_bits": []
+    },
+    {
+      "index": 1,
+      "descriptor_offset": "0x4",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x20020800": "0x00000002"
+      },
+      "focus_input_bits": [
+        {
+          "input_bit": 0,
+          "input_mask": "0x00000001",
+          "focus_delta": {
+            "0x20020800": {
+              "baseline": "0x00000001",
+              "test": "0x00000003",
+              "xor": "0x00000002"
+            }
+          }
+        }
+      ],
+      "failed_bits": []
+    },
+    {
+      "index": 2,
+      "descriptor_offset": "0x8",
+      "baseline_value": "0x00000001",
+      "influence_masks": {},
+      "focus_input_bits": [],
+      "failed_bits": [
+        {
+          "input_bit": 0,
+          "input_mask": "0x00000001",
+          "test_value": "0x00000000",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 1,
+          "input_mask": "0x00000002",
+          "test_value": "0x00000003",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 2,
+          "input_mask": "0x00000004",
+          "test_value": "0x00000005",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 3,
+          "input_mask": "0x00000008",
+          "test_value": "0x00000009",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 4,
+          "input_mask": "0x00000010",
+          "test_value": "0x00000011",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 5,
+          "input_mask": "0x00000020",
+          "test_value": "0x00000021",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 6,
+          "input_mask": "0x00000040",
+          "test_value": "0x00000041",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 7,
+          "input_mask": "0x00000080",
+          "test_value": "0x00000081",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 8,
+          "input_mask": "0x00000100",
+          "test_value": "0x00000101",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 9,
+          "input_mask": "0x00000200",
+          "test_value": "0x00000201",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 10,
+          "input_mask": "0x00000400",
+          "test_value": "0x00000401",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 11,
+          "input_mask": "0x00000800",
+          "test_value": "0x00000801",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 12,
+          "input_mask": "0x00001000",
+          "test_value": "0x00001001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 13,
+          "input_mask": "0x00002000",
+          "test_value": "0x00002001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 14,
+          "input_mask": "0x00004000",
+          "test_value": "0x00004001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 15,
+          "input_mask": "0x00008000",
+          "test_value": "0x00008001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 16,
+          "input_mask": "0x00010000",
+          "test_value": "0x00010001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 17,
+          "input_mask": "0x00020000",
+          "test_value": "0x00020001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 18,
+          "input_mask": "0x00040000",
+          "test_value": "0x00040001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 19,
+          "input_mask": "0x00080000",
+          "test_value": "0x00080001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 20,
+          "input_mask": "0x00100000",
+          "test_value": "0x00100001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 21,
+          "input_mask": "0x00200000",
+          "test_value": "0x00200001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 22,
+          "input_mask": "0x00400000",
+          "test_value": "0x00400001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 23,
+          "input_mask": "0x00800000",
+          "test_value": "0x00800001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 24,
+          "input_mask": "0x01000000",
+          "test_value": "0x01000001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 25,
+          "input_mask": "0x02000000",
+          "test_value": "0x02000001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 26,
+          "input_mask": "0x04000000",
+          "test_value": "0x04000001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 27,
+          "input_mask": "0x08000000",
+          "test_value": "0x08000001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 28,
+          "input_mask": "0x10000000",
+          "test_value": "0x10000001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 29,
+          "input_mask": "0x20000000",
+          "test_value": "0x20000001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 30,
+          "input_mask": "0x40000000",
+          "test_value": "0x40000001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        },
+        {
+          "input_bit": 31,
+          "input_mask": "0x80000000",
+          "test_value": "0x80000001",
+          "error": "RuntimeError: unexpected byte-copy request"
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "descriptor_offset": "0xc",
+      "baseline_value": "0x00000001",
+      "influence_masks": {
+        "0x20020804": "0x00000030"
+      },
+      "focus_input_bits": [
+        {
+          "input_bit": 0,
+          "input_mask": "0x00000001",
+          "focus_delta": {
+            "0x20020804": {
+              "baseline": "0x00000011",
+              "test": "0x00000001",
+              "xor": "0x00000010"
+            }
+          }
+        },
+        {
+          "input_bit": 1,
+          "input_mask": "0x00000002",
+          "focus_delta": {
+            "0x20020804": {
+              "baseline": "0x00000011",
+              "test": "0x00000031",
+              "xor": "0x00000020"
+            }
+          }
+        }
+      ],
+      "failed_bits": []
+    },
+    {
+      "index": 4,
+      "descriptor_offset": "0x10",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x20020804": "0x00000300"
+      },
+      "focus_input_bits": [
+        {
+          "input_bit": 0,
+          "input_mask": "0x00000001",
+          "focus_delta": {
+            "0x20020804": {
+              "baseline": "0x00000011",
+              "test": "0x00000111",
+              "xor": "0x00000100"
+            }
+          }
+        },
+        {
+          "input_bit": 1,
+          "input_mask": "0x00000002",
+          "focus_delta": {
+            "0x20020804": {
+              "baseline": "0x00000011",
+              "test": "0x00000211",
+              "xor": "0x00000200"
+            }
+          }
+        }
+      ],
+      "failed_bits": []
+    },
+    {
+      "index": 5,
+      "descriptor_offset": "0x14",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x20020804": "0x00010000"
+      },
+      "focus_input_bits": [
+        {
+          "input_bit": 0,
+          "input_mask": "0x00000001",
+          "focus_delta": {
+            "0x20020804": {
+              "baseline": "0x00000011",
+              "test": "0x00010011",
+              "xor": "0x00010000"
+            }
+          }
+        }
+      ],
+      "failed_bits": []
+    },
+    {
+      "index": 6,
+      "descriptor_offset": "0x18",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x20020804": "0x3f000000"
+      },
+      "focus_input_bits": [
+        {
+          "input_bit": 0,
+          "input_mask": "0x00000001",
+          "focus_delta": {
+            "0x20020804": {
+              "baseline": "0x00000011",
+              "test": "0x01000011",
+              "xor": "0x01000000"
+            }
+          }
+        },
+        {
+          "input_bit": 1,
+          "input_mask": "0x00000002",
+          "focus_delta": {
+            "0x20020804": {
+              "baseline": "0x00000011",
+              "test": "0x02000011",
+              "xor": "0x02000000"
+            }
+          }
+        },
+        {
+          "input_bit": 2,
+          "input_mask": "0x00000004",
+          "focus_delta": {
+            "0x20020804": {
+              "baseline": "0x00000011",
+              "test": "0x04000011",
+              "xor": "0x04000000"
+            }
+          }
+        },
+        {
+          "input_bit": 3,
+          "input_mask": "0x00000008",
+          "focus_delta": {
+            "0x20020804": {
+              "baseline": "0x00000011",
+              "test": "0x08000011",
+              "xor": "0x08000000"
+            }
+          }
+        },
+        {
+          "input_bit": 4,
+          "input_mask": "0x00000010",
+          "focus_delta": {
+            "0x20020804": {
+              "baseline": "0x00000011",
+              "test": "0x10000011",
+              "xor": "0x10000000"
+            }
+          }
+        },
+        {
+          "input_bit": 5,
+          "input_mask": "0x00000020",
+          "focus_delta": {
+            "0x20020804": {
+              "baseline": "0x00000011",
+              "test": "0x20000011",
+              "xor": "0x20000000"
+            }
+          }
+        }
+      ],
+      "failed_bits": []
+    },
+    {
+      "index": 7,
+      "descriptor_offset": "0x1c",
+      "baseline_value": "0x00000400",
+      "influence_masks": {
+        "0x20020808": "0x00000fff"
+      },
+      "focus_input_bits": [
+        {
+          "input_bit": 0,
+          "input_mask": "0x00000001",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a650401",
+              "xor": "0x00000001"
+            }
+          }
+        },
+        {
+          "input_bit": 1,
+          "input_mask": "0x00000002",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a650402",
+              "xor": "0x00000002"
+            }
+          }
+        },
+        {
+          "input_bit": 2,
+          "input_mask": "0x00000004",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a650404",
+              "xor": "0x00000004"
+            }
+          }
+        },
+        {
+          "input_bit": 3,
+          "input_mask": "0x00000008",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a650408",
+              "xor": "0x00000008"
+            }
+          }
+        },
+        {
+          "input_bit": 4,
+          "input_mask": "0x00000010",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a650410",
+              "xor": "0x00000010"
+            }
+          }
+        },
+        {
+          "input_bit": 5,
+          "input_mask": "0x00000020",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a650420",
+              "xor": "0x00000020"
+            }
+          }
+        },
+        {
+          "input_bit": 6,
+          "input_mask": "0x00000040",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a650440",
+              "xor": "0x00000040"
+            }
+          }
+        },
+        {
+          "input_bit": 7,
+          "input_mask": "0x00000080",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a650480",
+              "xor": "0x00000080"
+            }
+          }
+        },
+        {
+          "input_bit": 8,
+          "input_mask": "0x00000100",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a650500",
+              "xor": "0x00000100"
+            }
+          }
+        },
+        {
+          "input_bit": 9,
+          "input_mask": "0x00000200",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a650600",
+              "xor": "0x00000200"
+            }
+          }
+        },
+        {
+          "input_bit": 10,
+          "input_mask": "0x00000400",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a650000",
+              "xor": "0x00000400"
+            }
+          }
+        },
+        {
+          "input_bit": 11,
+          "input_mask": "0x00000800",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a650c00",
+              "xor": "0x00000800"
+            }
+          }
+        }
+      ],
+      "failed_bits": []
+    },
+    {
+      "index": 8,
+      "descriptor_offset": "0x20",
+      "baseline_value": "0x00000a65",
+      "influence_masks": {
+        "0x20020808": "0x0fff0000"
+      },
+      "focus_input_bits": [
+        {
+          "input_bit": 0,
+          "input_mask": "0x00000001",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a640400",
+              "xor": "0x00010000"
+            }
+          }
+        },
+        {
+          "input_bit": 1,
+          "input_mask": "0x00000002",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a670400",
+              "xor": "0x00020000"
+            }
+          }
+        },
+        {
+          "input_bit": 2,
+          "input_mask": "0x00000004",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a610400",
+              "xor": "0x00040000"
+            }
+          }
+        },
+        {
+          "input_bit": 3,
+          "input_mask": "0x00000008",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a6d0400",
+              "xor": "0x00080000"
+            }
+          }
+        },
+        {
+          "input_bit": 4,
+          "input_mask": "0x00000010",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a750400",
+              "xor": "0x00100000"
+            }
+          }
+        },
+        {
+          "input_bit": 5,
+          "input_mask": "0x00000020",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a450400",
+              "xor": "0x00200000"
+            }
+          }
+        },
+        {
+          "input_bit": 6,
+          "input_mask": "0x00000040",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0a250400",
+              "xor": "0x00400000"
+            }
+          }
+        },
+        {
+          "input_bit": 7,
+          "input_mask": "0x00000080",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0ae50400",
+              "xor": "0x00800000"
+            }
+          }
+        },
+        {
+          "input_bit": 8,
+          "input_mask": "0x00000100",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0b650400",
+              "xor": "0x01000000"
+            }
+          }
+        },
+        {
+          "input_bit": 9,
+          "input_mask": "0x00000200",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x08650400",
+              "xor": "0x02000000"
+            }
+          }
+        },
+        {
+          "input_bit": 10,
+          "input_mask": "0x00000400",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x0e650400",
+              "xor": "0x04000000"
+            }
+          }
+        },
+        {
+          "input_bit": 11,
+          "input_mask": "0x00000800",
+          "focus_delta": {
+            "0x20020808": {
+              "baseline": "0x0a650400",
+              "test": "0x02650400",
+              "xor": "0x08000000"
+            }
+          }
+        }
+      ],
+      "failed_bits": []
+    },
+    {
+      "index": 9,
+      "descriptor_offset": "0x24",
+      "baseline_value": "0x0000019a",
+      "influence_masks": {
+        "0x2002080c": "0x00000fff"
+      },
+      "focus_input_bits": [
+        {
+          "input_bit": 0,
+          "input_mask": "0x00000001",
+          "focus_delta": {
+            "0x2002080c": {
+              "baseline": "0x0000019a",
+              "test": "0x0000019b",
+              "xor": "0x00000001"
+            }
+          }
+        },
+        {
+          "input_bit": 1,
+          "input_mask": "0x00000002",
+          "focus_delta": {
+            "0x2002080c": {
+              "baseline": "0x0000019a",
+              "test": "0x00000198",
+              "xor": "0x00000002"
+            }
+          }
+        },
+        {
+          "input_bit": 2,
+          "input_mask": "0x00000004",
+          "focus_delta": {
+            "0x2002080c": {
+              "baseline": "0x0000019a",
+              "test": "0x0000019e",
+              "xor": "0x00000004"
+            }
+          }
+        },
+        {
+          "input_bit": 3,
+          "input_mask": "0x00000008",
+          "focus_delta": {
+            "0x2002080c": {
+              "baseline": "0x0000019a",
+              "test": "0x00000192",
+              "xor": "0x00000008"
+            }
+          }
+        },
+        {
+          "input_bit": 4,
+          "input_mask": "0x00000010",
+          "focus_delta": {
+            "0x2002080c": {
+              "baseline": "0x0000019a",
+              "test": "0x0000018a",
+              "xor": "0x00000010"
+            }
+          }
+        },
+        {
+          "input_bit": 5,
+          "input_mask": "0x00000020",
+          "focus_delta": {
+            "0x2002080c": {
+              "baseline": "0x0000019a",
+              "test": "0x000001ba",
+              "xor": "0x00000020"
+            }
+          }
+        },
+        {
+          "input_bit": 6,
+          "input_mask": "0x00000040",
+          "focus_delta": {
+            "0x2002080c": {
+              "baseline": "0x0000019a",
+              "test": "0x000001da",
+              "xor": "0x00000040"
+            }
+          }
+        },
+        {
+          "input_bit": 7,
+          "input_mask": "0x00000080",
+          "focus_delta": {
+            "0x2002080c": {
+              "baseline": "0x0000019a",
+              "test": "0x0000011a",
+              "xor": "0x00000080"
+            }
+          }
+        },
+        {
+          "input_bit": 8,
+          "input_mask": "0x00000100",
+          "focus_delta": {
+            "0x2002080c": {
+              "baseline": "0x0000019a",
+              "test": "0x0000009a",
+              "xor": "0x00000100"
+            }
+          }
+        },
+        {
+          "input_bit": 9,
+          "input_mask": "0x00000200",
+          "focus_delta": {
+            "0x2002080c": {
+              "baseline": "0x0000019a",
+              "test": "0x0000039a",
+              "xor": "0x00000200"
+            }
+          }
+        },
+        {
+          "input_bit": 10,
+          "input_mask": "0x00000400",
+          "focus_delta": {
+            "0x2002080c": {
+              "baseline": "0x0000019a",
+              "test": "0x0000059a",
+              "xor": "0x00000400"
+            }
+          }
+        },
+        {
+          "input_bit": 11,
+          "input_mask": "0x00000800",
+          "focus_delta": {
+            "0x2002080c": {
+              "baseline": "0x0000019a",
+              "test": "0x0000099a",
+              "xor": "0x00000800"
+            }
+          }
+        }
+      ],
+      "failed_bits": []
+    },
+    {
+      "index": 10,
+      "descriptor_offset": "0x28",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x20020810": "0x0003ffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 11,
+      "descriptor_offset": "0x2c",
+      "baseline_value": "0x00008000",
+      "influence_masks": {
+        "0x20020814": "0x0003ffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 12,
+      "descriptor_offset": "0x30",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x20020818": "0x03ffffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 13,
+      "descriptor_offset": "0x34",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x2002081c": "0x03ffffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 14,
+      "descriptor_offset": "0x38",
+      "baseline_value": "0x00005000",
+      "influence_masks": {
+        "0x20020820": "0x0000ffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 15,
+      "descriptor_offset": "0x3c",
+      "baseline_value": "0x00002ca0",
+      "influence_masks": {
+        "0x20020828": "0x0003ffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 16,
+      "descriptor_offset": "0x40",
+      "baseline_value": "0x00002ca0",
+      "influence_masks": {
+        "0x2002082c": "0x0003ffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 17,
+      "descriptor_offset": "0x44",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x20020830": "0x03ffffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 18,
+      "descriptor_offset": "0x48",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x20020834": "0x03ffffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 19,
+      "descriptor_offset": "0x4c",
+      "baseline_value": "0xffff8000",
+      "influence_masks": {
+        "0x20020838": "0x0000ffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 20,
+      "descriptor_offset": "0x50",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x20020840": "0x0003ffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 21,
+      "descriptor_offset": "0x54",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x20020844": "0x0003ffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 22,
+      "descriptor_offset": "0x58",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x20020848": "0x03ffffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 23,
+      "descriptor_offset": "0x5c",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x2002084c": "0x03ffffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 24,
+      "descriptor_offset": "0x60",
+      "baseline_value": "0x00005000",
+      "influence_masks": {
+        "0x20020850": "0x0000ffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 25,
+      "descriptor_offset": "0x64",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x20020858": "0x0003ffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 26,
+      "descriptor_offset": "0x68",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x2002085c": "0x0003ffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 27,
+      "descriptor_offset": "0x6c",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x20020860": "0x03ffffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 28,
+      "descriptor_offset": "0x70",
+      "baseline_value": "0x00000000",
+      "influence_masks": {
+        "0x20020864": "0x03ffffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 29,
+      "descriptor_offset": "0x74",
+      "baseline_value": "0xffff8000",
+      "influence_masks": {
+        "0x20020868": "0x0000ffff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 30,
+      "descriptor_offset": "0x78",
+      "baseline_value": "0x00003fff",
+      "influence_masks": {
+        "0x2002086c": "0x00007fff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 31,
+      "descriptor_offset": "0x7c",
+      "baseline_value": "0x00003fff",
+      "influence_masks": {
+        "0x2002086c": "0xffff0000"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 32,
+      "descriptor_offset": "0x80",
+      "baseline_value": "0x00003fff",
+      "influence_masks": {
+        "0x20020870": "0x00007fff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 33,
+      "descriptor_offset": "0x84",
+      "baseline_value": "0x00003fff",
+      "influence_masks": {
+        "0x20020870": "0xffff0000"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 34,
+      "descriptor_offset": "0x88",
+      "baseline_value": "0x00003fff",
+      "influence_masks": {
+        "0x20020874": "0x00007fff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 35,
+      "descriptor_offset": "0x8c",
+      "baseline_value": "0x00003fff",
+      "influence_masks": {
+        "0x20020874": "0xffff0000"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 36,
+      "descriptor_offset": "0x90",
+      "baseline_value": "0x00003fff",
+      "influence_masks": {
+        "0x20020878": "0x00007fff"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 37,
+      "descriptor_offset": "0x94",
+      "baseline_value": "0x00003fff",
+      "influence_masks": {
+        "0x20020878": "0xffff0000"
+      },
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 38,
+      "descriptor_offset": "0x98",
+      "baseline_value": "0x00000000",
+      "influence_masks": {},
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 39,
+      "descriptor_offset": "0x9c",
+      "baseline_value": "0x00000000",
+      "influence_masks": {},
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 40,
+      "descriptor_offset": "0xa0",
+      "baseline_value": "0x00000000",
+      "influence_masks": {},
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 41,
+      "descriptor_offset": "0xa4",
+      "baseline_value": "0x00000000",
+      "influence_masks": {},
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 42,
+      "descriptor_offset": "0xa8",
+      "baseline_value": "0x00000000",
+      "influence_masks": {},
+      "focus_input_bits": [],
+      "failed_bits": []
+    },
+    {
+      "index": 43,
+      "descriptor_offset": "0xac",
+      "baseline_value": "0x00000000",
+      "influence_masks": {},
+      "focus_input_bits": [],
+      "failed_bits": []
+    }
+  ],
+  "real_record8_occurrences": [
+    {
+      "occurrence": 0,
+      "record_size": 176,
+      "payload_offset": "0xa76d4",
+      "u32": [
+        "0x1",
+        "0x0",
+        "0x1",
+        "0x1",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x400",
+        "0xa65",
+        "0x19a",
+        "0x0",
+        "0x8000",
+        "0x0",
+        "0x0",
+        "0x5000",
+        "0x2ca0",
+        "0x2ca0",
+        "0x0",
+        "0x0",
+        "0xffff8000",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x5000",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0xffff8000",
+        "0x3fff",
+        "0x3fff",
+        "0x3fff",
+        "0x3fff",
+        "0x3fff",
+        "0x3fff",
+        "0x3fff",
+        "0x3fff",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0"
+      ],
+      "focus_registers": {
+        "0x20020800": "0x00000001",
+        "0x20020804": "0x00000011",
+        "0x20020808": "0x0a650400",
+        "0x2002080c": "0x0000019a"
+      }
+    }
+  ],
+  "write_pc_disassembly": {
+    "0x420d3cbc": [
+      {
+        "address": "0x420d3c8c",
+        "bytes": "041094e5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [r4, #4]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3c90",
+        "bytes": "811002e0",
+        "mnemonic": "and",
+        "op_str": "r1, r2, r1, lsl #1",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3c94",
+        "bytes": "010080e1",
+        "mnemonic": "orr",
+        "op_str": "r0, r0, r1",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3c98",
+        "bytes": "f8159fe5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [pc, #0x5f8]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3c9c",
+        "bytes": "000881e5",
+        "mnemonic": "str",
+        "op_str": "r0, [r1, #0x800]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3ca0",
+        "bytes": "000081e2",
+        "mnemonic": "add",
+        "op_str": "r0, r1, #0",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3ca4",
+        "bytes": "040890e5",
+        "mnemonic": "ldr",
+        "op_str": "r0, [r0, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3ca8",
+        "bytes": "0300c0e3",
+        "mnemonic": "bic",
+        "op_str": "r0, r0, #3",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cac",
+        "bytes": "0810d4e5",
+        "mnemonic": "ldrb",
+        "op_str": "r1, [r4, #8]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cb0",
+        "bytes": "031001e2",
+        "mnemonic": "and",
+        "op_str": "r1, r1, #3",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cb4",
+        "bytes": "010080e1",
+        "mnemonic": "orr",
+        "op_str": "r0, r0, r1",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cb8",
+        "bytes": "d8159fe5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [pc, #0x5d8]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cbc",
+        "bytes": "040881e5",
+        "mnemonic": "str",
+        "op_str": "r0, [r1, #0x804]",
+        "is_write_pc": true
+      },
+      {
+        "address": "0x420d3cc0",
+        "bytes": "000081e2",
+        "mnemonic": "add",
+        "op_str": "r0, r1, #0",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cc4",
+        "bytes": "040890e5",
+        "mnemonic": "ldr",
+        "op_str": "r0, [r0, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cc8",
+        "bytes": "3000c0e3",
+        "mnemonic": "bic",
+        "op_str": "r0, r0, #0x30",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3ccc",
+        "bytes": "3020a0e3",
+        "mnemonic": "mov",
+        "op_str": "r2, #0x30",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cd0",
+        "bytes": "0c1094e5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [r4, #0xc]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cd4",
+        "bytes": "011202e0",
+        "mnemonic": "and",
+        "op_str": "r1, r2, r1, lsl #4",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cd8",
+        "bytes": "010080e1",
+        "mnemonic": "orr",
+        "op_str": "r0, r0, r1",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cdc",
+        "bytes": "b4159fe5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [pc, #0x5b4]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3ce0",
+        "bytes": "040881e5",
+        "mnemonic": "str",
+        "op_str": "r0, [r1, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3ce4",
+        "bytes": "000081e2",
+        "mnemonic": "add",
+        "op_str": "r0, r1, #0",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3ce8",
+        "bytes": "040890e5",
+        "mnemonic": "ldr",
+        "op_str": "r0, [r0, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cec",
+        "bytes": "030cc0e3",
+        "mnemonic": "bic",
+        "op_str": "r0, r0, #0x300",
+        "is_write_pc": false
+      }
+    ],
+    "0x420d3ce0": [
+      {
+        "address": "0x420d3cb0",
+        "bytes": "031001e2",
+        "mnemonic": "and",
+        "op_str": "r1, r1, #3",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cb4",
+        "bytes": "010080e1",
+        "mnemonic": "orr",
+        "op_str": "r0, r0, r1",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cb8",
+        "bytes": "d8159fe5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [pc, #0x5d8]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cbc",
+        "bytes": "040881e5",
+        "mnemonic": "str",
+        "op_str": "r0, [r1, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cc0",
+        "bytes": "000081e2",
+        "mnemonic": "add",
+        "op_str": "r0, r1, #0",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cc4",
+        "bytes": "040890e5",
+        "mnemonic": "ldr",
+        "op_str": "r0, [r0, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cc8",
+        "bytes": "3000c0e3",
+        "mnemonic": "bic",
+        "op_str": "r0, r0, #0x30",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3ccc",
+        "bytes": "3020a0e3",
+        "mnemonic": "mov",
+        "op_str": "r2, #0x30",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cd0",
+        "bytes": "0c1094e5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [r4, #0xc]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cd4",
+        "bytes": "011202e0",
+        "mnemonic": "and",
+        "op_str": "r1, r2, r1, lsl #4",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cd8",
+        "bytes": "010080e1",
+        "mnemonic": "orr",
+        "op_str": "r0, r0, r1",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cdc",
+        "bytes": "b4159fe5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [pc, #0x5b4]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3ce0",
+        "bytes": "040881e5",
+        "mnemonic": "str",
+        "op_str": "r0, [r1, #0x804]",
+        "is_write_pc": true
+      },
+      {
+        "address": "0x420d3ce4",
+        "bytes": "000081e2",
+        "mnemonic": "add",
+        "op_str": "r0, r1, #0",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3ce8",
+        "bytes": "040890e5",
+        "mnemonic": "ldr",
+        "op_str": "r0, [r0, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cec",
+        "bytes": "030cc0e3",
+        "mnemonic": "bic",
+        "op_str": "r0, r0, #0x300",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cf0",
+        "bytes": "032ca0e3",
+        "mnemonic": "mov",
+        "op_str": "r2, #0x300",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cf4",
+        "bytes": "101094e5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [r4, #0x10]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cf8",
+        "bytes": "011402e0",
+        "mnemonic": "and",
+        "op_str": "r1, r2, r1, lsl #8",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cfc",
+        "bytes": "010080e1",
+        "mnemonic": "orr",
+        "op_str": "r0, r0, r1",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d00",
+        "bytes": "90159fe5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [pc, #0x590]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d04",
+        "bytes": "040881e5",
+        "mnemonic": "str",
+        "op_str": "r0, [r1, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d08",
+        "bytes": "000081e2",
+        "mnemonic": "add",
+        "op_str": "r0, r1, #0",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d0c",
+        "bytes": "040890e5",
+        "mnemonic": "ldr",
+        "op_str": "r0, [r0, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d10",
+        "bytes": "0108c0e3",
+        "mnemonic": "bic",
+        "op_str": "r0, r0, #0x10000",
+        "is_write_pc": false
+      }
+    ],
+    "0x420d3d04": [
+      {
+        "address": "0x420d3cd4",
+        "bytes": "011202e0",
+        "mnemonic": "and",
+        "op_str": "r1, r2, r1, lsl #4",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cd8",
+        "bytes": "010080e1",
+        "mnemonic": "orr",
+        "op_str": "r0, r0, r1",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cdc",
+        "bytes": "b4159fe5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [pc, #0x5b4]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3ce0",
+        "bytes": "040881e5",
+        "mnemonic": "str",
+        "op_str": "r0, [r1, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3ce4",
+        "bytes": "000081e2",
+        "mnemonic": "add",
+        "op_str": "r0, r1, #0",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3ce8",
+        "bytes": "040890e5",
+        "mnemonic": "ldr",
+        "op_str": "r0, [r0, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cec",
+        "bytes": "030cc0e3",
+        "mnemonic": "bic",
+        "op_str": "r0, r0, #0x300",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cf0",
+        "bytes": "032ca0e3",
+        "mnemonic": "mov",
+        "op_str": "r2, #0x300",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cf4",
+        "bytes": "101094e5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [r4, #0x10]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cf8",
+        "bytes": "011402e0",
+        "mnemonic": "and",
+        "op_str": "r1, r2, r1, lsl #8",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cfc",
+        "bytes": "010080e1",
+        "mnemonic": "orr",
+        "op_str": "r0, r0, r1",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d00",
+        "bytes": "90159fe5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [pc, #0x590]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d04",
+        "bytes": "040881e5",
+        "mnemonic": "str",
+        "op_str": "r0, [r1, #0x804]",
+        "is_write_pc": true
+      },
+      {
+        "address": "0x420d3d08",
+        "bytes": "000081e2",
+        "mnemonic": "add",
+        "op_str": "r0, r1, #0",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d0c",
+        "bytes": "040890e5",
+        "mnemonic": "ldr",
+        "op_str": "r0, [r0, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d10",
+        "bytes": "0108c0e3",
+        "mnemonic": "bic",
+        "op_str": "r0, r0, #0x10000",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d14",
+        "bytes": "b411d4e1",
+        "mnemonic": "ldrh",
+        "op_str": "r1, [r4, #0x14]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d18",
+        "bytes": "0128a0e3",
+        "mnemonic": "mov",
+        "op_str": "r2, #0x10000",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d1c",
+        "bytes": "011802e0",
+        "mnemonic": "and",
+        "op_str": "r1, r2, r1, lsl #16",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d20",
+        "bytes": "010080e1",
+        "mnemonic": "orr",
+        "op_str": "r0, r0, r1",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d24",
+        "bytes": "6c159fe5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [pc, #0x56c]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d28",
+        "bytes": "040881e5",
+        "mnemonic": "str",
+        "op_str": "r0, [r1, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d2c",
+        "bytes": "000081e2",
+        "mnemonic": "add",
+        "op_str": "r0, r1, #0",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d30",
+        "bytes": "040890e5",
+        "mnemonic": "ldr",
+        "op_str": "r0, [r0, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d34",
+        "bytes": "3f04c0e3",
+        "mnemonic": "bic",
+        "op_str": "r0, r0, #0x3f000000",
+        "is_write_pc": false
+      }
+    ],
+    "0x420d3d28": [
+      {
+        "address": "0x420d3cf8",
+        "bytes": "011402e0",
+        "mnemonic": "and",
+        "op_str": "r1, r2, r1, lsl #8",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3cfc",
+        "bytes": "010080e1",
+        "mnemonic": "orr",
+        "op_str": "r0, r0, r1",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d00",
+        "bytes": "90159fe5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [pc, #0x590]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d04",
+        "bytes": "040881e5",
+        "mnemonic": "str",
+        "op_str": "r0, [r1, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d08",
+        "bytes": "000081e2",
+        "mnemonic": "add",
+        "op_str": "r0, r1, #0",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d0c",
+        "bytes": "040890e5",
+        "mnemonic": "ldr",
+        "op_str": "r0, [r0, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d10",
+        "bytes": "0108c0e3",
+        "mnemonic": "bic",
+        "op_str": "r0, r0, #0x10000",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d14",
+        "bytes": "b411d4e1",
+        "mnemonic": "ldrh",
+        "op_str": "r1, [r4, #0x14]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d18",
+        "bytes": "0128a0e3",
+        "mnemonic": "mov",
+        "op_str": "r2, #0x10000",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d1c",
+        "bytes": "011802e0",
+        "mnemonic": "and",
+        "op_str": "r1, r2, r1, lsl #16",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d20",
+        "bytes": "010080e1",
+        "mnemonic": "orr",
+        "op_str": "r0, r0, r1",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d24",
+        "bytes": "6c159fe5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [pc, #0x56c]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d28",
+        "bytes": "040881e5",
+        "mnemonic": "str",
+        "op_str": "r0, [r1, #0x804]",
+        "is_write_pc": true
+      },
+      {
+        "address": "0x420d3d2c",
+        "bytes": "000081e2",
+        "mnemonic": "add",
+        "op_str": "r0, r1, #0",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d30",
+        "bytes": "040890e5",
+        "mnemonic": "ldr",
+        "op_str": "r0, [r0, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d34",
+        "bytes": "3f04c0e3",
+        "mnemonic": "bic",
+        "op_str": "r0, r0, #0x3f000000",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d38",
+        "bytes": "1810d4e5",
+        "mnemonic": "ldrb",
+        "op_str": "r1, [r4, #0x18]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d3c",
+        "bytes": "3f24a0e3",
+        "mnemonic": "mov",
+        "op_str": "r2, #0x3f000000",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d40",
+        "bytes": "011c02e0",
+        "mnemonic": "and",
+        "op_str": "r1, r2, r1, lsl #24",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d44",
+        "bytes": "010080e1",
+        "mnemonic": "orr",
+        "op_str": "r0, r0, r1",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d48",
+        "bytes": "48159fe5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [pc, #0x548]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d4c",
+        "bytes": "040881e5",
+        "mnemonic": "str",
+        "op_str": "r0, [r1, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d50",
+        "bytes": "44059fe5",
+        "mnemonic": "ldr",
+        "op_str": "r0, [pc, #0x544]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d54",
+        "bytes": "d000c0e1",
+        "mnemonic": "ldrd",
+        "op_str": "r0, r1, [r0]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d58",
+        "bytes": "083649e0",
+        "mnemonic": "sub",
+        "op_str": "r3, sb, r8, lsl #12",
+        "is_write_pc": false
+      }
+    ],
+    "0x420d3d4c": [
+      {
+        "address": "0x420d3d1c",
+        "bytes": "011802e0",
+        "mnemonic": "and",
+        "op_str": "r1, r2, r1, lsl #16",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d20",
+        "bytes": "010080e1",
+        "mnemonic": "orr",
+        "op_str": "r0, r0, r1",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d24",
+        "bytes": "6c159fe5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [pc, #0x56c]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d28",
+        "bytes": "040881e5",
+        "mnemonic": "str",
+        "op_str": "r0, [r1, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d2c",
+        "bytes": "000081e2",
+        "mnemonic": "add",
+        "op_str": "r0, r1, #0",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d30",
+        "bytes": "040890e5",
+        "mnemonic": "ldr",
+        "op_str": "r0, [r0, #0x804]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d34",
+        "bytes": "3f04c0e3",
+        "mnemonic": "bic",
+        "op_str": "r0, r0, #0x3f000000",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d38",
+        "bytes": "1810d4e5",
+        "mnemonic": "ldrb",
+        "op_str": "r1, [r4, #0x18]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d3c",
+        "bytes": "3f24a0e3",
+        "mnemonic": "mov",
+        "op_str": "r2, #0x3f000000",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d40",
+        "bytes": "011c02e0",
+        "mnemonic": "and",
+        "op_str": "r1, r2, r1, lsl #24",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d44",
+        "bytes": "010080e1",
+        "mnemonic": "orr",
+        "op_str": "r0, r0, r1",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d48",
+        "bytes": "48159fe5",
+        "mnemonic": "ldr",
+        "op_str": "r1, [pc, #0x548]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d4c",
+        "bytes": "040881e5",
+        "mnemonic": "str",
+        "op_str": "r0, [r1, #0x804]",
+        "is_write_pc": true
+      },
+      {
+        "address": "0x420d3d50",
+        "bytes": "44059fe5",
+        "mnemonic": "ldr",
+        "op_str": "r0, [pc, #0x544]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d54",
+        "bytes": "d000c0e1",
+        "mnemonic": "ldrd",
+        "op_str": "r0, r1, [r0]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d58",
+        "bytes": "083649e0",
+        "mnemonic": "sub",
+        "op_str": "r3, sb, r8, lsl #12",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d5c",
+        "bytes": "032000e0",
+        "mnemonic": "and",
+        "op_str": "r2, r0, r3",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d60",
+        "bytes": "0030a0e3",
+        "mnemonic": "mov",
+        "op_str": "r3, #0",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d64",
+        "bytes": "08b668e0",
+        "mnemonic": "rsb",
+        "op_str": "fp, r8, r8, lsl #12",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d68",
+        "bytes": "1c0094e5",
+        "mnemonic": "ldr",
+        "op_str": "r0, [r4, #0x1c]",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d6c",
+        "bytes": "0b0000e0",
+        "mnemonic": "and",
+        "op_str": "r0, r0, fp",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d70",
+        "bytes": "033003e0",
+        "mnemonic": "and",
+        "op_str": "r3, r3, r3",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d74",
+        "bytes": "020080e1",
+        "mnemonic": "orr",
+        "op_str": "r0, r0, r2",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d78",
+        "bytes": "031081e1",
+        "mnemonic": "orr",
+        "op_str": "r1, r1, r3",
+        "is_write_pc": false
+      },
+      {
+        "address": "0x420d3d7c",
+        "bytes": "18259fe5",
+        "mnemonic": "ldr",
+        "op_str": "r2, [pc, #0x518]",
+        "is_write_pc": false
+      }
+    ]
+  }
+}
