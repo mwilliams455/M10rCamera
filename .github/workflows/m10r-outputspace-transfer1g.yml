@@ -1,0 +1,108 @@
+name: M10-R output-space transfer 1G
+on:
+  push:
+    branches: [m10r-outputspace-transfer1a]
+    paths: ['.github/workflows/m10r-outputspace-transfer1g.yml']
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace TF config consumer and YC helper
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          cat >/tmp/unpack.cpp <<'CPP'
+          #include <cstdint>
+          #include <fstream>
+          #include <stdexcept>
+          #include <vector>
+          using namespace std; static uint32_t u32(const vector<uint8_t>&b,size_t o){return uint32_t(b[o])|(uint32_t(b[o+1])<<8)|(uint32_t(b[o+2])<<16)|(uint32_t(b[o+3])<<24);} struct BR{const uint8_t*p;size_t n,bit=0;int get(){if(bit>=n*8)throw runtime_error("eof");int v=(p[bit>>3]>>(7-(bit&7)))&1;++bit;return v;}}; static int cat(BR&r){int a=r.get();if(!a)return r.get()?7:6;int b=r.get();if(!b)return r.get()?5:1;int c=r.get();if(!c)return r.get()?2:0;int d=r.get();if(!d)return 4;return r.get()?8:3;} int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;uint32_t h=u32(fw,C+8),expected=u32(fw,C+0x10);const uint8_t*tr=&fw[C+0x54];vector<uint8_t>out;out.reserve(expected);size_t st=C+h;for(int i=0;i<8;i++){size_t e=st+i*16;uint32_t ro=u32(fw,e+4),ps=u32(fw,e+8),us=u32(fw,e+12);BR br{&fw[C+ro],ps};for(uint32_t j=0;j<us;j++){int k=cat(br),x=0,v=0;for(int z=0;z<k;z++)x=(x<<1)|br.get();if(k)v=(x>=(1<<(k-1)))?x:x-((1<<k)-1);out.push_back(tr[v+128]);}}ofstream o("/tmp/M10R_unpacked.bin",ios::binary);o.write((char*)out.data(),out.size());return out.size()==expected?0:3;}
+          CPP
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_OUTPUTSPACE_TRANSFER1G.txt
+          from pathlib import Path
+          import struct
+          from capstone import *
+          from capstone.arm import ARM_OP_MEM,ARM_OP_IMM,ARM_REG_PC
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes();BASE=0x42000000;PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN);md.detail=True
+          def off(a):return PFX+a-BASE
+          def one(a):
+            if not BASE<=a<BASE+len(b)-PFX:return None
+            q=list(md.disasm(b[off(a):off(a)+4],a,count=1));return q[0] if q else None
+          def dis(a,z):return list(md.disasm(b[off(a):off(z)],a))
+          def lit(i):
+            try:
+              if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                la=((i.address+4)&~3)+i.operands[1].mem.disp;o=off(la)
+                if 0<=o<=len(b)-4:return la,struct.unpack_from('<I',b,o)[0]
+            except:pass
+          def call(i):
+            if i.mnemonic in ('bl','blx') and i.operands and i.operands[0].type==ARM_OP_IMM:return i.operands[0].imm
+          def astr(v):
+            if not BASE<=v<BASE+len(b)-PFX:return None
+            o=off(v);e=b.find(b'\0',o,min(len(b),o+180));q=b[o:e] if e>o else b''
+            return q.decode('ascii','replace') if len(q)>=4 and all(0x20<=x<=0x7e for x in q) else None
+          def fmt(i):
+            s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}';x=lit(i)
+            if x:
+              s+=f' ; LIT {hex(x[0])}->{hex(x[1])}';st=astr(x[1])
+              if st:s+=f' STRING={st!r}'
+            t=call(i)
+            if t is not None:s+=f' ; CALL={hex(t)}'
+            return s
+          print('M10-R OUTPUTSPACE TRANSFER1G')
+          print('\n=== YC HELPER 0x420D456C RAW FUNCTION ===')
+          # Known next function family begins nearby; bounded 0x300 bytes.
+          for i in dis(0x420d456c,0x420d486c):print(fmt(i))
+
+          print('\n=== YC HELPER HARDWARE / STATE LITERALS ===')
+          for i in dis(0x420d456c,0x420d486c):
+            x=lit(i)
+            if x and (0x20000000<=x[1]<0x21000000 or 0x40000000<=x[1]<0x44000000):print(fmt(i))
+
+          print('\n=== CALLERS OF YC HELPER IN IMG B2Y SELECTOR AREA ===')
+          for a in range(0x42153000,0x42156000,2):
+            i=one(a)
+            if i and call(i)==0x420d456c:print(fmt(i))
+
+          print('\n=== CA9 START COLOR MANAGEMENT 0x420A3488..0x420A363A ===')
+          for i in dis(0x420a3488,0x420a363a):print(fmt(i))
+
+          print('\n=== REMAPPING OFFSET-LIKE ACCESS PATTERNS IN CA9 0x420A2C00..0x420A7000 ===')
+          # Catch direct offsets and the compiler's +0xff then +0x21/+0x29/+0x35 sequence.
+          ins=[one(a) for a in range(0x420a2c00,0x420a7000,2)];ins=[i for i in ins if i]
+          for k,i in enumerate(ins):
+            direct=any(x in i.op_str for x in ('#0x128','#0x12c','#0x130','#0x134'))
+            seq=False
+            if i.mnemonic in ('adds','add') and any(x in i.op_str for x in ('#0x21','#0x29','#0x35')):
+              seq=any(j.mnemonic in ('adds','add') and '#0xff' in j.op_str for j in ins[max(0,k-3):k])
+            if direct or seq:
+              print('\n-- pattern at',hex(i.address),'--')
+              for j in ins[max(0,k-5):min(len(ins),k+12)]:print(fmt(j))
+
+          print('\n=== START-CM DIRECT KNOWN PROGRAMMER CALLS ===')
+          known={0x420d15e8:'DG',0x420d25a4:'INTERP_GAMMA',0x420d3c1c:'TONE',0x420d1170:'DEKNEE',0x420d456c:'YC_HELPER'}
+          for i in dis(0x420a3488,0x420a363a):
+            t=call(i)
+            if t in known:print(hex(i.address),known[t],hex(t))
+
+          print('\n=== INTERPRETATION GATE ===')
+          print('Classify 0x420D456C as parameter/state/hardware programming from its literals and stores. Classify TF remapping only from observed consumption of config +0x128..+0x134; do not equate it with OETF by name.')
+          PY
+      - name: Commit report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_OUTPUTSPACE_TRANSFER1G.txt
+          git commit -m 'research: record TF consumer and YC helper trace 1G' || exit 0
+          git pull --rebase origin m10r-outputspace-transfer1a
+          git push
