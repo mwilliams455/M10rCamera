@@ -1,0 +1,675 @@
+M10-R OUTPUTSPACE TRANSFER1F
+
+=== TF CALL FULL SURROUND 0x420A57A0..0x420A591C ===
+420a57a0: movs       r0, r1
+420a57a2: str        r2, [sp, #0x14]
+420a57a4: str        r0, [sp, #0x10]
+420a57a6: ldr        r3, [sp, #0x14]
+420a57a8: ldr        r2, [sp, #0x10]
+420a57aa: ldr        r1, [sp, #0x1c]
+420a57ac: ldr        r0, [sp, #0x18]
+420a57ae: blx        #0x421e67a0 ; CALL=0x421e67a0
+420a57b2: str        r1, [sp, #0x24]
+420a57b4: str        r0, [sp, #0x20]
+420a57b6: blx        #0x421e65a4 ; CALL=0x421e65a4
+420a57ba: movs       r1, r0
+420a57bc: ldr        r0, [sp, #0x1b8]
+420a57be: adds       r0, #0x70
+420a57c0: str        r1, [r0, #0x18]
+420a57c2: ldr        r0, [sp, #0x1b8]
+420a57c4: adds       r0, #0x70
+420a57c6: ldr        r0, [r0, #0x24]
+420a57c8: str        r0, [sp, #0x14]
+420a57ca: blx        #0x421e6614 ; CALL=0x421e6614
+420a57ce: str        r1, [sp, #0x1c]
+420a57d0: str        r0, [sp, #0x18]
+420a57d2: ldr        r0, [sp, #0x1b8]
+420a57d4: adds       r0, #0xe0
+420a57d6: ldr        r3, [r0, #0x3c]
+420a57d8: ldr        r2, [r0, #0x38]
+420a57da: str        r3, [sp, #0x14]
+420a57dc: str        r2, [sp, #0x10]
+420a57de: ldr        r0, [sp, #0x18]
+420a57e0: blx        #0x421e67a0 ; CALL=0x421e67a0
+420a57e4: str        r1, [sp, #0x24]
+420a57e6: str        r0, [sp, #0x20]
+420a57e8: blx        #0x421e65a4 ; CALL=0x421e65a4
+420a57ec: movs       r2, r0
+420a57ee: ldr        r0, [sp, #0x1b8]
+420a57f0: adds       r0, #0x70
+420a57f2: str        r2, [r0, #0x1c]
+420a57f4: ldr        r0, [sp, #0x1b8]
+420a57f6: adds       r0, #0x70
+420a57f8: ldr        r0, [r0, #0x24]
+420a57fa: str        r0, [sp, #0x14]
+420a57fc: blx        #0x421e6614 ; CALL=0x421e6614
+420a5800: str        r1, [sp, #0x1c]
+420a5802: str        r0, [sp, #0x18]
+420a5804: ldr        r0, [sp, #0x1b8]
+420a5806: movs       r1, r0
+420a5808: adds       r1, #0xe0
+420a580a: ldr        r3, [r1, #0x44]
+420a580c: ldr        r2, [r1, #0x40]
+420a580e: str        r3, [sp, #0x14]
+420a5810: str        r2, [sp, #0x10]
+420a5812: ldr        r1, [sp, #0x1c]
+420a5814: ldr        r0, [sp, #0x18]
+420a5816: blx        #0x421e67a0 ; CALL=0x421e67a0
+420a581a: str        r1, [sp, #0x24]
+420a581c: str        r0, [sp, #0x20]
+420a581e: blx        #0x421e65a4 ; CALL=0x421e65a4
+420a5822: movs       r1, r0
+420a5824: ldr        r0, [sp, #0x1b8]
+420a5826: adds       r0, #0x70
+420a5828: str        r1, [r0, #0x20]
+420a582a: movs       r3, #0xff
+420a582c: adds       r3, #0x7f
+420a582e: ldr        r2, [pc, #0xdc] ; LIT 0x420a590c->0x421e9c91 STRING='ca9_cm_config_fill'
+420a5830: ldr        r1, [pc, #0xdc] ; LIT 0x420a5910->0x42837160 STRING='CA9: %s(), %d - default data loaded for: CM1, CM2 and default CC0'
+420a5832: movs       r0, #4
+420a5834: bl         #0x42140150 ; CALL=0x42140150
+420a5838: add        r0, sp, #0x28
+420a583a: bl         #0x420a4884 ; CALL=0x420a4884
+420a583e: str        r0, [sp, #0x1b4]
+420a5840: movs       r1, #0xf8
+420a5842: ldr        r0, [sp, #0x1b8]
+420a5844: adds       r0, #0xff
+420a5846: adds       r0, #0x35
+420a5848: blx        #0x4204f3bc ; CALL=0x4204f3bc
+420a584c: ldr        r0, [sp, #0x1b4]
+420a584e: cmp        r0, #0
+420a5850: bne        #0x420a5880
+420a5852: ldr        r0, [sp, #0x28]
+420a5854: cmp        r0, #0
+420a5856: beq        #0x420a585c
+420a5858: movs       r1, #1
+420a585a: b          #0x420a585e
+420a585c: movs       r1, #0
+420a585e: ldr        r0, [sp, #0x1b8]
+420a5860: adds       r0, #0xff
+420a5862: adds       r0, #0x21
+420a5864: strb       r1, [r0, #8]
+420a5866: ldr        r0, [sp, #0x1b8]
+420a5868: adds       r0, #0xff
+420a586a: adds       r0, #0x29
+420a586c: ldr        r1, [sp, #0x2c]
+420a586e: str        r1, [r0, #4]
+420a5870: movs       r2, #0xf8
+420a5872: add        r1, sp, #0x30
+420a5874: ldr        r0, [sp, #0x1b8]
+420a5876: adds       r0, #0xff
+420a5878: adds       r0, #0x35
+420a587a: blx        #0x4204f2ec ; CALL=0x4204f2ec
+420a587e: b          #0x420a58c8
+420a5880: movs       r1, #1
+420a5882: ldr        r0, [sp, #0x1b8]
+420a5884: adds       r0, #0xff
+420a5886: adds       r0, #0x21
+420a5888: strb       r1, [r0, #8]
+420a588a: movs       r1, #2
+420a588c: ldr        r0, [sp, #0x1b8]
+420a588e: adds       r0, #0xff
+420a5890: adds       r0, #0x29
+420a5892: str        r1, [r0, #4]
+420a5894: ldr        r0, [pc, #0x7c] ; LIT 0x420a5914->0x421e9ca4
+420a5896: ldm        r0!, {r1, r2}
+420a5898: str        r2, [sp, #0x24]
+420a589a: str        r1, [sp, #0x20]
+420a589c: ldr        r0, [sp, #0x1b8]
+420a589e: movs       r1, r0
+420a58a0: adds       r1, #0xff
+420a58a2: adds       r1, #0x29
+420a58a4: ldr        r2, [sp, #0x24]
+420a58a6: ldr        r0, [sp, #0x20]
+420a58a8: str        r2, [r1, #0x10]
+420a58aa: str        r0, [r1, #0xc]
+420a58ac: ldr        r0, [pc, #0x64] ; LIT 0x420a5914->0x421e9ca4
+420a58ae: adds       r0, #8
+420a58b0: ldm        r0!, {r1, r2}
+420a58b2: str        r2, [sp, #0x1c]
+420a58b4: str        r1, [sp, #0x18]
+420a58b6: ldr        r0, [sp, #0x1b8]
+420a58b8: movs       r1, r0
+420a58ba: adds       r1, #0xff
+420a58bc: adds       r1, #0x35
+420a58be: ldr        r2, [sp, #0x1c]
+420a58c0: ldr        r0, [sp, #0x18]
+420a58c2: str        r2, [r1, #0xc]
+420a58c4: str        r0, [r1, #8]
+420a58c6: mov        r8, r8
+420a58c8: ldr        r0, [sp, #0x1b8]
+420a58ca: adds       r0, #0xff
+420a58cc: adds       r0, #0x29
+420a58ce: ldr        r0, [r0, #4]
+420a58d0: str        r0, [sp, #4]
+420a58d2: blx        #0x421e6648 ; CALL=0x421e6648
+420a58d6: movs       r2, #0
+420a58d8: ldr        r3, [pc, #0x3c] ; LIT 0x420a5918->0x3ff00000
+420a58da: str        r1, [sp, #0xc]
+420a58dc: str        r0, [sp, #8]
+420a58de: blx        #0x421e6050 ; CALL=0x421e6050
+420a58e2: str        r1, [sp, #0x14]
+420a58e4: str        r0, [sp, #0x10]
+420a58e6: blx        #0x42172544 ; CALL=0x42172544
+420a58ea: str        r1, [sp, #0x1c]
+420a58ec: str        r0, [sp, #0x18]
+420a58ee: blx        #0x420a957c ; CALL=0x420a957c
+420a58f2: str        r1, [sp, #0x24]
+420a58f4: str        r0, [sp, #0x20]
+420a58f6: blx        #0x421e65a4 ; CALL=0x421e65a4
+420a58fa: movs       r2, r0
+420a58fc: ldr        r0, [sp, #0x1b8]
+420a58fe: adds       r0, #0xff
+420a5900: adds       r0, #0x29
+420a5902: str        r2, [r0, #8]
+420a5904: ldr        r0, [sp, #0x1b4]
+420a5906: add        sp, #0x1bc
+420a5908: pop        {pc}
+420a590a: movs       r0, r0
+420a590c: ldr        r4, [sp, #0x244]
+420a590e: tst        r6, r3
+420a5910: strb       r0, [r4, #5]
+420a5912: cmp        r3, r0
+420a5914: ldr        r4, [sp, #0x290]
+420a5916: tst        r6, r3
+420a5918: movs       r0, r0
+420a591a: subs       r7, #0xf0
+
+=== TF STACK LOCAL ACCESS SURFACE ===
+420a583e: str        r0, [sp, #0x1b4]
+420a5842: ldr        r0, [sp, #0x1b8]
+420a584c: ldr        r0, [sp, #0x1b4]
+420a5852: ldr        r0, [sp, #0x28]
+420a585e: ldr        r0, [sp, #0x1b8]
+420a5866: ldr        r0, [sp, #0x1b8]
+420a586c: ldr        r1, [sp, #0x2c]
+420a5874: ldr        r0, [sp, #0x1b8]
+420a5882: ldr        r0, [sp, #0x1b8]
+420a588c: ldr        r0, [sp, #0x1b8]
+420a5898: str        r2, [sp, #0x24]
+420a589a: str        r1, [sp, #0x20]
+420a589c: ldr        r0, [sp, #0x1b8]
+420a58a4: ldr        r2, [sp, #0x24]
+420a58a6: ldr        r0, [sp, #0x20]
+420a58b2: str        r2, [sp, #0x1c]
+420a58b4: str        r1, [sp, #0x18]
+420a58b6: ldr        r0, [sp, #0x1b8]
+420a58be: ldr        r2, [sp, #0x1c]
+420a58c0: ldr        r0, [sp, #0x18]
+420a58c8: ldr        r0, [sp, #0x1b8]
+420a58d0: str        r0, [sp, #4]
+420a58da: str        r1, [sp, #0xc]
+420a58dc: str        r0, [sp, #8]
+420a58e2: str        r1, [sp, #0x14]
+420a58e4: str        r0, [sp, #0x10]
+420a58ea: str        r1, [sp, #0x1c]
+420a58ec: str        r0, [sp, #0x18]
+420a58f2: str        r1, [sp, #0x24]
+420a58f4: str        r0, [sp, #0x20]
+420a58fc: ldr        r0, [sp, #0x1b8]
+420a5904: ldr        r0, [sp, #0x1b4]
+420a590c: ldr        r4, [sp, #0x244]
+420a5914: ldr        r4, [sp, #0x290]
+
+=== RAW THUMB DECODE YC SELECTOR 0x42154D80..0x42154F80 ===
+42154d80: movs       r0, #2
+42154d82: bl         #0x42140150 ; CALL=0x42140150
+42154d84: vld3.32    {d26[0], d27[0], d28[0]}, [r5], r1
+42154d86: add        r2, sp, #4
+42154d88: movs       r1, #4
+42154d8a: adr        r0, #0x48 ; ADR=0x42154dd4 STRING='B2Y.bin'
+42154d8c: bl         #0x421a0fc0 ; CALL=0x421a0fc0
+42154d8e: ldrsb.w    r0, [r8, r4]
+42154d90: movs       r4, r0
+42154d92: cmp        r4, #0
+42154d94: bne        #0x42154da4
+42154d96: movs       r6, #1
+42154d98: ldr        r1, [pc, #0x14] ; LIT 0x42154db0->0x408cedaa
+42154d9a: strb       r0, [r1]
+42154d9c: adr        r1, #0x3c ; ADR=0x42154ddc STRING='NO VALID STRING   img_b2y_select_wbcliplevel_paraset'
+42154d9e: movs       r0, #4
+42154da0: bl         #0x42140150 ; CALL=0x42140150
+42154da4: movs       r1, r6
+42154da6: movs       r0, r4
+42154da8: bl         #0x420d42dc ; CALL=0x420d42dc
+42154dac: add        sp, #0x44
+42154dae: pop        {r4, r5, r6, r7, pc}
+42154db0: stc        p0, c4, [sl, #0x230]!
+42154db2: lsls       r4, r1
+42154db4: movs       r0, r0
+42154db6: movs       r0, r0
+42154db8: rsbs       r7, r2, #0
+42154dba: ldr        r4, [pc, #0x10c] ; LIT 0x42154ec8->0xb091b5f0
+42154dbc: str        r1, [r1, r1]
+42154dbe: cmp        r4, sb
+42154dc0: cmp        r6, sl
+42154dc2: movs       r0, #0x4c
+42154dc4: movs       r0, #0x20
+42154dc6: movs       r0, #0x20
+42154dc8: strb       r3, [r2, #0x11]
+42154dca: ldr        r2, [r6, #0x14]
+42154dcc: str        r6, [r5, #0x74]
+42154dce: movs       r5, #0x3a
+42154dd0: lsls       r3, r6, #1
+42154dd2: movs       r0, r0
+42154dd4: adds       r2, #0x42
+42154dd6: cmp        r6, #0x59
+42154dd8: ldr        r2, [r4, #0x14]
+42154dda: lsls       r6, r5, #1
+42154ddc: ldr        r7, [pc, #0x138] ; LIT 0x42154f18->0xfb28f77f
+42154dde: ldrsb      r0, [r4, r0]
+42154de0: ldr        r4, [pc, #0x104] ; LIT 0x42154ee8->0x71084669
+42154de2: add        r1, sb
+42154de4: strh       r0, [r4, r4]
+42154de6: strh       r4, [r2, r1]
+42154de8: ldr        r6, [pc, #0x124] ; LIT 0x42154f10->0xf91ef7eb
+42154dea: movs       r0, #0x47
+42154dec: movs       r0, #0x20
+42154dee: ldr        r1, [r5, #0x54]
+42154df0: ldrsh      r7, [r4, r5]
+42154df2: adds       r2, #0x62
+42154df4: ldrsh      r1, [r7, r5]
+42154df6: str        r3, [r6, #0x54]
+42154df8: str        r4, [r5, #0x54]
+42154dfa: strb       r3, [r4, #0x11]
+42154dfc: strb       r7, [r3, #0x1d]
+42154dfe: str        r2, [r4, #0x34]
+42154e00: ldr        r4, [r5, #0x14]
+42154e02: ldr        r0, [r6, #0x44]
+42154e04: strb       r5, [r4, #0x19]
+42154e06: ldr        r5, [r4, #0x44]
+42154e08: strb       r7, [r3, #1]
+42154e0a: strb       r1, [r4, #9]
+42154e0c: strb       r1, [r4, #0xd]
+42154e0e: strb       r5, [r4, #0x11]
+42154e10: movs       r0, r0
+42154e12: movs       r0, r0
+42154e14: push       {r4, r5, r6, r7, lr}
+42154e16: sub        sp, #0x44
+42154e18: movs       r7, r0
+42154e1a: movs       r5, r1
+42154e1c: movs       r6, #0
+42154e1e: ldr        r0, [pc, #0x4c] ; LIT 0x42154e6c->0x408cedbf
+42154e20: ldrb       r0, [r0]
+42154e22: cmp        r0, #1
+42154e24: bne        #0x42154e2a
+42154e26: cmp        r5, #1
+42154e28: beq        #0x42154e68
+42154e2a: movs       r0, #1
+42154e2c: ldr        r1, [pc, #0x3c] ; LIT 0x42154e6c->0x408cedbf
+42154e2e: strb       r0, [r1]
+42154e30: adr        r0, #0x3c ; ADR=0x42154e70
+42154e32: ldrb       r0, [r0]
+42154e34: mov        r1, sp
+42154e36: strb       r0, [r1, #4]
+42154e38: add        r2, sp, #4
+42154e3a: adr        r1, #0x38 ; ADR=0x42154e74 STRING='Y BLEND     String:%s'
+42154e3c: movs       r0, #2
+42154e3e: bl         #0x42140150 ; CALL=0x42140150
+42154e40: vst3.32    {d10[0], d11[0], d12[0]}, [r7], r1
+42154e42: add        r2, sp, #4
+42154e44: movs       r1, #0xd
+42154e46: adr        r0, #0x44 ; ADR=0x42154e8c STRING='B2Y.bin'
+42154e48: bl         #0x421a0fc0 ; CALL=0x421a0fc0
+42154e4a: ldrh.w     r0, [sl, #4]
+42154e4c: movs       r4, r0
+42154e4e: cmp        r4, #0
+42154e50: bne        #0x42154e60
+42154e52: movs       r6, #1
+42154e54: ldr        r1, [pc, #0x14] ; LIT 0x42154e6c->0x408cedbf
+42154e56: strb       r0, [r1]
+42154e58: adr        r1, #0x38 ; ADR=0x42154e94 STRING='NO VALID STRING   img_b2y_select_y_blend_paraset'
+42154e5a: movs       r0, #4
+42154e5c: bl         #0x42140150 ; CALL=0x42140150
+42154e60: movs       r1, r6
+42154e62: movs       r0, r4
+42154e64: bl         #0x420d447c ; CALL=0x420d447c
+42154e66: mls        r0, sl, r1, fp
+42154e68: add        sp, #0x44
+42154e6a: pop        {r4, r5, r6, r7, pc}
+42154e6c: ldc        p0, c4, [pc, #0x230]!
+42154e6e: lsls       r4, r1
+42154e70: movs       r0, r0
+42154e72: movs       r0, r0
+42154e74: movs       r0, #0x59
+42154e76: ldr        r4, [pc, #0x108] ; LIT 0x42154f80->0x7465
+42154e78: ldr        r6, [pc, #0x114] ; LIT 0x42154f90->0xd1032801
+42154e7a: movs       r0, #0x44
+42154e7c: movs       r0, #0x20
+42154e7e: movs       r0, #0x20
+42154e80: strb       r3, [r2, #0x11]
+42154e82: ldr        r2, [r6, #0x14]
+42154e84: str        r6, [r5, #0x74]
+42154e86: movs       r5, #0x3a
+42154e88: lsls       r3, r6, #1
+42154e8a: movs       r0, r0
+42154e8c: adds       r2, #0x42
+42154e8e: cmp        r6, #0x59
+42154e90: ldr        r2, [r4, #0x14]
+42154e92: lsls       r6, r5, #1
+42154e94: ldr        r7, [pc, #0x138] ; LIT 0x42154fd0->0x29f9d7
+42154e96: ldrsb      r0, [r4, r0]
+42154e98: ldr        r4, [pc, #0x104] ; LIT 0x42154fa0->0x29eb9a
+42154e9a: add        r1, sb
+42154e9c: strh       r0, [r4, r4]
+42154e9e: strh       r4, [r2, r1]
+42154ea0: ldr        r6, [pc, #0x124] ; LIT 0x42154fc8->0x1e9b5b19
+42154ea2: movs       r0, #0x47
+42154ea4: movs       r0, #0x20
+42154ea6: ldr        r1, [r5, #0x54]
+42154ea8: ldrsh      r7, [r4, r5]
+42154eaa: adds       r2, #0x62
+42154eac: ldrsh      r1, [r7, r5]
+42154eae: str        r3, [r6, #0x54]
+42154eb0: str        r4, [r5, #0x54]
+42154eb2: strb       r3, [r4, #0x11]
+42154eb4: ldrb       r7, [r3, #5]
+42154eb6: str        r7, [r3, #0x24]
+42154eb8: str        r4, [r5, #0x54]
+42154eba: str        r6, [r5, #0x44]
+42154ebc: strb       r7, [r3, #1]
+42154ebe: strb       r1, [r4, #9]
+42154ec0: strb       r1, [r4, #0xd]
+42154ec2: strb       r5, [r4, #0x11]
+42154ec4: movs       r0, r0
+42154ec6: movs       r0, r0
+42154ec8: push       {r4, r5, r6, r7, lr}
+42154eca: sub        sp, #0x44
+42154ecc: movs       r7, r0
+42154ece: movs       r5, r1
+42154ed0: movs       r6, #0
+42154ed2: ldr        r0, [pc, #0x4c] ; LIT 0x42154f20->0x408cedbe
+42154ed4: ldrb       r0, [r0]
+42154ed6: cmp        r0, #1
+42154ed8: bne        #0x42154ede
+42154eda: cmp        r5, #1
+42154edc: beq        #0x42154f1c
+42154ede: movs       r0, #1
+42154ee0: ldr        r1, [pc, #0x3c] ; LIT 0x42154f20->0x408cedbe
+42154ee2: strb       r0, [r1]
+42154ee4: adr        r0, #0x3c ; ADR=0x42154f24
+42154ee6: ldrb       r0, [r0]
+42154ee8: mov        r1, sp
+42154eea: strb       r0, [r1, #4]
+42154eec: add        r2, sp, #4
+42154eee: adr        r1, #0x38 ; ADR=0x42154f28 STRING='YC CONVERSION     String:%s'
+42154ef0: movs       r0, #2
+42154ef2: bl         #0x42140150 ; CALL=0x42140150
+42154ef4: vld1.8     {d10, d11}, [sp], r1
+42154ef6: add        r2, sp, #4
+42154ef8: movs       r1, #0xc
+42154efa: adr        r0, #0x48 ; ADR=0x42154f44 STRING='B2Y.bin'
+42154efc: bl         #0x421a0fc0 ; CALL=0x421a0fc0
+42154f00: movs       r4, r0
+42154f02: cmp        r4, #0
+42154f04: bne        #0x42154f14
+42154f06: movs       r6, #1
+42154f08: ldr        r1, [pc, #0x14] ; LIT 0x42154f20->0x408cedbe
+42154f0a: strb       r0, [r1]
+42154f0c: adr        r1, #0x3c ; ADR=0x42154f4c STRING='NO VALID STRING   img_b2y_select_yc_conversion_paraset'
+42154f0e: movs       r0, #4
+42154f10: bl         #0x42140150 ; CALL=0x42140150
+42154f12: ldrsb.w    r0, [lr, r1, lsl #3]
+42154f14: movs       r1, r6
+42154f16: movs       r0, r4
+42154f18: bl         #0x420d456c ; CALL=0x420d456c
+42154f1a: smladx     r0, r8, r1, fp
+42154f1c: add        sp, #0x44
+42154f1e: pop        {r4, r5, r6, r7, pc}
+42154f20: ldc        p0, c4, [lr, #0x230]!
+42154f22: lsls       r4, r1
+42154f24: movs       r0, r0
+42154f26: movs       r0, r0
+42154f28: muls       r1, r3, r1
+42154f2a: orrs       r0, r4
+42154f2c: ldr        r6, [pc, #0x13c] ; LIT 0x4215506c->0x202100
+42154f2e: cmp        r6, sl
+42154f30: strh       r2, [r2, r5]
+42154f32: ldr        r7, [pc, #0x124] ; LIT 0x42155058->0x21dcfdad
+42154f34: movs       r0, #0x4e
+42154f36: movs       r0, #0x20
+42154f38: movs       r0, #0x20
+42154f3a: strb       r3, [r2, #0x11]
+42154f3c: ldr        r2, [r6, #0x14]
+42154f3e: str        r6, [r5, #0x74]
+42154f40: movs       r5, #0x3a
+42154f42: lsls       r3, r6, #1
+42154f44: adds       r2, #0x42
+42154f46: cmp        r6, #0x59
+42154f48: ldr        r2, [r4, #0x14]
+42154f4a: lsls       r6, r5, #1
+42154f4c: ldr        r7, [pc, #0x138] ; LIT 0x42155088->0x29ff1f
+42154f4e: ldrsb      r0, [r4, r0]
+42154f50: ldr        r4, [pc, #0x104] ; LIT 0x42155058->0x21dcfdad
+42154f52: add        r1, sb
+42154f54: strh       r0, [r4, r4]
+42154f56: strh       r4, [r2, r1]
+42154f58: ldr        r6, [pc, #0x124] ; LIT 0x42155080->0x200029
+42154f5a: movs       r0, #0x47
+42154f5c: movs       r0, #0x20
+42154f5e: ldr        r1, [r5, #0x54]
+42154f60: ldrsh      r7, [r4, r5]
+42154f62: adds       r2, #0x62
+42154f64: ldrsh      r1, [r7, r5]
+42154f66: str        r3, [r6, #0x54]
+42154f68: str        r4, [r5, #0x54]
+42154f6a: strb       r3, [r4, #0x11]
+42154f6c: ldrb       r7, [r3, #5]
+42154f6e: ldrsh      r3, [r4, r5]
+42154f70: ldr        r3, [r4, #0x74]
+42154f72: strb       r6, [r5, #0x19]
+42154f74: strb       r5, [r4, #9]
+42154f76: ldr        r3, [r6, #0x14]
+42154f78: ldr        r7, [r5, #0x64]
+42154f7a: strb       r7, [r3, #1]
+42154f7c: strb       r1, [r4, #9]
+42154f7e: strb       r1, [r4, #0xd]
+
+=== DIRECT LINEAR WINDOWS AROUND YC DIAGNOSTIC STRINGS ===
+-- 0x42154dc0 0x42154e90 --
+42154dc0: cmp        r6, sl
+42154dc2: movs       r0, #0x4c
+42154dc4: movs       r0, #0x20
+42154dc6: movs       r0, #0x20
+42154dc8: strb       r3, [r2, #0x11]
+42154dca: ldr        r2, [r6, #0x14]
+42154dcc: str        r6, [r5, #0x74]
+42154dce: movs       r5, #0x3a
+42154dd0: lsls       r3, r6, #1
+42154dd2: movs       r0, r0
+42154dd4: adds       r2, #0x42
+42154dd6: cmp        r6, #0x59
+42154dd8: ldr        r2, [r4, #0x14]
+42154dda: lsls       r6, r5, #1
+42154ddc: ldr        r7, [pc, #0x138] ; LIT 0x42154f18->0xfb28f77f
+42154dde: ldrsb      r0, [r4, r0]
+42154de0: ldr        r4, [pc, #0x104] ; LIT 0x42154ee8->0x71084669
+42154de2: add        r1, sb
+42154de4: strh       r0, [r4, r4]
+42154de6: strh       r4, [r2, r1]
+42154de8: ldr        r6, [pc, #0x124] ; LIT 0x42154f10->0xf91ef7eb
+42154dea: movs       r0, #0x47
+42154dec: movs       r0, #0x20
+42154dee: ldr        r1, [r5, #0x54]
+42154df0: ldrsh      r7, [r4, r5]
+42154df2: adds       r2, #0x62
+42154df4: ldrsh      r1, [r7, r5]
+42154df6: str        r3, [r6, #0x54]
+42154df8: str        r4, [r5, #0x54]
+42154dfa: strb       r3, [r4, #0x11]
+42154dfc: strb       r7, [r3, #0x1d]
+42154dfe: str        r2, [r4, #0x34]
+42154e00: ldr        r4, [r5, #0x14]
+42154e02: ldr        r0, [r6, #0x44]
+42154e04: strb       r5, [r4, #0x19]
+42154e06: ldr        r5, [r4, #0x44]
+42154e08: strb       r7, [r3, #1]
+42154e0a: strb       r1, [r4, #9]
+42154e0c: strb       r1, [r4, #0xd]
+42154e0e: strb       r5, [r4, #0x11]
+42154e10: movs       r0, r0
+42154e12: movs       r0, r0
+42154e14: push       {r4, r5, r6, r7, lr}
+42154e16: sub        sp, #0x44
+42154e18: movs       r7, r0
+42154e1a: movs       r5, r1
+42154e1c: movs       r6, #0
+42154e1e: ldr        r0, [pc, #0x4c] ; LIT 0x42154e6c->0x408cedbf
+42154e20: ldrb       r0, [r0]
+42154e22: cmp        r0, #1
+42154e24: bne        #0x42154e2a
+42154e26: cmp        r5, #1
+42154e28: beq        #0x42154e68
+42154e2a: movs       r0, #1
+42154e2c: ldr        r1, [pc, #0x3c] ; LIT 0x42154e6c->0x408cedbf
+42154e2e: strb       r0, [r1]
+42154e30: adr        r0, #0x3c ; ADR=0x42154e70
+42154e32: ldrb       r0, [r0]
+42154e34: mov        r1, sp
+42154e36: strb       r0, [r1, #4]
+42154e38: add        r2, sp, #4
+42154e3a: adr        r1, #0x38 ; ADR=0x42154e74 STRING='Y BLEND     String:%s'
+42154e3c: movs       r0, #2
+42154e3e: bl         #0x42140150 ; CALL=0x42140150
+42154e42: add        r2, sp, #4
+42154e44: movs       r1, #0xd
+42154e46: adr        r0, #0x44 ; ADR=0x42154e8c STRING='B2Y.bin'
+42154e48: bl         #0x421a0fc0 ; CALL=0x421a0fc0
+42154e4c: movs       r4, r0
+42154e4e: cmp        r4, #0
+42154e50: bne        #0x42154e60
+42154e52: movs       r6, #1
+42154e54: ldr        r1, [pc, #0x14] ; LIT 0x42154e6c->0x408cedbf
+42154e56: strb       r0, [r1]
+42154e58: adr        r1, #0x38 ; ADR=0x42154e94 STRING='NO VALID STRING   img_b2y_select_y_blend_paraset'
+42154e5a: movs       r0, #4
+42154e5c: bl         #0x42140150 ; CALL=0x42140150
+42154e60: movs       r1, r6
+42154e62: movs       r0, r4
+42154e64: bl         #0x420d447c ; CALL=0x420d447c
+42154e68: add        sp, #0x44
+42154e6a: pop        {r4, r5, r6, r7, pc}
+42154e6c: ldc        p0, c4, [pc, #0x230]!
+42154e70: movs       r0, r0
+42154e72: movs       r0, r0
+42154e74: movs       r0, #0x59
+42154e76: ldr        r4, [pc, #0x108] ; LIT 0x42154f80->0x7465
+42154e78: ldr        r6, [pc, #0x114] ; LIT 0x42154f90->0xd1032801
+42154e7a: movs       r0, #0x44
+42154e7c: movs       r0, #0x20
+42154e7e: movs       r0, #0x20
+42154e80: strb       r3, [r2, #0x11]
+42154e82: ldr        r2, [r6, #0x14]
+42154e84: str        r6, [r5, #0x74]
+42154e86: movs       r5, #0x3a
+42154e88: lsls       r3, r6, #1
+42154e8a: movs       r0, r0
+42154e8c: adds       r2, #0x42
+42154e8e: cmp        r6, #0x59
+-- 0x42154e90 0x42154f28 --
+42154e90: ldr        r2, [r4, #0x14]
+42154e92: lsls       r6, r5, #1
+42154e94: ldr        r7, [pc, #0x138] ; LIT 0x42154fd0->0x29f9d7
+42154e96: ldrsb      r0, [r4, r0]
+42154e98: ldr        r4, [pc, #0x104] ; LIT 0x42154fa0->0x29eb9a
+42154e9a: add        r1, sb
+42154e9c: strh       r0, [r4, r4]
+42154e9e: strh       r4, [r2, r1]
+42154ea0: ldr        r6, [pc, #0x124] ; LIT 0x42154fc8->0x1e9b5b19
+42154ea2: movs       r0, #0x47
+42154ea4: movs       r0, #0x20
+42154ea6: ldr        r1, [r5, #0x54]
+42154ea8: ldrsh      r7, [r4, r5]
+42154eaa: adds       r2, #0x62
+42154eac: ldrsh      r1, [r7, r5]
+42154eae: str        r3, [r6, #0x54]
+42154eb0: str        r4, [r5, #0x54]
+42154eb2: strb       r3, [r4, #0x11]
+42154eb4: ldrb       r7, [r3, #5]
+42154eb6: str        r7, [r3, #0x24]
+42154eb8: str        r4, [r5, #0x54]
+42154eba: str        r6, [r5, #0x44]
+42154ebc: strb       r7, [r3, #1]
+42154ebe: strb       r1, [r4, #9]
+42154ec0: strb       r1, [r4, #0xd]
+42154ec2: strb       r5, [r4, #0x11]
+42154ec4: movs       r0, r0
+42154ec6: movs       r0, r0
+42154ec8: push       {r4, r5, r6, r7, lr}
+42154eca: sub        sp, #0x44
+42154ecc: movs       r7, r0
+42154ece: movs       r5, r1
+42154ed0: movs       r6, #0
+42154ed2: ldr        r0, [pc, #0x4c] ; LIT 0x42154f20->0x408cedbe
+42154ed4: ldrb       r0, [r0]
+42154ed6: cmp        r0, #1
+42154ed8: bne        #0x42154ede
+42154eda: cmp        r5, #1
+42154edc: beq        #0x42154f1c
+42154ede: movs       r0, #1
+42154ee0: ldr        r1, [pc, #0x3c] ; LIT 0x42154f20->0x408cedbe
+42154ee2: strb       r0, [r1]
+42154ee4: adr        r0, #0x3c ; ADR=0x42154f24
+42154ee6: ldrb       r0, [r0]
+42154ee8: mov        r1, sp
+42154eea: strb       r0, [r1, #4]
+42154eec: add        r2, sp, #4
+42154eee: adr        r1, #0x38 ; ADR=0x42154f28 STRING='YC CONVERSION     String:%s'
+42154ef0: movs       r0, #2
+42154ef2: bl         #0x42140150 ; CALL=0x42140150
+42154ef6: add        r2, sp, #4
+42154ef8: movs       r1, #0xc
+42154efa: adr        r0, #0x48 ; ADR=0x42154f44 STRING='B2Y.bin'
+42154efc: bl         #0x421a0fc0 ; CALL=0x421a0fc0
+42154f00: movs       r4, r0
+42154f02: cmp        r4, #0
+42154f04: bne        #0x42154f14
+42154f06: movs       r6, #1
+42154f08: ldr        r1, [pc, #0x14] ; LIT 0x42154f20->0x408cedbe
+42154f0a: strb       r0, [r1]
+42154f0c: adr        r1, #0x3c ; ADR=0x42154f4c STRING='NO VALID STRING   img_b2y_select_yc_conversion_paraset'
+42154f0e: movs       r0, #4
+42154f10: bl         #0x42140150 ; CALL=0x42140150
+42154f14: movs       r1, r6
+42154f16: movs       r0, r4
+42154f18: bl         #0x420d456c ; CALL=0x420d456c
+42154f1c: add        sp, #0x44
+42154f1e: pop        {r4, r5, r6, r7, pc}
+42154f20: ldc        p0, c4, [lr, #0x230]!
+42154f24: movs       r0, r0
+42154f26: movs       r0, r0
+
+=== EXACT YC STRING XREFS ADR+LITERAL ===
+42154eee: adr        r1, #0x38 ; ADR=0x42154f28 STRING='YC CONVERSION     String:%s'
+42154f0c: adr        r1, #0x3c ; ADR=0x42154f4c STRING='NO VALID STRING   img_b2y_select_yc_conversion_paraset'
+xrefs 0x42154eee,0x42154f0c
+
+=== YC OWNER FILTERED TRACE ===
+OWNER 0x42154ec8
+42154ed2: ldr        r0, [pc, #0x4c] ; LIT 0x42154f20->0x408cedbe
+42154ed4: ldrb       r0, [r0]
+42154ed6: cmp        r0, #1
+42154ed8: bne        #0x42154ede
+42154eda: cmp        r5, #1
+42154edc: beq        #0x42154f1c
+42154ee0: ldr        r1, [pc, #0x3c] ; LIT 0x42154f20->0x408cedbe
+42154ee2: strb       r0, [r1]
+42154ee6: ldrb       r0, [r0]
+42154eea: strb       r0, [r1, #4]
+42154ef2: bl         #0x42140150 ; CALL=0x42140150
+42154efc: bl         #0x421a0fc0 ; CALL=0x421a0fc0
+42154f02: cmp        r4, #0
+42154f04: bne        #0x42154f14
+42154f08: ldr        r1, [pc, #0x14] ; LIT 0x42154f20->0x408cedbe
+42154f0a: strb       r0, [r1]
+42154f10: bl         #0x42140150 ; CALL=0x42140150
+42154f18: bl         #0x420d456c ; CALL=0x420d456c
+
+=== YC OWNER COLORSPACE DEPENDENCY TEST ===
+0x42154ec8 ['42154eca: sub        sp, #0x44', '42154f1c: add        sp, #0x44']
+
+=== KNOWN B2Y PROGRAMMER CALLS FROM YC OWNER ===
+0x42154ec8 NONE
+
+=== GATE ===
+Use TF post-call copies to identify the remapping destination. Treat YC selector as parameter selection unless its owner writes hardware or calls B2Y programming. No renderer changes from selector strings alone.
