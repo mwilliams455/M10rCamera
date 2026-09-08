@@ -14,7 +14,8 @@ The mathematical inverse is approximately Q12:
 
 This tool searches exact/near binary fingerprints and related strings. A near
 match is reported as evidence only; it is not promoted to a firmware symbol or
-pixel-flow claim without code/xref support.
+pixel-flow claim without code/xref support. The post-install trigger commit is
+intentional so GitHub evaluates this workflow after it exists on the branch.
 """
 from __future__ import annotations
 import csv, re, struct, sys
@@ -39,7 +40,6 @@ def strings(data: bytes, minlen=5):
 
 def near_inverse_windows(data: bytes):
     hits=[]
-    # Align to 4 bytes; recovered calibration matrices are int32 little-endian.
     for off in range(0,len(data)-36+1,4):
         v=struct.unpack_from('<9i',data,off)
         if not all(abs(v[k]-4096)<=64 for k in (0,3,6)): continue
@@ -58,7 +58,6 @@ def main():
     for r in rows:
         p=root/r['file']
         if p.exists(): files.append((r['name'],p))
-    # Include extractor-created auxiliary calibration blobs not present in sections.csv.
     seen={p.resolve() for _,p in files}
     for p in root.glob('*'):
         if p.is_file() and p.name!='sections.csv' and p.resolve() not in seen:
