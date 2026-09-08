@@ -105,16 +105,16 @@ jobs:
           ! grep -F 'int xr = M10RToneDg1A.toInput(lr' "$R"
           ! grep -F 'int xg = M10RToneDg1A.toInput(lg' "$R"
           ! grep -F 'int xb = M10RToneDg1A.toInput(lb' "$R"
-          cat > "$GITHUB_WORKSPACE/M10R_RENDER1A_PROVENANCE.txt" <<'EOF'
-M10R_RENDER1A
-Base: m10r-capture1b
-Mode: single-frame, HDR disabled
-Colour fixes: RGBORDER1A + SOURCECM1A
-Tone assets: firmware-extracted MEDIUM + Differential Gamma
-Nonlinear application: chroma-preserving luma gain
-Current order: MEDIUM_THEN_DIFFERENTIAL_GAMMA (PROVISIONAL pending ARM-state firmware trace)
-Purpose: first installable photographic validation build; remaining firmware work is targeted from image discrepancies.
-EOF
+          printf '%s\n' \
+            'M10R_RENDER1A' \
+            'Base: m10r-capture1b' \
+            'Mode: single-frame, HDR disabled' \
+            'Colour fixes: RGBORDER1A + SOURCECM1A' \
+            'Tone assets: firmware-extracted MEDIUM + Differential Gamma' \
+            'Nonlinear application: chroma-preserving luma gain' \
+            'Current order: MEDIUM_THEN_DIFFERENTIAL_GAMMA (PROVISIONAL pending ARM-state firmware trace)' \
+            'Purpose: first installable photographic validation build; remaining firmware work is targeted from image discrepancies.' \
+            > "$GITHUB_WORKSPACE/M10R_RENDER1A_PROVENANCE.txt"
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
