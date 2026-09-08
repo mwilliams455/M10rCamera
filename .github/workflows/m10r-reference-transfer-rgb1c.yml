@@ -1,0 +1,148 @@
+name: M10-R encoded luma headroom scale audit RGB1C
+on:
+  push:
+    branches: [m10r-reference-transfer-rgb1c]
+    paths:
+      - '.github/workflows/m10r-reference-transfer-rgb1c.yml'
+      - 'app/src/main/java/com/m10r/diagnostic/M10RTransferRgb1CRenderer.java'
+      - 'tools/M10RTransferRgb1CCli.java'
+      - 'tools/m10r_reference_transfer_rgb1c_fit.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install analysis dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl >/dev/null
+          python3 -m pip install --quiet rawpy pillow numpy
+      - name: Extract and verify exact M10-R nonlinear assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          rm -rf /tmp/m10r_b2y_assets
+          python3 tools/m10r_b2y_assets.py /tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin /tmp/m10r_b2y_assets >/dev/null
+          echo '2fd6ca209f290c75aa96976b3d7692e55c41a55c0017a063aba9808da3b41a00  /tmp/m10r_b2y_assets/tone_medium_q15.u32le' | sha256sum -c -
+          echo '9e65de24d52271be0783f4e2728f20f482c0ba43b63159b75033b4a4fc75457d  /tmp/m10r_b2y_assets/dg_expanded_u16le.bin' | sha256sum -c -
+      - name: Compile RGB1C renderer
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/m10r_reference_transfer_rgb1c_fit.py tools/m10r_reference_transfer_rgb_fit.py tools/m10r_reference_order_fit.py
+          mkdir -p /tmp/m10r_rgb1c_classes
+          javac -d /tmp/m10r_rgb1c_classes \
+            app/src/main/java/com/m10r/diagnostic/DngMetadataReader.java \
+            app/src/main/java/com/m10r/diagnostic/DngRawDecoder.java \
+            app/src/main/java/com/m10r/diagnostic/LosslessJpegDecoder.java \
+            app/src/main/java/com/m10r/diagnostic/SensorPreviewCore.java \
+            app/src/main/java/com/m10r/diagnostic/M10RColorSpecCore.java \
+            app/src/main/java/com/m10r/diagnostic/M10RReferenceColorCore.java \
+            app/src/main/java/com/m10r/diagnostic/M10RNeutralClipReferenceRenderer.java \
+            app/src/main/java/com/m10r/diagnostic/M10RTransferRgb1CRenderer.java \
+            tools/M10RTransferRgb1CCli.java
+      - name: Render and score six same-capture pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/m10r_rgb1c
+          for id in 01 02 03 04 05 06; do
+            base="https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_${id}"
+            curl -L --fail --retry 3 --retry-delay 2 "$base.jpg" -o "/tmp/m10r_rgb1c/${id}.jpg"
+            curl -L --fail --retry 3 --retry-delay 2 "$base.dng" -o "/tmp/m10r_rgb1c/${id}.dng"
+            exiftool -j -n -Make -Model -SerialNumber -ImageUniqueID -DateTimeOriginal -CreateDate -ExposureTime -FNumber -ISO -FocalLength -ExposureCompensation -WhiteBalance -Contrast -Saturation -Sharpness \
+              "/tmp/m10r_rgb1c/${id}.jpg" "/tmp/m10r_rgb1c/${id}.dng" > "/tmp/m10r_rgb1c/${id}_exif.json"
+            java -cp /tmp/m10r_rgb1c_classes com.m10r.diagnostic.M10RTransferRgb1CCli \
+              "/tmp/m10r_rgb1c/${id}.dng" /tmp/m10r_b2y_assets/tone_medium_q15.u32le /tmp/m10r_b2y_assets/dg_expanded_u16le.bin \
+              "/tmp/m10r_rgb1c/${id}_ll_on.ppm" "/tmp/m10r_rgb1c/${id}_ll_id.ppm" \
+              "/tmp/m10r_rgb1c/${id}_b100.ppm" "/tmp/m10r_rgb1c/${id}_b094.ppm" \
+              "/tmp/m10r_rgb1c/${id}_x100.ppm" "/tmp/m10r_rgb1c/${id}_x094.ppm" 2000 | tee "/tmp/m10r_rgb1c/${id}_render.txt"
+            python3 tools/m10r_reference_transfer_rgb1c_fit.py --jpg "/tmp/m10r_rgb1c/${id}.jpg" --dng "/tmp/m10r_rgb1c/${id}.dng" \
+              --ll-oetf "/tmp/m10r_rgb1c/${id}_ll_on.ppm" --ll-identity "/tmp/m10r_rgb1c/${id}_ll_id.ppm" \
+              --el-bounded-s100 "/tmp/m10r_rgb1c/${id}_b100.ppm" --el-bounded-s094 "/tmp/m10r_rgb1c/${id}_b094.ppm" \
+              --el-extended-s100 "/tmp/m10r_rgb1c/${id}_x100.ppm" --el-extended-s094 "/tmp/m10r_rgb1c/${id}_x094.ppm" \
+              --sample "$id" --metadata-json "/tmp/m10r_rgb1c/${id}_exif.json" --out "/tmp/m10r_rgb1c/${id}_metrics.json" >/dev/null
+            rm -f "/tmp/m10r_rgb1c/${id}.jpg" "/tmp/m10r_rgb1c/${id}.dng" /tmp/m10r_rgb1c/${id}_*.ppm
+          done
+      - name: Aggregate RGB1C targeted gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,statistics
+          from pathlib import Path
+          modes=['ll_oetf','ll_identity','el_bounded_s100','el_bounded_s094','el_extended_s100','el_extended_s094']
+          variants=['el_bounded_s094','el_extended_s100','el_extended_s094'];base='el_bounded_s100'
+          rows=[json.loads(p.read_text()) for p in sorted(Path('/tmp/m10r_rgb1c').glob('*_metrics.json'))]
+          valid=[r for r in rows if r['metadata'].get('identity_supported') is True and r['metadata'].get('default_jpeg_controls') is True]
+          keys=['encoded_rgb_rmse','luma_rmse','delta_e76_mean','hue_error_deg_mean','saturation_error_abs_mean']
+          def med(m,k):return statistics.median(r['metrics'][m][k] for r in valid)
+          def hi(m):return statistics.median(r['metrics'][m]['bins']['highlight']['rgb_rmse'] for r in valid)
+          def clips(m):return sum(sum(r['metrics'][m]['highlight_channel_clipping'][c]['candidate_255_reference_below_250'] for c in 'RGB') for r in valid)
+          agg={'total':len(rows),'valid':len(valid),'medians':{},'highlight_rgb_rmse':{},'false_highlight_clips':{},'variant_gate':{}}
+          for m in modes:
+              agg['medians'][m]={k:med(m,k) for k in keys};agg['highlight_rgb_rmse'][m]=hi(m);agg['false_highlight_clips'][m]=clips(m)
+          b=agg['medians'][base];bhi=agg['highlight_rgb_rmse'][base];bclips=agg['false_highlight_clips'][base]
+          cleared=[]
+          for m in variants:
+              q=agg['medians'][m];rat={k:q[k]/b[k] for k in ('encoded_rgb_rmse','luma_rmse','delta_e76_mean')}
+              core_not_worse=all(v<=1.02 for v in rat.values());core_improve=sum(v<0.995 for v in rat.values())>=2
+              hi_improve=agg['highlight_rgb_rmse'][m] <= bhi*0.90
+              hue_ok=q['hue_error_deg_mean'] <= b['hue_error_deg_mean']*1.05+0.5
+              sat_ok=q['saturation_error_abs_mean'] <= b['saturation_error_abs_mean']*1.05+0.005
+              clips_ok=agg['false_highlight_clips'][m] <= bclips*1.05
+              passed=core_not_worse and core_improve and hi_improve and hue_ok and sat_ok and clips_ok
+              agg['variant_gate'][m]={'core_ratios_vs_base':rat,'core_not_worse_2pct':core_not_worse,'core_improves_two':core_improve,
+                  'highlight_improves_10pct':hi_improve,'hue_guard':hue_ok,'saturation_guard':sat_ok,'clip_guard':clips_ok,'passed':passed}
+              if passed:cleared.append(m)
+          verdict='RGB1C_NO_BRIGHT_END_VARIANT_CLEARS_GATE'
+          if cleared:
+              cleared.sort(key=lambda m:sum(agg['variant_gate'][m]['core_ratios_vs_base'].values())/3)
+              verdict='RGB1C_FAVORS_'+cleared[0].upper()
+          agg['verdict']=verdict;agg['workflow_run_id']=os.environ.get('GITHUB_RUN_ID');agg['analysis_input_commit']=os.environ.get('GITHUB_SHA')
+          out=['M10-R REFERENCE TRANSFER RGB1C — ENCODED-LUMA HEADROOM / SCALE','',
+               'Frozen winner entering test: EL_OETF = encoded luma -> MEDIUM/DG -> shared gain on linear RGB -> sRGB OETF.',
+               'Factorial: bounded vs extended pre-output-clamp encoded luma; coordinate scale 1.00 vs pre-declared 0.94; scale is applied before the 14-bit clamp.',
+               'Scale 0.94 is not fitted here; it is the nearest-rounding median identity scale from the earlier six-pair scalar transfer evidence.',
+               'Fit freedom: NONE. Live m10r-capture1b remains untouched.','', '=== Aggregate ===']
+          for m in modes:out.append(f"{m}: medians={agg['medians'][m]} highlightRGB={agg['highlight_rgb_rmse'][m]} falseClips={agg['false_highlight_clips'][m]}")
+          out+=['','=== Targeted gate versus EL bounded scale1.00 ===']
+          for m in variants:out.append(f"{m}: {agg['variant_gate'][m]}")
+          out+=['','VERDICT '+verdict,'',
+                'Interpretation boundary: this tests only encoded-luma per-channel clamp ownership and a pre-declared coordinate scale. It does not solve the literal B2Y signal mux.',
+                f"Workflow run id: {agg['workflow_run_id']}",f"Analysis input commit: {agg['analysis_input_commit']}"]
+          Path('research/M10R_REFERENCE_TRANSFER_RGB1C.md').write_text('\n'.join(out)+'\n')
+          Path('research/M10R_REFERENCE_TRANSFER_RGB1C.json').write_text(json.dumps({'samples':rows,'aggregate':agg},indent=2,sort_keys=True)+'\n')
+          print('\n'.join(out))
+          PY
+      - name: Upload RGB1C evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: M10R-REFERENCE-TRANSFER-RGB1C
+          path: |
+            /tmp/m10r_rgb1c/*_metrics.json
+            /tmp/m10r_rgb1c/*_render.txt
+            research/M10R_REFERENCE_TRANSFER_RGB1C.md
+            research/M10R_REFERENCE_TRANSFER_RGB1C.json
+          if-no-files-found: warn
+      - name: Commit RGB1C evidence
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_REFERENCE_TRANSFER_RGB1C.md research/M10R_REFERENCE_TRANSFER_RGB1C.json
+          git commit -m 'research: record encoded luma headroom scale audit RGB1C' || exit 0
+          git pull --rebase origin m10r-reference-transfer-rgb1c;git push
