@@ -1,0 +1,152 @@
+name: M10-R RENDER1B LOOK1B YC1B APK
+
+on:
+  push:
+    branches:
+      - m10r-render1a
+    paths:
+      - '.github/workflows/m10r-render1b-look1b-yc1b-apk.yml'
+      - 'patches/fix-m10r-render1b-look1b-yc1b.py'
+  workflow_dispatch:
+
+jobs:
+  build-render1b-look1b-yc1b:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout M10-R repo
+        uses: actions/checkout@v4
+
+      - name: Verify patch syntax
+        run: |
+          set -euo pipefail
+          python3 -m py_compile patches/apply-m10r-capture1-foundation.py
+          python3 -m py_compile patches/apply-m10r-capture1b-renderer.py
+          python3 -m py_compile patches/fix-m10r-capture1b-compile1.py
+          python3 -m py_compile patches/fix-m10r-capture1b-opencv1.py
+          python3 -m py_compile patches/fix-m10r-capture1b-compile2.py
+          python3 -m py_compile patches/fix-m10r-capture1b-device1.py
+          python3 -m py_compile patches/fix-m10r-capture1b-jpegsave1.py
+          python3 -m py_compile patches/fix-m10r-capture1b-rgborder1a.py
+          python3 -m py_compile patches/fix-m10r-capture1b-sourcecm1a.py
+          python3 -m py_compile patches/fix-m10r-capture1b-tonedg1a.py
+          python3 -m py_compile patches/fix-m10r-capture1b-tonedg1b.py
+          python3 -m py_compile patches/fix-m10r-render1a-stability1.py
+          python3 -m py_compile patches/fix-m10r-render1a-stability2.py
+          python3 -m py_compile patches/fix-m10r-render1a-stability3-native1.py
+          python3 -m py_compile patches/fix-m10r-render1b-look1a-yc1a.py
+          python3 -m py_compile patches/fix-m10r-render1b-look1b-yc1b.py
+          python3 -m py_compile patches/verify-m10r-capture1b.py
+          python3 -m py_compile tools/m10r_sections.py
+          python3 -m py_compile tools/m10r_b2y_assets.py
+
+      - name: Clone exact Photon baseline
+        run: |
+          set -euo pipefail
+          PHOTON_SHA=f0e6425d2509fb8ab834d5d3af593183038b778c
+          git clone --depth 1 --branch dev https://github.com/eszdman/PhotonCamera.git PhotonCamera
+          git -C PhotonCamera fetch --depth 1 origin "$PHOTON_SHA"
+          git -C PhotonCamera checkout --detach FETCH_HEAD
+          test "$(git -C PhotonCamera rev-parse HEAD)" = "$PHOTON_SHA"
+          git -C PhotonCamera rev-parse HEAD | tee PHOTON_UPSTREAM_COMMIT.txt
+
+      - name: Extract exact M10-R MEDIUM and Differential Gamma assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          rm -rf /tmp/m10r_b2y_assets
+          python3 tools/m10r_b2y_assets.py /tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin /tmp/m10r_b2y_assets >/tmp/m10r_b2y_manifest.stdout.json
+          echo '2fd6ca209f290c75aa96976b3d7692e55c41a55c0017a063aba9808da3b41a00  /tmp/m10r_b2y_assets/tone_medium_q15.u32le' | sha256sum -c -
+          echo '9e65de24d52271be0783f4e2728f20f482c0ba43b63159b75033b4a4fc75457d  /tmp/m10r_b2y_assets/dg_expanded_u16le.bin' | sha256sum -c -
+
+      - name: Apply capture, colour, tone and LOOK1B
+        run: |
+          set -euo pipefail
+          python3 "$GITHUB_WORKSPACE/patches/apply-m10r-capture1-foundation.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/apply-m10r-capture1b-renderer.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-compile1.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-opencv1.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-compile2.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-device1.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-jpegsave1.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-rgborder1a.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/verify-m10r-capture1b.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-sourcecm1a.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-tonedg1a.py" "$GITHUB_WORKSPACE/PhotonCamera" /tmp/m10r_b2y_assets
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-capture1b-tonedg1b.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-render1a-stability1.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-render1a-stability2.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-render1a-stability3-native1.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-render1b-look1a-yc1a.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          python3 "$GITHUB_WORKSPACE/patches/fix-m10r-render1b-look1b-yc1b.py" "$GITHUB_WORKSPACE/PhotonCamera"
+          R="$GITHUB_WORKSPACE/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java"
+          N="$GITHUB_WORKSPACE/PhotonCamera/app/src/main/cpp/m10rRender.cpp"
+          grep -F "versionName '0.97-m10rcapture1b-rgborder1a-sourcecm1a-tonedg1b-stability3-native1-look1b-yc1b'" "$GITHUB_WORKSPACE/PhotonCamera/app/build.gradle"
+          grep -F 'lookExperiment", "LOOK1B_YC1B"' "$R"
+          grep -F 'preserve_Cb_over_Y_and_Cr_over_Y_through_MEDIUM_DG_then_exact_matrix_inverse' "$R"
+          grep -F 'const double mappedCb = cb * yRatio;' "$N"
+          grep -F 'const double mappedCr = cr * yRatio;' "$N"
+          grep -F 'hdrEnabled", false' "$R"
+          grep -F 'sourceFrameCount", 1' "$R"
+          printf '%s\n' \
+            'M10R_RENDER1B_LOOK1B_YC1B' \
+            'Base: LOOK1A YC1A + NATIVE1' \
+            'Exact firmware Yc_Convert supplies tone Y' \
+            'MEDIUM then Differential Gamma maps Y' \
+            'Cb/Y and Cr/Y ratios preserved through tone mapping' \
+            'No arbitrary saturation multiplier' \
+            'Y_BLEND/local YC conditioning remain unresolved' \
+            'Single-frame, HDR disabled; source colour/exposure/JPEG/speed topology frozen' \
+            > "$GITHUB_WORKSPACE/M10R_RENDER1B_LOOK1B_YC1B_PROVENANCE.txt"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android build components
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-36" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.0.12077973"
+
+      - name: Build RENDER1B LOOK1B YC1B debug APK
+        run: |
+          set -o pipefail
+          cd PhotonCamera
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_RENDER1B_LOOK1B_YC1B_GRADLE.log"
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: M10R-RENDER1B-LOOK1B-YC1B-buildlog
+          path: M10R_RENDER1B_LOOK1B_YC1B_GRADLE.log
+          if-no-files-found: ignore
+
+      - name: Upload APK and provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: M10RCam-RENDER1B-LOOK1B-YC1B-debug-apk
+          path: |
+            PhotonCamera/app/build/outputs/apk/debug/*.apk
+            PHOTON_UPSTREAM_COMMIT.txt
+            M10R_RENDER1B_LOOK1B_YC1B_PROVENANCE.txt
+            /tmp/m10r_b2y_assets/manifest.json
+          if-no-files-found: error
