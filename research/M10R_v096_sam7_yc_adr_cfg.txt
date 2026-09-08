@@ -1,0 +1,427 @@
+V096_DIAG=0x4f6d8..0x4f705|name=Im_B2Y_Ctrl_RGB_OutClip|ascii=I:Im_B2Y_Ctrl_RGB_OutClip error. jyw_no > MAX
+V096_DIAG=0x4f708..0x4f745|name=Im_B2Y_Ctrl_RGB_OutClip|ascii=I:Im_B2Y_Ctrl_RGB_OutClip error. b2y_ctrl_rgb_out_clip = NULL
+V096_DIAG=0x4f74b..0x4f77c|name=Im_B2Y_Ctrl_JpegXR_OutClip|ascii= I:Im_B2Y_Ctrl_JpegXR_OutClip error. jyw_no > MAX
+V096_DIAG=0x4f783..0x4f7b9|name=Im_B2Y_Ctrl_YC_OutOffsetAndGain|ascii=CI:Im_B2Y_Ctrl_YC_OutOffsetAndGain error. jyw_no > MAX
+V096_DIAG=0x4fb8b..0x4fbb8|name=Im_B2Y_Ctrl_YC_OutClip|ascii=CI:Im_B2Y_Ctrl_YC_OutClip error. jyw_no > MAX
+V096_DIAG=0x4fbbc..0x4fbf7|name=Im_B2Y_Ctrl_YC_OutClip|ascii=I:Im_B2Y_Ctrl_YC_OutClip error. b2y_ctrl_yc_out_clip = NULL
+V096_DIAG=0x4fbff..0x4fc30|name=Im_B2Y_Ctrl_YCtoRGB_Matrix|ascii= I:Im_B2Y_Ctrl_YCtoRGB_Matrix error. jyw_no > MAX
+V096_NAMED_DIAG_COUNT=7
+V096_ADR_XREF=code=0x4f326|target=0x4f6d8|name=Im_B2Y_Ctrl_RGB_OutClip|adr r0, #0x3b0
+V096_ADR_XREF=code=0x4f340|target=0x4f708|name=Im_B2Y_Ctrl_RGB_OutClip|adr r0, #0x3c4
+V096_ADR_XREF=code=0x4f42c|target=0x4f74c|name=Im_B2Y_Ctrl_JpegXR_OutClip|adr r0, #0x31c
+V096_ADR_XREF=code=0x4f532|target=0x4f784|name=Im_B2Y_Ctrl_YC_OutOffsetAndGain|adr r0, #0x250
+V096_ADR_XREF=code=0x4f7d6|target=0x4fb8c|name=Im_B2Y_Ctrl_YC_OutClip|adr r0, #0x3b4
+V096_ADR_XREF=code=0x4f7f0|target=0x4fbbc|name=Im_B2Y_Ctrl_YC_OutClip|adr r0, #0x3c8
+V096_ADR_XREF=code=0x4f8bc|target=0x4fc00|name=Im_B2Y_Ctrl_YCtoRGB_Matrix|adr r0, #0x340
+V096_ADR_XREF_COUNT=7
+V096_BIND=xref=0x4f326|name=Im_B2Y_Ctrl_RGB_OutClip|func=0x4f30e|cfg_nodes=124
+V096_BIND=xref=0x4f340|name=Im_B2Y_Ctrl_RGB_OutClip|func=0x4f30e|cfg_nodes=124
+V096_BIND=xref=0x4f42c|name=Im_B2Y_Ctrl_JpegXR_OutClip|func=0x4f414|cfg_nodes=124
+V096_BIND=xref=0x4f532|name=Im_B2Y_Ctrl_YC_OutOffsetAndGain|func=0x4f51a|cfg_nodes=118
+V096_BIND=xref=0x4f7d6|name=Im_B2Y_Ctrl_YC_OutClip|func=0x4f7c0|cfg_nodes=107
+V096_BIND=xref=0x4f7f0|name=Im_B2Y_Ctrl_YC_OutClip|func=0x4f7c0|cfg_nodes=107
+V096_BIND=xref=0x4f8bc|name=Im_B2Y_Ctrl_YCtoRGB_Matrix|func=0x4f8a4|cfg_nodes=171
+
+=== V096 BOUND FUNCTIONS ===
+
+V096_FUNC=0x4f30e|names=Im_B2Y_Ctrl_RGB_OutClip|cfg_nodes=124
+  V096_INS=0x4f30e|push {r4, r5, r6, lr}
+  V096_INS=0x4f310|ldr r5, [pc, #0x3c0]
+  V096_INS=0x4f314|beq #0x4f334
+  V096_INS=0x4f316|cmp r0, #2
+  V096_INS=0x4f318|blo #0x4f344
+  V096_INS=0x4f31a|ldr r2, [pc, #0x2f8]
+  V096_INS=0x4f31c|ldr r1, [pc, #0x2f8]
+  V096_INS=0x4f31e|ldr r0, [pc, #0x2fc]
+  V096_INS=0x4f322|bl #0x4548
+  V096_INS=0x4f326|adr r0, #0x3b0
+  V096_INS=0x4f328|bl #0x4548
+  V096_INS=0x4f32c|bl #0x454a
+  V096_INS=0x4f332|pop {r4, r5, r6, pc}
+  V096_INS=0x4f334|ldr r2, [pc, #0x2dc]
+  V096_INS=0x4f336|ldr r1, [pc, #0x2e0]
+  V096_INS=0x4f338|ldr r0, [pc, #0x2e0]
+  V096_INS=0x4f33c|bl #0x4548
+  V096_INS=0x4f340|adr r0, #0x3c4
+  V096_INS=0x4f342|b #0x4f328
+  V096_INS=0x4f344|cmp r0, #0
+  V096_INS=0x4f346|beq #0x4f3b0
+  V096_INS=0x4f348|bl #0x4d1b4
+  V096_INS=0x4f34c|ldr r0, [pc, #0x3f8]
+  V096_INS=0x4f34e|ldr r1, [r0]
+  V096_INS=0x4f350|ldrh r2, [r4]
+  V096_INS=0x4f35c|str r1, [r0]
+  V096_INS=0x4f35e|ldr r1, [r0]
+  V096_INS=0x4f360|ldrh r2, [r4, #2]
+  V096_INS=0x4f36a|str r1, [r0]
+  V096_INS=0x4f36c|ldr r1, [r0, #4]
+  V096_INS=0x4f36e|ldrh r2, [r4, #4]
+  V096_INS=0x4f37a|str r1, [r0, #4]
+  V096_INS=0x4f37c|ldr r1, [r0, #4]
+  V096_INS=0x4f37e|ldrh r2, [r4, #6]
+  V096_INS=0x4f388|str r1, [r0, #4]
+  V096_INS=0x4f38a|ldr r1, [r0, #8]
+  V096_INS=0x4f38c|ldrh r2, [r4, #8]
+  V096_INS=0x4f398|str r1, [r0, #8]
+  V096_INS=0x4f39a|ldr r1, [r0, #8]
+  V096_INS=0x4f39c|ldrh r2, [r4, #0xa]
+  V096_INS=0x4f3a6|str r1, [r0, #8]
+  V096_INS=0x4f3a8|bl #0x4d118
+  V096_INS=0x4f3ae|pop {r4, r5, r6, pc}
+  V096_INS=0x4f3b0|bl #0x4d1b4
+  V096_INS=0x4f3b4|ldr r0, [pc, #0x390]
+  V096_INS=0x4f3b8|ldr r1, [r0, #0x48]
+  V096_INS=0x4f3ba|ldrh r2, [r4]
+  V096_INS=0x4f3c6|str r1, [r0, #0x48]
+  V096_INS=0x4f3c8|ldr r1, [r0, #0x48]
+  V096_INS=0x4f3ca|ldrh r2, [r4, #2]
+  V096_INS=0x4f3d4|str r1, [r0, #0x48]
+  V096_INS=0x4f3d6|ldr r1, [r0, #0x4c]
+  V096_INS=0x4f3d8|ldrh r2, [r4, #4]
+  V096_INS=0x4f3e4|str r1, [r0, #0x4c]
+  V096_INS=0x4f3e6|ldr r1, [r0, #0x4c]
+  V096_INS=0x4f3e8|ldrh r2, [r4, #6]
+  V096_INS=0x4f3f2|str r1, [r0, #0x4c]
+  V096_INS=0x4f3f4|ldr r1, [r0, #0x50]
+  V096_INS=0x4f3f6|ldrh r2, [r4, #8]
+  V096_INS=0x4f402|str r1, [r0, #0x50]
+  V096_INS=0x4f404|ldr r1, [r0, #0x50]
+  V096_INS=0x4f406|ldrh r2, [r4, #0xa]
+  V096_INS=0x4f410|str r1, [r0, #0x50]
+  V096_INS=0x4f412|b #0x4f3a8
+  V096_CALL=0x4f322->0x4548
+  V096_CALL=0x4f328->0x4548
+  V096_CALL=0x4f32c->0x454a
+  V096_CALL=0x4f33c->0x4548
+  V096_CALL=0x4f348->0x4d1b4
+  V096_CALL=0x4f3a8->0x4d118
+  V096_CALL=0x4f3b0->0x4d1b4
+  V096_MMIO=code=0x4f34c|literal=0x4f748|value=0x20022580|ldr r0, [pc, #0x3f8]
+V096_FUNC_SUMMARY=0x4f30e|names=Im_B2Y_Ctrl_RGB_OutClip|mmio=0x20022580
+
+V096_FUNC=0x4f414|names=Im_B2Y_Ctrl_JpegXR_OutClip|cfg_nodes=124
+  V096_INS=0x4f414|push {r4, r5, r6, lr}
+  V096_INS=0x4f416|ldr r5, [pc, #0x2bc]
+  V096_INS=0x4f41a|beq #0x4f43a
+  V096_INS=0x4f41c|cmp r0, #2
+  V096_INS=0x4f41e|blo #0x4f44a
+  V096_INS=0x4f420|ldr r2, [pc, #0x1f0]
+  V096_INS=0x4f422|ldr r1, [pc, #0x1f4]
+  V096_INS=0x4f424|ldr r0, [pc, #0x1f4]
+  V096_INS=0x4f428|bl #0x4548
+  V096_INS=0x4f42c|adr r0, #0x31c
+  V096_INS=0x4f42e|bl #0x4548
+  V096_INS=0x4f432|bl #0x454a
+  V096_INS=0x4f438|pop {r4, r5, r6, pc}
+  V096_INS=0x4f43a|ldr r2, [pc, #0x1d8]
+  V096_INS=0x4f43c|ldr r1, [pc, #0x1d8]
+  V096_INS=0x4f43e|ldr r0, [pc, #0x1dc]
+  V096_INS=0x4f442|bl #0x4548
+  V096_INS=0x4f446|ldr r0, [pc, #0x338]
+  V096_INS=0x4f448|b #0x4f42e
+  V096_INS=0x4f44a|cmp r0, #0
+  V096_INS=0x4f44c|beq #0x4f4b6
+  V096_INS=0x4f44e|bl #0x4d1b4
+  V096_INS=0x4f452|ldr r0, [pc, #0x2f4]
+  V096_INS=0x4f454|ldr r1, [r0, #0xc]
+  V096_INS=0x4f456|ldrh r2, [r4]
+  V096_INS=0x4f462|str r1, [r0, #0xc]
+  V096_INS=0x4f464|ldr r1, [r0, #0xc]
+  V096_INS=0x4f466|ldrh r2, [r4, #2]
+  V096_INS=0x4f470|str r1, [r0, #0xc]
+  V096_INS=0x4f472|ldr r1, [r0, #0x10]
+  V096_INS=0x4f474|ldrh r2, [r4, #4]
+  V096_INS=0x4f480|str r1, [r0, #0x10]
+  V096_INS=0x4f482|ldr r1, [r0, #0x10]
+  V096_INS=0x4f484|ldrh r2, [r4, #6]
+  V096_INS=0x4f48e|str r1, [r0, #0x10]
+  V096_INS=0x4f490|ldr r1, [r0, #0x14]
+  V096_INS=0x4f492|ldrh r2, [r4, #8]
+  V096_INS=0x4f49e|str r1, [r0, #0x14]
+  V096_INS=0x4f4a0|ldr r1, [r0, #0x14]
+  V096_INS=0x4f4a2|ldrh r2, [r4, #0xa]
+  V096_INS=0x4f4ac|str r1, [r0, #0x14]
+  V096_INS=0x4f4ae|bl #0x4d118
+  V096_INS=0x4f4b4|pop {r4, r5, r6, pc}
+  V096_INS=0x4f4b6|bl #0x4d1b4
+  V096_INS=0x4f4ba|ldr r0, [pc, #0x28c]
+  V096_INS=0x4f4be|ldr r1, [r0, #0x54]
+  V096_INS=0x4f4c0|ldrh r2, [r4]
+  V096_INS=0x4f4cc|str r1, [r0, #0x54]
+  V096_INS=0x4f4ce|ldr r1, [r0, #0x54]
+  V096_INS=0x4f4d0|ldrh r2, [r4, #2]
+  V096_INS=0x4f4da|str r1, [r0, #0x54]
+  V096_INS=0x4f4dc|ldr r1, [r0, #0x58]
+  V096_INS=0x4f4de|ldrh r2, [r4, #4]
+  V096_INS=0x4f4ea|str r1, [r0, #0x58]
+  V096_INS=0x4f4ec|ldr r1, [r0, #0x58]
+  V096_INS=0x4f4ee|ldrh r2, [r4, #6]
+  V096_INS=0x4f4f8|str r1, [r0, #0x58]
+  V096_INS=0x4f4fa|ldr r1, [r0, #0x5c]
+  V096_INS=0x4f4fc|ldrh r2, [r4, #8]
+  V096_INS=0x4f508|str r1, [r0, #0x5c]
+  V096_INS=0x4f50a|ldr r1, [r0, #0x5c]
+  V096_INS=0x4f50c|ldrh r2, [r4, #0xa]
+  V096_INS=0x4f516|str r1, [r0, #0x5c]
+  V096_INS=0x4f518|b #0x4f4ae
+  V096_CALL=0x4f428->0x4548
+  V096_CALL=0x4f42e->0x4548
+  V096_CALL=0x4f432->0x454a
+  V096_CALL=0x4f442->0x4548
+  V096_CALL=0x4f44e->0x4d1b4
+  V096_CALL=0x4f4ae->0x4d118
+  V096_CALL=0x4f4b6->0x4d1b4
+  V096_MMIO=code=0x4f452|literal=0x4f748|value=0x20022580|ldr r0, [pc, #0x2f4]
+V096_FUNC_SUMMARY=0x4f414|names=Im_B2Y_Ctrl_JpegXR_OutClip|mmio=0x20022580
+
+V096_FUNC=0x4f51a|names=Im_B2Y_Ctrl_YC_OutOffsetAndGain|cfg_nodes=118
+  V096_INS=0x4f51a|push {r4, r5, r6, lr}
+  V096_INS=0x4f51c|ldr r4, [pc, #0x1b4]
+  V096_INS=0x4f520|beq #0x4f540
+  V096_INS=0x4f522|cmp r0, #2
+  V096_INS=0x4f524|blo #0x4f550
+  V096_INS=0x4f526|ldr r2, [pc, #0xec]
+  V096_INS=0x4f528|ldr r1, [pc, #0xec]
+  V096_INS=0x4f52a|ldr r0, [pc, #0xf0]
+  V096_INS=0x4f52e|bl #0x4548
+  V096_INS=0x4f532|adr r0, #0x250
+  V096_INS=0x4f534|bl #0x4548
+  V096_INS=0x4f538|bl #0x454a
+  V096_INS=0x4f53e|pop {r4, r5, r6, pc}
+  V096_INS=0x4f540|ldr r2, [pc, #0xd0]
+  V096_INS=0x4f542|ldr r1, [pc, #0xd4]
+  V096_INS=0x4f544|ldr r0, [pc, #0xd4]
+  V096_INS=0x4f548|bl #0x4548
+  V096_INS=0x4f54c|ldr r0, [pc, #0x26c]
+  V096_INS=0x4f54e|b #0x4f534
+  V096_INS=0x4f550|ldr r4, [pc, #0x1f4]
+  V096_INS=0x4f552|cmp r0, #0
+  V096_INS=0x4f554|beq #0x4f5ba
+  V096_INS=0x4f556|bl #0x4d1b4
+  V096_INS=0x4f55a|ldr r0, [r4, #0x74]
+  V096_INS=0x4f55c|ldrb r1, [r5]
+  V096_INS=0x4f564|str r0, [r4, #0x74]
+  V096_INS=0x4f566|ldr r0, [r4, #0x78]
+  V096_INS=0x4f568|ldrb r1, [r5, #1]
+  V096_INS=0x4f570|str r0, [r4, #0x78]
+  V096_INS=0x4f572|ldr r0, [r4, #0x7c]
+  V096_INS=0x4f574|ldrb r1, [r5, #2]
+  V096_INS=0x4f57c|str r0, [r4, #0x7c]
+  V096_INS=0x4f582|ldr r1, [r0]
+  V096_INS=0x4f584|ldrh r2, [r5, #4]
+  V096_INS=0x4f590|str r1, [r0]
+  V096_INS=0x4f592|ldr r1, [r0, #4]
+  V096_INS=0x4f594|ldrh r2, [r5, #6]
+  V096_INS=0x4f5a0|str r1, [r0, #4]
+  V096_INS=0x4f5a2|ldr r1, [r0, #8]
+  V096_INS=0x4f5a4|ldrh r2, [r5, #8]
+  V096_INS=0x4f5b0|str r1, [r0, #8]
+  V096_INS=0x4f5b2|bl #0x4d118
+  V096_INS=0x4f5b8|pop {r4, r5, r6, pc}
+  V096_INS=0x4f5ba|bl #0x4d1b4
+  V096_INS=0x4f5be|ldr r0, [r4, #0x50]
+  V096_INS=0x4f5c0|ldrb r1, [r5]
+  V096_INS=0x4f5c8|str r0, [r4, #0x50]
+  V096_INS=0x4f5ca|ldr r0, [r4, #0x54]
+  V096_INS=0x4f5cc|ldrb r1, [r5, #1]
+  V096_INS=0x4f5d4|str r0, [r4, #0x54]
+  V096_INS=0x4f5d6|ldr r0, [r4, #0x58]
+  V096_INS=0x4f5d8|ldrb r1, [r5, #2]
+  V096_INS=0x4f5e0|str r0, [r4, #0x58]
+  V096_INS=0x4f5e2|ldr r0, [r4, #0x5c]
+  V096_INS=0x4f5e4|ldrh r1, [r5, #4]
+  V096_INS=0x4f5f0|str r0, [r4, #0x5c]
+  V096_INS=0x4f5f2|ldr r0, [r4, #0x60]
+  V096_INS=0x4f5f4|ldrh r1, [r5, #6]
+  V096_INS=0x4f600|str r0, [r4, #0x60]
+  V096_INS=0x4f602|ldr r0, [r4, #0x64]
+  V096_INS=0x4f604|ldrh r1, [r5, #8]
+  V096_INS=0x4f610|str r0, [r4, #0x64]
+  V096_INS=0x4f612|b #0x4f5b2
+  V096_CALL=0x4f52e->0x4548
+  V096_CALL=0x4f534->0x4548
+  V096_CALL=0x4f538->0x454a
+  V096_CALL=0x4f548->0x4548
+  V096_CALL=0x4f556->0x4d1b4
+  V096_CALL=0x4f5b2->0x4d118
+  V096_CALL=0x4f5ba->0x4d1b4
+  V096_MMIO=code=0x4f550|literal=0x4f748|value=0x20022580|ldr r4, [pc, #0x1f4]
+V096_FUNC_SUMMARY=0x4f51a|names=Im_B2Y_Ctrl_YC_OutOffsetAndGain|mmio=0x20022580
+
+V096_FUNC=0x4f7c0|names=Im_B2Y_Ctrl_YC_OutClip|cfg_nodes=107
+  V096_INS=0x4f7c0|push {r4, r5, r6, lr}
+  V096_INS=0x4f7c2|ldr r5, [pc, #0x3b8]
+  V096_INS=0x4f7c6|beq #0x4f7e4
+  V096_INS=0x4f7c8|cmp r0, #2
+  V096_INS=0x4f7ca|blo #0x4f7f4
+  V096_INS=0x4f7cc|ldr r2, [pc, #0x3b0]
+  V096_INS=0x4f7ce|ldr r1, [pc, #0x3b4]
+  V096_INS=0x4f7d0|ldr r0, [pc, #0x3b4]
+  V096_INS=0x4f7d2|bl #0x4548
+  V096_INS=0x4f7d6|adr r0, #0x3b4
+  V096_INS=0x4f7d8|bl #0x4548
+  V096_INS=0x4f7dc|bl #0x454a
+  V096_INS=0x4f7e2|pop {r4, r5, r6, pc}
+  V096_INS=0x4f7e4|ldr r2, [pc, #0x398]
+  V096_INS=0x4f7e6|ldr r1, [pc, #0x39c]
+  V096_INS=0x4f7e8|ldr r0, [pc, #0x39c]
+  V096_INS=0x4f7ec|bl #0x4548
+  V096_INS=0x4f7f0|adr r0, #0x3c8
+  V096_INS=0x4f7f2|b #0x4f7d8
+  V096_INS=0x4f7f8|cmp r0, #0
+  V096_INS=0x4f7fa|beq #0x4f852
+  V096_INS=0x4f7fc|bl #0x4d1b4
+  V096_INS=0x4f800|ldr r0, [pc, #0x3f8]
+  V096_INS=0x4f802|ldr r1, [r0, #0xc]
+  V096_INS=0x4f804|ldrb r2, [r4, #1]
+  V096_INS=0x4f80c|str r1, [r0, #0xc]
+  V096_INS=0x4f80e|ldr r1, [r0, #0xc]
+  V096_INS=0x4f810|ldrb r2, [r4]
+  V096_INS=0x4f812|bics r1, r5
+  V096_INS=0x4f818|str r1, [r0, #0xc]
+  V096_INS=0x4f81a|ldr r1, [r0, #0x10]
+  V096_INS=0x4f81c|ldrb r2, [r4, #3]
+  V096_INS=0x4f824|str r1, [r0, #0x10]
+  V096_INS=0x4f826|ldr r1, [r0, #0x10]
+  V096_INS=0x4f828|ldrb r2, [r4, #2]
+  V096_INS=0x4f82a|bics r1, r5
+  V096_INS=0x4f830|str r1, [r0, #0x10]
+  V096_INS=0x4f832|ldr r1, [r0, #0x14]
+  V096_INS=0x4f834|ldrb r2, [r4, #5]
+  V096_INS=0x4f83c|str r1, [r0, #0x14]
+  V096_INS=0x4f83e|ldr r1, [r0, #0x14]
+  V096_INS=0x4f840|ldrb r2, [r4, #4]
+  V096_INS=0x4f842|bics r1, r5
+  V096_INS=0x4f848|str r1, [r0, #0x14]
+  V096_INS=0x4f84a|bl #0x4d118
+  V096_INS=0x4f850|pop {r4, r5, r6, pc}
+  V096_INS=0x4f852|bl #0x4d1b4
+  V096_INS=0x4f856|ldr r0, [pc, #0x3a4]
+  V096_INS=0x4f85a|ldr r1, [r0, #0x68]
+  V096_INS=0x4f85c|ldrb r2, [r4, #1]
+  V096_INS=0x4f864|str r1, [r0, #0x68]
+  V096_INS=0x4f866|ldr r1, [r0, #0x68]
+  V096_INS=0x4f868|ldrb r2, [r4]
+  V096_INS=0x4f86a|bics r1, r5
+  V096_INS=0x4f870|str r1, [r0, #0x68]
+  V096_INS=0x4f872|ldr r1, [r0, #0x6c]
+  V096_INS=0x4f874|ldrb r2, [r4, #3]
+  V096_INS=0x4f87c|str r1, [r0, #0x6c]
+  V096_INS=0x4f87e|ldr r1, [r0, #0x6c]
+  V096_INS=0x4f880|ldrb r2, [r4, #2]
+  V096_INS=0x4f882|bics r1, r5
+  V096_INS=0x4f888|str r1, [r0, #0x6c]
+  V096_INS=0x4f88a|ldr r1, [r0, #0x70]
+  V096_INS=0x4f88c|ldrb r2, [r4, #5]
+  V096_INS=0x4f894|str r1, [r0, #0x70]
+  V096_INS=0x4f896|ldr r1, [r0, #0x70]
+  V096_INS=0x4f898|ldrb r2, [r4, #4]
+  V096_INS=0x4f89a|bics r1, r5
+  V096_INS=0x4f8a0|str r1, [r0, #0x70]
+  V096_INS=0x4f8a2|b #0x4f84a
+  V096_CALL=0x4f7d2->0x4548
+  V096_CALL=0x4f7d8->0x4548
+  V096_CALL=0x4f7dc->0x454a
+  V096_CALL=0x4f7ec->0x4548
+  V096_CALL=0x4f7fc->0x4d1b4
+  V096_CALL=0x4f84a->0x4d118
+  V096_CALL=0x4f852->0x4d1b4
+  V096_MMIO=code=0x4f800|literal=0x4fbfc|value=0x20022600|ldr r0, [pc, #0x3f8]
+V096_FUNC_SUMMARY=0x4f7c0|names=Im_B2Y_Ctrl_YC_OutClip|mmio=0x20022600
+
+V096_FUNC=0x4f8a4|names=Im_B2Y_Ctrl_YCtoRGB_Matrix|cfg_nodes=171
+  V096_INS=0x4f8a4|push {r4, r5, r6, lr}
+  V096_INS=0x4f8a6|ldr r5, [pc, #0x2d4]
+  V096_INS=0x4f8aa|beq #0x4f8ca
+  V096_INS=0x4f8ac|cmp r0, #2
+  V096_INS=0x4f8ae|blo #0x4f8da
+  V096_INS=0x4f8b0|ldr r2, [pc, #0x2cc]
+  V096_INS=0x4f8b2|ldr r1, [pc, #0x2d0]
+  V096_INS=0x4f8b4|ldr r0, [pc, #0x2d0]
+  V096_INS=0x4f8b8|bl #0x4548
+  V096_INS=0x4f8bc|adr r0, #0x340
+  V096_INS=0x4f8be|bl #0x4548
+  V096_INS=0x4f8c2|bl #0x454a
+  V096_INS=0x4f8c8|pop {r4, r5, r6, pc}
+  V096_INS=0x4f8ca|ldr r2, [pc, #0x2b4]
+  V096_INS=0x4f8cc|ldr r1, [pc, #0x2b4]
+  V096_INS=0x4f8ce|ldr r0, [pc, #0x2b8]
+  V096_INS=0x4f8d2|bl #0x4548
+  V096_INS=0x4f8d6|ldr r0, [pc, #0x35c]
+  V096_INS=0x4f8d8|b #0x4f8be
+  V096_INS=0x4f8da|ldr r5, [pc, #0x35c]
+  V096_INS=0x4f8dc|cmp r0, #0
+  V096_INS=0x4f8de|beq #0x4f978
+  V096_INS=0x4f8e0|bl #0x4d1b4
+  V096_INS=0x4f8e4|ldr r0, [pc, #0x314]
+  V096_INS=0x4f8e8|ldr r1, [r0, #0x20]
+  V096_INS=0x4f8ea|ldrh r2, [r4]
+  V096_INS=0x4f8f6|str r1, [r0, #0x20]
+  V096_INS=0x4f8f8|ldr r1, [r0, #0x20]
+  V096_INS=0x4f8fa|ldrh r2, [r4, #2]
+  V096_INS=0x4f904|str r1, [r0, #0x20]
+  V096_INS=0x4f906|ldr r1, [r0, #0x24]
+  V096_INS=0x4f908|ldrh r2, [r4, #4]
+  V096_INS=0x4f914|str r1, [r0, #0x24]
+  V096_INS=0x4f916|ldr r1, [r0, #0x24]
+  V096_INS=0x4f918|ldrh r2, [r4, #6]
+  V096_INS=0x4f922|str r1, [r0, #0x24]
+  V096_INS=0x4f924|ldr r1, [r0, #0x28]
+  V096_INS=0x4f926|ldrh r2, [r4, #8]
+  V096_INS=0x4f932|str r1, [r0, #0x28]
+  V096_INS=0x4f934|ldr r1, [r0, #0x28]
+  V096_INS=0x4f936|ldrh r2, [r4, #0xa]
+  V096_INS=0x4f940|str r1, [r0, #0x28]
+  V096_INS=0x4f942|ldr r1, [r0, #0x2c]
+  V096_INS=0x4f944|ldrh r2, [r4, #0xc]
+  V096_INS=0x4f950|str r1, [r0, #0x2c]
+  V096_INS=0x4f952|ldr r1, [r0, #0x2c]
+  V096_INS=0x4f954|ldrh r2, [r4, #0xe]
+  V096_INS=0x4f95e|str r1, [r0, #0x2c]
+  V096_INS=0x4f960|ldr r1, [r0, #0x30]
+  V096_INS=0x4f962|ldrh r2, [r4, #0x10]
+  V096_INS=0x4f96e|str r1, [r0, #0x30]
+  V096_INS=0x4f970|bl #0x4d118
+  V096_INS=0x4f976|pop {r4, r5, r6, pc}
+  V096_INS=0x4f978|bl #0x4d1b4
+  V096_INS=0x4f97c|ldr r0, [pc, #0x2bc]
+  V096_INS=0x4f97e|ldr r1, [r0, #0x60]
+  V096_INS=0x4f980|ldrh r2, [r4]
+  V096_INS=0x4f98c|str r1, [r0, #0x60]
+  V096_INS=0x4f98e|ldr r1, [r0, #0x60]
+  V096_INS=0x4f990|ldrh r2, [r4, #2]
+  V096_INS=0x4f99a|str r1, [r0, #0x60]
+  V096_INS=0x4f99c|ldr r1, [r0, #0x64]
+  V096_INS=0x4f99e|ldrh r2, [r4, #4]
+  V096_INS=0x4f9aa|str r1, [r0, #0x64]
+  V096_INS=0x4f9ac|ldr r1, [r0, #0x64]
+  V096_INS=0x4f9ae|ldrh r2, [r4, #6]
+  V096_INS=0x4f9b8|str r1, [r0, #0x64]
+  V096_INS=0x4f9ba|ldr r1, [r0, #0x68]
+  V096_INS=0x4f9bc|ldrh r2, [r4, #8]
+  V096_INS=0x4f9c8|str r1, [r0, #0x68]
+  V096_INS=0x4f9ca|ldr r1, [r0, #0x68]
+  V096_INS=0x4f9cc|ldrh r2, [r4, #0xa]
+  V096_INS=0x4f9d6|str r1, [r0, #0x68]
+  V096_INS=0x4f9d8|ldr r1, [r0, #0x6c]
+  V096_INS=0x4f9da|ldrh r2, [r4, #0xc]
+  V096_INS=0x4f9e6|str r1, [r0, #0x6c]
+  V096_INS=0x4f9e8|ldr r1, [r0, #0x6c]
+  V096_INS=0x4f9ea|ldrh r2, [r4, #0xe]
+  V096_INS=0x4f9f4|str r1, [r0, #0x6c]
+  V096_INS=0x4f9f6|ldr r1, [r0, #0x70]
+  V096_INS=0x4f9f8|ldrh r2, [r4, #0x10]
+  V096_INS=0x4fa04|str r1, [r0, #0x70]
+  V096_INS=0x4fa06|b #0x4f970
+  V096_CALL=0x4f8b8->0x4548
+  V096_CALL=0x4f8be->0x4548
+  V096_CALL=0x4f8c2->0x454a
+  V096_CALL=0x4f8d2->0x4548
+  V096_CALL=0x4f8e0->0x4d1b4
+  V096_CALL=0x4f970->0x4d118
+  V096_CALL=0x4f978->0x4d1b4
+  V096_MMIO=code=0x4f8e4|literal=0x4fbfc|value=0x20022600|ldr r0, [pc, #0x314]
+  V096_MMIO=code=0x4f97c|literal=0x4fc3c|value=0x20022500|ldr r0, [pc, #0x2bc]
+V096_FUNC_SUMMARY=0x4f8a4|names=Im_B2Y_Ctrl_YCtoRGB_Matrix|mmio=0x20022500,0x20022600
+V096_UNREFERENCED_NAMES=1|Im_B2Y_Ctrl_Yc_Convert
+OVERALL_VERDICT=SAM7_YC_DIAGNOSTICS_BOUND_BY_CORRECT_PC_RELATIVE_ADR_AND_CFG
