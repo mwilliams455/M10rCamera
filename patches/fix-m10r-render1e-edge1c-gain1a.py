@@ -41,7 +41,8 @@ for idx in range(count):
     blob=b[payload_base+rel:payload_base+rel+size]
     txt=' '.join(m.group().decode('ascii','ignore') for m in re.finditer(rb'[ -~]{8,}',hdr))
     for iso in (100,200,800):
-        if f'_B2YMODE:STILL_SHARPNESS:MEDIUM_ISO:{iso}' in txt:
+        # ISO token must end here: avoid matching ISO:100 inside ISO:100000.
+        if re.search(rf'_B2YMODE:STILL_SHARPNESS:MEDIUM_ISO:{iso}(?!\d)',txt):
             seen[iso]=(u32(blob,0x118)&0x3ff,u32(blob,0x11c)&0x3ff,idx)
 expect={100:(160,1023),200:(128,1023),800:(80,1023)}
 for iso,(g,mx) in expect.items():
