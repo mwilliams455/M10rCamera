@@ -2,7 +2,7 @@
 """Trace IMG-System B2Y selector strings, refs and orchestration call order.
 
 Targets the recovered neighborhood containing tone-control TBL0/TBL1,
-WBCLIPLEVEL, Y_BLEND and YC_CONVERSION.  No semantic labels are assigned from
+WBCLIPLEVEL, Y_BLEND and YC_CONVERSION. No semantic labels are assigned from
 proximity alone: the report distinguishes direct string-pointer evidence,
 branch targets and the 0x20020780 MMIO owner inventory.
 """
@@ -108,7 +108,6 @@ def main():
                 owner=nearest_push(md,data,xo)
                 print(f'V067_STRING_XREF={label}|ptr=0x{q:x}|code=0x{xo:x}|owner={"-" if owner is None else hex(owner)}|{ins.mnemonic} {ins.op_str}')
                 if owner is not None: owners.append(owner)
-    # Always dump the already-proven page20780 orchestrator owner.
     orch=0x154f88
     dump_function(md,data,orch,0x500)
     print('\n=== V067 CALL TARGET CONTEXT ===')
