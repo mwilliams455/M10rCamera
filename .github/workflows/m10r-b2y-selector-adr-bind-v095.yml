@@ -1,0 +1,48 @@
+name: M10-R v0.95 exact B2Y selector ADR binding
+on:
+  push:
+    branches: [m10r-b2y-yc-domain1a]
+    paths:
+      - 'tools/m10r_b2y_selector_adr_bind_v095.py'
+      - '.github/workflows/m10r-b2y-selector-adr-bind-v095.yml'
+  workflow_dispatch:
+permissions: {contents: write}
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet 'capstone==5.0.3'
+      - name: Fetch verify decode extract
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text();a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n");z=p.index("\n          CPP",a);Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          echo '859c936b6ac8efe0bc4ce7f05623013644fc5d8aee3c6835f09860f452adc2e0  /tmp/M10R_unpacked.bin' | sha256sum -c -
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sec >/dev/null
+      - name: Bind selectors by executable ADR
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/m10r_b2y_selector_adr_bind_v095.py /tmp/sec | tee research/M10R_v095_b2y_selector_adr_binding.txt
+          grep -q 'V095_FOCUS=record=0xd|name=y_blend' research/M10R_v095_b2y_selector_adr_binding.txt
+          grep -q 'V095_FOCUS=record=0xc|name=yc_conversion' research/M10R_v095_b2y_selector_adr_binding.txt
+          grep -q 'V095_FOCUS=record=0x17|name=post_processing_filter' research/M10R_v095_b2y_selector_adr_binding.txt
+          grep -q 'OVERALL_VERDICT=' research/M10R_v095_b2y_selector_adr_binding.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-V095-B2Y-SELECTOR-ADR-BINDING
+          path: research/M10R_v095_b2y_selector_adr_binding.txt
+      - name: Commit evidence
+        run: |
+          git config user.name 'github-actions[bot]';git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v095_b2y_selector_adr_binding.txt
+          git commit -m 'research: record v095 exact B2Y selector ADR binding' || exit 0
+          git pull --rebase origin m10r-b2y-yc-domain1a
+          git push
