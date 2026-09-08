@@ -1,0 +1,161 @@
+name: M10-R paired RAW JPEG transfer audit1A
+on:
+  push:
+    branches: [m10r-reference-transfer1a]
+    paths:
+      - '.github/workflows/m10r-reference-transfer1a.yml'
+      - 'tools/m10r_reference_transfer_fit.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install analysis dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl >/dev/null
+          python3 -m pip install --quiet rawpy pillow numpy
+      - name: Extract exact firmware nonlinear assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          rm -rf /tmp/m10r_b2y_assets
+          python3 tools/m10r_b2y_assets.py /tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin /tmp/m10r_b2y_assets >/dev/null
+      - name: Analyze six identity-gated same-capture pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/m10r_transfer1a
+          for id in 01 02 03 04 05 06; do
+            echo "=== sample $id ==="
+            base="https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_${id}"
+            curl -L --fail --retry 3 --retry-delay 2 "$base.jpg" -o "/tmp/m10r_transfer1a/${id}.jpg"
+            curl -L --fail --retry 3 --retry-delay 2 "$base.dng" -o "/tmp/m10r_transfer1a/${id}.dng"
+            exiftool -j -n \
+              -Make -Model -SerialNumber -ImageUniqueID -DateTimeOriginal -CreateDate \
+              -ExposureTime -FNumber -ISO -FocalLength -ExposureCompensation \
+              -WhiteBalance -Contrast -Saturation -Sharpness \
+              "/tmp/m10r_transfer1a/${id}.jpg" "/tmp/m10r_transfer1a/${id}.dng" > "/tmp/m10r_transfer1a/${id}_exif.json"
+            python3 tools/m10r_reference_transfer_fit.py \
+              --jpg "/tmp/m10r_transfer1a/${id}.jpg" \
+              --dng "/tmp/m10r_transfer1a/${id}.dng" \
+              --assets /tmp/m10r_b2y_assets \
+              --sample "$id" \
+              --metadata-json "/tmp/m10r_transfer1a/${id}_exif.json" \
+              --out "/tmp/m10r_transfer1a/${id}_fit.json" >/dev/null
+            rm -f "/tmp/m10r_transfer1a/${id}.jpg" "/tmp/m10r_transfer1a/${id}.dng"
+          done
+      - name: Aggregate transfer evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, statistics
+          from pathlib import Path
+
+          rows=[json.loads(p.read_text()) for p in sorted(Path('/tmp/m10r_transfer1a').glob('*_fit.json'))]
+          valid=[r for r in rows if r.get('metadata',{}).get('identity_supported') is True
+                 and r.get('metadata',{}).get('default_jpeg_controls') is True
+                 and r.get('fits')]
+          transfers=['identity','srgb_oetf','gamma22_oetf','srgb_eotf','gamma22_eotf']
+          out=[]
+          out.append('M10-R PAIRED RAW/JPEG TRANSFER AUDIT1A')
+          out.append('source: Photography Blog Leica M10-R samples 01..06; same-capture identity and default JPEG controls gated')
+          out.append('fixed upstream candidate: exact firmware MEDIUM -> Differential Gamma')
+          out.append('fit freedom: input coordinate scale + output affine only; NO arbitrary fitted output gamma')
+          out.append('IMPORTANT: empirical photographic evidence, not direct CA9/B2Y mux proof.')
+          out.append('')
+          out.append('=== per-sample fixed-transfer fits ===')
+          for r in rows:
+            m=r.get('metadata',{}); j=m.get('jpg',{})
+            out.append(f"sample {r['sample']} identity={m.get('identity_supported')} defaults={m.get('default_jpeg_controls')} ISO={j.get('ISO')} patches={r.get('patches',{}).get('fit')}")
+            if not r.get('fits'):
+              out.append('  ERROR '+r.get('error','no fit'))
+              continue
+            for rnd in ('trunc','nearest'):
+              ranked=sorted((r['fits'][f'{rnd}|{t}']['test_rmse'],t,r['fits'][f'{rnd}|{t}']['raw_scale']) for t in transfers)
+              out.append(f"  {rnd}: "+' | '.join(f"{t} rmse={rm:.6f} scale={sc:.3f}" for rm,t,sc in ranked))
+              d=r['deltas'][rnd]
+              out.append(f"    vs identity: srgb_oetf={d['srgb_oetf']:+.6f} gamma22_oetf={d['gamma22_oetf']:+.6f} srgb_eotf={d['srgb_eotf']:+.6f} gamma22_eotf={d['gamma22_eotf']:+.6f}")
+
+          aggregate={'total':len(rows),'valid':len(valid),'rounding':{}}
+          out.append('')
+          out.append('=== aggregate ===')
+          for rnd in ('trunc','nearest'):
+            wins={t:0 for t in transfers}
+            ranks=[]
+            for r in valid:
+              ranked=sorted((r['fits'][f'{rnd}|{t}']['test_rmse'],t) for t in transfers)
+              wins[ranked[0][1]] += 1
+              ranks.append([t for _,t in ranked])
+            sdel=[r['fits'][f'{rnd}|srgb_oetf']['test_rmse']-r['fits'][f'{rnd}|identity']['test_rmse'] for r in valid]
+            gdel=[r['fits'][f'{rnd}|gamma22_oetf']['test_rmse']-r['fits'][f'{rnd}|identity']['test_rmse'] for r in valid]
+            edel=[r['fits'][f'{rnd}|srgb_eotf']['test_rmse']-r['fits'][f'{rnd}|identity']['test_rmse'] for r in valid]
+            rec={
+              'wins':wins,
+              'rankings':ranks,
+              'srgb_oetf_minus_identity':sdel,
+              'gamma22_oetf_minus_identity':gdel,
+              'srgb_eotf_minus_identity':edel,
+              'median_srgb_oetf_minus_identity':statistics.median(sdel) if sdel else None,
+              'median_gamma22_oetf_minus_identity':statistics.median(gdel) if gdel else None,
+              'median_srgb_eotf_minus_identity':statistics.median(edel) if edel else None,
+            }
+            aggregate['rounding'][rnd]=rec
+            out.append(f"{rnd}: wins={wins}")
+            out.append(f"  median RMSE delta (candidate-identity): sRGB OETF={rec['median_srgb_oetf_minus_identity']} gamma2.2 OETF={rec['median_gamma22_oetf_minus_identity']} sRGB EOTF={rec['median_srgb_eotf_minus_identity']}")
+
+          verdict='UNRESOLVED'
+          if len(valid)>=4:
+            ident_ok=all(aggregate['rounding'][rnd]['wins']['identity'] >= max(4, len(valid)-1)
+                         and aggregate['rounding'][rnd]['median_srgb_oetf_minus_identity'] is not None
+                         and aggregate['rounding'][rnd]['median_srgb_oetf_minus_identity'] > 0.05
+                         and aggregate['rounding'][rnd]['median_gamma22_oetf_minus_identity'] > 0.05
+                         for rnd in ('trunc','nearest'))
+            srgb_ok=all(aggregate['rounding'][rnd]['wins']['srgb_oetf'] >= max(4, len(valid)-1)
+                        and aggregate['rounding'][rnd]['median_srgb_oetf_minus_identity'] is not None
+                        and aggregate['rounding'][rnd]['median_srgb_oetf_minus_identity'] < -0.05
+                        for rnd in ('trunc','nearest'))
+            if ident_ok:
+              verdict='PAIRED_REFERENCES_FAVOR_NO_ADDITIONAL_OETF_AFTER_TONE_DG'
+            elif srgb_ok:
+              verdict='PAIRED_REFERENCES_FAVOR_SRGB_OETF_AFTER_TONE_DG'
+          aggregate['verdict']=verdict
+          out.append('')
+          out.append('VERDICT '+verdict)
+          out.append('Interpretation boundary: this discriminates observable RAW->JPEG transfer shape around the recovered MEDIUM->DG chain; it does not by itself locate the transfer in CA9 vs B2Y vs JPEG hardware.')
+          out.append('If identity wins strongly, the Android renderer should NOT remove its final sRGB OETF until an RGB/full-pipeline validation confirms the neutral-patch result.')
+          out.append('')
+          out.append('LIMITATIONS')
+          out.append('- neutral low-texture patches use rawpy linear camera-space green as the scalar input proxy.')
+          out.append('- per-candidate input scale and output affine absorb exposure/level nuisance terms but not nonlinear transfer shape.')
+          out.append('- JPEG luminance is measured from encoded 8-bit RGB; this test intentionally asks which fixed candidate best predicts that observable output.')
+          out.append('- local processing, demosaic differences, chroma transforms and exact CA9 output-space matrices are not solved here.')
+
+          Path('research/M10R_REFERENCE_TRANSFER1A.md').write_text('\n'.join(out)+'\n')
+          Path('research/M10R_REFERENCE_TRANSFER1A.json').write_text(json.dumps({'samples':rows,'aggregate':aggregate},indent=2,sort_keys=True)+'\n')
+          print('\n'.join(out))
+          PY
+      - name: Commit transfer evidence
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_REFERENCE_TRANSFER1A.md research/M10R_REFERENCE_TRANSFER1A.json
+          git commit -m 'research: record paired RAW JPEG transfer audit1A' || exit 0
+          git pull --rebase origin m10r-reference-transfer1a
+          git push
