@@ -21,9 +21,13 @@ def load_parser(repo: Path):
 def main():
     if len(sys.argv)!=3: raise SystemExit('usage: m10r_yc_matrix_ownership_v076.py <sections_dir> <repo_root>')
     root=Path(sys.argv[1]);repo=Path(sys.argv[2]);mod=load_parser(repo)
-    hits=list(root.glob('*data_calib_B2Y*.bin*'))
-    if len(hits)!=1: raise SystemExit(f'expected one B2Y auxiliary file, got {hits}')
-    p=hits[0];data=p.read_bytes();records=mod.parse_records(data)
+    # Deliberately select the main B2Y calibration, not the separate B2Y_CC0_CA9_CM blob.
+    p=root/'074_IMG_Calibration_Data_data_calib_B2Y.bin.bin'
+    if not p.exists():
+        hits=list(root.glob('074_*data_calib_B2Y.bin.bin'))
+        if len(hits)!=1: raise SystemExit(f'expected main 074 B2Y auxiliary file, got {hits}')
+        p=hits[0]
+    data=p.read_bytes();records=mod.parse_records(data)
     last=max(r.payload_offset+r.size for r in records)
     print(f'V076_B2Y=file={p.name}|size=0x{len(data):x}|records={len(records)}|last_record_end=0x{last:x}|trailing=0x{len(data)-last:x}')
     start=0;count=0
@@ -40,7 +44,6 @@ def main():
             print(f'V076_MATRIX=off=0x{off:x}|owner_record=NONE|zone={zone}|context={data[lo:hi].hex()}')
         count+=1;start=off+1
     print(f'V076_MATRIX_COUNT={count}')
-    # Explicit known record-0x0C inventory.
     c=[r for r in records if r.record_id==0x0c]
     print(f"V076_ID0C_COUNT={len(c)}|indices={','.join(str(r.index) for r in c)}")
     print('OVERALL_VERDICT=MATRIX_OCCURRENCE_OWNERSHIP_RECORDED_WITHOUT_STAGE_ORDER_INFERENCE')
