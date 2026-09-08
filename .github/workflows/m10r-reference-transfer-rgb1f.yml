@@ -76,9 +76,10 @@ jobs:
           def binmed(m,b): return statistics.median(r['metrics'][m]['bins'][b]['rgb_rmse'] for r in valid)
           def clips(m): return sum(sum(r['metrics'][m]['highlight_channel_clipping'][c]['candidate_255_reference_below_250'] for c in 'RGB') for r in valid)
           agg={'valid':len(valid),'medians':{},'bins':{},'falseClips':{},'sampleWins':{},'gate':{},'ranking':[]}
+          bin_names=('shadow','midtone','highlight','neutral_pixels','colourful_pixels')
           for m in modes:
               agg['medians'][m]={k:med(m,k) for k in core+chroma}
-              agg['bins'][m]={b:binmed(m,b) for b in ('shadow','midtone','highlight','neutral','colorful')}
+              agg['bins'][m]={b:binmed(m,b) for b in bin_names}
               agg['falseClips'][m]=clips(m)
           for cand in modes[1:]:
               wins={k:sum(r['metrics'][cand][k] < r['metrics'][base][k] for r in valid) for k in ('encoded_rgb_rmse','luma_rmse','delta_e76_mean')}
@@ -92,8 +93,6 @@ jobs:
               q=agg['medians'][m]
               ratios={k:q[k]/b[k] for k in ('encoded_rgb_rmse','luma_rmse','delta_e76_mean')}
               hratio=agg['bins'][m]['highlight']/bh
-              # Strict promotion gate: firmware Y must be at least modestly better globally,
-              # materially better in highlights, and not regress chroma/clipping.
               passed=(ratios['encoded_rgb_rmse']<=0.99 and ratios['luma_rmse']<=0.99 and ratios['delta_e76_mean']<=1.02
                       and hratio<=0.95
                       and q['hue_error_deg_mean']<=b['hue_error_deg_mean']*1.05+0.5
