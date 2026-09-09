@@ -29,7 +29,6 @@ jobs:
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
           python3 - <<'PY' > research/M10R_v269_round_helper_40012940.txt
           from pathlib import Path
-          import struct
           from capstone import Cs,CS_ARCH_ARM,CS_MODE_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
 
           b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes()
@@ -46,27 +45,28 @@ jobs:
               for i in md.disasm(b[off(a):off(z)],a):
                   print(f'{i.address:08x}: {i.bytes.hex():10s} {i.mnemonic:12s} {i.op_str}')
               print()
-          print('M10-R v2.69 EXACT CC ROUND-HELPER TRACE — MODE-CORRECTED')
+          print('M10-R v2.69 EXACT CC ROUND-HELPER TRACE — FUNCTION-ENTRY DECODE')
           print('firmware sha256 ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498')
-          print('Key observation: ARM callers use BLX immediate to 0x40012940, so the target executes in Thumb state.')
+          print('ARM callers use BLX immediate to 0x40012940, so 0x40012940 executes in Thumb state.')
           print()
-          print('=== raw bytes around helper ===')
+          print('=== raw bytes / constants around helper ===')
           hx(0x40012920,0x40012a80)
           print()
-          dump(0x40012920,0x40012a80,'helper neighborhood containing 0x40012940',thumb=True)
+          dump(0x40012940,0x400129c8,'0x40012940 exact helper body',thumb=True)
+          dump(0x400129e4,0x40012a80,'next Thumb routine after helper',thumb=True)
           dump(0x400038b0,0x40003b20,'rendered-CC builder and scale-search callers',thumb=False)
           dump(0x40012f20,0x40012f90,'additional direct caller neighborhood',thumb=False)
           print('INTERPRETATION BOUNDARY')
-          print('- 0x40012940 is decoded as Thumb/Thumb-2 because ARM-state callers use BLX immediate.')
-          print('- Exact tie behavior is frozen only if the helper instructions/constants uniquely determine it.')
-          print('- Because the helper is called during scale search, its semantics may alter both q[i] and selected scaleCode.')
+          print('- Helper body is decoded from exact function entry, not the preceding constant pool.')
+          print('- Exact tie behavior is frozen only if instructions/constants uniquely determine it.')
+          print('- Because helper is called during scale search, semantics may alter both q[i] and selected scaleCode.')
           PY
-      - name: Commit mode-corrected helper trace
+      - name: Commit function-entry helper trace
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add research/M10R_v269_round_helper_40012940.txt
-          git commit -m 'research: record mode-corrected v269 CC round-helper trace' || exit 0
+          git commit -m 'research: record function-entry v269 CC round-helper trace' || exit 0
           git pull --rebase origin m10r-wbcc0-v269-research
           git push
