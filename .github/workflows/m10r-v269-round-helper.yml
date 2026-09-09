@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 -m pip install --quiet capstone
-      - name: Unpack firmware and dump 0x40012940 exactly
+      - name: Unpack firmware and dump 0x40012940 in correct Thumb state
         shell: bash
         run: |
           set -euo pipefail
@@ -29,55 +29,44 @@ jobs:
           python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
           python3 - <<'PY' > research/M10R_v269_round_helper_40012940.txt
           from pathlib import Path
-          import struct, math
-          from capstone import Cs,CS_ARCH_ARM,CS_MODE_ARM,CS_MODE_LITTLE_ENDIAN
-          from capstone.arm import ARM_OP_MEM,ARM_REG_PC
+          import struct
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
 
           b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes()
           BASE=0x40000000; PFX=4
-          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN); md.detail=True
           def off(a): return PFX+a-BASE
-          def litaddr(i):
-              try:
-                  if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
-                      return i.address+8+i.operands[1].mem.disp
-              except Exception: pass
-              return None
-          def fmt(i):
-              s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
-              la=litaddr(i)
-              if la is not None:
-                  o=off(la)
-                  if 0 <= o <= len(b)-4:
-                      u=struct.unpack_from('<I',b,o)[0]
-                      s+=f' ; LIT32[{la:08x}]={u:08x}'
-                      if 0 <= o <= len(b)-8:
-                          d=struct.unpack_from('<d',b,o)[0]
-                          if math.isfinite(d): s+=f' F64={d:.17g}'
-              return s
-          def dump(a,z,title):
-              print(f'=== {title} {a:08x}..{z:08x} ===')
-              for i in md.disasm(b[off(a):off(z)],a): print(fmt(i))
+          def hx(a,z):
+              d=b[off(a):off(z)]
+              for q in range(0,len(d),16):
+                  print(f'{a+q:08x}: '+d[q:q+16].hex(' '))
+          def dump(a,z,title,thumb=False):
+              mode=(CS_MODE_THUMB if thumb else CS_MODE_ARM)|CS_MODE_LITTLE_ENDIAN
+              md=Cs(CS_ARCH_ARM,mode); md.detail=True
+              print(f'=== {title} {a:08x}..{z:08x} mode={"THUMB" if thumb else "ARM"} ===')
+              for i in md.disasm(b[off(a):off(z)],a):
+                  print(f'{i.address:08x}: {i.bytes.hex():10s} {i.mnemonic:12s} {i.op_str}')
               print()
-
-          print('M10-R v2.69 EXACT CC ROUND-HELPER TRACE')
+          print('M10-R v2.69 EXACT CC ROUND-HELPER TRACE — MODE-CORRECTED')
           print('firmware sha256 ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498')
-          print('Purpose: close 0x40012940 before treating rendered-CC tie rounding / scale selection as frozen.')
+          print('Key observation: ARM callers use BLX immediate to 0x40012940, so the target executes in Thumb state.')
           print()
-          dump(0x40012880,0x40012a40,'helper neighborhood containing 0x40012940')
-          dump(0x400038b0,0x40003b20,'rendered-CC builder and scale search callers')
-          dump(0x40012f20,0x40012f90,'additional direct caller neighborhood')
+          print('=== raw bytes around helper ===')
+          hx(0x40012920,0x40012a80)
+          print()
+          dump(0x40012920,0x40012a80,'helper neighborhood containing 0x40012940',thumb=True)
+          dump(0x400038b0,0x40003b20,'rendered-CC builder and scale-search callers',thumb=False)
+          dump(0x40012f20,0x40012f90,'additional direct caller neighborhood',thumb=False)
           print('INTERPRETATION BOUNDARY')
-          print('- Raw disassembly only. Do not infer C rounding semantics from a function name or prior oracle implementation.')
-          print('- Exact tie behavior is frozen only if instructions/constants uniquely determine it.')
-          print('- Because this helper is called during scale search, its semantics may alter both q[i] and selected scaleCode.')
+          print('- 0x40012940 is decoded as Thumb/Thumb-2 because ARM-state callers use BLX immediate.')
+          print('- Exact tie behavior is frozen only if the helper instructions/constants uniquely determine it.')
+          print('- Because the helper is called during scale search, its semantics may alter both q[i] and selected scaleCode.')
           PY
-      - name: Commit exact helper trace
+      - name: Commit mode-corrected helper trace
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add research/M10R_v269_round_helper_40012940.txt
-          git commit -m 'research: record v269 exact CC round-helper trace' || exit 0
+          git commit -m 'research: record mode-corrected v269 CC round-helper trace' || exit 0
           git pull --rebase origin m10r-wbcc0-v269-research
           git push
