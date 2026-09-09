@@ -1,8 +1,8 @@
-M10-R v2.69 EXACT CC ROUND-HELPER TRACE — MODE-CORRECTED
+M10-R v2.69 EXACT CC ROUND-HELPER TRACE — FUNCTION-ENTRY DECODE
 firmware sha256 ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498
-Key observation: ARM callers use BLX immediate to 0x40012940, so the target executes in Thumb state.
+ARM callers use BLX immediate to 0x40012940, so 0x40012940 executes in Thumb state.
 
-=== raw bytes around helper ===
+=== raw bytes / constants around helper ===
 40012920: 00 00 00 00 00 00 e0 3f 00 00 00 00 00 00 00 40
 40012930: 86 eb f9 ff a8 99 00 00 ae 99 00 00 00 00 00 00
 40012940: 10 b5 2d ed 02 0b 84 b0 9d ed 04 0b 51 ec 10 0b
@@ -26,15 +26,101 @@ Key observation: ARM callers use BLX immediate to 0x40012940, so the target exec
 40012a60: b0 ee 40 3b 31 f0 06 03 00 eb c1 02 92 ed 00 2b
 40012a70: b0 ee 42 0b 03 ee 01 0b f1 d1 02 29 17 d0 04 29
 
-=== helper neighborhood containing 0x40012940 40012920..40012a80 mode=THUMB ===
-40012920: 0000       movs         r0, r0
-40012922: 0000       movs         r0, r0
-40012924: 0000       movs         r0, r0
-40012926: e03f       subs         r7, #0xe0
-40012928: 0000       movs         r0, r0
-4001292a: 0000       movs         r0, r0
-4001292c: 0000       movs         r0, r0
-4001292e: 0040       ands         r0, r0
+=== 0x40012940 exact helper body 40012940..400129c8 mode=THUMB ===
+40012940: 10b5       push         {r4, lr}
+40012942: 2ded020b   vpush        {d0}
+40012946: 84b0       sub          sp, #0x10
+40012948: 9ded040b   vldr         d0, [sp, #0x10]
+4001294c: 51ec100b   vmov         r0, r1, d0
+40012950: 00f03efd   bl           #0x400133d0
+40012954: 41ec100b   vmov         d0, r0, r1
+40012958: 9ded041b   vldr         d1, [sp, #0x10]
+4001295c: 0598       ldr          r0, [sp, #0x14]
+4001295e: 9fed1a2b   vldr         d2, [pc, #0x68]
+40012962: 9fed1b3b   vldr         d3, [pc, #0x6c]
+40012966: 9fed1c4b   vldr         d4, [pc, #0x70]
+4001296a: 10f0004f   tst.w        r0, #-0x80000000
+4001296e: 31ee401b   vsub.f64     d1, d1, d0
+40012972: 0ad0       beq          #0x4001298a
+40012974: b4eec41b   vcmpe.f64    d1, d4
+40012978: f1ee10fa   vmrs         apsr_nzcv, fpscr
+4001297c: 0ad9       bls          #0x40012994
+4001297e: b4eec31b   vcmpe.f64    d1, d3
+40012982: f1ee10fa   vmrs         apsr_nzcv, fpscr
+40012986: 0fdd       ble          #0x400129a8
+40012988: 0ce0       b            #0x400129a4
+4001298a: b4eec41b   vcmpe.f64    d1, d4
+4001298e: f1ee10fa   vmrs         apsr_nzcv, fpscr
+40012992: 02d2       bhs          #0x4001299a
+40012994: 30ee420b   vsub.f64     d0, d0, d2
+40012998: 06e0       b            #0x400129a8
+4001299a: b4eec31b   vcmpe.f64    d1, d3
+4001299e: f1ee10fa   vmrs         apsr_nzcv, fpscr
+400129a2: 01db       blt          #0x400129a8
+400129a4: 30ee020b   vadd.f64     d0, d0, d2
+400129a8: 8ded020b   vstr         d0, [sp, #8]
+400129ac: 9ded040b   vldr         d0, [sp, #0x10]
+400129b0: 8ded000b   vstr         d0, [sp]
+400129b4: 0399       ldr          r1, [sp, #0xc]
+400129b6: 0198       ldr          r0, [sp, #4]
+400129b8: 61f31e00   bfi          r0, r1, #0, #0x1f
+400129bc: 0390       str          r0, [sp, #0xc]
+400129be: 9ded020b   vldr         d0, [sp, #8]
+400129c2: 06b0       add          sp, #0x18
+400129c4: 10bd       pop          {r4, pc}
+400129c6: 0000       movs         r0, r0
+
+=== next Thumb routine after helper 400129e4..40012a80 mode=THUMB ===
+400129e4: 1cff2fe1   vrhadd.u16   d14, d12, d31
+400129e8: 4df804ed   str          lr, [sp, #-0x4]!
+400129ec: 2ded028b   vpush        {d8}
+400129f0: b1eec08b   vsqrt.f64    d8, d0
+400129f4: 83b0       sub          sp, #0xc
+400129f6: 8ded008b   vstr         d8, [sp]
+400129fa: dde90001   ldrd         r0, r1, [sp]
+400129fe: 0028       cmp          r0, #0
+40012a00: 18bf       it           ne
+40012a02: 0120       movne        r0, #1
+40012a04: 0843       orrs         r0, r1
+40012a06: 20f00040   bic          r0, r0, #0x80000000
+40012a0a: c0f17f60   rsb.w        r0, r0, #0xff00000
+40012a0e: 00f1e040   add.w        r0, r0, #0x70000000
+40012a12: c00f       lsrs         r0, r0, #0x1f
+40012a14: 12d0       beq          #0x40012a3c
+40012a16: 8ded000b   vstr         d0, [sp]
+40012a1a: dde90010   ldrd         r1, r0, [sp]
+40012a1e: 0029       cmp          r1, #0
+40012a20: 18bf       it           ne
+40012a22: 0121       movne        r1, #1
+40012a24: 0843       orrs         r0, r1
+40012a26: 20f00040   bic          r0, r0, #0x80000000
+40012a2a: c0f17f60   rsb.w        r0, r0, #0xff00000
+40012a2e: 00f1e040   add.w        r0, r0, #0x70000000
+40012a32: c00f       lsrs         r0, r0, #0x1f
+40012a34: 04bf       itt          eq
+40012a36: 0120       moveq        r0, #1
+40012a38: fdf76afb   bleq         #0x40010110
+40012a3c: b0ee480b   vmov.f64     d0, d8
+40012a40: 03b0       add          sp, #0xc
+40012a42: bdec028b   vpop         {d8}
+40012a46: 5df804fb   ldr          pc, [sp], #4
+40012a4a: 491e       subs         r1, r1, #1
+40012a4c: b0ee401b   vmov.f64     d1, d0
+40012a50: 31f00603   bics         r3, r1, #6
+40012a54: 00ebc102   add.w        r2, r0, r1, lsl #3
+40012a58: 92ed000b   vldr         d0, [r2]
+40012a5c: 0dd0       beq          #0x40012a7a
+40012a5e: 491e       subs         r1, r1, #1
+40012a60: b0ee403b   vmov.f64     d3, d0
+40012a64: 31f00603   bics         r3, r1, #6
+40012a68: 00ebc102   add.w        r2, r0, r1, lsl #3
+40012a6c: 92ed002b   vldr         d2, [r2]
+40012a70: b0ee420b   vmov.f64     d0, d2
+40012a74: 03ee010b   vmla.f64     d0, d3, d1
+40012a78: f1d1       bne          #0x40012a5e
+40012a7a: 0229       cmp          r1, #2
+40012a7c: 17d0       beq          #0x40012aae
+40012a7e: 0429       cmp          r1, #4
 
 === rendered-CC builder and scale-search callers 400038b0..40003b20 mode=ARM ===
 400038b0: f0412de9   push         {r4, r5, r6, r7, r8, lr}
@@ -225,6 +311,6 @@ Key observation: ARM callers use BLX immediate to 0x40012940, so the target exec
 40012f8c: b0390140   strhmi       r3, [r1], -r0
 
 INTERPRETATION BOUNDARY
-- 0x40012940 is decoded as Thumb/Thumb-2 because ARM-state callers use BLX immediate.
-- Exact tie behavior is frozen only if the helper instructions/constants uniquely determine it.
-- Because the helper is called during scale search, its semantics may alter both q[i] and selected scaleCode.
+- Helper body is decoded from exact function entry, not the preceding constant pool.
+- Exact tie behavior is frozen only if instructions/constants uniquely determine it.
+- Because helper is called during scale search, semantics may alter both q[i] and selected scaleCode.
