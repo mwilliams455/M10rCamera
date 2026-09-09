@@ -24,6 +24,7 @@ def one(s,a,b,label):
 # DIAG1B supplies an explicit DCIM/Camera anchor and logs the writer result.
 # If the sidecar still cannot be written, the complete JSON payload is emitted
 # into the Photon log so the photographic diagnostic cannot be lost silently.
+# No photographic arithmetic is changed by this patch.
 
 grad='app/build.gradle'; g=rd(grad)
 g=one(g,
