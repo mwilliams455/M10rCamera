@@ -34,8 +34,8 @@ g=one(g,
 wr(grad,g)
 
 default='app/src/main/java/com/particlesdevs/photoncamera/processing/DefaultSaver.java'; d=rd(default)
-old='''                    if (capture1b != null) {\n                        M10RNativeRenderer.persistDiagnostics(capture1Jpeg, capture1b.diagnostics);\n                    }'''
-new='''                    if (capture1b != null) {\n                        // DIAG1B: JPEGSAVE1 puts capture1Jpeg in PhotonCamera/Raw, so\n                        // construct the intended public DCIM/Camera anchor explicitly.\n                        Path diagAnchor = java.nio.file.Paths.get(\n                                com.particlesdevs.photoncamera.util.FileManager.sDCIM_CAMERA.getAbsolutePath(),\n                                capture1Stem + ".jpg");\n                        capture1b.diagnostics.put("diagnosticsIntent",\n                                "DIAG1B_DCIM_CAMERA_EXPLICIT_WITH_LOG_FALLBACK");\n                        boolean diagSaved = M10RNativeRenderer.persistDiagnostics(\n                                diagAnchor, capture1b.diagnostics);\n                        Log.d(TAG, "M10-R DIAG1B JSON saved=" + diagSaved\n                                + " anchor=" + diagAnchor);\n                        if (!diagSaved) {\n                            Log.e(TAG, "M10-R DIAG1B JSON WRITE FAILED; payload="\n                                    + capture1b.diagnostics.toString());\n                        }\n                    }'''
+old='''M10RNativeRenderer.persistDiagnostics(capture1Jpeg, capture1b.diagnostics);'''
+new='''// DIAG1B: JPEGSAVE1 puts capture1Jpeg in PhotonCamera/Raw, so explicitly\n                    // target public DCIM/Camera while retaining the same capture stem.\n                    Path diagAnchor = java.nio.file.Paths.get(\n                            com.particlesdevs.photoncamera.util.FileManager.sDCIM_CAMERA.getAbsolutePath(),\n                            capture1Stem + ".jpg");\n                    try { capture1b.diagnostics.put("diagnosticsIntent",\n                            "DIAG1B_DCIM_CAMERA_EXPLICIT_WITH_LOG_FALLBACK"); } catch (Throwable ignored) {}\n                    boolean diagSaved = M10RNativeRenderer.persistDiagnostics(\n                            diagAnchor, capture1b.diagnostics);\n                    Log.d(TAG, "M10-R DIAG1B JSON saved=" + diagSaved + " anchor=" + diagAnchor);\n                    if (!diagSaved) {\n                        Log.e(TAG, "M10-R DIAG1B JSON WRITE FAILED; payload="\n                                + capture1b.diagnostics.toString());\n                    }'''
 d=one(d,old,new,'explicit-dcim-anchor')
 wr(default,d)
 
@@ -64,7 +64,8 @@ for x in [
     'DIAG1B_DCIM_CAMERA_EXPLICIT_WITH_LOG_FALLBACK',
     'M10-R DIAG1B JSON saved=',
     'M10-R DIAG1B JSON WRITE FAILED; payload=',
-    'persistDiagnostics(diagAnchor, capture1b.diagnostics)',
+    'persistDiagnostics(',
+    'diagAnchor, capture1b.diagnostics',
 ]:
     if x not in D: raise SystemExit('RENDER1F DIAG1B saver invariant missing: '+x)
 if 'persistDiagnostics(capture1Jpeg, capture1b.diagnostics)' in D:
