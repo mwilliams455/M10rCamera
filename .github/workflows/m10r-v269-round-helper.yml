@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 -m pip install --quiet capstone
-      - name: Unpack firmware and dump 0x40012940 in correct Thumb state
+      - name: Unpack firmware and dump round helper plus residual-base callee
         shell: bash
         run: |
           set -euo pipefail
@@ -45,28 +45,28 @@ jobs:
               for i in md.disasm(b[off(a):off(z)],a):
                   print(f'{i.address:08x}: {i.bytes.hex():10s} {i.mnemonic:12s} {i.op_str}')
               print()
-          print('M10-R v2.69 EXACT CC ROUND-HELPER TRACE — FUNCTION-ENTRY DECODE')
+          print('M10-R v2.69 EXACT CC ROUND-HELPER TRACE — CALLEE INCLUDED')
           print('firmware sha256 ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498')
-          print('ARM callers use BLX immediate to 0x40012940, so 0x40012940 executes in Thumb state.')
+          print('ARM callers BLX 0x40012940; helper executes Thumb. Helper BL 0x400133D0; callee also executes Thumb.')
           print()
           print('=== raw bytes / constants around helper ===')
           hx(0x40012920,0x40012a80)
           print()
           dump(0x40012940,0x400129c8,'0x40012940 exact helper body',thumb=True)
-          dump(0x400129e4,0x40012a80,'next Thumb routine after helper',thumb=True)
+          dump(0x400133d0,0x40013520,'0x400133D0 residual-base callee',thumb=True)
           dump(0x400038b0,0x40003b20,'rendered-CC builder and scale-search callers',thumb=False)
           dump(0x40012f20,0x40012f90,'additional direct caller neighborhood',thumb=False)
           print('INTERPRETATION BOUNDARY')
-          print('- Helper body is decoded from exact function entry, not the preceding constant pool.')
-          print('- Exact tie behavior is frozen only if instructions/constants uniquely determine it.')
-          print('- Because helper is called during scale search, semantics may alter both q[i] and selected scaleCode.')
+          print('- d2/d3/d4 literals used by 0x40012940 resolve to +1.0/+0.5/-0.5.')
+          print('- Exact round mode is frozen only after identifying what 0x400133D0 returns for finite positive/negative doubles.')
+          print('- Helper participates in scale search, so semantics can alter q[i] and selected scaleCode.')
           PY
-      - name: Commit function-entry helper trace
+      - name: Commit helper plus callee trace
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add research/M10R_v269_round_helper_40012940.txt
-          git commit -m 'research: record function-entry v269 CC round-helper trace' || exit 0
+          git commit -m 'research: record v269 CC round-helper callee trace' || exit 0
           git pull --rebase origin m10r-wbcc0-v269-research
           git push
