@@ -130,10 +130,12 @@ for x in [
     'saf_fallback',
 ]:
     if x not in H: raise SystemExit('RENDER1F DIAG1D helper invariant missing: '+x)
-if 'Files.createDirectories(parent);' in R:
-    raise SystemExit('RENDER1F DIAG1D old public createDirectories gate remains')
-if 'Files.write(sidecar' in R:
-    raise SystemExit('RENDER1F DIAG1D old direct-only Files.write remains')
+# Scope the writer guard to persistDiagnostics itself. M10RNativeRenderer contains
+# other diagnostic/failure-sidecar Files.write calls that are intentionally untouched.
+if old in R:
+    raise SystemExit('RENDER1F DIAG1D old persistDiagnostics implementation remains')
+if new not in R:
+    raise SystemExit('RENDER1F DIAG1D new persistDiagnostics implementation missing')
 for x in [
     'capture1Jpeg, capture1b.diagnostics',
     'M10-R DIAG1C PAYLOAD part=',
@@ -145,7 +147,7 @@ if '-diag1d-m9sidecario1a' not in G:
 
 print('M10-R RENDER1F DIAG1D M9SIDECARIO1A applied')
 print(' - exact M9 SIDECAR1A transport principle ported: direct filesystem first, Photon SAF fallback second')
-print(' - public Files.createDirectories gate removed')
+print(' - public Files.createDirectories gate removed from persistDiagnostics')
 print(' - M10-R sidecar naming/payload retained')
 print(' - DIAG1C complete-log fallback retained')
 print(' - rendering, colour, tone, edge, exposure, JPEG quality, 12MP, single RAW and HDR-off unchanged')
