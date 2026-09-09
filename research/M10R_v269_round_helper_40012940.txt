@@ -1,209 +1,230 @@
-M10-R v2.69 EXACT CC ROUND-HELPER TRACE
+M10-R v2.69 EXACT CC ROUND-HELPER TRACE — MODE-CORRECTED
 firmware sha256 ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498
-Purpose: close 0x40012940 before treating rendered-CC tie rounding / scale selection as frozen.
+Key observation: ARM callers use BLX immediate to 0x40012940, so the target executes in Thumb state.
 
-=== helper neighborhood containing 0x40012940 40012880..40012a40 ===
-40012880: vadd.f64   d0, d0, d8
-40012884: svclt      #0x41b01
-40012888: bleq       #0x4108e0b4
-4001288c: bleq       #0x4104e174
-40012890: cdp        p0, #2, c13, c1, c0, #6
-40012894: vmla.f64   d1, d10, d9
-40012898: vadd.f64   d1, d0, d12
-4001289c: vsub.f64   d0, d0, d1
-400128a0: vnmla.f64  d0, d10, d8
-400128a4: fldmiax    sp!, {d0, d1, d2, d3, d4}
-400128a8: andlt      r8, r2, r0, lsl fp
+=== raw bytes around helper ===
+40012920: 00 00 00 00 00 00 e0 3f 00 00 00 00 00 00 00 40
+40012930: 86 eb f9 ff a8 99 00 00 ae 99 00 00 00 00 00 00
+40012940: 10 b5 2d ed 02 0b 84 b0 9d ed 04 0b 51 ec 10 0b
+40012950: 00 f0 3e fd 41 ec 10 0b 9d ed 04 1b 05 98 9f ed
+40012960: 1a 2b 9f ed 1b 3b 9f ed 1c 4b 10 f0 00 4f 31 ee
+40012970: 40 1b 0a d0 b4 ee c4 1b f1 ee 10 fa 0a d9 b4 ee
+40012980: c3 1b f1 ee 10 fa 0f dd 0c e0 b4 ee c4 1b f1 ee
+40012990: 10 fa 02 d2 30 ee 42 0b 06 e0 b4 ee c3 1b f1 ee
+400129a0: 10 fa 01 db 30 ee 02 0b 8d ed 02 0b 9d ed 04 0b
+400129b0: 8d ed 00 0b 03 99 01 98 61 f3 1e 00 03 90 9d ed
+400129c0: 02 0b 06 b0 10 bd 00 00 00 00 00 00 00 00 f0 3f
+400129d0: 00 00 00 00 00 00 e0 3f 00 00 00 00 00 00 e0 bf
+400129e0: 01 c0 8f e2 1c ff 2f e1 4d f8 04 ed 2d ed 02 8b
+400129f0: b1 ee c0 8b 83 b0 8d ed 00 8b dd e9 00 01 00 28
+40012a00: 18 bf 01 20 08 43 20 f0 00 40 c0 f1 7f 60 00 f1
+40012a10: e0 40 c0 0f 12 d0 8d ed 00 0b dd e9 00 10 00 29
+40012a20: 18 bf 01 21 08 43 20 f0 00 40 c0 f1 7f 60 00 f1
+40012a30: e0 40 c0 0f 04 bf 01 20 fd f7 6a fb b0 ee 48 0b
+40012a40: 03 b0 bd ec 02 8b 5d f8 04 fb 49 1e b0 ee 40 1b
+40012a50: 31 f0 06 03 00 eb c1 02 92 ed 00 0b 0d d0 49 1e
+40012a60: b0 ee 40 3b 31 f0 06 03 00 eb c1 02 92 ed 00 2b
+40012a70: b0 ee 42 0b 03 ee 01 0b f1 d1 02 29 17 d0 04 29
 
-=== rendered-CC builder and scale search callers 400038b0..40003b20 ===
-400038b0: push       {r4, r5, r6, r7, r8, lr}
-400038b4: mov        r6, r1
-400038b8: mov        r5, r0
-400038bc: mov        r0, #1
-400038c0: rsb        r1, r2, #9
-400038c4: mov        r7, r3
-400038c8: vpush      {d8}
-400038cc: lsl        r0, r0, r1
-400038d0: str        r2, [r5, #0x24]
-400038d4: vmov       s0, r0
-400038d8: vcvt.f64.s32 d8, s0
-400038dc: vldr       d0, [r6]
-400038e0: vmul.f64   d0, d0, d8
-400038e4: blx        #0x40012940
-400038e8: vcvt.s32.f64 s0, d0
-400038ec: ldr        r4, [pc, #0x744] ; LIT32[40004038]=40013930 F64=5.3053855994853905e-315
-400038f0: ldr        r0, [r4]
-400038f4: ldr        r2, [r4, #4]
-400038f8: vmov       r1, s0
-400038fc: bl         #0x40012b4c
-40003900: str        r0, [r5]
-40003904: vldr       d0, [r6, #8]
-40003908: vmul.f64   d0, d0, d8
-4000390c: blx        #0x40012940
-40003910: vcvt.s32.f64 s0, d0
-40003914: ldr        r0, [r4]
-40003918: ldr        r2, [r4, #4]
-4000391c: vmov       r1, s0
-40003920: bl         #0x40012b4c
-40003924: str        r0, [r5, #4]
-40003928: vldr       d0, [r6, #0x10]
-4000392c: vmul.f64   d0, d0, d8
-40003930: blx        #0x40012940
-40003934: vcvt.s32.f64 s0, d0
-40003938: ldr        r0, [r4]
-4000393c: ldr        r2, [r4, #4]
-40003940: vmov       r1, s0
-40003944: bl         #0x40012b4c
-40003948: str        r0, [r5, #8]
-4000394c: vldr       d0, [r6, #0x18]
-40003950: vmul.f64   d0, d0, d8
-40003954: blx        #0x40012940
-40003958: vcvt.s32.f64 s0, d0
-4000395c: ldr        r0, [r4]
-40003960: ldr        r2, [r4, #4]
-40003964: vmov       r1, s0
-40003968: bl         #0x40012b4c
-4000396c: str        r0, [r5, #0xc]
-40003970: vldr       d0, [r6, #0x20]
-40003974: vmul.f64   d0, d0, d8
-40003978: blx        #0x40012940
-4000397c: vcvt.s32.f64 s0, d0
-40003980: ldr        r0, [r4]
-40003984: ldr        r2, [r4, #4]
-40003988: vmov       r1, s0
-4000398c: bl         #0x40012b4c
-40003990: str        r0, [r5, #0x10]
-40003994: vldr       d0, [r6, #0x28]
-40003998: vmul.f64   d0, d0, d8
-4000399c: blx        #0x40012940
-400039a0: vcvt.s32.f64 s0, d0
-400039a4: ldr        r0, [r4]
-400039a8: ldr        r2, [r4, #4]
-400039ac: vmov       r1, s0
-400039b0: bl         #0x40012b4c
-400039b4: str        r0, [r5, #0x14]
-400039b8: vldr       d0, [r6, #0x30]
-400039bc: vmul.f64   d0, d0, d8
-400039c0: blx        #0x40012940
-400039c4: vcvt.s32.f64 s0, d0
-400039c8: ldr        r0, [r4]
-400039cc: ldr        r2, [r4, #4]
-400039d0: vmov       r1, s0
-400039d4: bl         #0x40012b4c
-400039d8: str        r0, [r5, #0x18]
-400039dc: vldr       d0, [r6, #0x38]
-400039e0: vmul.f64   d0, d0, d8
-400039e4: blx        #0x40012940
-400039e8: vcvt.s32.f64 s0, d0
-400039ec: ldr        r0, [r4]
-400039f0: ldr        r2, [r4, #4]
-400039f4: vmov       r1, s0
-400039f8: bl         #0x40012b4c
-400039fc: str        r0, [r5, #0x1c]
-40003a00: vldr       d0, [r6, #0x40]
-40003a04: vmul.f64   d0, d0, d8
-40003a08: blx        #0x40012940
-40003a0c: vcvt.s32.f64 s0, d0
-40003a10: ldr        r0, [r4]
-40003a14: ldr        r2, [r4, #4]
-40003a18: vmov       r1, s0
-40003a1c: bl         #0x40012b4c
-40003a20: vmov       s0, r7
-40003a24: str        r0, [r5, #0x20]
-40003a28: vcvt.f64.s32 d0, s0
-40003a2c: blx        #0x40012940
-40003a30: vcvt.s32.f64 s0, d0
-40003a34: vstr       s0, [r5, #0x28]
-40003a38: vpop       {d8}
-40003a3c: pop        {r4, r5, r6, r7, r8, pc}
-40003a40: push       {r4, r5, r6, r7, r8, sb, sl, lr}
-40003a44: mov        r8, r0
-40003a48: ldr        r4, [pc, #0x5e8] ; LIT32[40004038]=40013930 F64=5.3053855994853905e-315
-40003a4c: mov        sb, r1
-40003a50: mov        r7, #1
-40003a54: vpush      {d8, d9, d10}
-40003a58: ldr        r0, [r4, #0xc]
-40003a5c: ldr        r5, [r4, #8]
-40003a60: cmp        r5, r0
-40003a64: bge        #0x40003ae8
-40003a68: mov        r0, sb
-40003a6c: bl         #0x400041b8
-40003a70: vmov.f64   d10, d0
-40003a74: mov        r0, sb
-40003a78: bl         #0x40004150
-40003a7c: rsb        r0, r5, #9
-40003a80: vmov.f64   d9, d0
-40003a84: lsl        r0, r7, r0
-40003a88: vmov       s0, r0
-40003a8c: vcvt.f64.s32 d8, s0
-40003a90: vmul.f64   d0, d10, d8
-40003a94: blx        #0x40012940
-40003a98: vcvt.s32.f64 s0, d0
-40003a9c: ldr        r1, [r4]
-40003aa0: vmov       r0, s0
-40003aa4: vmul.f64   d0, d9, d8
-40003aa8: cmp        r0, r1
-40003aac: movge      r6, #1
-40003ab0: movlt      r6, #0
-40003ab4: blx        #0x40012940
-40003ab8: vcvt.s32.f64 s0, d0
-40003abc: ldr        r1, [r4, #4]
-40003ac0: vmov       r0, s0
-40003ac4: cmp        r0, r1
-40003ac8: movle      r0, #1
-40003acc: movgt      r0, #0
-40003ad0: tst        r0, r6
-40003ad4: bne        #0x40003ae8
-40003ad8: ldr        r0, [r4, #0xc]
-40003adc: add        r5, r5, #1
-40003ae0: cmp        r5, r0
-40003ae4: blt        #0x40003a68
-40003ae8: str        r5, [r8]
-40003aec: vpop       {d8, d9, d10}
-40003af0: pop        {r4, r5, r6, r7, r8, sb, sl, pc}
-40003af4: push       {r4, r5, r6, r7, r8, sb, sl, fp, lr}
-40003af8: mov        r7, #0
-40003afc: mov        r4, r0
-40003b00: mov        r1, #0x48
-40003b04: vpush      {d8, d9, d10}
-40003b08: sub        sp, sp, #0x324
-40003b0c: add        r0, sp, #0x2c8
-40003b10: str        r7, [sp, #0x120]
-40003b14: str        r7, [sp, #0x128]
-40003b18: str        r7, [sp, #0x12c]
-40003b1c: str        r7, [sp, #0x134]
+=== helper neighborhood containing 0x40012940 40012920..40012a80 mode=THUMB ===
+40012920: 0000       movs         r0, r0
+40012922: 0000       movs         r0, r0
+40012924: 0000       movs         r0, r0
+40012926: e03f       subs         r7, #0xe0
+40012928: 0000       movs         r0, r0
+4001292a: 0000       movs         r0, r0
+4001292c: 0000       movs         r0, r0
+4001292e: 0040       ands         r0, r0
 
-=== additional direct caller neighborhood 40012f20..40012f90 ===
-40012f20: add        r6, r6, #4
-40012f24: vcvt.f64.s32 d2, s1
-40012f28: vcvt.f64.s32 d1, s0
-40012f2c: vdiv.f64   d0, d2, d1
-40012f30: blx        #0x40012940
-40012f34: vstr       d0, [r5, #8]
-40012f38: vmov       s0, r4
-40012f3c: vldr       s1, [r6, #4]
-40012f40: add        r5, r5, #8
-40012f44: add        r6, r6, #4
-40012f48: vcvt.f64.s32 d2, s1
-40012f4c: vcvt.f64.s32 d1, s0
-40012f50: vdiv.f64   d0, d2, d1
-40012f54: blx        #0x40012940
-40012f58: vstr       d0, [r5, #8]
-40012f5c: vmov       s0, r4
-40012f60: vldr       s1, [r6, #4]
-40012f64: add        r5, r5, #8
-40012f68: vcvt.f64.s32 d2, s1
-40012f6c: vcvt.f64.s32 d1, s0
-40012f70: vdiv.f64   d0, d2, d1
-40012f74: blx        #0x40012940
-40012f78: vstr       d0, [r5, #8]
-40012f7c: pop        {r4, r5, r6, r7, r8, pc}
-40012f80: ldr        r1, [pc, #4] ; LIT32[40012f8c]=400139b0 F64=-3.2223649113756623e+181
-40012f84: mov        r2, #0x48
-40012f88: b          #0x4000fdb4
-40012f8c: strhmi     r3, [r1], -r0
+=== rendered-CC builder and scale-search callers 400038b0..40003b20 mode=ARM ===
+400038b0: f0412de9   push         {r4, r5, r6, r7, r8, lr}
+400038b4: 0160a0e1   mov          r6, r1
+400038b8: 0050a0e1   mov          r5, r0
+400038bc: 0100a0e3   mov          r0, #1
+400038c0: 091062e2   rsb          r1, r2, #9
+400038c4: 0370a0e1   mov          r7, r3
+400038c8: 028b2ded   vpush        {d8}
+400038cc: 1001a0e1   lsl          r0, r0, r1
+400038d0: 242085e5   str          r2, [r5, #0x24]
+400038d4: 100a00ee   vmov         s0, r0
+400038d8: c08bb8ee   vcvt.f64.s32 d8, s0
+400038dc: 000b96ed   vldr         d0, [r6]
+400038e0: 080b20ee   vmul.f64     d0, d0, d8
+400038e4: 153c00fa   blx          #0x40012940
+400038e8: c00bbdee   vcvt.s32.f64 s0, d0
+400038ec: 44479fe5   ldr          r4, [pc, #0x744]
+400038f0: 000094e5   ldr          r0, [r4]
+400038f4: 042094e5   ldr          r2, [r4, #4]
+400038f8: 101a10ee   vmov         r1, s0
+400038fc: 923c00eb   bl           #0x40012b4c
+40003900: 000085e5   str          r0, [r5]
+40003904: 020b96ed   vldr         d0, [r6, #8]
+40003908: 080b20ee   vmul.f64     d0, d0, d8
+4000390c: 0b3c00fa   blx          #0x40012940
+40003910: c00bbdee   vcvt.s32.f64 s0, d0
+40003914: 000094e5   ldr          r0, [r4]
+40003918: 042094e5   ldr          r2, [r4, #4]
+4000391c: 101a10ee   vmov         r1, s0
+40003920: 893c00eb   bl           #0x40012b4c
+40003924: 040085e5   str          r0, [r5, #4]
+40003928: 040b96ed   vldr         d0, [r6, #0x10]
+4000392c: 080b20ee   vmul.f64     d0, d0, d8
+40003930: 023c00fa   blx          #0x40012940
+40003934: c00bbdee   vcvt.s32.f64 s0, d0
+40003938: 000094e5   ldr          r0, [r4]
+4000393c: 042094e5   ldr          r2, [r4, #4]
+40003940: 101a10ee   vmov         r1, s0
+40003944: 803c00eb   bl           #0x40012b4c
+40003948: 080085e5   str          r0, [r5, #8]
+4000394c: 060b96ed   vldr         d0, [r6, #0x18]
+40003950: 080b20ee   vmul.f64     d0, d0, d8
+40003954: f93b00fa   blx          #0x40012940
+40003958: c00bbdee   vcvt.s32.f64 s0, d0
+4000395c: 000094e5   ldr          r0, [r4]
+40003960: 042094e5   ldr          r2, [r4, #4]
+40003964: 101a10ee   vmov         r1, s0
+40003968: 773c00eb   bl           #0x40012b4c
+4000396c: 0c0085e5   str          r0, [r5, #0xc]
+40003970: 080b96ed   vldr         d0, [r6, #0x20]
+40003974: 080b20ee   vmul.f64     d0, d0, d8
+40003978: f03b00fa   blx          #0x40012940
+4000397c: c00bbdee   vcvt.s32.f64 s0, d0
+40003980: 000094e5   ldr          r0, [r4]
+40003984: 042094e5   ldr          r2, [r4, #4]
+40003988: 101a10ee   vmov         r1, s0
+4000398c: 6e3c00eb   bl           #0x40012b4c
+40003990: 100085e5   str          r0, [r5, #0x10]
+40003994: 0a0b96ed   vldr         d0, [r6, #0x28]
+40003998: 080b20ee   vmul.f64     d0, d0, d8
+4000399c: e73b00fa   blx          #0x40012940
+400039a0: c00bbdee   vcvt.s32.f64 s0, d0
+400039a4: 000094e5   ldr          r0, [r4]
+400039a8: 042094e5   ldr          r2, [r4, #4]
+400039ac: 101a10ee   vmov         r1, s0
+400039b0: 653c00eb   bl           #0x40012b4c
+400039b4: 140085e5   str          r0, [r5, #0x14]
+400039b8: 0c0b96ed   vldr         d0, [r6, #0x30]
+400039bc: 080b20ee   vmul.f64     d0, d0, d8
+400039c0: de3b00fa   blx          #0x40012940
+400039c4: c00bbdee   vcvt.s32.f64 s0, d0
+400039c8: 000094e5   ldr          r0, [r4]
+400039cc: 042094e5   ldr          r2, [r4, #4]
+400039d0: 101a10ee   vmov         r1, s0
+400039d4: 5c3c00eb   bl           #0x40012b4c
+400039d8: 180085e5   str          r0, [r5, #0x18]
+400039dc: 0e0b96ed   vldr         d0, [r6, #0x38]
+400039e0: 080b20ee   vmul.f64     d0, d0, d8
+400039e4: d53b00fa   blx          #0x40012940
+400039e8: c00bbdee   vcvt.s32.f64 s0, d0
+400039ec: 000094e5   ldr          r0, [r4]
+400039f0: 042094e5   ldr          r2, [r4, #4]
+400039f4: 101a10ee   vmov         r1, s0
+400039f8: 533c00eb   bl           #0x40012b4c
+400039fc: 1c0085e5   str          r0, [r5, #0x1c]
+40003a00: 100b96ed   vldr         d0, [r6, #0x40]
+40003a04: 080b20ee   vmul.f64     d0, d0, d8
+40003a08: cc3b00fa   blx          #0x40012940
+40003a0c: c00bbdee   vcvt.s32.f64 s0, d0
+40003a10: 000094e5   ldr          r0, [r4]
+40003a14: 042094e5   ldr          r2, [r4, #4]
+40003a18: 101a10ee   vmov         r1, s0
+40003a1c: 4a3c00eb   bl           #0x40012b4c
+40003a20: 107a00ee   vmov         s0, r7
+40003a24: 200085e5   str          r0, [r5, #0x20]
+40003a28: c00bb8ee   vcvt.f64.s32 d0, s0
+40003a2c: c33b00fa   blx          #0x40012940
+40003a30: c00bbdee   vcvt.s32.f64 s0, d0
+40003a34: 0a0a85ed   vstr         s0, [r5, #0x28]
+40003a38: 028bbdec   vpop         {d8}
+40003a3c: f081bde8   pop          {r4, r5, r6, r7, r8, pc}
+40003a40: f0472de9   push         {r4, r5, r6, r7, r8, sb, sl, lr}
+40003a44: 0080a0e1   mov          r8, r0
+40003a48: e8459fe5   ldr          r4, [pc, #0x5e8]
+40003a4c: 0190a0e1   mov          sb, r1
+40003a50: 0170a0e3   mov          r7, #1
+40003a54: 068b2ded   vpush        {d8, d9, d10}
+40003a58: 0c0094e5   ldr          r0, [r4, #0xc]
+40003a5c: 085094e5   ldr          r5, [r4, #8]
+40003a60: 000055e1   cmp          r5, r0
+40003a64: 1f0000aa   bge          #0x40003ae8
+40003a68: 0900a0e1   mov          r0, sb
+40003a6c: d10100eb   bl           #0x400041b8
+40003a70: 40abb0ee   vmov.f64     d10, d0
+40003a74: 0900a0e1   mov          r0, sb
+40003a78: b40100eb   bl           #0x40004150
+40003a7c: 090065e2   rsb          r0, r5, #9
+40003a80: 409bb0ee   vmov.f64     d9, d0
+40003a84: 1700a0e1   lsl          r0, r7, r0
+40003a88: 100a00ee   vmov         s0, r0
+40003a8c: c08bb8ee   vcvt.f64.s32 d8, s0
+40003a90: 080b2aee   vmul.f64     d0, d10, d8
+40003a94: a93b00fa   blx          #0x40012940
+40003a98: c00bbdee   vcvt.s32.f64 s0, d0
+40003a9c: 001094e5   ldr          r1, [r4]
+40003aa0: 100a10ee   vmov         r0, s0
+40003aa4: 080b29ee   vmul.f64     d0, d9, d8
+40003aa8: 010050e1   cmp          r0, r1
+40003aac: 0160a0a3   movge        r6, #1
+40003ab0: 0060a0b3   movlt        r6, #0
+40003ab4: a13b00fa   blx          #0x40012940
+40003ab8: c00bbdee   vcvt.s32.f64 s0, d0
+40003abc: 041094e5   ldr          r1, [r4, #4]
+40003ac0: 100a10ee   vmov         r0, s0
+40003ac4: 010050e1   cmp          r0, r1
+40003ac8: 0100a0d3   movle        r0, #1
+40003acc: 0000a0c3   movgt        r0, #0
+40003ad0: 060010e1   tst          r0, r6
+40003ad4: 0300001a   bne          #0x40003ae8
+40003ad8: 0c0094e5   ldr          r0, [r4, #0xc]
+40003adc: 015085e2   add          r5, r5, #1
+40003ae0: 000055e1   cmp          r5, r0
+40003ae4: dfffffba   blt          #0x40003a68
+40003ae8: 005088e5   str          r5, [r8]
+40003aec: 068bbdec   vpop         {d8, d9, d10}
+40003af0: f087bde8   pop          {r4, r5, r6, r7, r8, sb, sl, pc}
+40003af4: f04f2de9   push         {r4, r5, r6, r7, r8, sb, sl, fp, lr}
+40003af8: 0070a0e3   mov          r7, #0
+40003afc: 0040a0e1   mov          r4, r0
+40003b00: 4810a0e3   mov          r1, #0x48
+40003b04: 068b2ded   vpush        {d8, d9, d10}
+40003b08: c9df4de2   sub          sp, sp, #0x324
+40003b0c: b20f8de2   add          r0, sp, #0x2c8
+40003b10: 20718de5   str          r7, [sp, #0x120]
+40003b14: 28718de5   str          r7, [sp, #0x128]
+40003b18: 2c718de5   str          r7, [sp, #0x12c]
+40003b1c: 34718de5   str          r7, [sp, #0x134]
+
+=== additional direct caller neighborhood 40012f20..40012f90 mode=ARM ===
+40012f20: 046086e2   add          r6, r6, #4
+40012f24: e02bb8ee   vcvt.f64.s32 d2, s1
+40012f28: c01bb8ee   vcvt.f64.s32 d1, s0
+40012f2c: 010b82ee   vdiv.f64     d0, d2, d1
+40012f30: 82fefffa   blx          #0x40012940
+40012f34: 020b85ed   vstr         d0, [r5, #8]
+40012f38: 104a00ee   vmov         s0, r4
+40012f3c: 010ad6ed   vldr         s1, [r6, #4]
+40012f40: 085085e2   add          r5, r5, #8
+40012f44: 046086e2   add          r6, r6, #4
+40012f48: e02bb8ee   vcvt.f64.s32 d2, s1
+40012f4c: c01bb8ee   vcvt.f64.s32 d1, s0
+40012f50: 010b82ee   vdiv.f64     d0, d2, d1
+40012f54: 79fefffa   blx          #0x40012940
+40012f58: 020b85ed   vstr         d0, [r5, #8]
+40012f5c: 104a00ee   vmov         s0, r4
+40012f60: 010ad6ed   vldr         s1, [r6, #4]
+40012f64: 085085e2   add          r5, r5, #8
+40012f68: e02bb8ee   vcvt.f64.s32 d2, s1
+40012f6c: c01bb8ee   vcvt.f64.s32 d1, s0
+40012f70: 010b82ee   vdiv.f64     d0, d2, d1
+40012f74: 71fefffa   blx          #0x40012940
+40012f78: 020b85ed   vstr         d0, [r5, #8]
+40012f7c: f081bde8   pop          {r4, r5, r6, r7, r8, pc}
+40012f80: 04109fe5   ldr          r1, [pc, #4]
+40012f84: 4820a0e3   mov          r2, #0x48
+40012f88: 89f3ffea   b            #0x4000fdb4
+40012f8c: b0390140   strhmi       r3, [r1], -r0
 
 INTERPRETATION BOUNDARY
-- Raw disassembly only. Do not infer C rounding semantics from a function name or prior oracle implementation.
-- Exact tie behavior is frozen only if instructions/constants uniquely determine it.
-- Because this helper is called during scale search, its semantics may alter both q[i] and selected scaleCode.
+- 0x40012940 is decoded as Thumb/Thumb-2 because ARM-state callers use BLX immediate.
+- Exact tie behavior is frozen only if the helper instructions/constants uniquely determine it.
+- Because the helper is called during scale search, its semantics may alter both q[i] and selected scaleCode.
