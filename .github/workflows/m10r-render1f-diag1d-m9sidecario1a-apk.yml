@@ -1,0 +1,179 @@
+name: M10-R RENDER1F DIAG1D M9SIDECARIO1A APK
+
+on:
+  push:
+    branches: [m10r-render1f-diag1d-m9sidecario1a-build]
+    paths:
+      - '.github/workflows/m10r-render1f-diag1d-m9sidecario1a-apk.yml'
+      - 'patches/fix-m10r-render1f-diag1d-m9sidecario1a.py'
+  workflow_dispatch:
+
+jobs:
+  build-render1f-diag1d-m9sidecario1a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout M10-R repo
+        uses: actions/checkout@v4
+
+      - name: Verify patch syntax
+        run: |
+          set -euo pipefail
+          for p in \
+            patches/apply-m10r-capture1-foundation.py \
+            patches/apply-m10r-capture1b-renderer.py \
+            patches/fix-m10r-capture1b-compile1.py \
+            patches/fix-m10r-capture1b-opencv1.py \
+            patches/fix-m10r-capture1b-compile2.py \
+            patches/fix-m10r-capture1b-device1.py \
+            patches/fix-m10r-capture1b-jpegsave1.py \
+            patches/fix-m10r-capture1b-rgborder1a.py \
+            patches/fix-m10r-capture1b-sourcecm1a.py \
+            patches/fix-m10r-capture1b-tonedg1a.py \
+            patches/fix-m10r-capture1b-tonedg1b.py \
+            patches/fix-m10r-render1a-stability1.py \
+            patches/fix-m10r-render1a-stability2.py \
+            patches/fix-m10r-render1a-stability3-native1.py \
+            patches/fix-m10r-render1b-look1a-yc1a.py \
+            patches/fix-m10r-render1b-look1b-yc1b.py \
+            patches/fix-m10r-render1c-edge1a.py \
+            patches/fix-m10r-render1d-edge1b-scale1a.py \
+            patches/fix-m10r-render1e-edge1c-gain1a.py \
+            patches/fix-m10r-render1f-yc2a-matrix1a.py \
+            patches/fix-m10r-render1f-diag1a.py \
+            patches/fix-m10r-render1f-diag1b.py \
+            patches/fix-m10r-render1f-diag1c.py \
+            patches/fix-m10r-render1f-diag1d-m9sidecario1a.py; do
+              python3 -m py_compile "$p"
+          done
+          python3 -m py_compile tools/m10r_sections.py tools/m10r_b2y_assets.py
+
+      - name: Clone exact Photon baseline
+        run: |
+          set -euo pipefail
+          PHOTON_SHA=f0e6425d2509fb8ab834d5d3af593183038b778c
+          git clone --depth 1 --branch dev https://github.com/eszdman/PhotonCamera.git PhotonCamera
+          git -C PhotonCamera fetch --depth 1 origin "$PHOTON_SHA"
+          git -C PhotonCamera checkout --detach FETCH_HEAD
+          test "$(git -C PhotonCamera rev-parse HEAD)" = "$PHOTON_SHA"
+          git -C PhotonCamera rev-parse HEAD | tee PHOTON_UPSTREAM_COMMIT.txt
+
+      - name: Extract exact M10-R B2Y assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          B2Y=/tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin
+          test -f "$B2Y"
+          rm -rf /tmp/m10r_b2y_assets
+          python3 tools/m10r_b2y_assets.py "$B2Y" /tmp/m10r_b2y_assets >/tmp/m10r_b2y_manifest.stdout.json
+          echo '2fd6ca209f290c75aa96976b3d7692e55c41a55c0017a063aba9808da3b41a00  /tmp/m10r_b2y_assets/tone_medium_q15.u32le' | sha256sum -c -
+          echo '9e65de24d52271be0783f4e2728f20f482c0ba43b63159b75033b4a4fc75457d  /tmp/m10r_b2y_assets/dg_expanded_u16le.bin' | sha256sum -c -
+
+      - name: Apply frozen RENDER1F plus DIAG1A/B/C and M9 SIDECARIO1A port
+        run: |
+          set -euo pipefail
+          B2Y=/tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin
+          python3 patches/apply-m10r-capture1-foundation.py PhotonCamera
+          python3 patches/apply-m10r-capture1b-renderer.py PhotonCamera
+          python3 patches/fix-m10r-capture1b-compile1.py PhotonCamera
+          python3 patches/fix-m10r-capture1b-opencv1.py PhotonCamera
+          python3 patches/fix-m10r-capture1b-compile2.py PhotonCamera
+          python3 patches/fix-m10r-capture1b-device1.py PhotonCamera
+          python3 patches/fix-m10r-capture1b-jpegsave1.py PhotonCamera
+          python3 patches/fix-m10r-capture1b-rgborder1a.py PhotonCamera
+          python3 patches/verify-m10r-capture1b.py PhotonCamera
+          python3 patches/fix-m10r-capture1b-sourcecm1a.py PhotonCamera
+          python3 patches/fix-m10r-capture1b-tonedg1a.py PhotonCamera /tmp/m10r_b2y_assets
+          python3 patches/fix-m10r-capture1b-tonedg1b.py PhotonCamera
+          python3 patches/fix-m10r-render1a-stability1.py PhotonCamera
+          python3 patches/fix-m10r-render1a-stability2.py PhotonCamera
+          python3 patches/fix-m10r-render1a-stability3-native1.py PhotonCamera
+          python3 patches/fix-m10r-render1b-look1a-yc1a.py PhotonCamera
+          python3 patches/fix-m10r-render1b-look1b-yc1b.py PhotonCamera
+          python3 patches/fix-m10r-render1c-edge1a.py PhotonCamera
+          python3 patches/fix-m10r-render1d-edge1b-scale1a.py PhotonCamera "$B2Y"
+          python3 patches/fix-m10r-render1e-edge1c-gain1a.py PhotonCamera "$B2Y"
+          python3 patches/fix-m10r-render1f-yc2a-matrix1a.py PhotonCamera "$B2Y"
+          python3 patches/fix-m10r-render1f-diag1a.py PhotonCamera
+          python3 patches/fix-m10r-render1f-diag1b.py PhotonCamera
+          python3 patches/fix-m10r-render1f-diag1c.py PhotonCamera
+          python3 patches/fix-m10r-render1f-diag1d-m9sidecario1a.py PhotonCamera
+
+          R=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          H=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RDiagnosticSidecarIO.java
+          D=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/DefaultSaver.java
+          G=PhotonCamera/app/build.gradle
+          grep -F "versionName '0.97-m10rcapture1b-rgborder1a-sourcecm1a-tonedg1b-stability3-native1-look1b-yc1b-render1f-yc2a-matrix1a-diag1d-m9sidecario1a'" "$G"
+          grep -F 'renderLook", "RENDER1F_YC2A_MATRIX1A"' "$R"
+          grep -F 'DIAG1D_M9SIDECARIO1A' "$R"
+          grep -F 'M10RDiagnosticSidecarIO.persist' "$R"
+          grep -F 'SimpleStorageHelper.openOutputStreamByAbsPath(path.toString())' "$H"
+          grep -F 'Files.newOutputStream(path)' "$H"
+          ! grep -F 'Files.createDirectories(parent);' "$R"
+          grep -F 'M10-R DIAG1C PAYLOAD part=' "$D"
+          grep -F 'M10-R DIAG1C PAYLOAD END parts=' "$D"
+          grep -F 'edgeScaleTableApplied", true' "$R"
+          grep -F 'edgeHfRecordGainApplied", true' "$R"
+          grep -F 'hdrEnabled", false' "$R"
+          grep -F 'sourceFrameCount", 1' "$R"
+
+          printf '%s\n' \
+            'M10R_RENDER1F_YC2A_MATRIX1A_DIAG1D_M9SIDECARIO1A' \
+            'Rendering is unchanged from RENDER1F MATRIX1A / DIAG1C.' \
+            'M10-R diagnostic public persistence now ports M9 SIDECAR1A: direct filesystem stream then Photon SimpleStorageHelper/SAF fallback.' \
+            'The scoped-storage-sensitive public Files.createDirectories(parent) gate is removed.' \
+            'DIAG1C complete JSON log fallback remains active.' \
+            'Single RAW/HDR-off/12MP/JPEG quality and all image arithmetic are unchanged.' \
+            > M10R_RENDER1F_DIAG1D_M9SIDECARIO1A_PROVENANCE.txt
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android build components
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-36" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.0.12077973"
+
+      - name: Build RENDER1F DIAG1D M9SIDECARIO1A debug APK
+        run: |
+          set -o pipefail
+          cd PhotonCamera
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_RENDER1F_DIAG1D_M9SIDECARIO1A_GRADLE.log"
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: M10R-RENDER1F-DIAG1D-M9SIDECARIO1A-buildlog
+          path: M10R_RENDER1F_DIAG1D_M9SIDECARIO1A_GRADLE.log
+          if-no-files-found: ignore
+
+      - name: Upload APK and provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: M10RCam-RENDER1F-YC2A-MATRIX1A-DIAG1D-M9SIDECARIO1A-debug-apk
+          path: |
+            PhotonCamera/app/build/outputs/apk/debug/*.apk
+            PHOTON_UPSTREAM_COMMIT.txt
+            M10R_RENDER1F_DIAG1D_M9SIDECARIO1A_PROVENANCE.txt
+            /tmp/m10r_b2y_assets/manifest.json
+          if-no-files-found: error
