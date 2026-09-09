@@ -1,0 +1,83 @@
+name: M10-R v2.69 CC round-helper exact trace
+on:
+  push:
+    branches: [m10r-wbcc0-v269-research]
+    paths: ['.github/workflows/m10r-v269-round-helper.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Unpack firmware and dump 0x40012940 exactly
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack && /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v269_round_helper_40012940.txt
+          from pathlib import Path
+          import struct, math
+          from capstone import Cs,CS_ARCH_ARM,CS_MODE_ARM,CS_MODE_LITTLE_ENDIAN
+          from capstone.arm import ARM_OP_MEM,ARM_REG_PC
+
+          b=Path('/tmp/sections/099_IMG-CA9_System.bin').read_bytes()
+          BASE=0x40000000; PFX=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_ARM|CS_MODE_LITTLE_ENDIAN); md.detail=True
+          def off(a): return PFX+a-BASE
+          def litaddr(i):
+              try:
+                  if i.mnemonic.startswith('ldr') and len(i.operands)>=2 and i.operands[1].type==ARM_OP_MEM and i.operands[1].mem.base==ARM_REG_PC:
+                      return i.address+8+i.operands[1].mem.disp
+              except Exception: pass
+              return None
+          def fmt(i):
+              s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+              la=litaddr(i)
+              if la is not None:
+                  o=off(la)
+                  if 0 <= o <= len(b)-4:
+                      u=struct.unpack_from('<I',b,o)[0]
+                      s+=f' ; LIT32[{la:08x}]={u:08x}'
+                      if 0 <= o <= len(b)-8:
+                          d=struct.unpack_from('<d',b,o)[0]
+                          if math.isfinite(d): s+=f' F64={d:.17g}'
+              return s
+          def dump(a,z,title):
+              print(f'=== {title} {a:08x}..{z:08x} ===')
+              for i in md.disasm(b[off(a):off(z)],a): print(fmt(i))
+              print()
+
+          print('M10-R v2.69 EXACT CC ROUND-HELPER TRACE')
+          print('firmware sha256 ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498')
+          print('Purpose: close 0x40012940 before treating rendered-CC tie rounding / scale selection as frozen.')
+          print()
+          dump(0x40012880,0x40012a40,'helper neighborhood containing 0x40012940')
+          dump(0x400038b0,0x40003b20,'rendered-CC builder and scale search callers')
+          dump(0x40012f20,0x40012f90,'additional direct caller neighborhood')
+          print('INTERPRETATION BOUNDARY')
+          print('- Raw disassembly only. Do not infer C rounding semantics from a function name or prior oracle implementation.')
+          print('- Exact tie behavior is frozen only if instructions/constants uniquely determine it.')
+          print('- Because this helper is called during scale search, its semantics may alter both q[i] and selected scaleCode.')
+          PY
+      - name: Commit exact helper trace
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v269_round_helper_40012940.txt
+          git commit -m 'research: record v269 exact CC round-helper trace' || exit 0
+          git pull --rebase origin m10r-wbcc0-v269-research
+          git push
