@@ -1,0 +1,161 @@
+name: M10-R v2.69 WB CC0 finite-precision boundary
+
+on:
+  push:
+    branches: [m10r-wbcc0-v269-research]
+    paths:
+      - 'tools/m10r_wb_cc0_boundary_v269.py'
+      - 'tools/m10r_colorspec_oracle.py'
+      - '.github/workflows/m10r-v269-wb-cc0-boundary.yml'
+  workflow_dispatch:
+    inputs:
+      cc0_json:
+        description: >-
+          Optional JSON object mapping PhotographyBlog reference sample IDs to
+          explicit firmware-derived row-major CC0 matrices, e.g.
+          {"01":"1,0,0,0,1,0,0,0,1"}. No matrix is inferred if absent.
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  selftest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install discriminator dependencies
+        run: |
+          set -euo pipefail
+          python3 -m pip install --quiet numpy pillow rawpy opencv-python-headless
+      - name: Run exact arithmetic / algebra self-check
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/m10r_v269
+          python3 tools/m10r_wb_cc0_boundary_v269.py --self-test --out /tmp/m10r_v269/selftest.json
+          cat /tmp/m10r_v269/selftest.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m10r-v269-selftest
+          path: /tmp/m10r_v269/selftest.json
+
+  explicit-reference:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.cc0_json != '' }}
+    needs: selftest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install reference-analysis dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl jq >/dev/null
+          python3 -m pip install --quiet numpy pillow rawpy opencv-python-headless
+      - name: Validate explicit CC0 mapping
+        env:
+          CC0_JSON: ${{ inputs.cc0_json }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$CC0_JSON" | jq -e 'type == "object"' >/dev/null
+          printf '%s\n' "$CC0_JSON" > /tmp/cc0.json
+          echo 'Explicit matrix keys:'
+          jq -r 'keys[]' /tmp/cc0.json
+      - name: Run only reference scenes with explicitly supplied CC0
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/m10r_v269/reference
+          ran=0
+          for id in 01 02 03 04 05 06; do
+            cc0="$(jq -r --arg id "$id" '.[$id] // empty' /tmp/cc0.json)"
+            if [ -z "$cc0" ]; then
+              echo "sample $id: SKIP (no explicit firmware-derived CC0 supplied)"
+              continue
+            fi
+            echo "=== sample $id ==="
+            base="https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_${id}"
+            curl -L --fail --retry 3 --retry-delay 2 "$base.jpg" -o "/tmp/m10r_v269/reference/${id}.jpg"
+            curl -L --fail --retry 3 --retry-delay 2 "$base.dng" -o "/tmp/m10r_v269/reference/${id}.dng"
+            exiftool -j -n \
+              -Make -Model -SerialNumber -ImageUniqueID -DateTimeOriginal -CreateDate \
+              -ExposureTime -FNumber -ISO -FocalLength -ExposureCompensation \
+              -WhiteBalance -Contrast -Saturation -Sharpness -AsShotNeutral -WhiteLevel -BlackLevel \
+              "/tmp/m10r_v269/reference/${id}.jpg" "/tmp/m10r_v269/reference/${id}.dng" \
+              > "/tmp/m10r_v269/reference/${id}_exif.json"
+            python3 tools/m10r_wb_cc0_boundary_v269.py \
+              --jpg "/tmp/m10r_v269/reference/${id}.jpg" \
+              --dng "/tmp/m10r_v269/reference/${id}.dng" \
+              --metadata-json "/tmp/m10r_v269/reference/${id}_exif.json" \
+              --sample "$id" \
+              --cc0 "$cc0" \
+              --out "/tmp/m10r_v269/reference/${id}_v269.json" >/dev/null
+            rm -f "/tmp/m10r_v269/reference/${id}.jpg" "/tmp/m10r_v269/reference/${id}.dng"
+            ran=$((ran+1))
+          done
+          if [ "$ran" -eq 0 ]; then
+            echo 'No recognised sample IDs (01..06) had explicit matrices.' >&2
+            exit 2
+          fi
+      - name: Aggregate finite-precision evidence
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, statistics
+          from pathlib import Path
+
+          rows=[json.loads(p.read_text()) for p in sorted(Path('/tmp/m10r_v269/reference').glob('*_v269.json'))]
+          report=[]
+          report.append('M10-R v2.69 WB <-> CC0 FINITE-PRECISION BOUNDARY')
+          report.append('RESEARCH ONLY — Android renderer/capture path unchanged')
+          report.append('CC0 policy: explicit firmware-derived matrix required per scene; no Adobe/rawpy colour matrix substitution')
+          report.append('')
+          report.append('PROVEN encoder facts used: scaleCode 0..3; signed q [-2048,+2047]; denominator 2^(9-scaleCode); increasing first-fit; nearest/ties-away rounding.')
+          report.append('OPEN: physical WB clamp; exact CC MAC/output arithmetic; Sfull therefore NON-BIT-EXACT.')
+          report.append('')
+          for r in rows:
+              cc=r['cc0']; f0=r['F0']['residual']; c1=r['C1']['residual']; p=r['patches']
+              report.append(
+                  f"sample {r['sample']} patches={p['usable']} train={p['train']} test={p['test']} "
+                  f"CC0scale={cc['separate']['scale_code']} collapsedScale={cc['collapsed']['scale_code']} "
+                  f"transition={cc['scale_code_transition']} F0max={f0['max_abs']:.12g} "
+                  f"C1rmse={c1['rmse']:.12g} C1max={c1['max_abs']:.12g}"
+              )
+              sf=r.get('Sfull',{})
+              for key,rec in sf.items():
+                  rr=rec['residual_vs_collapsed']
+                  report.append(f"  Sfull {key}: rmse={rr['rmse']:.12g} max={rr['max_abs']:.12g} [NON-BIT-EXACT CC MAC]")
+          report.append('')
+          transitions=sum(bool(r['cc0']['scale_code_transition']) for r in rows)
+          c1=[float(r['C1']['residual']['rmse']) for r in rows]
+          report.append(f"scenes={len(rows)} scaleCodeTransitions={transitions}")
+          report.append(f"C1 rmse median={statistics.median(c1) if c1 else None}")
+          report.append('')
+          report.append('INTERPRETATION GUARDRAIL')
+          report.append('- F0 must remain numerical-noise control.')
+          report.append('- Clean-midlevel C1 residual associated with a scaleCode transition supports a dynamic CC quantisation/order boundary.')
+          report.append('- W1/Sfull residual concentrated near channel headroom supports a physical WB finite-precision/clamp boundary.')
+          report.append('- A level-independent colour offset is not evidence of clipping; inspect ColorSpec/D50/source calibration instead.')
+
+          out='\n'.join(report)+'\n'
+          Path('research/M10R_v269_wb_cc0_boundary.txt').write_text(out)
+          Path('research/M10R_v269_wb_cc0_boundary.json').write_text(json.dumps({'samples':rows},indent=2,sort_keys=True)+'\n')
+          print(out)
+          PY
+      - name: Commit explicit-reference evidence
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v269_wb_cc0_boundary.txt research/M10R_v269_wb_cc0_boundary.json
+          git commit -m 'research: record v269 WB CC0 boundary evidence' || exit 0
+          git pull --rebase origin m10r-wbcc0-v269-research
+          git push
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m10r-v269-explicit-reference
+          path: |
+            /tmp/m10r_v269/reference/*_v269.json
+            research/M10R_v269_wb_cc0_boundary.txt
+            research/M10R_v269_wb_cc0_boundary.json
