@@ -1,6 +1,6 @@
-M10-R v2.69 EXACT CC ROUND-HELPER TRACE — FUNCTION-ENTRY DECODE
+M10-R v2.69 EXACT CC ROUND-HELPER TRACE — CALLEE INCLUDED
 firmware sha256 ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498
-ARM callers use BLX immediate to 0x40012940, so 0x40012940 executes in Thumb state.
+ARM callers BLX 0x40012940; helper executes Thumb. Helper BL 0x400133D0; callee also executes Thumb.
 
 === raw bytes / constants around helper ===
 40012920: 00 00 00 00 00 00 e0 3f 00 00 00 00 00 00 00 40
@@ -70,57 +70,137 @@ ARM callers use BLX immediate to 0x40012940, so 0x40012940 executes in Thumb sta
 400129c4: 10bd       pop          {r4, pc}
 400129c6: 0000       movs         r0, r0
 
-=== next Thumb routine after helper 400129e4..40012a80 mode=THUMB ===
-400129e4: 1cff2fe1   vrhadd.u16   d14, d12, d31
-400129e8: 4df804ed   str          lr, [sp, #-0x4]!
-400129ec: 2ded028b   vpush        {d8}
-400129f0: b1eec08b   vsqrt.f64    d8, d0
-400129f4: 83b0       sub          sp, #0xc
-400129f6: 8ded008b   vstr         d8, [sp]
-400129fa: dde90001   ldrd         r0, r1, [sp]
-400129fe: 0028       cmp          r0, #0
-40012a00: 18bf       it           ne
-40012a02: 0120       movne        r0, #1
-40012a04: 0843       orrs         r0, r1
-40012a06: 20f00040   bic          r0, r0, #0x80000000
-40012a0a: c0f17f60   rsb.w        r0, r0, #0xff00000
-40012a0e: 00f1e040   add.w        r0, r0, #0x70000000
-40012a12: c00f       lsrs         r0, r0, #0x1f
-40012a14: 12d0       beq          #0x40012a3c
-40012a16: 8ded000b   vstr         d0, [sp]
-40012a1a: dde90010   ldrd         r1, r0, [sp]
-40012a1e: 0029       cmp          r1, #0
-40012a20: 18bf       it           ne
-40012a22: 0121       movne        r1, #1
-40012a24: 0843       orrs         r0, r1
-40012a26: 20f00040   bic          r0, r0, #0x80000000
-40012a2a: c0f17f60   rsb.w        r0, r0, #0xff00000
-40012a2e: 00f1e040   add.w        r0, r0, #0x70000000
-40012a32: c00f       lsrs         r0, r0, #0x1f
-40012a34: 04bf       itt          eq
-40012a36: 0120       moveq        r0, #1
-40012a38: fdf76afb   bleq         #0x40010110
-40012a3c: b0ee480b   vmov.f64     d0, d8
-40012a40: 03b0       add          sp, #0xc
-40012a42: bdec028b   vpop         {d8}
-40012a46: 5df804fb   ldr          pc, [sp], #4
-40012a4a: 491e       subs         r1, r1, #1
-40012a4c: b0ee401b   vmov.f64     d1, d0
-40012a50: 31f00603   bics         r3, r1, #6
-40012a54: 00ebc102   add.w        r2, r0, r1, lsl #3
-40012a58: 92ed000b   vldr         d0, [r2]
-40012a5c: 0dd0       beq          #0x40012a7a
-40012a5e: 491e       subs         r1, r1, #1
-40012a60: b0ee403b   vmov.f64     d3, d0
-40012a64: 31f00603   bics         r3, r1, #6
-40012a68: 00ebc102   add.w        r2, r0, r1, lsl #3
-40012a6c: 92ed002b   vldr         d2, [r2]
-40012a70: b0ee420b   vmov.f64     d0, d2
-40012a74: 03ee010b   vmla.f64     d0, d3, d1
-40012a78: f1d1       bne          #0x40012a5e
-40012a7a: 0229       cmp          r1, #2
-40012a7c: 17d0       beq          #0x40012aae
-40012a7e: 0429       cmp          r1, #4
+=== 0x400133D0 residual-base callee 400133d0..40013520 mode=THUMB ===
+400133d0: 5fea410c   lsls.w       ip, r1, #1
+400133d4: 5fea5c5c   lsrs.w       ip, ip, #0x15
+400133d8: acf58063   sub.w        r3, ip, #0x400
+400133dc: 5b1c       adds         r3, r3, #1
+400133de: 39d4       bmi          #0x40013454
+400133e0: d3f13402   rsbs.w       r2, r3, #0x34
+400133e4: 40f34580   ble.w        #0x40013472
+400133e8: b2f12003   subs.w       r3, r2, #0x20
+400133ec: 14da       bge          #0x40013418
+400133ee: 4ff0010c   mov.w        ip, #1
+400133f2: 0cfa02fc   lsl.w        ip, ip, r2
+400133f6: acf10103   sub.w        r3, ip, #1
+400133fa: 0340       ands         r3, r0
+400133fc: b3eb5c02   subs.w       r2, r3, ip, lsr #1
+40013400: 20ea0300   bic.w        r0, r0, r3
+40013404: 08bf       it           eq
+40013406: 10ea0c0f   tsteq.w      r0, ip
+4001340a: 98bf       it           ls
+4001340c: 7047       bxls         lr
+4001340e: 10eb0c00   adds.w       r0, r0, ip
+40013412: 41f10001   adc          r1, r1, #0
+40013416: 7047       bx           lr
+40013418: 0ad0       beq          #0x40013430
+4001341a: c3f12002   rsb.w        r2, r3, #0x20
+4001341e: 01fa02fc   lsl.w        ip, r1, r2
+40013422: 0128       cmp          r0, #1
+40013424: 21fa03f1   lsr.w        r1, r1, r3
+40013428: 01fa03f1   lsl.w        r1, r1, r3
+4001342c: 4cf10000   adc          r0, ip, #0
+40013430: 4ff0010c   mov.w        ip, #1
+40013434: 0cfa03fc   lsl.w        ip, ip, r3
+40013438: acf10103   sub.w        r3, ip, #1
+4001343c: b0f1004f   cmp.w        r0, #-0x80000000
+40013440: 21ea0301   bic.w        r1, r1, r3
+40013444: 08bf       it           eq
+40013446: 11ea0c0f   tsteq.w      r1, ip
+4001344a: 4ff00000   mov.w        r0, #0
+4001344e: 88bf       it           hi
+40013450: 6144       addhi        r1, ip
+40013452: 7047       bx           lr
+40013454: b3f1ff3f   cmp.w        r3, #-1
+40013458: 28bf       it           hs
+4001345a: 50eac12c   orrshs.w     ip, r0, r1, lsl #11
+4001345e: 01f00041   and          r1, r1, #0x80000000
+40013462: 4ff00000   mov.w        r0, #0
+40013466: 84bf       itt          hi
+40013468: 41f07c51   orrhi        r1, r1, #0x3f000000
+4001346c: 41f47001   orrhi        r1, r1, #0xf00000
+40013470: 7047       bx           lr
+40013472: b3f5806f   cmp.w        r3, #0x400
+40013476: b8bf       it           lt
+40013478: 7047       bxlt         lr
+4001347a: 70b5       push         {r4, r5, r6, lr}
+4001347c: fff759ff   bl           #0x40013332
+40013480: 40db       blt          #0x40013504
+40013482: b6be       bkpt         #0xb6
+40013484: 4ff04070   mov.w        r0, #0x3000000
+40013488: e1ee100a   vmsr         fpscr, r0
+4001348c: 7047       bx           lr
+4001348e: fcf7a5bf   b.w          #0x400103dc
+40013492: fdf715bb   b.w          #0x40010ac0
+40013496: 0000       movs         r0, r0
+40013498: 0c02       lsls         r4, r1, #8
+4001349a: 0000       movs         r0, r0
+4001349c: 0000       movs         r0, r0
+4001349e: 0000       movs         r0, r0
+400134a0: 0a0a       lsrs         r2, r1, #8
+400134a2: 0a0a       lsrs         r2, r1, #8
+400134a4: 0a0a       lsrs         r2, r1, #8
+400134a6: 0a0a       lsrs         r2, r1, #8
+400134a8: 0a0a       lsrs         r2, r1, #8
+400134aa: 0a0a       lsrs         r2, r1, #8
+400134ac: 0a0a       lsrs         r2, r1, #8
+400134ae: 0000       movs         r0, r0
+400134b0: 0000       movs         r0, r0
+400134b2: 0000       movs         r0, r0
+400134b4: 000a       lsrs         r0, r0, #8
+400134b6: 0a14       asrs         r2, r1, #0x10
+400134b8: 1414       asrs         r4, r2, #0x10
+400134ba: 1e1e       subs         r6, r3, #0
+400134bc: 1e1e       subs         r6, r3, #0
+400134be: 1e1e       subs         r6, r3, #0
+400134c0: 1414       asrs         r4, r2, #0x10
+400134c2: 140a       lsrs         r4, r2, #8
+400134c4: 0a00       movs         r2, r1
+400134c6: 0000       movs         r0, r0
+400134c8: 0000       movs         r0, r0
+400134ca: 0a0a       lsrs         r2, r1, #8
+400134cc: 141e       subs         r4, r2, #0
+400134ce: 1e1e       subs         r6, r3, #0
+400134d0: 1e28       cmp          r0, #0x1e
+400134d2: 3232       adds         r2, #0x32
+400134d4: 281e       subs         r0, r5, #0
+400134d6: 1e1e       subs         r6, r3, #0
+400134d8: 1e14       asrs         r6, r3, #0x10
+400134da: 0a0a       lsrs         r2, r1, #8
+400134dc: 0000       movs         r0, r0
+400134de: 000a       lsrs         r0, r0, #8
+400134e0: 0a14       asrs         r2, r1, #0x10
+400134e2: 1e28       cmp          r0, #0x1e
+400134e4: 3232       adds         r2, #0x32
+400134e6: 323c       subs         r4, #0x32
+400134e8: 3c3c       subs         r4, #0x3c
+400134ea: 3c32       adds         r2, #0x3c
+400134ec: 3232       adds         r2, #0x32
+400134ee: 281e       subs         r0, r5, #0
+400134f0: 140a       lsrs         r4, r2, #8
+400134f2: 0a00       movs         r2, r1
+400134f4: 0a0a       lsrs         r2, r1, #8
+400134f6: 141e       subs         r4, r2, #0
+400134f8: 2832       adds         r2, #0x28
+400134fa: 3c50       str          r4, [r7, r0]
+400134fc: 5050       str          r0, [r2, r1]
+400134fe: 5050       str          r0, [r2, r1]
+40013500: 5050       str          r0, [r2, r1]
+40013502: 503c       subs         r4, #0x50
+40013504: 3228       cmp          r0, #0x32
+40013506: 1e14       asrs         r6, r3, #0x10
+40013508: 0a0a       lsrs         r2, r1, #8
+4001350a: 0a14       asrs         r2, r1, #0x10
+4001350c: 1e28       cmp          r0, #0x1e
+4001350e: 323c       subs         r4, #0x32
+40013510: 5050       str          r0, [r2, r1]
+40013512: 6464       str          r4, [r4, #0x44]
+40013514: 6464       str          r4, [r4, #0x44]
+40013516: 6464       str          r4, [r4, #0x44]
+40013518: 5050       str          r0, [r2, r1]
+4001351a: 3c32       adds         r2, #0x3c
+4001351c: 281e       subs         r0, r5, #0
+4001351e: 140a       lsrs         r4, r2, #8
 
 === rendered-CC builder and scale-search callers 400038b0..40003b20 mode=ARM ===
 400038b0: f0412de9   push         {r4, r5, r6, r7, r8, lr}
@@ -311,6 +391,6 @@ ARM callers use BLX immediate to 0x40012940, so 0x40012940 executes in Thumb sta
 40012f8c: b0390140   strhmi       r3, [r1], -r0
 
 INTERPRETATION BOUNDARY
-- Helper body is decoded from exact function entry, not the preceding constant pool.
-- Exact tie behavior is frozen only if instructions/constants uniquely determine it.
-- Because helper is called during scale search, semantics may alter both q[i] and selected scaleCode.
+- d2/d3/d4 literals used by 0x40012940 resolve to +1.0/+0.5/-0.5.
+- Exact round mode is frozen only after identifying what 0x400133D0 returns for finite positive/negative doubles.
+- Helper participates in scale search, so semantics can alter q[i] and selected scaleCode.
