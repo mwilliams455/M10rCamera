@@ -12,14 +12,22 @@ Frozen here:
   * 3x3 matrix/vector algebra used by CA9
   * fixed Leica PCS<->internal-working-RGB matrices
   * default-still sRGB CC1 matrix
-  * rendered-CC coefficient quantization for an explicit scale code
-  * half-away-from-zero rendered-CC rounding and [-2048,+2047] clamp
+  * rendered-CC coefficient representation and explicit-scale quantization
+  * rendered-CC finite coefficient rounding: nearest, ties away from zero
+  * rendered-CC automatic scale search: scaleCode 0..3 in increasing order,
+    accepting the first candidate whose rounded q coefficients all fit
+    [-2048,+2047]
+
+v2.69 evidence closure:
+  * rounding is firmware-proven from 0x40012940 plus Thumb 0x400133D0;
+  * the scale-search caller rounds before range testing and advances the scale
+    code one-by-one, so rounding can affect both q coefficients and scaleCode.
 
 Not silently invented here:
   * DNG illuminant-enum -> exact firmware T1/T2 parser bridge
   * complete xy->temperature table routine / NeutralToXY end-to-end driver
-  * the firmware bounded automatic scale-code search limits
   * unresolved +0x26 rendered-record halfword
+  * rendered-CC MAC/output fixed-point arithmetic after record decode
 
 Those boundaries are parameters or separate future closures rather than SDK
 assumptions.
@@ -29,7 +37,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
-from typing import Iterable, Sequence
+from typing import Sequence
 
 Matrix3 = tuple[tuple[float, float, float], tuple[float, float, float], tuple[float, float, float]]
 Vector3 = tuple[float, float, float]
@@ -40,6 +48,7 @@ GAIN_MAX = 2000
 ASN_SCALE = 256.0
 CC_MIN = -2048
 CC_MAX = 2047
+RENDERED_CC_SCALE_CODES = (0, 1, 2, 3)
 
 # Firmware-stored matrices; preserve stored precision rather than recomputing.
 BRADFORD: Matrix3 = (
@@ -165,8 +174,9 @@ def recover_ca9_gains(as_shot_neutral: Sequence[float]) -> tuple[int, int, int]:
     for n in as_shot_neutral:
         if n <= 0.0 or not math.isfinite(n):
             raise ValueError("AsShotNeutral channels must be positive and finite")
-        # Python round is ties-to-even. The six validated M10-R samples are far
-        # from half ties; the empirical freeze specifies round(256/ASN).
+        # Python round is ties-to-even. The validated M10-R reference samples are
+        # far from half ties; this remains an empirical first-parity ASN inverse,
+        # separate from the now-proven rendered-CC coefficient round helper.
         g = int(round(ASN_SCALE / n))
         out.append(min(GAIN_MAX, max(GAIN_MIN, g)))
     return (out[0], out[1], out[2])
@@ -215,6 +225,7 @@ def default_cc1() -> Matrix3:
 
 
 def round_half_away_from_zero(v: float) -> int:
+    """Firmware-proven finite CC coefficient rounding (v2.69)."""
     if not math.isfinite(v):
         raise ValueError("cannot quantize non-finite value")
     if v >= 0.0:
@@ -222,22 +233,37 @@ def round_half_away_from_zero(v: float) -> int:
     return int(math.ceil(v - 0.5))
 
 
-def quantize_rendered_cc(matrix: Matrix3, scale_code: int, kelvin: int) -> RenderedCCRecord:
-    """Build the proven fields of the 0x2C rendered-CC record.
-
-    Automatic SelectScale bounds remain outside this function until their
-    global constants are frozen; callers pass the scale code explicitly.
-    """
-    shift = 9 - int(scale_code)
-    if shift < 0 or shift > 30:
-        raise ValueError("scale_code produces unsupported integer shift")
-    denominator = 1 << shift
+def _rounded_cc_coeff(matrix: Matrix3, scale_code: int) -> tuple[int, int, int, int, int, int, int, int, int]:
+    if int(scale_code) not in RENDERED_CC_SCALE_CODES:
+        raise ValueError("rendered-CC scale_code must be one of 0,1,2,3")
+    denominator = 1 << (9 - int(scale_code))
     flat = [matrix[r][c] for r in range(3) for c in range(3)]
-    q = tuple(
-        min(CC_MAX, max(CC_MIN, round_half_away_from_zero(v * denominator)))
-        for v in flat
-    )
+    return tuple(round_half_away_from_zero(v * denominator) for v in flat)  # type: ignore[return-value]
+
+
+def quantize_rendered_cc(matrix: Matrix3, scale_code: int, kelvin: int) -> RenderedCCRecord:
+    """Build the proven fields of the 0x2C record at an explicit scale code.
+
+    This preserves the historical oracle API: an explicitly requested scale is
+    encoded and saturated to the recovered signed field range.  New code that
+    wants firmware automatic scale selection should call select_rendered_cc_scale.
+    """
+    q0 = _rounded_cc_coeff(matrix, scale_code)
+    q = tuple(min(CC_MAX, max(CC_MIN, x)) for x in q0)
     return RenderedCCRecord(q, int(scale_code), int(kelvin))  # type: ignore[arg-type]
+
+
+def select_rendered_cc_scale(matrix: Matrix3, kelvin: int) -> RenderedCCRecord:
+    """Firmware-proven increasing first-fit rendered-CC scale search.
+
+    Each candidate is rounded first using 0x40012940's finite nearest/ties-away
+    rule, then tested against [-2048,+2047].  The first fitting scaleCode wins.
+    """
+    for scale_code in RENDERED_CC_SCALE_CODES:
+        q = _rounded_cc_coeff(matrix, scale_code)
+        if min(q) >= CC_MIN and max(q) <= CC_MAX:
+            return RenderedCCRecord(q, scale_code, int(kelvin))
+    raise OverflowError("matrix cannot be represented by recovered rendered-CC scaleCode 0..3")
 
 
 def max_abs_matrix_error(a: Matrix3, b: Matrix3) -> float:
@@ -252,13 +278,19 @@ def self_check() -> dict[str, object]:
     # Stored Bradford inverse is intentionally truncated; do not demand exact I.
     bradford_err = max_abs_matrix_error(mat_mul(BRADFORD, BRADFORD_INV), _identity())
     working_err = max_abs_matrix_error(mat_mul(PCS_TO_INTERNAL, INTERNAL_TO_PCS), _identity())
+    irec = select_rendered_cc_scale(_identity(), 0)
+    later = select_rendered_cc_scale(((6.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)), 0)
     return {
         "bradford_identity_max_abs": bradford_err,
         "working_pair_identity_max_abs": working_err,
         "default_output": "sRGB",
         "neutral_to_xy_epsilon": NEUTRAL_TO_XY_EPSILON,
         "neutral_to_xy_max_passes": NEUTRAL_TO_XY_MAX_PASSES,
-        "status": "proven-core-executable; exact xy->temperature/NeutralToXY driver remains separate",
+        "rendered_cc_rounding": "PROVEN nearest/ties-away from zero for finite coefficients",
+        "rendered_cc_scale_search": "PROVEN increasing first-fit scaleCode 0..3 after rounding/range test",
+        "rendered_cc_identity_scale": irec.scale_code,
+        "rendered_cc_forced_later_scale": later.scale_code,
+        "status": "proven-core-executable; exact xy->temperature/NeutralToXY driver and CC MAC remain separate",
     }
 
 
