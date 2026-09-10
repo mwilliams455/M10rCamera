@@ -146,3 +146,5 @@ print(' - TRANSFER1A inverse-sRGB pass no longer executes')
 print(' - old sRGB/inverse implementations retained only as unreachable research controls')
 print(' - WORKING1A, MEDIUM/DG, Yc/LOOK1B, WB/CA9/matrices/exposure/JPEG/single-RAW/HDR-off frozen')
 print(' - exact M10-R output encoding is NOT claimed')
+
+# CI trigger after workflow registration.
