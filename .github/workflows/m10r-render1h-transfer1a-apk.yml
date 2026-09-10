@@ -1,0 +1,219 @@
+name: M10-R RENDER1H TRANSFER1A APK
+
+on:
+  push:
+    branches: [m10r-render1h-transfer1a-build]
+    paths:
+      - '.github/workflows/m10r-render1h-transfer1a-apk.yml'
+      - 'patches/fix-m10r-render1h-transfer1a.py'
+  workflow_dispatch:
+
+jobs:
+  build-render1h-transfer1a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout M10-R repo
+        uses: actions/checkout@v4
+
+      - name: Verify patch syntax
+        run: |
+          set -euo pipefail
+          for p in \
+            patches/apply-m10r-capture1-foundation.py \
+            patches/apply-m10r-capture1b-renderer.py \
+            patches/fix-m10r-capture1b-compile1.py \
+            patches/fix-m10r-capture1b-opencv1.py \
+            patches/fix-m10r-capture1b-compile2.py \
+            patches/fix-m10r-capture1b-device1.py \
+            patches/fix-m10r-capture1b-jpegsave1.py \
+            patches/fix-m10r-capture1b-rgborder1a.py \
+            patches/fix-m10r-capture1b-sourcecm1a.py \
+            patches/fix-m10r-capture1b-tonedg1a.py \
+            patches/fix-m10r-capture1b-tonedg1b.py \
+            patches/fix-m10r-render1a-stability1.py \
+            patches/fix-m10r-render1a-stability2.py \
+            patches/fix-m10r-render1a-stability3-native1.py \
+            patches/fix-m10r-render1b-look1a-yc1a.py \
+            patches/fix-m10r-render1b-look1b-yc1b.py \
+            patches/fix-m10r-render1c-edge1a.py \
+            patches/fix-m10r-render1d-edge1b-scale1a.py \
+            patches/fix-m10r-render1e-edge1c-gain1a.py \
+            patches/fix-m10r-render1f-yc2a-matrix1a.py \
+            patches/fix-m10r-render1f-diag1a.py \
+            patches/fix-m10r-render1f-diag1c-saf1.py \
+            patches/fix-m10r-render1g-working1a.py \
+            patches/fix-m10r-render1h-transfer1a.py; do
+              python3 -m py_compile "$p"
+          done
+          python3 -m py_compile tools/m10r_sections.py tools/m10r_b2y_assets.py
+
+      - name: Clone exact Photon baseline
+        run: |
+          set -euo pipefail
+          PHOTON_SHA=f0e6425d2509fb8ab834d5d3af593183038b778c
+          git clone --depth 1 --branch dev https://github.com/eszdman/PhotonCamera.git PhotonCamera
+          git -C PhotonCamera fetch --depth 1 origin "$PHOTON_SHA"
+          git -C PhotonCamera checkout --detach FETCH_HEAD
+          test "$(git -C PhotonCamera rev-parse HEAD)" = "$PHOTON_SHA"
+          git -C PhotonCamera rev-parse HEAD | tee PHOTON_UPSTREAM_COMMIT.txt
+
+      - name: Extract exact M10-R B2Y assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          B2Y=/tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin
+          test -f "$B2Y"
+          rm -rf /tmp/m10r_b2y_assets
+          python3 tools/m10r_b2y_assets.py "$B2Y" /tmp/m10r_b2y_assets >/tmp/m10r_b2y_manifest.stdout.json
+          echo '2fd6ca209f290c75aa96976b3d7692e55c41a55c0017a063aba9808da3b41a00  /tmp/m10r_b2y_assets/tone_medium_q15.u32le' | sha256sum -c -
+          echo '9e65de24d52271be0783f4e2728f20f482c0ba43b63159b75033b4a4fc75457d  /tmp/m10r_b2y_assets/dg_expanded_u16le.bin' | sha256sum -c -
+
+      - name: Apply frozen WORKING1A then TRANSFER1A only
+        run: |
+          set -euo pipefail
+          B2Y=/tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin
+          python3 patches/apply-m10r-capture1-foundation.py PhotonCamera
+          python3 patches/apply-m10r-capture1b-renderer.py PhotonCamera
+          python3 patches/fix-m10r-capture1b-compile1.py PhotonCamera
+          python3 patches/fix-m10r-capture1b-opencv1.py PhotonCamera
+          python3 patches/fix-m10r-capture1b-compile2.py PhotonCamera
+          python3 patches/fix-m10r-capture1b-device1.py PhotonCamera
+          python3 patches/fix-m10r-capture1b-jpegsave1.py PhotonCamera
+          python3 patches/fix-m10r-capture1b-rgborder1a.py PhotonCamera
+          python3 patches/verify-m10r-capture1b.py PhotonCamera
+          python3 patches/fix-m10r-capture1b-sourcecm1a.py PhotonCamera
+          python3 patches/fix-m10r-capture1b-tonedg1a.py PhotonCamera /tmp/m10r_b2y_assets
+          python3 patches/fix-m10r-capture1b-tonedg1b.py PhotonCamera
+          python3 patches/fix-m10r-render1a-stability1.py PhotonCamera
+          python3 patches/fix-m10r-render1a-stability2.py PhotonCamera
+          python3 patches/fix-m10r-render1a-stability3-native1.py PhotonCamera
+          python3 patches/fix-m10r-render1b-look1a-yc1a.py PhotonCamera
+          python3 patches/fix-m10r-render1b-look1b-yc1b.py PhotonCamera
+          python3 patches/fix-m10r-render1c-edge1a.py PhotonCamera
+          python3 patches/fix-m10r-render1d-edge1b-scale1a.py PhotonCamera "$B2Y"
+          python3 patches/fix-m10r-render1e-edge1c-gain1a.py PhotonCamera "$B2Y"
+          python3 patches/fix-m10r-render1f-yc2a-matrix1a.py PhotonCamera "$B2Y"
+          python3 patches/fix-m10r-render1f-diag1a.py PhotonCamera
+          python3 patches/fix-m10r-render1f-diag1c-saf1.py PhotonCamera
+          python3 patches/fix-m10r-render1g-working1a.py PhotonCamera
+          python3 patches/fix-m10r-render1h-transfer1a.py PhotonCamera
+
+          R=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          C=PhotonCamera/app/src/main/cpp/m10rRender.cpp
+          G=PhotonCamera/app/build.gradle
+
+          # Candidate identity and transfer-only diagnostics.
+          grep -F "render1h-transfer1a-diag1c-saf1'" "$G"
+          grep -F 'renderLook", "RENDER1H_TRANSFER1A_WORKING1A_YC2A_MATRIX1A"' "$R"
+          grep -F 'outputTransferExperiment", "TRANSFER1A_POST_EDGE_INVERSE_SRGB_CANCEL"' "$R"
+          grep -F 'outputTransferPlacement", "post_EDGE1A_before_JPEG"' "$R"
+          grep -F 'working1aNativeSrgbOetfRetainedForEdgeInvariant", true' "$R"
+          grep -F 'edgeInputDomainUnchangedFromWorking1A", true' "$R"
+          grep -F 'netOutputTransfer", "linear_coded_after_inverse_sRGB"' "$R"
+          grep -F 'outputTransferExactHardwareParityClaimed", false' "$R"
+          grep -F 'nativeInverseSrgbTransfer(bitmap)' "$R"
+          grep -F 'M10RNativeRenderer_nativeInverseSrgbTransfer' "$C"
+          grep -F 'std::pow((encoded + 0.055) / 1.055, 2.4)' "$C"
+
+          # Isolation: WORKING1A topology, OETF, EDGE1A and all frozen controls must survive.
+          grep -F 'workingBasisPlacementFix", "WORKING1A"' "$R"
+          grep -F 'nonlinearPlacement", "M10R_internal_working_RGB_between_CC0_CC1"' "$R"
+          grep -F 'cc1Placement", "post_MEDIUM_DG_before_sRGB_OETF"' "$R"
+          grep -F 'double[] targetToWorking = matMul(PCS_TO_INTERNAL,' "$R"
+          grep -F 'double[] workingToSrgb = DEFAULT_SRGB_CC1.clone();' "$R"
+          grep -F 'srgb8(outR)' "$C"
+          grep -F 'srgb8(outG)' "$C"
+          grep -F 'srgb8(outB)' "$C"
+          grep -F 'M10RNativeRenderer_nativeEdgePass' "$C"
+          grep -F 'double e=v<=0.0031308 ? 12.92*v : 1.055*std::pow(v,1.0/2.4)-0.055;' "$C"
+          grep -F '*synthGain*edgeScale*hfRecordGain' "$C"
+          grep -F 'yc2aMatrixCorrectionApplied", true' "$R"
+          grep -F 'edgeScaleTableApplied", true' "$R"
+          grep -F 'edgeHfRecordGainApplied", true' "$R"
+          grep -F 'b2yYBlendApplied", false' "$R"
+          grep -F 'textureEnhancementBlockEnabled", false' "$R"
+          grep -F 'lowFrequencyEdgeApplied", false' "$R"
+          grep -F 'hdrEnabled", false' "$R"
+          grep -F 'sourceFrameCount", 1' "$R"
+          grep -F 'DIAG1C_SAF_ABSPATH' "$R"
+
+          python3 - <<'PY'
+          # Numerical sanity: the diagnostic inverse LUT is monotone and is the
+          # exact inverse equation of the renderer's textbook sRGB OETF, modulo
+          # the deliberate 8-bit round trip.
+          import math
+          lut=[]
+          for i in range(256):
+              e=i/255.0
+              l=e/12.92 if e<=0.04045 else ((e+0.055)/1.055)**2.4
+              lut.append(int(math.floor(max(0.0,min(1.0,l))*255.0+0.5)))
+          assert lut[0] == 0 and lut[-1] == 255
+          assert all(a <= b for a,b in zip(lut,lut[1:]))
+          assert lut[128] < 128
+          print('inverse-sRGB LUT sanity:', lut[0], lut[32], lut[64], lut[128], lut[192], lut[255])
+          PY
+
+          printf '%s\n' \
+            'M10R_RENDER1H_TRANSFER1A' \
+            'ONE-VARIABLE A/B: delivered final transfer coding only.' \
+            'Frozen WORKING1A chain reconstructed first.' \
+            'Existing textbook sRGB OETF remains in nativeProcessTile so EDGE1A receives exactly the same input domain.' \
+            'Existing EDGE1A decode/process/re-encode remains unchanged.' \
+            'Change: one inverse textbook-sRGB pass is applied after EDGE1A and before JPEG publication.' \
+            'Net diagnostic JPEG is linear-coded after an acknowledged 8-bit sRGB round trip.' \
+            'This is a transfer-ownership discriminator, not an exact M10-R hardware-parity claim.' \
+            'No WB, matrix, MEDIUM, DG, Yc, edge, exposure, JPEG quality, RAW count, or HDR change.' \
+            > M10R_RENDER1H_TRANSFER1A_PROVENANCE.txt
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android build components
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-36" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.0.12077973"
+
+      - name: Build RENDER1H TRANSFER1A debug APK
+        run: |
+          set -o pipefail
+          cd PhotonCamera
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_RENDER1H_TRANSFER1A_GRADLE.log"
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: M10R-RENDER1H-TRANSFER1A-buildlog
+          path: M10R_RENDER1H_TRANSFER1A_GRADLE.log
+          if-no-files-found: ignore
+
+      - name: Upload APK and provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: M10RCam-RENDER1H-TRANSFER1A-DIAG1C-SAF1-debug-apk
+          path: |
+            PhotonCamera/app/build/outputs/apk/debug/*.apk
+            PHOTON_UPSTREAM_COMMIT.txt
+            M10R_RENDER1H_TRANSFER1A_PROVENANCE.txt
+            /tmp/m10r_b2y_assets/manifest.json
+          if-no-files-found: error
