@@ -1,7 +1,7 @@
 # M10-R v2.70E — WORKING1A DEVICE RESULT / TRANSFER1A GATE
 
 Date: 2026-09-10
-Status: **WORKING1A retained; one final-transfer discriminator authorized**
+Status: **WORKING1A retained; TRANSFER1A built for device judgement**
 
 ## Device evidence
 
@@ -61,13 +61,20 @@ A naive edit that removes `srgb8()` from the WORKING1A native pixel loop is **no
 
 The existing experimental EDGE1A pass consumes the already sRGB-coded bitmap, explicitly decodes sRGB to linear for luma/high-frequency processing, then re-encodes affected pixels to sRGB. If the native pixel loop were changed to emit linear-coded bytes while EDGE1A were left unchanged, EDGE1A would decode the wrong domain and the candidate would alter both transfer and edge arithmetic.
 
-Therefore TRANSFER1A must preserve the complete WORKING1A + EDGE1A path and cancel the final sRGB coding only **after** EDGE1A.
+Therefore TRANSFER1A preserves the complete WORKING1A + EDGE1A path and cancels the final sRGB coding only **after** EDGE1A.
 
-## Authorized candidate
+## Built candidate
 
 ```text
 RENDER1H_TRANSFER1A
 experiment = TRANSFER1A_POST_EDGE_INVERSE_SRGB_CANCEL
+branch = m10r-render1h-transfer1a-build
+build head = 43aca6efd0fd9d25797301fb99d78c70e8d9818e
+Actions run = 34457532518
+artifact = M10RCam-RENDER1H-TRANSFER1A-DIAG1C-SAF1-debug-apk
+artifact id = 10144209849
+artifact digest = sha256:8e07832b5b080fa335a8f8727fd13218fad21827c5e4e793995ab06b9bb4ba7e
+build result = SUCCESS
 ```
 
 Pipeline:
@@ -86,9 +93,43 @@ source RAW
 
 The last pass maps each 8-bit sRGB code through the exact inverse textbook sRGB equation and re-quantizes to 8-bit. This makes the delivered JPEG linear-coded for the diagnostic A/B while keeping every upstream stage, including EDGE1A's input domain, unchanged.
 
+## Build/static gate
+
+The Actions run completed every stage successfully, including:
+
+```text
+patch syntax
+exact Photon baseline checkout
+exact M10-R firmware/B2Y asset extraction and hash checks
+full frozen WORKING1A reconstruction
+TRANSFER1A application
+candidate identity/invariant greps
+inverse-sRGB LUT numerical sanity
+Android/NDK build
+APK/provenance publication
+```
+
+Static checks explicitly retain:
+
+```text
+WORKING1A targetToWorking + post-MEDIUM/DG CC1
+native srgb8(outR/outG/outB)
+EDGE1A native pass
+EDGE1A linear decode and sRGB re-encode
+EDGE scale/gain stages
+YC2A
+Y_BLEND OFF
+TEXTURE OFF
+LF OFF
+HDR OFF
+single RAW
+```
+
+Therefore the delivered-image A/B remains isolated to the post-edge inverse transfer pass.
+
 ## Deliberate limitation
 
-Because the baseline OETF has already quantized to 8-bit before the inverse pass, this is not a bit-exact reconstruction of an hypothetical no-OETF firmware path. It is a bounded **transfer-cancellation discriminator** only.
+Because the baseline OETF has already quantized to 8-bit before the inverse pass, this is not a bit-exact reconstruction of a hypothetical no-OETF firmware path. It is a bounded **transfer-cancellation discriminator** only.
 
 Metadata must state:
 
