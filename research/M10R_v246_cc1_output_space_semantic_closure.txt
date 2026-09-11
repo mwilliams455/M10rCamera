@@ -1,0 +1,84 @@
+M10-R v2.46 CC1 OUTPUT-SPACE SEMANTIC CLOSURE
+
+Purpose
+-------
+Close the remaining ambiguity in the rendered ColorSpec constructor field1 / CC1 rows that caused RENDER1O to use constructor mode 1 as DEFAULT_SRGB_CC1.
+
+Frozen firmware evidence
+------------------------
+1. v2.31 proves IMG factory STILL color-space value sRGB=1 is translated by ca9_cm_fill_parameter into CA9 mode byte 0 and that the same request object is sent through opcode 0x40 to the CA9 rendered ColorSpec constructor. There is no hidden 0->1 remap at that boundary.
+2. v2.30 recovers the three constructor field1 matrices used as CC1 sources:
+
+mode 0:
+  2.0341 -0.7273 -0.3067
+ -0.2288  1.2317 -0.0029
+ -0.0086 -0.1533  1.1619
+
+mode 1:
+  1.3895 -0.1693 -0.2202
+ -0.2288  1.2317 -0.0029
+ -0.0176 -0.0963  1.1139
+
+mode 2:
+  1.2789 -0.1128 -0.1661
+ -0.2042  1.2569 -0.0527
+  0.0183 -0.1126  1.0943
+
+3. v2.30 also recovers the exact ProPhoto D50 RGB<->XYZ matrices in the same CA9 ColorSpec code:
+  ProPhoto RGB->XYZ D50 getter target 0x40013A40
+  ProPhoto XYZ->RGB D50 getter target 0x400139F8
+
+Standard-space closure
+----------------------
+For an internal ProPhoto RGB working vector, the exact linear conversion to an output RGB space is:
+
+  M(ProPhoto->output) = M(XYZ_D50->output) * M(ProPhoto->XYZ_D50)
+
+Using the standard D50 matrices already identified exactly in v2.30 gives:
+
+ProPhoto -> sRGB reference:
+  2.03407594 -0.72733421 -0.30674173
+ -0.22881332  1.23173016 -0.00291684
+ -0.00856984 -0.15328657  1.16185641
+firmware mode 0 max coefficient error = 4.3591775e-05
+
+ProPhoto -> Adobe RGB reference:
+  1.38952067 -0.16931974 -0.22020099
+ -0.22881309  1.23173022 -0.00291694
+ -0.01763726 -0.09626482  1.11390207
+firmware mode 1 max coefficient error = 3.7263184e-05
+
+ProPhoto -> ECI RGB reference:
+  1.27891267 -0.11277603 -0.16613677
+ -0.20421568  1.25688785 -0.05267227
+  0.01829194 -0.11258157  1.09428963
+firmware mode 2 max coefficient error = 3.6768672e-05
+
+All three recovered field1 matrices preserve the neutral axis (row sums approximately 1.0), as expected for RGB-working-space to RGB-output-space gamut conversions.
+
+Semantic closure
+----------------
+CA9 rendered CC1 field1 semantics are therefore:
+
+  mode 0 = ProPhoto RGB -> sRGB
+  mode 1 = ProPhoto RGB -> Adobe RGB
+  mode 2 = ProPhoto RGB -> ECI RGB
+
+This simultaneously resolves the apparent v2.30/v2.31 contradiction:
+
+  factory STILL sRGB -> CA9 mode 0 -> ProPhoto-to-sRGB CC1
+
+The earlier RENDER1O constant named DEFAULT_SRGB_CC1 used the mode-1 field1 matrix (1.3895 ...), which is actually ProPhoto-to-AdobeRGB. That label was wrong.
+
+Important companion-field note
+------------------------------
+The v2.30 field2 companion getters do not line up with field1 destinations for modes 0 and 1 when interpreted as simple inverse pairs. That does not weaken the CC1 field1 closure because v2.29/v2.30 identify field1 as the CC1 source and the field1 matrices independently close against ProPhoto->output transforms to <5e-5. The precise role/order of field2 remains a separate ColorSpec object-semantic question and must not be used to relabel CC1.
+
+Renderer consequence
+--------------------
+RENDER1P / CC1MAP1A is authorized as a one-variable correction on top of RENDER1O:
+
+  old RENDER1O DEFAULT_SRGB_CC1 = mode 1 = ProPhoto->AdobeRGB
+  new RENDER1P DEFAULT_SRGB_CC1 = mode 0 = ProPhoto->sRGB
+
+Freeze all other photographic variables: source calibration, WB/CA9, WORKING1A placement, YC2A, MEDIUM/DG, YBLEND1A, NATIVEOUT1A, EDGE0A, exposure, JPEG quality, single RAW and HDR-off.
