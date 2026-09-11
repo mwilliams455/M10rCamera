@@ -1,0 +1,218 @@
+name: M10-R v2.45 JPEG ICC colorspace handoff
+on:
+  push:
+    branches: [m10r-render1o-cc1on1a]
+    paths: ['.github/workflows/m10r-v245-jpeg-icc-colorspace-handoff.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone
+      - name: Trace B2Y/CC1 to JPEG ICC/output colorspace handoff
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          a=p.index("cat >/tmp/unpack.cpp <<'CPP'\n")+len("cat >/tmp/unpack.cpp <<'CPP'\n")
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 - <<'PY' > research/M10R_v245_jpeg_icc_colorspace_handoff.txt
+          from pathlib import Path
+          import struct,re
+          from collections import defaultdict
+          from capstone import *
+          from capstone.arm import *
+
+          b=Path('/tmp/sections/092_IMG-System.bin').read_bytes()
+          BASE=0x42000000; P=4
+          md=Cs(CS_ARCH_ARM,CS_MODE_THUMB|CS_MODE_LITTLE_ENDIAN); md.detail=True; md.skipdata=True
+          def off(a): return P+a-BASE
+          def va(o): return BASE+o-P
+          def ops(i):
+              try:return i.operands
+              except:return []
+          def call(i):
+              try:
+                  o=ops(i)
+                  if i.mnemonic in ('bl','blx') and o and o[0].type==ARM_OP_IMM:return o[0].imm&~1
+              except:pass
+          def lit(i):
+              try:
+                  o=ops(i)
+                  if i.mnemonic.startswith('ldr') and len(o)>=2 and o[1].type==ARM_OP_MEM and o[1].mem.base==ARM_REG_PC:
+                      la=((i.address+4)&~3)+o[1].mem.disp; fo=off(la)
+                      if 0<=fo<=len(b)-4:return la,struct.unpack_from('<I',b,fo)[0]
+              except:pass
+          def fmt(i):
+              s=f'{i.address:08x}: {i.mnemonic:10s} {i.op_str}'
+              q=lit(i); c=call(i)
+              if q:s+=f' ; LIT {q[0]:08x}->{q[1]:08x}'
+              if c is not None:s+=f' ; CALL {c:08x}'
+              return s
+          def u32_hits(v):
+              n=struct.pack('<I',v); out=[]; p=0
+              while True:
+                  p=b.find(n,p)
+                  if p<0:break
+                  out.append(p); p+=1
+              return out
+          def refs_to_pool(pool_addr,span=0x9000):
+              po=off(pool_addr); lo=max(P,po-span)&~1; hi=min(len(b)-2,po+0x20); out=[]
+              for o in range(lo,hi,2):
+                  ins=list(md.disasm(b[o:o+4],va(o),count=1))
+                  if ins:
+                      q=lit(ins[0])
+                      if q and q[0]==pool_addr:out.append(ins[0].address)
+              return sorted(set(out))
+          def disasm_window(ref,before=0x90,after=0x130):
+              a=max(BASE,(ref-before)&~1); z=min(BASE+len(b)-P,ref+after)
+              return list(md.disasm(b[off(a):off(z)],a))
+          def asciis(blob,minlen=5):
+              return [m.group().decode('latin1','replace') for m in re.finditer(rb'[ -~]{%d,}'%minlen,blob)]
+
+          print('M10-R v2.45 JPEG / ICC / COLORSPACE HANDOFF')
+          print('firmware_sha256 ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498')
+          print('question: after rendered CC1/B2Y, is there a second pixel colorspace transform before JPEG, or only output-profile/tag selection?')
+          print()
+
+          # ICC profiles: ICC header has big-endian length at +0 and signature acsp at +36.
+          profiles=[]
+          for o in range(0,len(b)-128,4):
+              if b[o+36:o+40]!=b'acsp': continue
+              size=struct.unpack_from('>I',b,o)[0]
+              if not (128<=size<=4_000_000 and o+size<=len(b)): continue
+              blob=b[o:o+size]
+              texts=asciis(blob[:min(size,0x6000)])
+              labels=[]
+              for s in texts:
+                  if re.search(r'(?i)(Adobe\s*RGB|IEC\s*sRGB|sRGB IEC|eciRGB|ECI RGB|ProPhoto|Default RGB colour space)',s):
+                      labels.append(s[:180])
+              profiles.append((o,size,labels[:10]))
+          # de-duplicate overlapping/acsp false positives by exact start.
+          uniq=[]; seen=set()
+          for x in profiles:
+              if x[0] not in seen: uniq.append(x); seen.add(x[0])
+          profiles=uniq
+          print('=== embedded ICC profiles ===')
+          print('count',len(profiles))
+          icc_refs=[]
+          for n,(o,size,labels) in enumerate(profiles):
+              a=va(o)
+              print(f'ICC[{n}] start={a:08x} off={o:#x} size={size} labels={labels}')
+              pools=u32_hits(a)
+              refs=[]
+              for po in pools:
+                  pa=va(po); rr=refs_to_pool(pa); refs.extend(rr)
+                  print(f'  ptr_pool={pa:08x} code_refs={[hex(x) for x in rr]}')
+              refs=sorted(set(refs)); icc_refs.extend(refs)
+              for r in refs[:16]:
+                  print(f'  -- ICC ref {r:08x} --')
+                  for i in disasm_window(r,0x80,0x120): print('   '+fmt(i))
+          print()
+
+          # JPEG/output/profile strings and exact code xrefs.
+          print('=== JPEG / output-profile strings and xrefs ===')
+          needles=re.compile(rb'(?i)(img_JPEG|JPEG|ICC|profile|color.?space|sRGB|Adobe\s*RGB|AdobeRGB|eciRGB)')
+          string_refs=[]; strings=[]
+          for m in re.finditer(rb'[ -~]{5,}\x00',b):
+              raw=m.group()[:-1]
+              if not needles.search(raw): continue
+              s=raw.decode('ascii','replace'); a=va(m.start())
+              strings.append((a,s))
+              print(f'STR {a:08x} {s!r}')
+              for po in u32_hits(a):
+                  pa=va(po); rr=refs_to_pool(pa); string_refs.extend(rr)
+                  if rr: print(f'  pool={pa:08x} refs={[hex(x) for x in rr]}')
+          print('string_count',len(strings),'code_ref_count',len(set(string_refs)))
+          print()
+
+          # Build neighborhoods for JPEG refs only, then summarize literals/calls. This gives the writer/config graph without whole-image disassembly.
+          jpeg_refs=[]
+          for a,s in strings:
+              if re.search(r'(?i)JPEG',s):
+                  for po in u32_hits(a): jpeg_refs += refs_to_pool(va(po))
+          jpeg_refs=sorted(set(jpeg_refs))
+          print('=== JPEG xref neighborhoods ===')
+          print('jpeg_refs', [hex(x) for x in jpeg_refs])
+          jpeg_calls=defaultdict(set); jpeg_literals=defaultdict(set)
+          for r in jpeg_refs:
+              print(f'-- JPEG ref {r:08x} --')
+              for i in disasm_window(r,0x100,0x180):
+                  print(fmt(i)); c=call(i); q=lit(i)
+                  if c is not None: jpeg_calls[r].add(c)
+                  if q: jpeg_literals[r].add(q[1])
+          print()
+
+          # Explicitly test whether known ColorManagement state or rendered-CC globals occur in JPEG neighborhoods.
+          watched={
+            0x43705760:'cm_request_root',0x43705830:'cm_root',0x43705950:'cm_aux',
+            0x408fe130:'rendered_CC0_global',0x408fe15c:'rendered_CC1_global',
+            0x20020080:'B2Y_reg_base_A',0x20020880:'B2Y_reg_base_B'}
+          print('=== watched color/B2Y literals near JPEG xrefs ===')
+          for r in jpeg_refs:
+              vals=jpeg_literals[r]
+              hits=[(hex(v),watched[v]) for v in watched if v in vals]
+              if hits: print(hex(r),hits)
+          print()
+
+          # Cross-function call targets: candidates reached from both ICC selector xrefs and JPEG writer/config xrefs.
+          def calls_near(refs):
+              d=defaultdict(set)
+              for r in refs:
+                  for i in disasm_window(r,0x120,0x180):
+                      c=call(i)
+                      if c is not None:d[c].add(r)
+              return d
+          ic= calls_near(sorted(set(icc_refs)))
+          jc= calls_near(jpeg_refs)
+          common=sorted(set(ic)&set(jc))
+          print('=== shared call targets between ICC selectors and JPEG neighborhoods ===')
+          for c in common:
+              print(f'{c:08x} icc_refs={[hex(x) for x in sorted(ic[c])]} jpeg_refs={[hex(x) for x in sorted(jc[c])]}')
+          print()
+
+          # Search exact known colorspace enum translation request root refs and classify proximity to JPEG code refs.
+          print('=== CM request-root refs vs JPEG refs ===')
+          cmrefs=[]
+          for po in u32_hits(0x43705760): cmrefs += refs_to_pool(va(po))
+          cmrefs=sorted(set(cmrefs))
+          print('cmrefs',[hex(x) for x in cmrefs])
+          for c in cmrefs:
+              near=[j for j in jpeg_refs if abs(j-c)<=0x3000]
+              if near: print(f'cmref {c:08x} near_jpeg={[hex(x) for x in near]}')
+          print()
+
+          # Search for standard output-space matrix getter addresses in JPEG neighborhoods. If present, that is direct evidence of a post-CC1 transform.
+          getters={0x40012ddc:'mode0_field1',0x40012fc4:'mode0_field2',0x40012db8:'mode1_field1',0x40012fa0:'mode1_field2',0x40012dc4:'mode2_field1',0x40012fac:'mode2_field2'}
+          print('=== CA9 matrix getter addresses encoded in IMG JPEG neighborhoods ===')
+          # Cross-core direct addresses are unlikely, but proving absence is useful.
+          for r in jpeg_refs:
+              vals=jpeg_literals[r]
+              h=[(hex(v),getters[v]) for v in getters if v in vals]
+              if h: print(hex(r),h)
+          print()
+          print('=== DECISION GATE ===')
+          print('A post-CC1 pixel conversion is supported only by a concrete matrix/transform consumer on the JPEG path, not by ICC tagging alone.')
+          print('If ICC selection is linked to JPEG but no second pixel transform is found, reopen the semantic interpretation of the constructor matrices rather than inserting a compensating renderer matrix.')
+          PY
+      - name: Commit v2.45 trace
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v245_jpeg_icc_colorspace_handoff.txt
+          git commit -m 'research: record v2.45 JPEG ICC colorspace handoff' || exit 0
+          git pull --rebase origin m10r-render1o-cc1on1a
+          git push
