@@ -1,0 +1,94 @@
+name: M10-R v2.45b JPEG ICC compact summary
+on:
+  push:
+    branches: [m10r-render1o-cc1on1a]
+    paths: ['.github/workflows/m10r-v245b-jpeg-icc-summary.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  summarize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Build compact summary from v2.45 trace
+        shell: bash
+        run: |
+          set -euo pipefail
+          F=research/M10R_v245_jpeg_icc_colorspace_handoff.txt
+          test -s "$F"
+          O=research/M10R_v245b_jpeg_icc_summary.txt
+          python3 - <<'PY' > "$O"
+          from pathlib import Path
+          p=Path('research/M10R_v245_jpeg_icc_colorspace_handoff.txt')
+          lines=p.read_text(errors='replace').splitlines()
+          print('M10-R v2.45b JPEG / ICC COMPACT SUMMARY')
+          print('source_lines',len(lines))
+          print()
+          headers={
+            '=== embedded ICC profiles ===',
+            '=== JPEG / output-profile strings and xrefs ===',
+            '=== JPEG xref neighborhoods ===',
+            '=== watched color/B2Y literals near JPEG xrefs ===',
+            '=== shared call targets between ICC selectors and JPEG neighborhoods ===',
+            '=== CM request-root refs vs JPEG refs ===',
+            '=== CA9 matrix getter addresses encoded in IMG JPEG neighborhoods ===',
+            '=== DECISION GATE ==='}
+          # Print compact scalar/result lines globally.
+          prefixes=('ICC[','count ','string_count','jpeg_refs','cmrefs','cmref ','source_lines')
+          interesting=[]
+          for i,s in enumerate(lines):
+              if s in headers or s.startswith(prefixes):
+                  interesting.append((i,s))
+              if 'rendered_CC' in s or 'B2Y_reg_base' in s or 'cm_request_root' in s or 'cm_root' in s or 'cm_aux' in s:
+                  interesting.append((i,s))
+              if 'icc_refs=' in s and 'jpeg_refs=' in s:
+                  interesting.append((i,s))
+              if 'mode0_field' in s or 'mode1_field' in s or 'mode2_field' in s:
+                  interesting.append((i,s))
+              if 'A post-CC1 pixel conversion' in s or 'If ICC selection' in s:
+                  interesting.append((i,s))
+          seen=set()
+          for i,s in interesting:
+              if (i,s) not in seen:
+                  print(f'L{i+1}: {s}')
+                  seen.add((i,s))
+          print()
+          # Capture the first 100 profile/JPEG/profile-selector strings, without disassembly neighborhoods.
+          print('=== selected strings ===')
+          n=0
+          for i,s in enumerate(lines):
+              if s.startswith('STR ') and any(k.lower() in s.lower() for k in ('jpeg','srgb','adobe','ecirgb','profile','color space','colorspace','icc')):
+                  print(f'L{i+1}: {s[:300]}')
+                  n+=1
+                  if n>=100: break
+          print()
+          # Section payloads: keep only non-instruction result lines between key headers.
+          keep_sections={
+            '=== watched color/B2Y literals near JPEG xrefs ===',
+            '=== shared call targets between ICC selectors and JPEG neighborhoods ===',
+            '=== CM request-root refs vs JPEG refs ===',
+            '=== CA9 matrix getter addresses encoded in IMG JPEG neighborhoods ==='}
+          active=None
+          print('=== compact section payloads ===')
+          for i,s in enumerate(lines):
+              if s.startswith('==='):
+                  active=s if s in keep_sections else None
+                  if active: print(active)
+                  continue
+              if active and s and not (len(s)>=9 and s[:8].isalnum() and ':' in s[:12]):
+                  print(f'L{i+1}: {s[:500]}')
+          PY
+          wc -l "$O"
+          cat "$O"
+      - name: Commit compact summary
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_v245b_jpeg_icc_summary.txt
+          git commit -m 'research: record compact v2.45 JPEG ICC summary' || exit 0
+          git pull --rebase origin m10r-render1o-cc1on1a
+          git push
