@@ -1,0 +1,46 @@
+M10-R v2.47 CC1 -> JPEG HANDOFF CLOSURE
+
+Question
+--------
+Does the rendered M10-R path apply another pixel colour-space matrix after B2Y CC1 and before JPEG encoding, which could compensate for a non-sRGB CC1 row?
+
+Evidence
+--------
+1. v2.45 scanned the IMG-System JPEG/output-profile code path and produced 39,632 lines of bounded xref/disassembly evidence.
+2. v2.45b condensed that trace without changing the source evidence.
+3. The firmware contains repeated embedded ICC profiles for Adobe RGB (1998), IEC sRGB and eciRGB v2.
+4. JPEG encoder/configuration strings operate on YCC buffers and expose YCC addresses, dimensions, sampling, quality, ISO, core and output size.
+5. Across the JPEG xref neighborhoods, the watched colour/B2Y literal section is empty for:
+   - 0x43705760 ColorManagement request root
+   - 0x43705830 ColorManagement root
+   - 0x43705950 ColorManagement auxiliary state
+   - 0x408FE130 rendered CC0 global
+   - 0x408FE15C rendered CC1 global
+   - 0x20020080 / 0x20020880 B2Y register bases
+6. The shared-call-target section between ICC-selector xrefs and JPEG neighborhoods is empty.
+7. The CA9 output-space matrix getter section in IMG JPEG neighborhoods is empty.
+8. The ColorManagement request-root refs are clustered around 0x420A2F08..0x420A5F3E and do not appear as a second matrix consumer inside the traced JPEG neighborhoods.
+
+Conclusion
+----------
+There is no firmware evidence in the bounded JPEG/output path for a second pixel colour-space matrix after CC1. ICC/profile presence is therefore treated as output metadata/profile selection unless a future trace finds a concrete pixel-transform consumer.
+
+The supported rendered architecture is:
+
+  target-camera RGB
+    -> Leica internal ProPhoto-like working RGB / CC0-side basis
+    -> Yc + nonlinear B2Y stages (MEDIUM/DG and currently constrained YBLEND1A)
+    -> exact Yc inverse back to internal working RGB
+    -> CC1 working-RGB -> selected output RGB
+    -> output quantization / YCC conversion
+    -> JPEG encoder
+
+For factory STILL sRGB, v2.31 proves CA9 mode 0 and v2.46 proves CC1 field1 mode 0 is ProPhoto RGB -> sRGB. Therefore RENDER1P/CC1MAP1A is the evidence-authorized correction to RENDER1O.
+
+Do not add a compensating post-CC1 matrix to the renderer without new direct firmware evidence.
+
+Remaining uncertainty
+---------------------
+- YBLEND1A is still a constrained reconstruction, not exact firmware pixel arithmetic.
+- Exact transfer/quantization semantics after CC1 remain separately investigable if device validation shows a residual systematic issue.
+- The ColorSpec field2 companion role remains unresolved, but it is not evidence for relabeling the field1 CC1 rows.
