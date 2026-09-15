@@ -1,15 +1,16 @@
-name: M10-R RENDER1Q YBLEND1B K035 APK
+name: M10-R RENDER1Q YBLENDDIAG1A APK
 
 on:
   push:
-    branches: [m10r-render1q-yblend1b-k035]
+    branches: [m10r-yblend-diag1a]
     paths:
       - '.github/workflows/m10r-render1q-yblend1b-k035-apk.yml'
       - 'patches/fix-m10r-render1q-yblend1b-k035.py'
+      - 'patches/fix-m10r-yblend-diag1a.py'
   workflow_dispatch:
 
 jobs:
-  build-render1q-yblend1b-k035:
+  build-render1q-yblenddiag1a:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -51,7 +52,8 @@ jobs:
             patches/fix-m10r-render1n-yblend1a.py \
             patches/fix-m10r-render1o-cc1on1a.py \
             patches/fix-m10r-render1p-cc1map1a.py \
-            patches/fix-m10r-render1q-yblend1b-k035.py; do
+            patches/fix-m10r-render1q-yblend1b-k035.py \
+            patches/fix-m10r-yblend-diag1a.py; do
               python3 -m py_compile "$p"
           done
           python3 -m py_compile tools/m10r_sections.py tools/m10r_b2y_assets.py
@@ -89,7 +91,7 @@ jobs:
           echo '2fd6ca209f290c75aa96976b3d7692e55c41a55c0017a063aba9808da3b41a00  /tmp/m10r_b2y_assets/tone_medium_q15.u32le' | sha256sum -c -
           echo '9e65de24d52271be0783f4e2728f20f482c0ba43b63159b75033b4a4fc75457d  /tmp/m10r_b2y_assets/dg_expanded_u16le.bin' | sha256sum -c -
 
-      - name: Apply frozen RENDER1P chain and YBLEND1B k0.35 probe
+      - name: Apply frozen RENDER1Q chain and Gate-B YBLENDDIAG1A
         run: |
           set -euo pipefail
           B2Y=/tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin
@@ -127,36 +129,37 @@ jobs:
           python3 patches/fix-m10r-render1o-cc1on1a.py PhotonCamera
           python3 patches/fix-m10r-render1p-cc1map1a.py PhotonCamera
           python3 patches/fix-m10r-render1q-yblend1b-k035.py PhotonCamera
+          python3 patches/fix-m10r-yblend-diag1a.py PhotonCamera
 
           R=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
           C=PhotonCamera/app/src/main/cpp/m10rRender.cpp
           G=PhotonCamera/app/build.gradle
-          grep -F "render1q-cc1map1a-yblend1b-k035-redtrace1b-edge0a-nativeout1a-diag1c-saf1'" "$G"
-          grep -F '2.0341, -0.7273, -0.3067' "$R"
-          grep -F 'cc1Ca9ModeIndex", 0' "$R"
-          grep -F 'cc1Semantic", "ProPhoto_RGB_to_sRGB"' "$R"
+          grep -F "render1q-yblenddiag1a-cc1map1a-yblend1b-k035-redtrace1b-edge0a-nativeout1a-diag1c-saf1'" "$G"
+          grep -F 'yBlendDiag1APhotographicPixelsChanged", false' "$R"
+          grep -F 'trueMatrixQ12", "1224,2403,469;-691,-1357,2048;2048,-1715,-333"' "$R"
+          grep -F 'liveYc1AMatrixQ12", "1224,2404,467;-691,-1357,2048;2048,-1715,-333"' "$R"
+          grep -F 'programmedTailWords", "0x3fff3fff,0x3fff3fff,0x3fff3fff"' "$R"
           grep -F 'yBlend1BK", 0.35' "$R"
+          grep -F 'const double y  = (1224.0*lr + 2404.0*lg + 467.0*lb) / 4096.0;' "$C"
           grep -F 'const double yBlendChromaScale = y > 1.0e-12 ? 1.0 + 0.35 * (yRatio - 1.0) : 0.0;' "$C"
           grep -F 'const double outR = outMat[0]*nr + outMat[1]*ng + outMat[2]*nb;' "$C"
           grep -F 'linear8(outR)' "$C"
           grep -F 'linear8(outG)' "$C"
           grep -F 'linear8(outB)' "$C"
-          if grep -Fq 'const double yBlendChromaScale = y > 1.0e-12 ? 0.5 * (1.0 + yRatio) : 0.0;' "$C"; then
-            echo 'ERROR: old k0.50 live chroma path remains' >&2; exit 1
-          fi
-          if grep -Fq '1.3895, -0.1693, -0.2202' "$R"; then
-            echo 'ERROR: old mode-1 CC1 remains' >&2; exit 1
+          if grep -Fq '(1224.0*lr + 2403.0*lg + 469.0*lb) / 4096.0' "$C"; then
+            echo 'ERROR: diagnostic record0C matrix leaked into live native path' >&2; exit 1
           fi
 
           printf '%s\n' \
-            'M10R_RENDER1Q_YBLEND1B_K035' \
-            'Base: validated RENDER1P CC1MAP1A.' \
-            'Only live photographic change: Yc chroma excess-gain inheritance k=0.50 -> k=0.35.' \
-            'Formula: scale = 1 + 0.35 * (mappedY/inputY - 1).' \
-            'This is a controlled falsification probe, not a Leica firmware formula claim.' \
-            'CC1MAP1A factory still sRGB mode0 matrix remains frozen.' \
-            'Mapped Y, MEDIUM/DG, YC2A, WORKING1A, WB/CA9, exposure, NATIVEOUT1A, EDGE0A, JPEG quality, single RAW and HDR-off remain frozen.' \
-            > M10R_RENDER1Q_YBLEND1B_K035_PROVENANCE.txt
+            'M10R_RENDER1Q_YBLENDDIAG1A' \
+            'Base: frozen RENDER1Q CC1MAP1A/YBLEND1B k0.35.' \
+            'Photographic pixels unchanged: native renderer remains exact RENDER1Q.' \
+            'Gate-B diagnostic samples true Y_BLEND record0C matrix 1224,2403,469;-691,-1357,2048;2048,-1715,-333.' \
+            'Live YC1A matrix remains 1224,2404,467;-691,-1357,2048;2048,-1715,-333 and is logged separately.' \
+            'All/warm-highlight/saturated-red/saturated-blue subsets and compact Y/Cb/Cr histograms are emitted to JSON sidecars.' \
+            '0x3FFF proximity is a diagnostic normalized-Q14 projection only; no ISP ABI or clipping semantic is claimed.' \
+            'Production/capture branch remains untouched.' \
+            > M10R_RENDER1Q_YBLENDDIAG1A_PROVENANCE.txt
 
       - uses: actions/setup-java@v4
         with:
@@ -169,26 +172,26 @@ jobs:
         run: |
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager "platforms;android-36" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.0.12077973"
-      - name: Build RENDER1Q YBLEND1B K035 debug APK
+      - name: Build RENDER1Q YBLENDDIAG1A debug APK
         run: |
           set -o pipefail
           cd PhotonCamera
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_RENDER1Q_YBLEND1B_K035_GRADLE.log"
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_RENDER1Q_YBLENDDIAG1A_GRADLE.log"
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: M10R-RENDER1Q-YBLEND1B-K035-buildlog
-          path: M10R_RENDER1Q_YBLEND1B_K035_GRADLE.log
+          name: M10R-RENDER1Q-YBLENDDIAG1A-buildlog
+          path: M10R_RENDER1Q_YBLENDDIAG1A_GRADLE.log
           if-no-files-found: ignore
       - name: Upload APK and provenance
         uses: actions/upload-artifact@v4
         with:
-          name: M10RCam-RENDER1Q-CC1MAP1A-YBLEND1B-K035-REDTRACE1B-NATIVEOUT1A-debug-apk
+          name: M10RCam-RENDER1Q-YBLENDDIAG1A-CC1MAP1A-YBLEND1B-K035-debug-apk
           path: |
             PhotonCamera/app/build/outputs/apk/debug/*.apk
             PHOTON_UPSTREAM_COMMIT.txt
-            M10R_RENDER1Q_YBLEND1B_K035_PROVENANCE.txt
+            M10R_RENDER1Q_YBLENDDIAG1A_PROVENANCE.txt
             /tmp/m10r_b2y_assets/manifest.json
           if-no-files-found: error
