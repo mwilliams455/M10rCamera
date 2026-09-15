@@ -18,8 +18,9 @@ src = src_path.read_text()
 # (1224,2403,469 / -691,-1357,2048 / 2048,-1715,-333) into both Java and
 # native rendering. The original DIAG1A patch was authored against the older
 # YC1A assumption 1224,2404,467, so its output-neutrality gates are stale.
-# Correct only those baseline/provenance assumptions here. The diagnostic
-# instrumentation itself is otherwise left byte-for-byte unchanged.
+# RENDER1G also renamed the sampled pre-B2Y working RGB from lr/lg/lb to
+# wr/wg/wb. Correct only those stale baseline/provenance/scope assumptions.
+# Native photographic arithmetic is never modified by this wrapper.
 replacements = [
     (
         "# IMPORTANT: the live renderer's YC1A Y row is 1224,2404,467. The newly\n# recovered TRUE Y_BLEND record 0x0C Y row is 1224,2403,469. Cb/Cr rows are\n# identical. DIAG1A therefore measures the true record-0x0C coordinates in the\n# existing 1/64 Java diagnostic sampler but deliberately does NOT replace YC1A\n# and does not touch m10rRender.cpp. This keeps photographic pixels frozen.",
@@ -28,6 +29,30 @@ replacements = [
     (
         "                    // record-0x0C matrix beside the frozen live YC1A matrix.\n                    // YC1A stays untouched: live Y row = 1224,2404,467; true\n                    // Y_BLEND row = 1224,2403,469. Cb/Cr rows are identical.",
         "                    // record-0x0C matrix beside the frozen live YC2A matrix.\n                    // RENDER1F already made the live matrix coefficient-identical\n                    // to record 0x0C; this diagnostic only observes its coordinates."
+    ),
+    # RENDER1G WORKING1A moved the sampled B2Y input from the old post-output
+    # lr/lg/lb naming to pre-B2Y Leica working RGB wr/wg/wb. DIAG1A must sample
+    # that same coordinate domain rather than referencing variables that no
+    # longer exist in Java scope.
+    (
+        'final double ybdY = (1224.0*lr + 2403.0*lg + 469.0*lb) / 4096.0;',
+        'final double ybdY = (1224.0*wr + 2403.0*wg + 469.0*wb) / 4096.0;'
+    ),
+    (
+        'final double ybdCb = (-691.0*lr - 1357.0*lg + 2048.0*lb) / 4096.0;',
+        'final double ybdCb = (-691.0*wr - 1357.0*wg + 2048.0*wb) / 4096.0;'
+    ),
+    (
+        'final double ybdCr = (2048.0*lr - 1715.0*lg - 333.0*lb) / 4096.0;',
+        'final double ybdCr = (2048.0*wr - 1715.0*wg - 333.0*wb) / 4096.0;'
+    ),
+    (
+        'final boolean ybdSatRed = lr >= 0.25 && lr >= 1.35*Math.max(lg, lb) && ybdRelCr >= 0.10;',
+        'final boolean ybdSatRed = wr >= 0.25 && wr >= 1.35*Math.max(wg, wb) && ybdRelCr >= 0.10;'
+    ),
+    (
+        'final boolean ybdSatBlue = lb >= 0.25 && lb >= 1.35*Math.max(lr, lg) && ybdRelCb >= 0.10;',
+        'final boolean ybdSatBlue = wb >= 0.25 && wb >= 1.35*Math.max(wr, wg) && ybdRelCb >= 0.10;'
     ),
     (
         'yBlendDiag1A.put("liveYc1AMatrixQ12", "1224,2404,467;-691,-1357,2048;2048,-1715,-333");',
@@ -72,6 +97,15 @@ if '1224,2404,467' in src:
     raise SystemExit('YBLEND DIAG1A BASELINEFIX1: stale 1224/2404/467 assumption remains')
 if '1224,2403,469' not in src or 'trueMinusLiveYRowQ12", "0,0,0' not in src:
     raise SystemExit('YBLEND DIAG1A BASELINEFIX1: corrected matrix identity missing')
+for required in [
+    'final double ybdY = (1224.0*wr + 2403.0*wg + 469.0*wb) / 4096.0;',
+    'final double ybdCb = (-691.0*wr - 1357.0*wg + 2048.0*wb) / 4096.0;',
+    'final double ybdCr = (2048.0*wr - 1715.0*wg - 333.0*wb) / 4096.0;',
+    'final boolean ybdSatRed = wr >= 0.25',
+    'final boolean ybdSatBlue = wb >= 0.25',
+]:
+    if required not in src:
+        raise SystemExit('YBLEND DIAG1A BASELINEFIX1: working-domain sampler correction missing: ' + required)
 
 with tempfile.TemporaryDirectory(prefix='m10r-yblenddiag1a-') as td:
     patched = Path(td) / 'fix-m10r-yblend-diag1a-currentbaseline.py'
@@ -79,6 +113,7 @@ with tempfile.TemporaryDirectory(prefix='m10r-yblenddiag1a-') as td:
     subprocess.run([sys.executable, str(patched), sys.argv[1]], check=True)
 
 print('M10-R YBLEND DIAG1A BASELINEFIX1 applied')
-print(' - historical DIAG1A instrumentation retained')
+print(' - historical DIAG1A structure retained')
 print(' - stale YC1A 1224/2404/467 baseline assumption corrected to current YC2A 1224/2403/469')
+print(' - Gate-B sampler now uses RENDER1G pre-B2Y working RGB wr/wg/wb')
 print(' - native renderer remains untouched by DIAG1A')
