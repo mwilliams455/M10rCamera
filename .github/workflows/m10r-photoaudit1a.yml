@@ -1,0 +1,92 @@
+name: M10-R PHOTOAUDIT1A
+on:
+  push:
+    branches: [m10r-photoaudit1a]
+    paths: ['.github/workflows/m10r-photoaudit1a.yml', 'tools/m10r_photoaudit1a.py']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install audit dependencies
+        run: |
+          python3 -m pip install --quiet rawpy==0.25.1 numpy pillow pyyaml opencv-python-headless tifffile
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl > /dev/null
+      - name: Reconstruct exactly the frozen renderer without building an APK
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import yaml,subprocess
+          from pathlib import Path
+          p=yaml.safe_load(Path('.github/workflows/m10r-render1q-yblend1b-k035-apk.yml').read_text())
+          steps=p['jobs']['build-render1q-yblend1b-k035']['steps']
+          names=['Clone exact Photon baseline','Extract exact M10-R B2Y assets','Apply frozen RENDER1P chain and YBLEND1B k0.35 probe']
+          for name in names:
+              s=next(s for s in steps if s.get('name')==name)
+              subprocess.run(['bash','-c',s['run']],check=True)
+          PY
+          mkdir -p audit_inputs/source audit_inputs/assets audit_inputs/samples
+          cp PhotonCamera/app/src/main/cpp/m10rRender.cpp audit_inputs/source/
+          cp PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/*.java audit_inputs/source/
+          cp /tmp/m10r_b2y_assets/* audit_inputs/assets/
+          cp PHOTON_UPSTREAM_COMMIT.txt M10R_RENDER1Q_YBLEND1B_K035_PROVENANCE.txt audit_inputs/source/
+          cp .github/workflows/m10r-render1q-yblend1b-k035-apk.yml audit_inputs/source/
+          git rev-parse HEAD > audit_inputs/source/audit_commit.txt
+      - name: Recover same-shot Leica raw arrays and original camera JPEG references
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import urllib.request,subprocess,json,hashlib,rawpy,numpy as np
+          root=Path('audit_inputs/samples')
+          for sid in ['01','02','03','04','05','06']:
+              base='https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_'+sid
+              jpg=root/(sid+'.jpg');dng=Path('/tmp')/(sid+'.dng')
+              for url,path in [(base+'.jpg',jpg),(base+'.dng',dng)]:
+                  urllib.request.urlretrieve(url,path)
+              metadata=json.loads(subprocess.check_output(['exiftool','-j','-n',str(jpg),str(dng)]))
+              provenance={'id':sid,'source_dng_url':base+'.dng','source_jpg_url':base+'.jpg',
+                  'dng_sha256':hashlib.sha256(dng.read_bytes()).hexdigest(),'jpg_sha256':hashlib.sha256(jpg.read_bytes()).hexdigest(),
+                  'metadata':metadata,'rawpy_version':rawpy.__version__}
+              with rawpy.imread(str(dng)) as raw:
+                  np.savez_compressed(root/(sid+'_raw.npz'),raw=raw.raw_image_visible.copy())
+                  provenance.update({'raw_pattern':raw.raw_pattern.tolist(),'color_desc':raw.color_desc.decode(),
+                    'black_level_per_channel':raw.black_level_per_channel,'white_level':raw.white_level,
+                    'camera_whitebalance':raw.camera_whitebalance,'color_matrix':raw.color_matrix.tolist(),
+                    'rgb_xyz_matrix':raw.rgb_xyz_matrix.tolist(),'sizes':str(raw.sizes)})
+              (root/(sid+'_metadata.json')).write_text(json.dumps(provenance,indent=2)+'\n')
+              dng.unlink()
+              print('Recovered '+sid,flush=True)
+          PY
+      - name: Run photographic audit when available
+        run: |
+          if [ -f tools/m10r_photoaudit1a.py ]; then
+            python3 tools/m10r_photoaudit1a.py audit_inputs audit_results
+          fi
+      - name: Build input checksum manifest
+        run: |
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          p=Path('audit_inputs')
+          rows=[{'path':str(f.relative_to(p)),'bytes':f.stat().st_size,'sha256':hashlib.sha256(f.read_bytes()).hexdigest()} for f in sorted(p.rglob('*')) if f.is_file()]
+          (p/'manifest.json').write_text(json.dumps(rows,indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-PHOTOAUDIT1A-RESEARCH-INPUTS
+          path: audit_inputs/
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-PHOTOAUDIT1A-RESULTS
+          path: audit_results/
+          retention-days: 90
+          if-no-files-found: ignore
