@@ -1,0 +1,90 @@
+name: M10-R Y BLEND GAMMAROUTE1A evidence
+on:
+  push:
+    branches: [m10r-yblend-gammaroute1a]
+    paths: ['.github/workflows/m10r-yblend-gammaroute1a.yml', 'tools/m10r_yblend_gammaroute1a.py']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verified-routing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned research dependencies
+        run: python3 -m pip install --quiet capstone==5.0.3 unicorn==2.1.3
+      - name: Fetch four hash-pinned related SDK source files without executing them
+        run: |
+          python3 - <<'PY'
+          import importlib.util,hashlib,urllib.request,time
+          from pathlib import Path
+          spec=importlib.util.spec_from_file_location('route','tools/m10r_yblend_gammaroute1a.py')
+          m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+          assert len(m.SDK_HASHES)==4
+          for p,h in m.SDK_HASHES.items():
+              url=f'https://raw.githubusercontent.com/ZMlogicL/companyTask/{m.SDK_COMMIT}/{p}'
+              for attempt in range(3):
+                  try:
+                      b=urllib.request.urlopen(url,timeout=60).read()
+                      break
+                  except Exception:
+                      if attempt==2: raise
+                      time.sleep(2)
+              assert hashlib.sha256(b).hexdigest()==h,p
+              f=Path('/tmp/sdk')/p;f.parent.mkdir(parents=True,exist_ok=True);f.write_bytes(b)
+          PY
+      - name: Obtain verified original firmware sections
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker);z=p.index('\n          CPP',a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          /tmp/unpack
+          echo '859c936b6ac8efe0bc4ce7f05623013644fc5d8aee3c6835f09860f452adc2e0  /tmp/M10R_unpacked.bin' | sha256sum -c -
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sec > /tmp/sections.txt
+      - name: Execute complete original upload paths and verify scope
+        run: |
+          set -euo pipefail
+          mkdir -p evidence/results evidence/tools
+          echo 'efae8aa67ca119f8c4fb4defc7f77af51b11aed1f062b8f61e08e4f0b2a37eda  tools/m10r_yblend_gammaroute1a.py' | sha256sum -c -
+          python3 tools/m10r_yblend_gammaroute1a.py /tmp/sec . /tmp/sdk evidence/results > evidence/results/stdout.txt
+          python3 tools/m10r_yblend_bit15_audit1a.py /tmp/sec --cases 1024 --out evidence/results/register_emulation.json > evidence/results/bit15_stdout.txt
+          cp tools/m10r_yblend_gammaroute1a.py tools/m10r_yblend_bit15_audit1a.py tools/m10r_b2y_assets.py evidence/tools/
+          cp .github/workflows/m10r-yblend-gammaroute1a.yml evidence/
+          git rev-parse HEAD > evidence/results/source_commit.txt
+          git fetch --no-tags --depth=1 origin f6c6a0e0713a120e0cbcc642933cde88f0a5ae75
+          git diff --name-only f6c6a0e0713a120e0cbcc642933cde88f0a5ae75 HEAD > evidence/results/changed_paths.txt
+          python3 - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          p=Path('evidence');j=json.loads((p/'results/gammaroute_results.json').read_text())
+          assert j['status']=='PASS_GAMMA_UPLOAD_ROUTING_ONLY'
+          assert j['gate_c_passed'] is False and j['renderer_changed'] is False
+          assert j['tests']['original_entry_executions']==105
+          assert j['tests']['table_writes']==1783808
+          assert j['tests']['source_writes_by_executed_firmware']==0
+          assert len(j['sdk_sources'])==4
+          assert hashlib.sha256((p/'results/register_emulation.json').read_bytes()).hexdigest()=='50eb66d4091436c76bd90d9fff94d89214c945089e4b27e95d5cba7792e747e3'
+          changed=(p/'results/changed_paths.txt').read_text().splitlines()
+          assert set(changed)=={'.github/workflows/m10r-yblend-gammaroute1a.yml','tools/m10r_yblend_gammaroute1a.py'}
+          entries=[]
+          for f in sorted(p.rglob('*')):
+              if f.is_file():
+                  b=f.read_bytes();entries.append({'path':str(f.relative_to(p)),'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+          (p/'manifest.json').write_text(json.dumps(entries,indent=2)+'\n')
+          (p/'README.txt').write_text('Original gamma upload routing only. Table apertures are RAM-backed: hardware broadcasts, aliasing and pixel consumers are not modeled. No M10-R pixel equation recovered. No firmware binaries, SDK source, libraries or APK included.\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-YBLEND-GAMMAROUTE1A-EVIDENCE
+          path: evidence/
+          retention-days: 90
+          if-no-files-found: error
