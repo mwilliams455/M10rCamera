@@ -1,0 +1,329 @@
+{
+  "status": "PASS_SOFTWARE_PRODUCER_ONLY",
+  "gate_c_passed": false,
+  "firmware_version": "M10-R-30.22.23.34-Customer.FW",
+  "section_sha256": {
+    "092_IMG-System.bin": "53e307ad2b241e4684f5f9974c1b9780bcbc9e37ac580d8dcaf45cf72aae80d4",
+    "100_IMG-SAM7.bin": "c30351bb884ffd66120bf201e9da5e3a1f6eef970e2eb9b8a2400cca04de51ae",
+    "074_IMG_Calibration_Data_data_calib_B2Y.bin.bin": "ea935a8006ea3b0a765660bd1d89f6a52c9f60508ee5ba76650005d80372335b"
+  },
+  "source_script_sha256": "5fde38cd9940e26fef3e85e1690361166019de1391049f4220611522fc80ecc0",
+  "seed": "0xD44802026",
+  "record_count": 168,
+  "records": [
+    {
+      "record_id": 12,
+      "index": 145,
+      "header_offset": "0x5fba4",
+      "header_first16_hex": "0c000000a0290c003c00000001000000",
+      "key_count": 1,
+      "keys": [
+        ""
+      ],
+      "payload_offset": "0x131834",
+      "payload_size": 60,
+      "payload_hex": "c804000063090000d50100004dfdffffb3faffff00080000000800004df9ffffb3feffffff3f0000ff3f0000ff3f0000ff3f0000ff3f0000ff3f0000",
+      "payload_sha256": "bbf2a327fe94fcac3ae2a4d526cf430fe43d20999daecdfcdf6e4d74baece54f",
+      "values_u32": [
+        1224,
+        2403,
+        469,
+        4294966605,
+        4294965939,
+        2048,
+        2048,
+        4294965581,
+        4294966963,
+        16383,
+        16383,
+        16383,
+        16383,
+        16383,
+        16383
+      ]
+    },
+    {
+      "record_id": 13,
+      "index": 146,
+      "header_offset": "0x60634",
+      "header_first16_hex": "0d000000e0290c001800000001000000",
+      "key_count": 1,
+      "keys": [
+        ""
+      ],
+      "payload_offset": "0x131874",
+      "payload_size": 24,
+      "payload_hex": "0000000020000000ff3f0000ff3f0000ff3f0000ff3f0000",
+      "payload_sha256": "cab40e527bfbe6b8a5cd0450a668f46d5d6569ee8405e89fdf7e1455f1492b50",
+      "values_u32": [
+        0,
+        32,
+        16383,
+        16383,
+        16383,
+        16383
+      ]
+    }
+  ],
+  "identity_guards": [
+    {
+      "label": "WBCLIPLEVEL",
+      "record": "0x4",
+      "adr_pc": "0x154d82",
+      "string_offset": "0x154dbc",
+      "lookup_call": "0x154d90",
+      "driver_call": "0x154dac",
+      "driver_offset": "0xd42e0"
+    },
+    {
+      "label": "Y BLEND",
+      "record": "0xd",
+      "adr_pc": "0x154e3e",
+      "string_offset": "0x154e78",
+      "lookup_call": "0x154e4c",
+      "driver_call": "0x154e68",
+      "driver_offset": "0xd4480"
+    },
+    {
+      "label": "YC CONVERSION",
+      "record": "0xc",
+      "adr_pc": "0x154ef2",
+      "string_offset": "0x154f2c",
+      "lookup_call": "0x154f00",
+      "driver_call": "0x154f1c",
+      "driver_offset": "0xd4570"
+    },
+    {
+      "label": "POST PROCESSING FILTER",
+      "record": "0x17",
+      "adr_pc": "0x154894",
+      "string_offset": "0x1548cc",
+      "lookup_call": "0x1548a2",
+      "driver_call": "0x1548be",
+      "driver_offset": "0xd34f0"
+    }
+  ],
+  "test_execution": {
+    "selector_lookup_driver_cases": 1792,
+    "scenario_matrix": [
+      {
+        "scenario": "original",
+        "cases": 128,
+        "intervention": "none"
+      },
+      {
+        "scenario": "file_missing",
+        "cases": 128,
+        "intervention": "synthetic negative control"
+      },
+      {
+        "scenario": "record_id_missing",
+        "cases": 128,
+        "intervention": "synthetic negative control"
+      },
+      {
+        "scenario": "key_mismatch",
+        "cases": 128,
+        "intervention": "synthetic negative control"
+      },
+      {
+        "scenario": "key_count_zero",
+        "cases": 128,
+        "intervention": "synthetic negative control"
+      },
+      {
+        "scenario": "bad_magic",
+        "cases": 128,
+        "intervention": "synthetic negative control"
+      }
+    ],
+    "synthetic_full_u32_payload_cases": 1024,
+    "outcome_counts": {
+      "normal_programming": 1144,
+      "fallback_programming": 600,
+      "cached_skip": 48
+    },
+    "full_mmio_window_compared_bytes": 16384,
+    "watched_mmio_writes": 10464,
+    "paired_word_writes": 6976,
+    "bit15_mutations": 0,
+    "argument_block_reads": 0,
+    "calibration_writes_by_firmware": 0,
+    "payload_loads": [
+      {
+        "offset": 0,
+        "bytes": 1,
+        "pc": "0xd448e"
+      },
+      {
+        "offset": 4,
+        "bytes": 4,
+        "pc": "0xd44a4"
+      },
+      {
+        "offset": 8,
+        "bytes": 2,
+        "pc": "0xd44bc"
+      },
+      {
+        "offset": 12,
+        "bytes": 2,
+        "pc": "0xd44d0"
+      },
+      {
+        "offset": 16,
+        "bytes": 2,
+        "pc": "0xd44e6"
+      },
+      {
+        "offset": 20,
+        "bytes": 2,
+        "pc": "0xd44fa"
+      }
+    ],
+    "stubs": [
+      "IMG 0x1a0c80: resolve B2Y.bin to supplied file registry or NULL",
+      "IMG 0x140154: diagnostic logger only"
+    ],
+    "original_executed": [
+      "selector 0x154e18",
+      "lookup 0x1a0fc4",
+      "string compare 0x4f164",
+      "driver 0xd4480"
+    ]
+  },
+  "producer_contract": {
+    "file": "B2Y.bin",
+    "record": 13,
+    "lookup_key": "",
+    "first_argument": "stored in r7 but not dereferenced or used by this bounded selector",
+    "second_argument": "skip register update only when arg1 == 1 AND cache byte == 1",
+    "cache_address": "0x408cedbf",
+    "lookup_success": "pass raw calibration payload pointer to D4480 with fallback=0; cache=1",
+    "lookup_failure": "pass NULL to D4480 with fallback=1; cache=0",
+    "cached_skip": "no lookup, no driver call, no MMIO update; NOT proof of an ISP bypass",
+    "field_calculation": "no arithmetic on payload fields between successful lookup and driver"
+  },
+  "sam7_entry_reference_census": {
+    "entry": "0x51da6",
+    "direct_branch_hits": [],
+    "pointer_hits": [],
+    "files_scanned": [
+      "000_LENS-Master.bin",
+      "001_LENS-SHB-File.bin",
+      "002_LENS-SHB-File.bin",
+      "003_LENS-SHB-File.bin",
+      "004_LENS-SHB-File.bin",
+      "005_LENS-SHB-File.bin",
+      "006_LENS-SHB-File.bin",
+      "007_LENS-SHB-File.bin",
+      "008_LENS-SHB-File.bin",
+      "009_LENS-SHB-File.bin",
+      "010_LENS-SHB-File.bin",
+      "011_LENS-SHB-File.bin",
+      "012_LENS-SHB-File.bin",
+      "013_LENS-SHB-File.bin",
+      "014_LENS-SHB-File.bin",
+      "015_LENS-SHB-File.bin",
+      "016_LENS-SHB-File.bin",
+      "017_LENS-SHB-File.bin",
+      "018_LENS-SHB-File.bin",
+      "019_LENS-SHB-File.bin",
+      "020_LENS-SHB-File.bin",
+      "021_LENS-SHB-File.bin",
+      "022_LENS-SHB-File.bin",
+      "023_LENS-SHB-File.bin",
+      "024_LENS-SHB-File.bin",
+      "025_LENS-SHB-File.bin",
+      "026_LENS-SHB-File.bin",
+      "027_LENS-SHB-File.bin",
+      "028_LENS-SHB-File.bin",
+      "029_LENS-SHB-File.bin",
+      "030_LENS-SHB-File.bin",
+      "031_LENS-SHB-File.bin",
+      "032_LENS-SHB-File.bin",
+      "033_LENS-SHB-File.bin",
+      "034_LENS-SHB-File.bin",
+      "035_LENS-SHB-File.bin",
+      "036_LENS-SHB-File.bin",
+      "037_LENS-SHB-File.bin",
+      "038_LENS-SHB-File.bin",
+      "039_LENS-SHB-File.bin",
+      "040_LENS-SHB-File.bin",
+      "041_LENS-SHB-File.bin",
+      "042_LENS-SHB-File.bin",
+      "043_LENS-SHB-File.bin",
+      "044_LENS-SHB-File.bin",
+      "045_LENS-SHB-File.bin",
+      "046_LENS-SHB-File.bin",
+      "047_LENS-SHB-File.bin",
+      "048_LENS-SHB-File.bin",
+      "049_LENS-SHB-File.bin",
+      "050_LENS-SHB-File.bin",
+      "051_LENS-SHB-File.bin",
+      "052_LENS-SHB-File.bin",
+      "053_LENS-SHB-File.bin",
+      "054_LENS-SHB-File.bin",
+      "055_LENS-SHB-File.bin",
+      "056_LENS-SHB-File.bin",
+      "057_LENS-SHB-File.bin",
+      "058_LENS-SHB-File.bin",
+      "059_LENS-SHB-File.bin",
+      "060_LENS-SHB-File.bin",
+      "061_LENS-SHB-File.bin",
+      "062_LENS-SHB-File.bin",
+      "063_LENS-SHB-File.bin",
+      "064_LENS-SHB-File.bin",
+      "065_LENS-CAB-File.bin",
+      "066_Touch-Pad-config.bin",
+      "067_WLAN_Certifification_data_wifi_WiFiCertificationConfig.json.bin",
+      "068_WLAN_Certifification_data_wifi_WiFiCertificationConfig.json.bin",
+      "069_WLAN_Certifification_data_wifi_WiFiCertificationConfig.json.bin",
+      "070_WLAN_Certifification_data_wifi_WiFiCertificationConfig.json.bin",
+      "071_WLAN_Certifification_data_wifi_WiFiCertificationConfig.json.bin",
+      "072_WLAN_Certifification_data_wifi_WiFiCertificationConfig.json.bin",
+      "073_IMG_Calibration_Data_data_calib_B2Y_CC0_CA9_CM.bin.bin",
+      "074_IMG_Calibration_Data_data_calib_B2Y.bin.bin",
+      "075_Disp_Gamma_Main.bin",
+      "076_Disp_Gamma_Main.bin",
+      "077_Disp_Gamma_Main.bin",
+      "078_Disp_Gamma_Main.bin",
+      "079_Disp_Gamma_OSD.bin",
+      "080_Disp_Gamma_OSD.bin",
+      "081_Disp_Gamma_OSD.bin",
+      "082_Disp_Gamma_OSD.bin",
+      "083_IMG_Calibration_Data_data_calib_ELF.bin.bin",
+      "084_IMG-FPGA_System.bin",
+      "085_GEO-CPG_file.bin",
+      "086_GEO-DBF_file.bin",
+      "087_GEO-SHX_file.bin",
+      "088_GEO-SHP_file.bin",
+      "089_GEO-SHX_file.bin",
+      "090_CTRL-System.bin",
+      "091_CTRL-Top_System.bin",
+      "092_IMG-System.bin",
+      "093_GUI_Image.bin",
+      "094_GUI_Image.bin",
+      "095_GUI_Image.bin",
+      "096_GUI_Image.bin",
+      "097_IMG_Calibration_Data_data_calib_SUPPRE.bin.bin",
+      "098_WLAN_EW-Dorin.bin",
+      "099_IMG-CA9_System.bin",
+      "100_IMG-SAM7.bin",
+      "101_DEFAULT_40Mp_SDM.bin"
+    ],
+    "pointer_encodings": [
+      "raw even/Thumb",
+      "conventional 0x43000000 base with four-byte section prefix"
+    ],
+    "scope": "Direct immediate calls within SAM7 and four exact little-endian pointer encodings across extracted .bin sections. No computed-pointer, relocation, indirect-dispatch or alternate-entry completeness claim."
+  },
+  "limitations": [
+    "The file-registry helper is stubbed; storage loading, later replacement or outside mutation of calibration memory are not modeled.",
+    "Synthetic missing/mismatched records and payload interventions are tests, not observed camera states or Leica presets.",
+    "A fixed control record does not prove scene-independent hardware behavior.",
+    "Source signals, denominator, paired-field meanings, pixel scaling, rounding, clipping and processing order remain unresolved.",
+    "The actual SAM7 compact-structure producer/caller remains unresolved; no dead-code conclusion follows from the bounded negative census.",
+    "No renderer or capture source changes; no photographic parity claim."
+  ]
+}
