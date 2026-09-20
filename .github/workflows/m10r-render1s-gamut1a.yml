@@ -1,0 +1,42 @@
+name: M10-R RENDER1S GAMUT1A
+on:
+  push:
+    branches: [m10r-render1s-gamut1a]
+    paths: ['.github/workflows/m10r-render1s-gamut1a.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: M10R-PHOTOAUDIT1A-RESEARCH-INPUTS
+          run-id: 35518775600
+          github-token: ${{ github.token }}
+          path: inputs
+      - name: Print bounded original source anchors
+        run: |
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          r=Path('inputs')
+          for e in json.loads((r/'manifest.json').read_text()):
+              f=r/e['path'];assert f.stat().st_size==e['bytes'] and hashlib.sha256(f.read_bytes()).hexdigest()==e['sha256']
+          c=(r/'source/m10rRender.cpp').read_text()
+          assert hashlib.sha256(c.encode()).hexdigest()=='27d42e3090435732bba6331380d2110227d3b713f59d3917b659d19cbea0f934'
+          core=c.split('\n\n// Exact Leica M10-R B2Y record 0x1E')[0]
+          print('BEGIN NATIVE CORE\n'+core+'\nEND NATIVE CORE',flush=True)
+          s=(r/'source/M10RNativeRenderer.java').read_text().splitlines()
+          needles=['DEFAULT_SRGB_CC1','nativeCounts','nativeProcessTile','photographicOutputStillCc1Bypassed','cc1Matrix','cc1RedEquation','counterfactualCc1StillEvaluated','return new Result','renderLook','new long[','new JSONArray','nCounts']
+          selected=set()
+          for i,line in enumerate(s):
+              if any(n in line for n in needles):selected.update(range(max(0,i-3),min(len(s),i+7)))
+          print('BEGIN JAVA ANCHORS')
+          for i in sorted(selected):print(str(i+1)+': '+s[i])
+          print('END JAVA ANCHORS')
+          PY
