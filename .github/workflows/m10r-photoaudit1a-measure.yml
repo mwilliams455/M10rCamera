@@ -1,0 +1,54 @@
+name: M10-R PHOTOAUDIT1A measurements
+on:
+  push:
+    branches: [m10r-photoaudit1a]
+    paths: ['tools/m10r_photoaudit_measure1a.py', '.github/workflows/m10r-photoaudit1a-measure.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: M10R-PHOTOAUDIT1A-RESEARCH-INPUTS
+          path: audit_inputs
+          run-id: 35518775600
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Dependencies
+        run: python3 -m pip install --quiet numpy pillow opencv-python-headless
+      - name: Native same-RAW audit
+        run: |
+          mkdir -p audit_results
+          if [ -f tools/m10r_photoaudit_measure1a.py ]; then
+            python3 tools/m10r_photoaudit_measure1a.py audit_inputs audit_results | tee audit_results/stdout.txt
+          fi
+      - name: Persist small audit evidence on isolated branch
+        if: always()
+        run: |
+          mkdir -p research/photoaudit1a_source
+          cp audit_inputs/source/m10rRender.cpp audit_inputs/source/M10RNativeRenderer.java research/photoaudit1a_source/
+          cp audit_inputs/samples/*metadata.json research/photoaudit1a_source/
+          if [ -f audit_results/results.json ]; then cp audit_results/results.json research/M10R_PHOTOAUDIT1A_RESULTS_20260920.json; fi
+          if [ -f audit_results/REPORT.md ]; then cp audit_results/REPORT.md research/M10R_PHOTOAUDIT1A_20260920.md; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/photoaudit1a_source research/M10R_PHOTOAUDIT1A* 2>/dev/null || git add research/photoaudit1a_source
+          if ! git diff --cached --quiet; then
+            git commit -m 'audit: retain native source reference metadata and measured photographic results'
+            git pull --rebase origin m10r-photoaudit1a
+            git push origin HEAD:m10r-photoaudit1a
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-PHOTOAUDIT1A-MEASUREMENTS
+          path: |
+            audit_results/
+            tools/m10r_photoaudit_measure1a.py
+          retention-days: 90
+          if-no-files-found: warn
