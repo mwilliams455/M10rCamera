@@ -1,0 +1,81 @@
+name: M10-R Y BLEND CALIBSOURCE1A
+on:
+  push:
+    branches: [m10r-yblend-calibsource1a]
+    paths:
+      - '.github/workflows/m10r-yblend-calibsource1a.yml'
+      - 'tools/m10r_yblend_calibsource1a.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  calibration-source-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned research dependencies
+        run: python3 -m pip install --quiet capstone==5.0.3 unicorn==2.1.3
+      - name: Fetch and verify original firmware
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+      - name: Decode using existing verified extractor
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker)
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          /tmp/unpack
+          echo '859c936b6ac8efe0bc4ce7f05623013644fc5d8aee3c6835f09860f452adc2e0  /tmp/M10R_unpacked.bin' | sha256sum -c -
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sec > /tmp/section_inventory.txt
+      - name: Execute original register audit and calibration-source tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p calibsource_evidence/results calibsource_evidence/tools
+          python3 tools/m10r_yblend_bit15_audit1a.py /tmp/sec --cases 1024 --out calibsource_evidence/results/audit_rerun.json > calibsource_evidence/results/audit_stdout.txt
+          python3 tools/m10r_yblend_calibsource1a.py /tmp/sec . calibsource_evidence/results --rounds 32 > calibsource_evidence/results/calibsource_stdout.txt
+          git rev-parse HEAD > calibsource_evidence/results/source_commit.txt
+          cp /tmp/section_inventory.txt calibsource_evidence/results/
+          cp tools/m10r_yblend_calibsource1a.py tools/m10r_yblend_bit15_audit1a.py calibsource_evidence/tools/
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,platform,capstone,unicorn
+          p=Path('calibsource_evidence')
+          j=json.loads((p/'results/calibsource_results.json').read_text())
+          assert j['status']=='PASS_CALIBRATION_SOURCE_SOFTWARE_ONLY'
+          assert j['source_script_sha256']=='48da32bae48834ffbf5adb0123262288e672e5dc8f30ac1079458b2906d9d5a1'
+          t=j['tests']
+          assert t['total_original_entry_executions']==544
+          assert t['selector_executions']==448 and t['upsert_executions']==96
+          assert t['source_memory_writes_by_executed_firmware']==t['bit15_mutations']==0
+          assert j['gate_c_passed'] is False
+          assert j['SAM7_scatter']['status']=='PASS_SCATTER_WITH_DECLARED_4BYTE_TAIL_FIXTURE'
+          assert j['SAM7_scatter']['synthetic_source_tail_bytes']==4
+          assert hashlib.sha256((p/'results/execution_history.json').read_bytes()).hexdigest()==j['execution_history_sha256']
+          assert hashlib.sha256((p/'results/audit_rerun.json').read_bytes()).hexdigest()=='50eb66d4091436c76bd90d9fff94d89214c945089e4b27e95d5cba7792e747e3'
+          (p/'results/environment.json').write_text(json.dumps({'python':platform.python_version(),'capstone':capstone.__version__,'unicorn':unicorn.__version__},indent=2)+'\n')
+          (p/'README.txt').write_text('Software calibration-source evidence, not an ISP emulator. Original selector, resolver, NOR metadata search, record lookup, descriptor registration and register programmer execute. Heap, file I/O and logging are declared stubs. The bounded SAM7 startup scatter test declares four absent source-tail bytes as synthetic; it does not validate camera boot. No firmware binaries, APKs or third-party libraries included. No renderer or capture changes.\n')
+          entries=[]
+          for f in sorted(p.rglob('*')):
+              if f.is_file():
+                  b=f.read_bytes()
+                  entries.append({'path':str(f.relative_to(p)),'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+          (p/'manifest.json').write_text(json.dumps(entries,indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-YBLEND-CALIBSOURCE1A-EVIDENCE
+          path: calibsource_evidence/
+          retention-days: 90
+          if-no-files-found: error
