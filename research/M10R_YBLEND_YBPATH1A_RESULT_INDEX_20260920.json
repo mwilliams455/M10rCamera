@@ -1,0 +1,84 @@
+{
+  "kind": "result_index_not_full_execution_results",
+  "status": "PASS_CONTROL_PATHS_ONLY",
+  "gate_c_passed": false,
+  "research_branch": "m10r-yblend-ybpath1a",
+  "base_sha": "febc0dd090a604ca4d5b4c465f5e0ca18853fb9a",
+  "ci_tested_commit": "2288190f2a1dcc5d43757657fbf13be2697e48e9",
+  "report_persistence_commit": "3a4d883f538a28ce4a70cfaa94d5edd267a5d097",
+  "report_path": "research/M10R_YBLEND_YBPATH1A_20260920.md",
+  "report_sha256": "60aba25aa00c63cffdc4fbb7b6338fcdda3cd1d4f647a9f95c1247b90dd4dd7d",
+  "script_path": "tools/m10r_yblend_ybpath1a.py",
+  "script_sha256": "376162e0839b83be755e3726714685d9dcbe124fe14d8237a809d678580cb925",
+  "full_results": {
+    "artifact_relative_path": "results/ybpath_results.json",
+    "bytes": 47882,
+    "sha256": "4c86b0bc18fca3c10578b435f3da7127936a18c07dd157331ddd8ad589499a23",
+    "includes": ["all examined calibration records and hashes", "source-anchored identity guards", "full tone field map", "45 coefficient-isolation cases", "tone-control cases", "contrast table upload evidence", "parameter read addresses", "SDK hashes and source anchors", "declared limitations"]
+  },
+  "ci": {
+    "run_id": 35509666868,
+    "conclusion": "success",
+    "artifact_id": 10603774878,
+    "artifact_name": "M10R-YBLEND-YBPATH1A-EVIDENCE",
+    "artifact_sha256": "2cd0c4b443f500ef3874fe564895434672680b8ace22d92e4129f745a31f623c",
+    "manifest_entries_verified": 12,
+    "local_ci_byte_identical_files": ["tools/m10r_yblend_ybpath1a.py", "results/ybpath_results.json", "results/execution_history.json", "results/original_executed_instructions.txt", "results/stdout.txt", "results/register_emulation.json", "results/bit15_stdout.txt"],
+    "prior_failed_run": 35509601272,
+    "prior_failure_cause": "Final provenance git diff could not find immutable base in shallow checkout; original-instruction tests had executed.",
+    "fix": "Workflow fetches exact base before diff. Research script unchanged."
+  },
+  "tests": {
+    "original_entry_executions": 1213,
+    "img_entries": 616,
+    "sam7_entries": 597,
+    "mmio_writes": 32927,
+    "complete_mmio_window_bytes": 16384,
+    "complete_img_tone_table_window_bytes": 262144,
+    "coefficient_isolation_interventions": 45,
+    "monitored_paired_bit15_changes": 0,
+    "original_img_memcpy_executed": true,
+    "stubs": ["SAM7 clock helpers 0x4D1B4 / 0x4D118", "IMG logger 0x140154"],
+    "retained_audit_executions": 10240,
+    "retained_audit_result_sha256": "50eb66d4091436c76bd90d9fff94d89214c945089e4b27e95d5cba7792e747e3"
+  },
+  "coefficient_rows": {
+    "cc0_trailing": {"record": 6, "slots": [11, 12, 13], "values": [77, 150, 29], "destination_field_bits": 8},
+    "tone": {"record": 8, "slots": [7, 8, 9], "values": [1024, 2661, 410], "destination_field_bits": 12},
+    "yc_conversion": {"record": 12, "slots": [0, 1, 2], "values": [1224, 2403, 469], "destination_field_bits": 13},
+    "determinant": 376215,
+    "scope": "Stored row algebra and independent register programming only; no shared pixel domain or denominator established."
+  },
+  "normal_tone_controls": [
+    {"record_slot": 0, "value": 1, "register": "0x20020800", "bit": 0},
+    {"record_slot": 1, "value": 0, "register": "0x20020800", "bit": 1},
+    {"record_slot": 5, "value": 0, "register": "0x20020804", "bit": 16}
+  ],
+  "tone_upload": {
+    "normal_bytes_each": 40960,
+    "destinations": ["0x20A00000", "0x20A0A000"],
+    "second_copy_condition": "Full record8 slot5 == 0 and full slot3 == 1 on tested successful driver path",
+    "contrast_cases": ["LOW", "MEDIUM", "HIGH"],
+    "bank_signal_identity_proven": false
+  },
+  "sdk": {
+    "repository": "ZMlogicL/companyTask",
+    "commit": "f5fc84bd5c475f4c15017b7bff749f81c3618287",
+    "hash_verified_files": 5,
+    "code_executed": false,
+    "conditional_interpretation": "Related SDK suggests CCYC-derived Yb, TCYC-derived Y and independent tone treatment. Exact Leica signal identities and connection to Y BLEND remain unproved."
+  },
+  "limitations": [
+    "Original programmer entries are tested, not full selector/lookup chains or ISP pixels.",
+    "SAM7 compact structures are analysis-side packing reconstructions, not recovered firmware constructors.",
+    "CC0 auxiliary correction matrix and precision are explicit fixtures, not a physical camera state.",
+    "Busy status bits are cleared for success-path tests; busy/error and physical clock behavior are not emulated.",
+    "Do not infer M10-R gamma bit25 is a Yb enable from the different SDK ABI.",
+    "Shared RGB domains, exact Y BLEND input/output routing, paired-field meaning, scaling, rounding and clipping remain open.",
+    "No renderer or capture source changes; no APK or photographic parity claim."
+  ],
+  "frozen_heads_checked_before_writes": {
+    "m10r-render1q-yblend1b-k035": "a66b73cc339ebcb863d345c7a9ee7ff631fc86f0",
+    "m10r-capture1b": "3b1e86b5055a21b548d56b23bd47f9dc66c57012"
+  }
+}
