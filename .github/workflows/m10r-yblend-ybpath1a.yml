@@ -59,6 +59,7 @@ jobs:
           cp tools/m10r_yblend_ybpath1a.py tools/m10r_yblend_bit15_audit1a.py tools/m10r_b2y_assets.py evidence/tools/
           cp .github/workflows/m10r-yblend-ybpath1a.yml evidence/
           git rev-parse HEAD > evidence/results/source_commit.txt
+          git fetch --no-tags --depth=1 origin febc0dd090a604ca4d5b4c465f5e0ca18853fb9a
           git diff --name-only febc0dd090a604ca4d5b4c465f5e0ca18853fb9a HEAD > evidence/results/changed_paths.txt
           python3 - <<'PY'
           import json,hashlib
