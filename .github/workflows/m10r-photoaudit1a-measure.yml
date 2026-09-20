@@ -1,8 +1,8 @@
-name: M10-R PHOTOAUDIT1A measurements
+name: M10-R PHOTOAUDIT1B validated measurements
 on:
   push:
     branches: [m10r-photoaudit1a]
-    paths: ['tools/m10r_photoaudit_measure1a.py', '.github/workflows/m10r-photoaudit1a-measure.yml']
+    paths: ['tools/m10r_photoaudit_measure1a.py', 'tools/m10r_photoaudit_validate1b.py', '.github/workflows/m10r-photoaudit1a-measure.yml']
   workflow_dispatch:
 permissions:
   contents: write
@@ -19,36 +19,43 @@ jobs:
           path: audit_inputs
           run-id: 35518775600
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Dependencies
-        run: python3 -m pip install --quiet numpy pillow opencv-python-headless
-      - name: Native same-RAW audit
+      - name: Pinned measurement dependencies
+        run: python3 -m pip install --quiet numpy==2.2.6 pillow==11.3.0 opencv-python-headless==4.13.0.92
+      - name: Native same-RAW audit and actual-pixel validation
         run: |
+          set -euo pipefail
           mkdir -p audit_results
-          if [ -f tools/m10r_photoaudit_measure1a.py ]; then
-            python3 tools/m10r_photoaudit_measure1a.py audit_inputs audit_results | tee audit_results/stdout.txt
-          fi
-      - name: Persist small audit evidence on isolated branch
-        if: always()
+          python3 tools/m10r_photoaudit_validate1b.py audit_inputs audit_results | tee audit_results/stdout.txt
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('audit_results/results.json').read_text())
+          assert r['status']=='PASS_PHOTOAUDIT1B_ACTUAL_RGB_PIXELS'
+          assert len(r['scenes'])==6
+          assert r['frozen_renderer_modified'] is False
+          assert r['capture_policy_modified'] is False
+          PY
+      - name: Persist completed evidence on isolated branch
         run: |
-          mkdir -p research/photoaudit1a_source
-          cp audit_inputs/source/m10rRender.cpp audit_inputs/source/M10RNativeRenderer.java research/photoaudit1a_source/
-          cp audit_inputs/samples/*metadata.json research/photoaudit1a_source/
-          if [ -f audit_results/results.json ]; then cp audit_results/results.json research/M10R_PHOTOAUDIT1A_RESULTS_20260920.json; fi
-          if [ -f audit_results/REPORT.md ]; then cp audit_results/REPORT.md research/M10R_PHOTOAUDIT1A_20260920.md; fi
+          set -euo pipefail
+          cp audit_results/results.json research/M10R_PHOTOAUDIT1B_RESULTS_20260920.json
+          cp audit_results/REPORT.md research/M10R_PHOTOAUDIT1B_20260920.md
+          cp audit_results/PHOTOAUDIT1B_HELDOUT_COMPARISON.jpg research/photoaudit1a_source/
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add research/photoaudit1a_source research/M10R_PHOTOAUDIT1A* 2>/dev/null || git add research/photoaudit1a_source
+          git add research/M10R_PHOTOAUDIT1B* research/photoaudit1a_source/PHOTOAUDIT1B_HELDOUT_COMPARISON.jpg
           if ! git diff --cached --quiet; then
-            git commit -m 'audit: retain native source reference metadata and measured photographic results'
+            git commit -m 'audit: retain validated same-RAW tonal and colour error measurements'
             git pull --rebase origin m10r-photoaudit1a
             git push origin HEAD:m10r-photoaudit1a
           fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: M10R-PHOTOAUDIT1A-MEASUREMENTS
+          name: M10R-PHOTOAUDIT1B-VALIDATED-MEASUREMENTS
           path: |
             audit_results/
             tools/m10r_photoaudit_measure1a.py
+            tools/m10r_photoaudit_validate1b.py
           retention-days: 90
-          if-no-files-found: warn
+          if-no-files-found: error
