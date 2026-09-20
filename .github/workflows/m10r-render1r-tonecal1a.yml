@@ -5,6 +5,7 @@ on:
     paths:
       - 'native/m10rToneCal1A.h'
       - 'tools/m10r_tonecal1a_validate.py'
+      - 'tools/m10r_tonecal1a_fetch_refs.py'
       - 'patches/fix-m10r-render1r-tonecal1a.py'
       - '.github/workflows/m10r-render1r-tonecal1a.yml'
   workflow_dispatch:
@@ -32,6 +33,8 @@ jobs:
           run-id: 35518775600
           github-token: ${{ github.token }}
           path: inputs
+      - name: Fetch predeclared new published reference pairs
+        run: python3 tools/m10r_tonecal1a_fetch_refs.py inputs
       - name: Check unchanged core, original validation, and new test-only scenes
         env:
           OPENBLAS_NUM_THREADS: '1'
@@ -54,8 +57,10 @@ jobs:
             validation/REPORT.md
             validation/manifest.json
             validation/*.jpg
+            inputs/fresh/provenance.json
             native/m10rToneCal1A.h
             tools/m10r_tonecal1a_validate.py
+            tools/m10r_tonecal1a_fetch_refs.py
             patches/fix-m10r-render1r-tonecal1a.py
           retention-days: 90
           if-no-files-found: error
