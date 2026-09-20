@@ -1,0 +1,100 @@
+{
+  "schema": "M10R_RENDER1R_TONECAL1A_RESULT_INDEX_V1",
+  "status": "PASS_NATIVE_PHOTOGRAPHIC_GATE_AND_TEST_APK_BUILD",
+  "empirical_not_firmware": true,
+  "gate_c_passed": false,
+  "device_validated": false,
+  "production_promoted": false,
+  "candidate_branch": "m10r-render1r-tonecal1a",
+  "branch_base": "2d16e275a887822a7c9d385441079010a398fd50",
+  "ci_tested_commit": "0c4c444d927eea7249b223490ee779518b8841b3",
+  "successful_run": 35524055153,
+  "failed_initial_run": {
+    "id": 35523781196,
+    "reason": "HTTP403 from urllib while fetching published capture07; six original comparisons passed before the download stopped the run",
+    "resolution": "Same published URLs fetched with original audit curl recipe; no scoring gate or coefficient changes"
+  },
+  "training_captures": ["01", "03", "05"],
+  "original_validation_captures": ["02", "04", "06"],
+  "additional_test_only_captures": ["07", "08", "09", "10"],
+  "additional_capture_independence_limit": "Same camera/publication; related statue and shop views, all ISO100; not four statistically independent environments",
+  "fixed_coefficients": [-3.229545380578171, -0.25128474545011054, -0.17860038493017244],
+  "fit_reproduced_from_development_only": true,
+  "summary": {
+    "original_target_native": {
+      "baseline_L_mae": 2.538583670660399,
+      "candidate_L_mae": 0.4458695033697544,
+      "improvements": 3,
+      "count": 3,
+      "reduction": 0.8243628884393778
+    },
+    "additional_target_native": {
+      "baseline_L_mae": 1.6236554915021162,
+      "candidate_L_mae": 0.2884936479935003,
+      "improvements": 4,
+      "count": 4,
+      "reduction": 0.8223184354665029,
+      "baseline_ab_error": 4.585014468413712,
+      "candidate_ab_error": 4.590058923269298,
+      "baseline_DE76": 5.080615205557612,
+      "candidate_DE76": 4.613865937564748
+    },
+    "original_white_normalized": {
+      "baseline_L_mae": 4.081297069331755,
+      "candidate_L_mae": 1.5928018667192465,
+      "reduction": 0.6097314555492424
+    },
+    "additional_white_normalized": {
+      "baseline_L_mae": 2.6520331701617037,
+      "candidate_L_mae": 0.938538257012927,
+      "reduction": 0.6461061394056014
+    }
+  },
+  "native_integration_cases": 20,
+  "integrated_pixels_equal_baseline_then_native_correction": true,
+  "original_upstream_counts_identical": true,
+  "local_ci_metric_comparisons": 144,
+  "local_ci_max_metric_difference": 0,
+  "quality": {
+    "gray_ramp_monotone": true,
+    "gray_channels_equal": true,
+    "black_white_exact": true,
+    "gray_unique_output_codes": 248,
+    "alpha_preservation_cases": 100000,
+    "rgb_numerical_probes": 135937,
+    "opencv_max_channel_code_difference": 1,
+    "quantization_limit": "Post-ARGB8 retone and rounding; not lossless, smooth-gradient device validation pending"
+  },
+  "artifacts": {
+    "evidence": {
+      "id": 10609079325,
+      "name": "M10R-RENDER1R-TONECAL1A-EVIDENCE",
+      "zip_sha256": "accb012e143fe5132cf71a52e86c3dbfd7f4588be1921b1c548cc51a2f6f803d",
+      "crc_pass": true,
+      "validation_manifest_entries_checked": 33,
+      "three_source_files_match_local_bytes": true
+    },
+    "apk": {
+      "id": 10608363908,
+      "name": "M10RCam-RENDER1R-TONECAL1A-TEST-APK",
+      "zip_sha256": "8be334f82e9fc63b63e2284bf13c2b7ffac462c644d259a96d43acefeaf3798d",
+      "apk_sha256": "1ce99f58e870fe30effcda1b51ce08d9c5d3a82312d01e52fefcce4d445f8577",
+      "apk_bytes": 113321240,
+      "crc_pass": true,
+      "dex_render_marker_present": true,
+      "native_code_in": ["lib/arm64-v8a/libdngCreator.so", "lib/armeabi-v7a/libdngCreator.so"],
+      "nativeProcessTile_and_tonecal_apply_symbols_present": true
+    }
+  },
+  "source_hashes": {
+    "original_m10rRender_cpp": "27d42e3090435732bba6331380d2110227d3b713f59d3917b659d19cbea0f934",
+    "candidate_m10rRender_cpp": "483a547259615c928a9dce82f88770995cec81f2900177db8439231f32d3baec",
+    "native_header": "890b55b3e27f02c1f6cbbdf3f5a5f4b1d272e39a88c0102f5f9059d3bbf93334"
+  },
+  "frozen_heads_rechecked_after_build": {
+    "m10r-render1q-yblend1b-k035": "a66b73cc339ebcb863d345c7a9ee7ff631fc86f0",
+    "m10r-capture1b": "3b1e86b5055a21b548d56b23bd47f9dc66c57012"
+  },
+  "unchanged": ["capture exposure", "shutter/ISO", "WB", "source matrices", "CA9 clipping", "MEDIUM/DG", "YC2A", "k=0.35", "demosaic", "output dimensions", "JPEG quality setting", "DNG", "viewfinder"],
+  "pending": ["Phone saved-JPEG validation", "Camera2 source-frontend equivalence", "Indoor/high-ISO generalization", "Gradient/banding and Android latency", "Separate measured chroma correction", "Firmware Y BLEND equation"]
+}
