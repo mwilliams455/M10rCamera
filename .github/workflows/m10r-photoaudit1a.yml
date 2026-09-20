@@ -42,13 +42,13 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          import urllib.request,subprocess,json,hashlib,rawpy,numpy as np
+          import subprocess,json,hashlib,rawpy,numpy as np
           root=Path('audit_inputs/samples')
           for sid in ['01','02','03','04','05','06']:
               base='https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_'+sid
               jpg=root/(sid+'.jpg');dng=Path('/tmp')/(sid+'.dng')
               for url,path in [(base+'.jpg',jpg),(base+'.dng',dng)]:
-                  urllib.request.urlretrieve(url,path)
+                  subprocess.run(['curl','-L','--fail','--retry','2','--retry-delay','2','--max-time','120',url,'-o',str(path)],check=True)
               metadata=json.loads(subprocess.check_output(['exiftool','-j','-n',str(jpg),str(dng)]))
               provenance={'id':sid,'source_dng_url':base+'.dng','source_jpg_url':base+'.jpg',
                   'dng_sha256':hashlib.sha256(dng.read_bytes()).hexdigest(),'jpg_sha256':hashlib.sha256(jpg.read_bytes()).hexdigest(),
@@ -69,15 +69,17 @@ jobs:
             python3 tools/m10r_photoaudit1a.py audit_inputs audit_results
           fi
       - name: Build input checksum manifest
+        if: always()
         run: |
           python3 - <<'PY'
           import hashlib,json
           from pathlib import Path
-          p=Path('audit_inputs')
+          p=Path('audit_inputs');p.mkdir(exist_ok=True)
           rows=[{'path':str(f.relative_to(p)),'bytes':f.stat().st_size,'sha256':hashlib.sha256(f.read_bytes()).hexdigest()} for f in sorted(p.rglob('*')) if f.is_file()]
           (p/'manifest.json').write_text(json.dumps(rows,indent=2)+'\n')
           PY
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: M10R-PHOTOAUDIT1A-RESEARCH-INPUTS
           path: audit_inputs/
