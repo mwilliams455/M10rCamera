@@ -1,0 +1,55 @@
+name: M10-R PHOTOAUDIT1B evidence verification
+on:
+  push:
+    branches: [m10r-photoaudit1a]
+    paths: ['.github/workflows/m10r-photoaudit1b-package.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: M10R-PHOTOAUDIT1B-VALIDATED-MEASUREMENTS
+          path: retained
+          run-id: 35520127954
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify downloaded files and assemble compact evidence
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,hashlib,shutil,os
+          root=Path('retained/audit_results');tools=Path('retained/tools')
+          def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+          manifest=json.loads((root/'manifest.json').read_text())
+          for item in manifest:
+              p=root/item['path']
+              assert p.is_file() and p.stat().st_size==item['bytes'] and sha(p)==item['sha256'],item['path']
+          r=json.loads((root/'results.json').read_text())
+          assert r['status']=='PASS_PHOTOAUDIT1B_ACTUAL_RGB_PIXELS'
+          assert sha(tools/'m10r_photoaudit_measure1a.py')==r['script_sha256']
+          assert sha(tools/'m10r_photoaudit_validate1b.py')==r['validation_supervisor_sha256']
+          assert sha(Path('research/photoaudit1a_source/m10rRender.cpp'))==r['native']['full_cpp_sha256']
+          p=Path('evidence');p.mkdir()
+          for name in ['REPORT.md','results.json','manifest.json','native_core.cpp','M10RNativeRenderer.java','PHOTOAUDIT1B_HELDOUT_COMPARISON.jpg']:
+              shutil.copy2(root/name,p/name)
+          shutil.copytree(tools,p/'tools')
+          (p/'tone_only_candidate.json').write_text(json.dumps({'status':'EXPERIMENTAL_NOT_PROMOTED','domain':'sRGB display pixels transformed to CIE L*a*b*; only L* changed then converted to bounded uint8 RGB','fit':r['tone_diagnostic']['target_native']['fit']},indent=2)+'\n')
+          provenance={'measurement_run_id':35520127954,'measurement_commit':r['executed_commit'],'measurement_artifact_id':10607888875,'verification_run_id':os.environ['GITHUB_RUN_ID'],'verification_commit':os.environ['GITHUB_SHA'],'downloaded_measurement_manifest_entries_verified':len(manifest),'both_executable_script_hashes_match_results':True,'retained_native_source_hash_matches_results':True,'local_rerun_claimed':False,'firmware_pixel_parity_claimed':False,'apk_built':False,'capture_policy_changed':False}
+          (p/'verification.json').write_text(json.dumps(provenance,indent=2)+'\n')
+          (p/'README.md').write_text('# PHOTOAUDIT1B compact evidence\n\nREPORT.md and results.json contain six same-shot reference comparisons and an actual-pixel scored tone-only diagnostic. The native colour/tone function was compiled unchanged. This is not full Android frontend or camera exposure-policy validation. No APK was built and no candidate is promoted.\n\nmanifest.json is the verified inventory of the COMPLETE measurement artifact, including PNG rasters that are not bundled here. package_manifest.json inventories THIS compact package. The full rasters remain in GitHub Actions measurement run 35520127954. The comparison board is a downscaled viewing aid, not the scoring input. References: Photography Blog M10-R review, unaltered original camera JPEGs and matching DNGs. Original photographs are not distributed at full size in this compact package.\n\nReproduce with the retained input artifact from run 35518775600; install numpy==2.2.6 pillow==11.3.0 opencv-python-headless==4.13.0.92, then run tools/m10r_photoaudit_validate1b.py INPUT_DIRECTORY OUTPUT_DIRECTORY with assertions enabled and g++/JDK installed.\n')
+          files=[{'path':str(f.relative_to(p)),'bytes':f.stat().st_size,'sha256':sha(f)} for f in sorted(p.rglob('*')) if f.is_file()]
+          (p/'package_manifest.json').write_text(json.dumps(files,indent=2)+'\n')
+          print(json.dumps(provenance,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-PHOTOAUDIT1B-COMPACT-EVIDENCE
+          path: evidence/
+          retention-days: 90
+          if-no-files-found: error
