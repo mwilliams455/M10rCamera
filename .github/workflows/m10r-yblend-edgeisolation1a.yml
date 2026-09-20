@@ -1,0 +1,68 @@
+name: M10-R Y BLEND EDGEISOLATION1A evidence
+on:
+  push:
+    branches: [m10r-yblend-edgeisolation1a]
+    paths: ['tools/m10r_yblend_edgeisolation1a.py', '.github/workflows/m10r-yblend-edgeisolation1a.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verified-edge-path:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned research dependencies
+        run: python3 -m pip install --quiet capstone==5.0.3 unicorn==2.1.3
+      - name: Obtain hash-verified firmware sections
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker);z=p.index('\n          CPP',a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          /tmp/unpack
+          echo '859c936b6ac8efe0bc4ce7f05623013644fc5d8aee3c6835f09860f452adc2e0  /tmp/M10R_unpacked.bin' | sha256sum -c -
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sec > /tmp/sections.txt
+      - name: Execute original edge and Y BLEND paths
+        run: |
+          set -euo pipefail
+          mkdir -p evidence/results evidence/tools
+          echo '2624c1ea34402663a8968c5a0e9b628ddcdf92bccd743b2b387694da707e7592  tools/m10r_yblend_edgeisolation1a.py' | sha256sum -c -
+          python3 tools/m10r_yblend_edgeisolation1a.py /tmp/sec evidence/results --stress-cases 128 > evidence/results/stdout.txt
+          cp tools/m10r_yblend_edgeisolation1a.py evidence/tools/
+          cp .github/workflows/m10r-yblend-edgeisolation1a.yml evidence/
+          git rev-parse HEAD > evidence/results/source_commit.txt
+          git fetch --no-tags --depth=1 origin f6c6a0e0713a120e0cbcc642933cde88f0a5ae75
+          git diff --name-only f6c6a0e0713a120e0cbcc642933cde88f0a5ae75 HEAD > evidence/results/changed_paths.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,hashlib
+          p=Path('evidence');j=json.loads((p/'results/edgeisolation_results.json').read_text())
+          assert j['status']=='PASS_EDGE_CONFIGURATION_ISOLATION_ONLY'
+          assert j['gate_c_passed'] is False and j['renderer_changed'] is False
+          assert j['tests']['original_entry_executions']==979
+          assert j['tests']['watched_mmio_writes']==15342
+          assert j['tests']['actual_key_cases']==132
+          assert j['tests']['calibration_writes']==0
+          changes=set((p/'results/changed_paths.txt').read_text().splitlines())
+          assert changes=={'.github/workflows/m10r-yblend-edgeisolation1a.yml','tools/m10r_yblend_edgeisolation1a.py'}
+          entries=[]
+          for f in sorted(p.rglob('*')):
+              if f.is_file():
+                  b=f.read_bytes();entries.append({'path':str(f.relative_to(p)),'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()})
+          (p/'manifest.json').write_text(json.dumps(entries,indent=2)+'\n')
+          (p/'README.txt').write_text('Original firmware configuration paths only. No ISP pixel equation, consumer wiring or photographic parity is claimed. No firmware binaries, external SDK files, third-party libraries or APK are included.\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-YBLEND-EDGEISOLATION1A-EVIDENCE
+          path: evidence/
+          retention-days: 90
+          if-no-files-found: error
