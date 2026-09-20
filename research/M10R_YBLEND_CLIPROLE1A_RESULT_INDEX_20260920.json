@@ -1,0 +1,55 @@
+{
+  "status": "PASS_NAMED_CLIP_ANALOGUE_ONLY",
+  "gate_c_passed": false,
+  "renderer_changed": false,
+  "branch": "m10r-yblend-cliprole1a",
+  "base_commit": "a1a32af288e6c74835c9d3cff7bf0e7f18e35f5a",
+  "source_commit": "4b43cfd78e30f72c1550c1e548d56e8dac7148a4",
+  "ci_tested_commit": "6e3823a7f834beb1d3e344381625d57f6f105409",
+  "run_id": 35517761570,
+  "run_conclusion": "success",
+  "artifact_id": 10607371972,
+  "artifact_name": "M10R-YBLEND-CLIPROLE1A-EVIDENCE",
+  "artifact_sha256": "79175606e7de463548b1193970e87cf4bfa41aef3328ad0b5fe0424292fe8dd6",
+  "source_sha256": "569fa810aebefa1a94ee750e6e90a1411a4e66a3e57bfa89eedc205bf49080e4",
+  "result_sha256": "dcd88257979b44de4ee7b577773b60a9338322155d0b83fe911a7a38ce15fbb1",
+  "regression_result_sha256": "50eb66d4091436c76bd90d9fff94d89214c945089e4b27e95d5cba7792e747e3",
+  "ci_manifest_entries_checked": 11,
+  "local_ci_byte_identical_files": 8,
+  "tests": {
+    "complete_SAM7_clip_routine_entries": 512,
+    "bounded_SUPPRE_slice_entries": 516,
+    "original_YBLEND_fallback_entries": 1,
+    "SAM7_MMIO_writes": 3072,
+    "SUPPRE_MMIO_writes": 1032,
+    "parameter_memory_writes_by_firmware": 0,
+    "separate_retained_BIT15_executions": 10240
+  },
+  "established": [
+    "Own-name guards for SAM7 RGB_OutClip at 0x4f30e and JpegXR_OutClip at 0x4f414",
+    "Those complete named clip routines use the same low15/preserved15/high16 packing as Y BLEND",
+    "Original SUPPRE labels bind positive fields to 15-bit destinations and negative fields to 16-bit destinations",
+    "SUPPRE diagnostic arguments zero-extend the negative-field halfwords, passing 0x8000 as 32768",
+    "SUPPRE literal defaults and the separately executed Y BLEND fallback share the 0x7fff/0x8000 values"
+  ],
+  "candidate_only": {
+    "equation": "min(P, max(-N, x))",
+    "interpretation": "P is a positive limit; N is a nonnegative magnitude for the negative limit",
+    "normal_interval": [-16383, 16383],
+    "fallback_interval": [-32768, 32767],
+    "firmware_pixel_execution": false,
+    "hardware_domain_established": false,
+    "YBLEND_channel_assignment_established": false
+  },
+  "remaining": [
+    "Y BLEND pair meanings, activation, signal domains and placement",
+    "Y BLEND ratio direction and denominator",
+    "Meaning of the two normal value-2 edge controls",
+    "Actual main/edge consumer routing",
+    "Hardware scaling rounding and clipping"
+  ],
+  "frozen_refs_rechecked": {
+    "m10r-render1q-yblend1b-k035": "a66b73cc339ebcb863d345c7a9ee7ff631fc86f0",
+    "m10r-capture1b": "3b1e86b5055a21b548d56b23bd47f9dc66c57012"
+  }
+}
