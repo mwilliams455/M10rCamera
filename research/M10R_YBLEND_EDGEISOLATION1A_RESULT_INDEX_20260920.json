@@ -1,0 +1,77 @@
+{
+  "status": "PASS_EDGE_CONFIGURATION_ISOLATION_ONLY",
+  "gate_c_passed": false,
+  "renderer_changed": false,
+  "branch": "m10r-yblend-edgeisolation1a",
+  "base_commit": "f6c6a0e0713a120e0cbcc642933cde88f0a5ae75",
+  "source_commit": "1c1c1cda425a6750b8ed0572fbf681884829f227",
+  "ci_tested_commit": "d80ad91dbd07ce91aaf63a1c2ea20206df86c458",
+  "run_id": 35516051722,
+  "run_conclusion": "success",
+  "artifact_id": 10606418774,
+  "artifact_sha256": "88b1a5b83bb0fb618e62ba622d0843dadaf16f8adbf32aefe020593cc8123c92",
+  "ci_manifest_entries_verified": 8,
+  "local_ci_identical_sha256": {
+    "tools/m10r_yblend_edgeisolation1a.py": "2624c1ea34402663a8968c5a0e9b628ddcdf92bccd743b2b387694da707e7592",
+    "m10r-yblend-edgeisolation1a.yml": "8dfff89b29068ee3fd3058998382701a76453c8210d2741aad5f9884e858a402",
+    "results/edgeisolation_results.json": "8a750be1351f74c92f40ea06457082d8f1c53a965cfa2cd8295440c35cbbd1b3",
+    "results/execution_histories.json": "56723c17bf4e98cd7da6455278e097838ddc6648d209757327a8d9ffe4052280",
+    "results/original_instruction_anchors.txt": "10e461b767bb8d20384d7f588d3c4cfd76522cb811505aeb10c1ab5e6aa0a6f1",
+    "results/stdout.txt": "051b2f597fa0db6c6dfcefe9e6fec720d4b38cc31596c83e7dde0070ee1223f8"
+  },
+  "report_sha256": "7a210f5f2d6b74e263d5fa0ab1e5ace4fc01b4065c6b0b0dae6f236993083f27",
+  "identities": {
+    "img_selector": "0x154064",
+    "record": "0x11",
+    "img_driver": "0xd16dc",
+    "img_label": "EDGE SYNTHESIS     String:%s",
+    "img_label_offset": "0x1540e8",
+    "sam_entry": "0x51342",
+    "sam_label": "I:Im_B2Y_Ctrl_EdgeBlend error. b2y_ctrl_edge_blend = NULL\n",
+    "sam_label_offset": "0x51594"
+  },
+  "test_counts": {
+    "original_entries": 979,
+    "img_entries": 719,
+    "sam7_entries": 260,
+    "actual_key_cases": 132,
+    "calibration_records": 15,
+    "stress_sets": 128,
+    "cached_skips": 132,
+    "mode_iso_transitions": 5,
+    "order_commutation_payloads": 15,
+    "mmio_writes": 15342,
+    "calibration_writes": 0
+  },
+  "calibration_summary": {
+    "STILL_STILLLINK": {
+      "100_160": 5400,
+      "200_250_320_400_500_640": 4096,
+      "listed_800_through_200000": 3700
+    },
+    "SLIVE_SMAGNI": {
+      "100_160_200_250_320": 1800,
+      "400_500_640": 1500,
+      "800_1000_1250": 1200,
+      "listed_1600_through_10000": 2000,
+      "12500_16000_20000_25000_32000": 4500,
+      "listed_40000_through_200000": 0
+    },
+    "meaning": "Stored equal values of slots 2 through 7; not a recovered gain denominator. Ranges denote the actual discrete calibration keys, not selectable camera ISO settings."
+  },
+  "firmware_hashes": {
+    "092_IMG-System.bin": "53e307ad2b241e4684f5f9974c1b9780bcbc9e37ac580d8dcaf45cf72aae80d4",
+    "100_IMG-SAM7.bin": "c30351bb884ffd66120bf201e9da5e3a1f6eef970e2eb9b8a2400cca04de51ae",
+    "074_IMG_Calibration_Data_data_calib_B2Y.bin.bin": "ea935a8006ea3b0a765660bd1d89f6a52c9f60508ee5ba76650005d80372335b"
+  },
+  "scope": [
+    "Original edge selector, string copy, concatenation, comparison, record lookup and driver are executed; file resolver and logger are stubbed.",
+    "Original SAM7 edge driver executes with only clock helpers stubbed.",
+    "Numeric mode IDs and runtime memory addresses are synthetic harness fixtures.",
+    "No MMIO reads of Y BLEND words or updates to those words by the tested edge path. This is not proof that hardware pixel signals are independent.",
+    "Two edge control fields are each two bits and normal value 2. Do not replace with the related SDK one-bit selector.",
+    "Y BLEND paired-field meanings and pixel equation remain unresolved.",
+    "Full machine results and execution histories are in the named CI artifact and downloadable evidence package.",
+    "The prior local-only CONSUMER1A patch is not part of this tested repository diff."
+  ]
+}
