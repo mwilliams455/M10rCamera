@@ -1,0 +1,53 @@
+name: M10-R Y BLEND SDKBRIDGE1A inputs
+on:
+  push:
+    branches: [m10r-yblend-sdkbridge1a]
+    paths: ['.github/workflows/m10r-yblend-sdkbridge1a.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-inputs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Fetch pinned comparison source bytes and verify Git blob identities
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import os,json,hashlib,urllib.request,concurrent.futures,time
+          from pathlib import Path
+          repo='ZMlogicL/companyTask'; ref='f5fc84bd5c475f4c15017b7bff749f81c3618287'
+          base=Path('sdk_inputs');base.mkdir()
+          def get(url,api=False):
+              for n in range(4):
+                  try:
+                      headers={'User-Agent':'M10R-research-source-audit'}
+                      if api:headers['Authorization']='Bearer '+os.environ['GH_TOKEN']
+                      return urllib.request.urlopen(urllib.request.Request(url,headers=headers),timeout=45).read()
+                  except Exception:
+                      if n==3:raise
+                      time.sleep(2**n)
+          tree_raw=get(f'https://api.github.com/repos/{repo}/git/trees/{ref}?recursive=1',True)
+          tree=json.loads(tree_raw);assert not tree['truncated']
+          (base/'tree.json').write_bytes(tree_raw)
+          files=[x for x in tree['tree'] if x['type']=='blob' and any(k in x['path'].lower() for k in ['b2y','r2y','fj_iq','fjiq','iq_ycc'])]
+          def fetch(x):
+              url=f'https://raw.githubusercontent.com/{repo}/{ref}/'+urllib.parse.quote(x['path'],safe='/')
+              data=get(url)
+              blob=hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()
+              assert blob==x['sha'],x['path']
+              p=base/'sources'/x['path'];p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(data)
+              return {'path':x['path'],'git_blob_sha':blob,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'source_url':url}
+          with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool: entries=list(pool.map(fetch,files))
+          report={'repository':repo,'commit':ref,'tree_sha':tree['sha'],'selection':'all blob paths containing b2y, r2y, fj_iq, fjiq or iq_ycc; no external source executed','files':entries}
+          (base/'manifest.json').write_text(json.dumps(report,indent=2)+'\n')
+          print('Verified',len(entries),'source files')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-SDKBRIDGE1A-PINNED-SOURCE-INPUTS
+          path: sdk_inputs/
+          retention-days: 7
+          if-no-files-found: error
