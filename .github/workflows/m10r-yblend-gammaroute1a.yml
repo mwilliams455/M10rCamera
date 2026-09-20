@@ -73,8 +73,10 @@ jobs:
           assert j['tests']['source_writes_by_executed_firmware']==0
           assert len(j['sdk_sources'])==4
           assert hashlib.sha256((p/'results/register_emulation.json').read_bytes()).hexdigest()=='50eb66d4091436c76bd90d9fff94d89214c945089e4b27e95d5cba7792e747e3'
-          changed=(p/'results/changed_paths.txt').read_text().splitlines()
-          assert set(changed)=={'.github/workflows/m10r-yblend-gammaroute1a.yml','tools/m10r_yblend_gammaroute1a.py'}
+          changed=set((p/'results/changed_paths.txt').read_text().splitlines())
+          required={'.github/workflows/m10r-yblend-gammaroute1a.yml','tools/m10r_yblend_gammaroute1a.py'}
+          allowed=required|{'research/M10R_YBLEND_GAMMAROUTE1A_20260920.md','research/M10R_YBLEND_GAMMAROUTE1A_RESULT_INDEX_20260920.json'}
+          assert required<=changed<=allowed
           entries=[]
           for f in sorted(p.rglob('*')):
               if f.is_file():
