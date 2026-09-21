@@ -49,6 +49,6 @@ inline unsigned apply(double lr,double lg,double lb,const double* matrix,
     const double gain=std::min(requested,ceiling);
     r=encode(cr*gain);g=encode(cg*gain);b=encode(cb*gain);
     if(!std::isfinite(r)||!std::isfinite(g)||!std::isfinite(b)) {r=ar;g=ag;b=ab;return 2;}
-    return (ceiling<requested?1u:0u)|(peak>1.0?4u:0u);
+    return (requestedPeak>knee?1u:0u)|(peak>1.0?4u:0u);
 }
 }
