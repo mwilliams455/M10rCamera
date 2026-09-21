@@ -1,0 +1,168 @@
+name: M10-R RENDER1T COLORRECON1A
+on:
+  push:
+    branches: [m10r-render1t-colorrecon1a]
+    paths:
+      - '.github/workflows/m10r-render1t-colorrecon1a.yml'
+      - 'native/m10rColorRecon1A.h'
+      - 'patches/fix-m10r-render1t-colorrecon1a.py'
+      - 'tools/m10r_colorrecon1a_validate.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install fixed validation dependencies
+        run: |
+          python3 -m pip install numpy==2.2.6 pillow==11.3.0 opencv-python-headless==4.13.0.92 rawpy==0.25.1
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl
+      - uses: actions/download-artifact@v4
+        with:
+          name: M10R-PHOTOAUDIT1A-RESEARCH-INPUTS
+          run-id: 35518775600
+          github-token: ${{ github.token }}
+          path: inputs
+      - name: Verify patch against actual retained Java and native source
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess,shutil,json
+          r=Path('patch_fixture');c=r/'app/src/main/cpp';j=r/'app/src/main/java/com/particlesdevs/photoncamera/m10r';c.mkdir(parents=True);j.mkdir(parents=True)
+          shutil.copy2('inputs/source/m10rRender.cpp',c/'m10rRender.cpp')
+          shutil.copy2('inputs/source/M10RNativeRenderer.java',j/'M10RNativeRenderer.java')
+          (r/'app/build.gradle').write_text("versionName '0.0-render1q-test'\n")
+          subprocess.run(['python3','patches/fix-m10r-render1r-tonecal1a.py','patches/fix-m10r-render1s-gamut1a.py',str(r)],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1s-gamut1a.py',str(r)],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1t-colorrecon1a.py',str(r)],check=True)
+          s=(j/'M10RNativeRenderer.java').read_text()
+          assert 'photographicOutputStillCc1Bypassed", true' not in s
+          assert 'cc1Matrix", "1.3895' not in s
+          assert 'meanCounterfactualPostCc1' not in s
+          assert 'final long[] nativeExactCounts = new long[32];' in s
+          assert 'json(workingToSrgb)' in s and 'gamutRowBands' in s
+          PY
+      - name: Retrieve unchanged public reference pairs
+        run: python3 tools/m10r_tonecal1a_fetch_refs.py inputs
+      - name: Execute native colour reconstruction and photographic regression checks
+        run: |
+          python3 tools/m10r_colorrecon1a_validate.py inputs validation
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          p=Path('validation/results.json');r=json.loads(p.read_text());proof=json.loads(Path('patch_fixture/M10R_RENDER1T_COLORRECON1A_PROVENANCE.json').read_text())
+          assert r['apk_gate_passed'] and r['status']=='PASS_COLORRECON1A_TEST_CANDIDATE'
+          assert r['candidate_cpp_sha256']==proof['candidate_cpp_sha256'] and r['header_sha256']==proof['header_sha256']
+          r['diagnostic_patch_fixture']=proof;p.write_text(json.dumps(r,indent=2)+'\n')
+          PY
+      - name: Assemble bounded evidence
+        if: always()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,shutil,os
+          dst=Path('evidence');dst.mkdir(exist_ok=True)
+          files=['validation/results.json','validation/REPORT.md','native/m10rColorRecon1A.h','native/m10rToneCal1A.h','native/m10rOutputGamut1A.h','patches/fix-m10r-render1t-colorrecon1a.py','patches/fix-m10r-render1r-tonecal1a.py','patches/fix-m10r-render1s-gamut1a.py','tools/m10r_colorrecon1a_validate.py','tools/m10r_photoaudit_measure1a.py','tools/m10r_gamut1a_validate.py','tools/m10r_tonecal1a_validate.py','.github/workflows/m10r-render1t-colorrecon1a.yml','patch_fixture/M10R_RENDER1T_COLORRECON1A_PROVENANCE.json']
+          files += [str(p) for p in Path('validation').glob('*.jpg')]
+          for name in files:
+              p=Path(name)
+              if p.is_file():
+                  q=dst/name;q.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,q)
+          (dst/'source_commit.txt').write_text(os.environ['GITHUB_SHA']+'\n')
+          (dst/'manifest.json').write_text(json.dumps([{'path':str(p.relative_to(dst)),'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in sorted(dst.rglob('*')) if p.is_file()],indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-RENDER1T-COLORRECON1A-EVIDENCE
+          path: evidence/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
+  build-candidate:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/download-artifact@v4
+        with:
+          name: M10R-RENDER1T-COLORRECON1A-EVIDENCE
+          path: validated
+      - name: Reconstruct exact RENDER1S and apply tested COLORRECON1A patch
+        run: |
+          python3 -m pip install PyYAML==6.0.2
+          python3 - <<'PY'
+          from pathlib import Path
+          import yaml,subprocess,json,hashlib
+          w=yaml.safe_load(Path('.github/workflows/m10r-render1r-tonecal1a.yml').read_text())
+          steps=w['jobs']['build-candidate']['steps']
+          for name in ['Reconstruct and verify exact frozen RENDER1Q','Apply bounded native tone-only candidate']:
+              s=next(s for s in steps if s.get('name')==name);subprocess.run(['bash','-euo','pipefail','-c',s['run']],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1s-gamut1a.py','PhotonCamera'],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1t-colorrecon1a.py','PhotonCamera'],check=True)
+          proof=json.loads(Path('PhotonCamera/M10R_RENDER1T_COLORRECON1A_PROVENANCE.json').read_text());r=json.loads(Path('validated/validation/results.json').read_text())
+          assert r['apk_gate_passed'] and proof['candidate_cpp_sha256']==r['candidate_cpp_sha256']
+          assert proof['candidate_java_sha256']==r['diagnostic_patch_fixture']['candidate_java_sha256'] and proof['header_sha256']==r['header_sha256']
+          Path('M10R_RENDER1T_COLORRECON1A_PROVENANCE.json').write_text(json.dumps(proof,indent=2)+'\n')
+          PY
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install fixed Android build components
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'cmake;3.22.1' 'ndk;27.0.12077973'
+      - name: Build isolated test APK
+        run: |
+          set -o pipefail
+          chmod +x PhotonCamera/gradlew
+          cd PhotonCamera
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_RENDER1T_COLORRECON1A_GRADLE.log"
+      - name: Inspect APK and copy install file
+        run: |
+          mkdir -p delivery
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,zipfile,json,shutil,os
+          apks=list(Path('PhotonCamera/app/build/outputs/apk/debug').glob('*.apk'));assert len(apks)==1
+          apk=apks[0];z=zipfile.ZipFile(apk);assert z.testzip() is None
+          dex=b''.join(z.read(n) for n in z.namelist() if n.endswith('.dex'))
+          assert b'RENDER1T_COLORRECON1A_GAMUT1A_TONECAL1A' in dex and b'colorRecon1A' in dex and b'outputGamut1A' in dex
+          libs=[n for n in z.namelist() if n.endswith('/libdngCreator.so')]
+          assert any('arm64-v8a/' in n for n in libs)
+          p=Path('delivery/M10RCam_RENDER1T_COLORRECON1A_TONECAL1A.apk');shutil.copy2(apk,p)
+          r={'source_commit':os.environ['GITHUB_SHA'],'run_id':os.environ['GITHUB_RUN_ID'],'apk_bytes':p.stat().st_size,'apk_sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'native_libraries':libs,'dex_marker_checked':True,'device_tested':False,'private_replay_is_separate_local_evidence':True}
+          Path('delivery/APK_PROVENANCE.json').write_text(json.dumps(r,indent=2)+'\n')
+          shutil.copy2('M10R_RENDER1T_COLORRECON1A_PROVENANCE.json','delivery/')
+          print('APK_READY',json.dumps(r))
+          PY
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose delivery/*.apk > delivery/signature_verification.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-RENDER1T-COLORRECON1A-BUILDLOG
+          path: M10R_RENDER1T_COLORRECON1A_GRADLE.log
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10RCam-RENDER1T-COLORRECON1A-TONECAL1A-TEST-APK
+          path: delivery/
+          if-no-files-found: error
+          retention-days: 90
