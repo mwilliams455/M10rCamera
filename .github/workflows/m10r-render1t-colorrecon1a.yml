@@ -44,7 +44,7 @@ jobs:
           shutil.copy2('inputs/source/m10rRender.cpp',c/'m10rRender.cpp')
           shutil.copy2('inputs/source/M10RNativeRenderer.java',j/'M10RNativeRenderer.java')
           (r/'app/build.gradle').write_text("versionName '0.0-render1q-test'\n")
-          subprocess.run(['python3','patches/fix-m10r-render1r-tonecal1a.py','patches/fix-m10r-render1s-gamut1a.py',str(r)],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1r-tonecal1a.py',str(r)],check=True)
           subprocess.run(['python3','patches/fix-m10r-render1s-gamut1a.py',str(r)],check=True)
           subprocess.run(['python3','patches/fix-m10r-render1t-colorrecon1a.py',str(r)],check=True)
           s=(j/'M10RNativeRenderer.java').read_text()
