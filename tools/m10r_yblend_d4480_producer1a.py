@@ -52,7 +52,8 @@ def assert_selector_flow(img:bytes):
     # r4 is not written again before it is moved into r0 for D4480.
     for x in seq:
         if 0x154e52 <= x.address < 0x154e66:
-            if x.operands and x.operands[0].type==ARM_OP_REG and x.reg_name(x.operands[0].reg)=="r4":
+            _reads,writes=x.regs_access()
+            if any(x.reg_name(reg)=="r4" for reg in writes):
                 raise AssertionError(f"selector rewrites record pointer r4 at {x.address:#x}")
     i=need(0x154e64,"movs")
     assert i.reg_name(i.operands[0].reg)=="r1" and i.reg_name(i.operands[1].reg)=="r6"
