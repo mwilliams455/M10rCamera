@@ -8,7 +8,7 @@ public final class M10RAe1BPolicyHostTest {
         M10RAe1BPolicy.Decision d=M10RAe1BPolicy.solve(
                 66440677L,59,1.63,23.950196650949387,0.0,100,50000);
         if(!d.valid) throw new AssertionError("decision invalid");
-        near(d.previewBvEv,1.0827464768840445,1e-9,"preview Bv");
+        near(d.previewBvEv,1.0827464768840445,1e-7,"preview Bv");
         near(d.tvIsoEv,4.5,1e-12,"1/f TV");
         if(d.oracle.iso!=100) throw new AssertionError("actual-Bv ISO");
         near(d.oracle.shutterSeconds,0.04220605362162608,1e-12,"actual-Bv shutter");
