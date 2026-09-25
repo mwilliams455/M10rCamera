@@ -13,11 +13,13 @@ from capstone.arm import ARM_OP_IMM, ARM_OP_REG
 
 def sha(b:bytes)->str:return hashlib.sha256(b).hexdigest()
 
-def load_parser(repo:Path):
-    p=repo/"tools"/"m10r_b2y_assets.py"
-    s=importlib.util.spec_from_file_location("m10r_b2y_assets_crossfw",p)
-    if s is None or s.loader is None:raise RuntimeError("parser spec")
+def load_module_path(p:Path,name:str):
+    s=importlib.util.spec_from_file_location(name,p)
+    if s is None or s.loader is None:raise RuntimeError("module spec "+str(p))
     m=importlib.util.module_from_spec(s);sys.modules[s.name]=m;s.loader.exec_module(m);return m
+
+def load_parser(repo:Path):
+    return load_module_path(repo/"tools"/"m10r_b2y_assets.py","m10r_b2y_assets_crossfw")
 
 def find_section(secdir:Path,needle:str)->Path:
     hits=[]
@@ -110,7 +112,7 @@ def locate_yblend_selector(img:bytes):
     }
 
 def execute_yblend_driver(img:bytes,repo:Path,driver:int,vals:list[int]):
-    audit=load_parser(repo/"tools"/"m10r_yblend_bit15_audit1a.py")
+    audit=load_module_path(repo/"tools"/"m10r_yblend_bit15_audit1a.py","m10r_yblend_bit15_audit1a_crossfw")
     p=audit.Programmer(img)
     old=bytes(0x4000)
     def run(fallback:int):
