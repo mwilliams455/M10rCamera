@@ -17,7 +17,7 @@ from pathlib import Path
 import hashlib,json,re,sys
 
 BASE_CPP_SHA="880ce125413bdf1e0f56fbbdcc56591ba91e794f9b5281488f63353dca724637"
-BASE_COLOR_HEADER_SHA="e8fccd5dad3f151e14616be4fed81d083121de8c"
+BASE_COLOR_HEADER_MARKER="Empirical COLORRECON1A. This is not recovered Leica Y BLEND arithmetic."
 
 COUNT_LEN=208
 TRACE_BASE=32
@@ -333,7 +333,7 @@ def main():
     version="0.97-m10r2b-skintrace1a"
     gradle.write_text(g.replace(versions[0],version,1))
 
-    proof={{
+    proof={
         "schema":"RENDER2B_SKINTRACE1A_PATCH_V1",
         "baseline":"RENDER2A_MFM1B_on_RENDER1T",
         "versionName":version,
@@ -349,7 +349,7 @@ def main():
         "toneCalChanged":False,
         "faceDetectionUsed":False,
         "sampleStride":64,
-        "countsLength":{COUNT_LEN},
+        "countsLength":COUNT_LEN,
         "warmBins":"mappedY_shadow_lowMid_midHigh_highlight_relCr>=0.04",
         "warmMidProxy":"mappedY_0.18_0.75_relCr_0.04_0.20_relCb_-0.18_0.03",
         "neutralControl":"mappedY_0.18_0.75_absRelCbCr<=0.02",
