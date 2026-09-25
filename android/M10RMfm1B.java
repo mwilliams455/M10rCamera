@@ -263,16 +263,23 @@ public final class M10RMfm1B {
     }
 
     private static Decision invalid(String reason) {
-        return new Decision(false,false,0.0,
-                Double.NaN,Double.NaN,Double.NaN,Double.NaN,Double.NaN,
-                Double.NaN,Double.NaN,Double.NaN,Double.NaN,Double.NaN,
-                Double.NaN,Double.NaN,Double.NaN,Double.NaN,
-                Double.NaN,Double.NaN,Double.NaN,Double.NaN,Double.NaN,
-                Double.NaN,Double.NaN,
-                Double.NaN,Double.NaN,Double.NaN,Double.NaN,
-                Double.NaN,Double.NaN,Double.NaN,
-                0,0,0.0,0.0,0.0,0.0,0.0,0.0,
-                null,reason);
+        return new Decision(
+                false, false, 0.0,
+                // scalar luminance/statistic fields
+                Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN,
+                Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN,
+                Double.NaN, Double.NaN, Double.NaN, Double.NaN,
+                // EV relationships
+                Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN,
+                Double.NaN, Double.NaN, Double.NaN,
+                // positive/negative candidate internals
+                Double.NaN, Double.NaN, Double.NaN, Double.NaN,
+                Double.NaN, Double.NaN, Double.NaN,
+                // regional counts/fractions/confidences
+                0, 0,
+                0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0,
+                null, reason);
     }
 
     private static double weightedMean(double[] v,int[] w) {
