@@ -72,7 +72,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 patches/fix-m10r-render1u-ae1a-diagnostic.py PhotonCamera
-          grep -F '0.0-render1u-ae1a-diag-render1t-test' PhotonCamera/app/build.gradle
+          grep -F 'render1u-ae1a-diag-render1t-colorrecon1a-tonecal1a-' PhotonCamera/app/build.gradle
           grep -F 'appendAe1ADiagnostics' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
           grep -F 'realExposureMutated", false' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
           grep -F 'class M10RAeOracle' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RAeOracle.java
