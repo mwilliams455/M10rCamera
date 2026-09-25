@@ -8,6 +8,8 @@ and duplicate counts. This is calibration provenance only, not ISP pixel arithme
 from __future__ import annotations
 import argparse,csv,hashlib,importlib.util,json,struct,sys
 from pathlib import Path
+from capstone import Cs, CS_ARCH_ARM, CS_MODE_THUMB
+from capstone.arm import ARM_OP_IMM, ARM_OP_REG
 
 def sha(b:bytes)->str:return hashlib.sha256(b).hexdigest()
 
@@ -35,6 +37,90 @@ def all_occ(data:bytes,needle:bytes):
         i=data.find(needle,p)
         if i<0:return out
         out.append(i);p=i+1
+
+def locate_yblend_selector(img:bytes):
+    """Locate the Y BLEND selector from its own diagnostic ADR and recover D4480 target."""
+    md=Cs(CS_ARCH_ARM,CS_MODE_THUMB);md.detail=True
+    strings=all_occ(img,b"Y BLEND     String:%s")
+    if len(strings)!=1:
+        raise RuntimeError(f"expected one Y BLEND label, found {strings}")
+    s_off=strings[0]
+    adr_hits=[]
+    for pc in range(max(0,s_off-0x100),s_off,2):
+        xs=list(md.disasm(img[pc:pc+4],pc,count=1))
+        if not xs: continue
+        i=xs[0]
+        if i.mnemonic=="adr" and len(i.operands)>=2 and i.operands[1].type==ARM_OP_IMM:
+            target=((pc+4)&~3)+i.operands[1].imm
+            if target==s_off:
+                adr_hits.append(pc)
+    if len(adr_hits)!=1:
+        raise RuntimeError(f"Y BLEND ADR hits {adr_hits}")
+    adr=adr_hits[0]
+
+    ins={}
+    for pc in range(max(0,adr-0x40),min(len(img)-4,adr+0x60),2):
+        xs=list(md.disasm(img[pc:pc+4],pc,count=1))
+        if xs: ins[pc]=xs[0]
+
+    rid=None; lookup=None
+    for pc in range(adr,min(adr+0x20,len(img)-4),2):
+        i=ins.get(pc)
+        if not i or i.mnemonic!="movs" or len(i.operands)<2: continue
+        if i.operands[0].type==ARM_OP_REG and i.reg_name(i.operands[0].reg)=="r1" and i.operands[1].type==ARM_OP_IMM and i.operands[1].imm==0x0d:
+            rid=pc
+            # canonical next direct BL is record lookup
+            for q in range(pc+2,min(pc+10,len(img)-4),2):
+                j=ins.get(q)
+                if j and j.mnemonic=="bl" and j.operands and j.operands[0].type==ARM_OP_IMM:
+                    lookup=(q,j.operands[0].imm); break
+            break
+    if rid is None or lookup is None:
+        raise RuntimeError("could not recover record-0D lookup sequence")
+
+    driver=None
+    for pc in range(lookup[0]+2,min(adr+0x40,len(img)-8),2):
+        a=ins.get(pc); b=ins.get(pc+2); d=ins.get(pc+4)
+        if not (a and b and d): continue
+        if a.mnemonic=="movs" and b.mnemonic=="movs" and d.mnemonic=="bl":
+            if (len(a.operands)>=2 and len(b.operands)>=2 and
+                a.operands[0].type==ARM_OP_REG and a.reg_name(a.operands[0].reg)=="r1" and
+                a.operands[1].type==ARM_OP_REG and a.reg_name(a.operands[1].reg)=="r6" and
+                b.operands[0].type==ARM_OP_REG and b.reg_name(b.operands[0].reg)=="r0" and
+                b.operands[1].type==ARM_OP_REG and b.reg_name(b.operands[1].reg)=="r4" and
+                d.operands[0].type==ARM_OP_IMM):
+                driver=(pc+4,d.operands[0].imm); break
+    if driver is None:
+        raise RuntimeError("could not recover Y BLEND driver call")
+
+    func_start=None
+    for pc in range(adr,max(-1,adr-0x50),-2):
+        i=ins.get(pc)
+        if i and i.mnemonic=="push":
+            func_start=pc; break
+    return {
+        "string_offset":s_off,
+        "adr_pc":adr,
+        "function_start":func_start,
+        "record_id_pc":rid,
+        "lookup_call_pc":lookup[0],
+        "lookup_target":lookup[1],
+        "driver_call_pc":driver[0],
+        "driver_target":driver[1],
+    }
+
+def execute_yblend_driver(img:bytes,repo:Path,driver:int,vals:list[int]):
+    audit=load_parser(repo/"tools"/"m10r_yblend_bit15_audit1a.py")
+    p=audit.Programmer(img)
+    old=bytes(0x4000)
+    def run(fallback:int):
+        got=p.run(driver,struct.pack("<6I",*vals),old,fallback)
+        return {
+          "0x2002092c":int.from_bytes(got[0x92c:0x930],"little"),
+          "0x20020930":int.from_bytes(got[0x930:0x934],"little"),
+          "0x20020934":int.from_bytes(got[0x934:0x938],"little"),
+        }
+    return {"normal":run(0),"fallback":run(1),"bit15_mutations":len(p.bit15_changes)}
 
 def main():
     ap=argparse.ArgumentParser()
@@ -69,6 +155,16 @@ def main():
     for needle in (b"Y BLEND",b"y_blend"):
         yblend_strings += [{"needle":needle.decode(),"offset":hex(x)} for x in all_occ(img,needle)]
 
+    selector=locate_yblend_selector(img)
+    driver=selector["driver_target"]
+    executed=execute_yblend_driver(img,args.repo,driver,du)
+    expected_normal={"0x2002092c":0x00002000,"0x20020930":0x3fff3fff,"0x20020934":0x3fff3fff}
+    expected_fallback={"0x2002092c":0x00000000,"0x20020930":0x80007fff,"0x20020934":0x80007fff}
+    if executed["normal"]!=expected_normal or executed["fallback"]!=expected_fallback:
+        raise RuntimeError(f"Y BLEND execution mismatch {executed}")
+    if executed["bit15_mutations"]!=0:
+        raise RuntimeError(f"unexpected bit15 mutation {executed}")
+
     result={
       "schema":"M10R_YBLEND_CROSSFIRMWARE1A_ITEM_V1",
       "version":args.version,
@@ -93,6 +189,11 @@ def main():
         "tail_u32":cu[9:],
       },
       "img_yblend_strings":yblend_strings,
+      "yblend_selector_driver":{
+        **{k:(hex(v) if isinstance(v,int) else v) for k,v in selector.items()},
+        "driver_first_0xf0_sha256":sha(img[driver:driver+0xf0]),
+        "original_thumb_execution":executed,
+      },
       "guardrails":[
         "Cross-version calibration equality constrains stability, not field semantics.",
         "A stable value 32 does not establish Q5/Q6 or 0.5.",
