@@ -1,0 +1,140 @@
+name: M10-R RENDER1W AE1B FREEZE1
+
+on:
+  push:
+    branches: [m10r-render1w-ae1b-freeze1]
+    paths:
+      - '.github/workflows/m10r-render1w-ae1b-freeze1.yml'
+      - 'android/M10RAeOracle.java'
+      - 'android/M10RAe1BPolicy.java'
+      - 'android/M10RAe1BState.java'
+      - 'android/M10RIntegralMask.java'
+      - 'tools/M10RAeOracleHostTest.java'
+      - 'tools/M10RAe1BPolicyHostTest.java'
+      - 'tools/M10RIntegralMaskHostTest.java'
+      - 'patches/fix-m10r-render1u-ae1a-diagnostic.py'
+      - 'patches/fix-m10r-render1v-ae1b-live.py'
+      - 'patches/fix-m10r-render1w-ae1b-freeze1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Validate host logic and patches
+        run: |
+          set -euo pipefail
+          python3 -m py_compile             patches/fix-m10r-render1u-ae1a-diagnostic.py             patches/fix-m10r-render1v-ae1b-live.py             patches/fix-m10r-render1w-ae1b-freeze1.py
+          rm -rf /tmp/m10r_freeze1_classes
+          mkdir -p /tmp/m10r_freeze1_classes
+          javac -d /tmp/m10r_freeze1_classes             android/M10RAeOracle.java android/M10RAe1BPolicy.java android/M10RAe1BState.java             android/M10RIntegralMask.java             tools/M10RAeOracleHostTest.java tools/M10RAe1BPolicyHostTest.java tools/M10RIntegralMaskHostTest.java
+          java -cp /tmp/m10r_freeze1_classes M10RAeOracleHostTest
+          java -cp /tmp/m10r_freeze1_classes M10RAe1BPolicyHostTest
+          java -cp /tmp/m10r_freeze1_classes M10RIntegralMaskHostTest
+      - name: Guard scope
+        run: |
+          set -euo pipefail
+          grep -F '"captureDecisionFrozenOncePerStill":True' patches/fix-m10r-render1w-ae1b-freeze1.py
+          grep -F '"fixedEvBoost":False' patches/fix-m10r-render1w-ae1b-freeze1.py
+          grep -F '"rendererNativeChanged":False' patches/fix-m10r-render1w-ae1b-freeze1.py
+
+  build:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Reconstruct RENDER1T
+        run: |
+          set -euo pipefail
+          python3 -m pip install PyYAML==6.0.2
+          python3 - <<'PY'
+          from pathlib import Path
+          import yaml,subprocess,hashlib
+          w=yaml.safe_load(Path('.github/workflows/m10r-render1r-tonecal1a.yml').read_text())
+          steps=w['jobs']['build-candidate']['steps']
+          for name in ['Reconstruct and verify exact frozen RENDER1Q','Apply bounded native tone-only candidate']:
+              s=next(s for s in steps if s.get('name')==name)
+              subprocess.run(['bash','-euo','pipefail','-c',s['run']],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1s-gamut1a.py','PhotonCamera'],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1t-colorrecon1a.py','PhotonCamera'],check=True)
+          c=Path('PhotonCamera/app/src/main/cpp/m10rRender.cpp')
+          assert hashlib.sha256(c.read_bytes()).hexdigest()=='880ce125413bdf1e0f56fbbdcc56591ba91e794f9b5281488f63353dca724637'
+          PY
+      - name: Apply AE1A, AE1B and FREEZE1
+        run: |
+          set -euo pipefail
+          python3 patches/fix-m10r-render1u-ae1a-diagnostic.py PhotonCamera
+          python3 patches/fix-m10r-render1v-ae1b-live.py PhotonCamera
+          python3 patches/fix-m10r-render1w-ae1b-freeze1.py PhotonCamera
+          grep -F 'render1w-ae1b-freeze1-render1t-colorrecon1a-tonecal1a-' PhotonCamera/app/build.gradle
+          grep -F 'prepareM10rAe1BCapture' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/parameters/IsoExpoSelector.java
+          grep -F 'captureRequestMatchesFrozenState' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          grep -F 'leicaIntegralVsWholeEv' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          echo '880ce125413bdf1e0f56fbbdcc56591ba91e794f9b5281488f63353dca724637  PhotonCamera/app/src/main/cpp/m10rRender.cpp' | sha256sum -c -
+          cp PhotonCamera/M10R_RENDER1W_AE1B_FREEZE1_PROVENANCE.json .
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install Android build components
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'cmake;3.22.1' 'ndk;27.0.12077973'
+      - name: Build APK
+        run: |
+          set -o pipefail
+          chmod +x PhotonCamera/gradlew
+          cd PhotonCamera
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_RENDER1W_AE1B_FREEZE1_GRADLE.log"
+      - name: Package APK
+        run: |
+          set -euo pipefail
+          mkdir -p delivery
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,shutil,zipfile
+          apks=list(Path('PhotonCamera/app/build/outputs/apk/debug').glob('*.apk'));assert len(apks)==1,apks
+          apk=apks[0];z=zipfile.ZipFile(apk);assert z.testzip() is None
+          dex=b''.join(z.read(n) for n in z.namelist() if n.endswith('.dex'))
+          for marker in [b'captureRequestMatchesFrozenState',b'leicaIntegralVsWholeEv',
+                         b'M10RIntegralMask',b'M10RAe1BState',
+                         b'RENDER1T_COLORRECON1A_GAMUT1A_TONECAL1A']:
+              assert marker in dex,marker
+          out=Path('delivery/M10RCam_RENDER1W_AE1B_FREEZE1_RENDER1T.apk');shutil.copy2(apk,out)
+          p={'source_commit':os.environ['GITHUB_SHA'],'run_id':os.environ['GITHUB_RUN_ID'],
+             'apk_bytes':out.stat().st_size,'apk_sha256':hashlib.sha256(out.read_bytes()).hexdigest(),
+             'capture_decision_frozen':True,'leica_integral_mask_diagnostic':True,
+             'fixed_ev_boost':False,'renderer_cpp_sha256':
+             '880ce125413bdf1e0f56fbbdcc56591ba91e794f9b5281488f63353dca724637',
+             'device_tested':False}
+          Path('delivery/APK_PROVENANCE.json').write_text(json.dumps(p,indent=2)+'\n')
+          shutil.copy2('M10R_RENDER1W_AE1B_FREEZE1_PROVENANCE.json','delivery/')
+          PY
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose delivery/*.apk > delivery/signature_verification.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-RENDER1W-AE1B-FREEZE1-BUILDLOG
+          path: M10R_RENDER1W_AE1B_FREEZE1_GRADLE.log
+          if-no-files-found: ignore
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10RCam-RENDER1W-AE1B-FREEZE1-TEST-APK
+          path: delivery/
+          if-no-files-found: error
+          retention-days: 90
