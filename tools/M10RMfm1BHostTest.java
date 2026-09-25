@@ -13,7 +13,7 @@ public final class M10RMfm1BHostTest {
         double[] sideBacklit=new double[16*22];
         for(int r=0;r<16;r++) for(int c=0;c<22;c++) {
             double v=0.10;
-            if(c<6) v=0.85;
+            if(c<8) v=0.85;
             if(c>=8 && c<=15 && r>=4 && r<12) v=0.055;
             sideBacklit[r*22+c]=v;
         }
