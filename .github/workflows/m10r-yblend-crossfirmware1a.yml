@@ -1,0 +1,114 @@
+name: M10-R Y_BLEND CROSSFIRMWARE1A
+
+on:
+  push:
+    branches: [m10r-yblend-crossfirmware1a]
+    paths:
+      - '.github/workflows/m10r-yblend-crossfirmware1a.yml'
+      - 'tools/m10r_yblend_crossfirmware1a.py'
+  workflow_dispatch:
+
+permissions: {contents: read}
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build verified generic M10-R unpacker
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker)
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+
+      - name: Download three public M10-R firmware generations
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/fw
+          curl -L --fail --retry 3 --retry-delay 2 \
+            'https://reddotforum.com/Firmware_files/M10-R-20.20.47.37-Customer.FW' \
+            -o /tmp/fw/M10-R-20.20.47.37-Customer.FW
+          curl -L --fail --retry 3 --retry-delay 2 \
+            'https://reddotforum.com/Firmware_files/M10-R-30.22.11.52-Customer.FW' \
+            -o /tmp/fw/M10-R-30.22.11.52-Customer.FW
+          curl -L --fail --retry 3 --retry-delay 2 \
+            'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' \
+            -o /tmp/fw/M10-R-30.22.23.34-Customer.FW
+          sha256sum /tmp/fw/* | tee /tmp/fw/firmware_sha256.txt
+
+      - name: Decode, extract, and compare Y BLEND records
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p crossfirmware1a_results
+          for V in 20.20.47.37 30.22.11.52 30.22.23.34; do
+            FW="/tmp/fw/M10-R-\${V}-Customer.FW"
+            cp "$FW" /tmp/M10-R.FW
+            rm -f /tmp/M10R_unpacked.bin
+            /tmp/unpack >/tmp/unpack_\${V}.txt
+            test -s /tmp/M10R_unpacked.bin
+            SEC="/tmp/sec_\${V}"
+            rm -rf "$SEC"
+            python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin "$SEC" >/tmp/sections_\${V}.txt
+            FW_SHA="$(sha256sum "$FW" | awk '{print $1}')"
+            DEC_SHA="$(sha256sum /tmp/M10R_unpacked.bin | awk '{print $1}')"
+            python3 tools/m10r_yblend_crossfirmware1a.py "$SEC" "$GITHUB_WORKSPACE" \
+              --version "$V" --firmware-sha256 "$FW_SHA" --decoded-sha256 "$DEC_SHA" \
+              --out "crossfirmware1a_results/\${V}.json" \
+              > "crossfirmware1a_results/\${V}.stdout.txt"
+          done
+          cp /tmp/fw/firmware_sha256.txt crossfirmware1a_results/
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          versions=["20.20.47.37","30.22.11.52","30.22.23.34"]
+          rows=[json.loads(Path(f"crossfirmware1a_results/{v}.json").read_text()) for v in versions]
+          summary={
+            "schema":"M10R_YBLEND_CROSSFIRMWARE1A_SUMMARY_V1",
+            "versions":versions,
+            "record_0x0d":[{
+              "version":x["version"],
+              "u32":x["record_0x0d"]["u32"],
+              "raw_sha256":x["record_0x0d"]["raw_sha256"],
+              "occurrences":x["record_0x0d"]["exact_payload_occurrences_in_b2y"],
+              "b2y_sha256":x["sections"]["b2y_sha256"],
+              "img_sha256":x["sections"]["img_sha256"],
+            } for x in rows],
+            "record_0x0c":[{
+              "version":x["version"],
+              "matrix":x["record_0x0c"]["signed_matrix"],
+              "tail":x["record_0x0c"]["tail_u32"],
+              "raw_sha256":x["record_0x0c"]["raw_sha256"],
+            } for x in rows],
+          }
+          d_payloads=[tuple(x["record_0x0d"]["u32"]) for x in rows]
+          c_mats=[tuple(x["record_0x0c"]["signed_matrix"]) for x in rows]
+          c_tails=[tuple(x["record_0x0c"]["tail_u32"]) for x in rows]
+          summary["record_0x0d_identical_all_versions"]=len(set(d_payloads))==1
+          summary["record_0x0c_matrix_identical_all_versions"]=len(set(c_mats))==1
+          summary["record_0x0c_tail_identical_all_versions"]=len(set(c_tails))==1
+          Path("crossfirmware1a_results/summary.json").write_text(json.dumps(summary,indent=2)+"\n")
+          print(json.dumps(summary,indent=2))
+          PY
+
+          git rev-parse HEAD > crossfirmware1a_results/source_commit.txt
+          sha256sum tools/m10r_yblend_crossfirmware1a.py > crossfirmware1a_results/script_sha256.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-YBLEND-CROSSFIRMWARE1A-RESULTS
+          path: crossfirmware1a_results/
+          retention-days: 90
+          if-no-files-found: error
