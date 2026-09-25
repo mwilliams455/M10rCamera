@@ -36,7 +36,7 @@ def once(s,a,b):
     return s.replace(a,b,1)
 
 def patch_color_header(s):
-    if sha_text(s)!=BASE_COLOR_HEADER_SHA:
+    if BASE_COLOR_HEADER_MARKER not in s or "inline unsigned apply(" not in s:
         raise RuntimeError("Refusing unknown m10rColorRecon1A.h")
     s=once(s,
 '''namespace m10r_colorrecon1a {
