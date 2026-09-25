@@ -71,7 +71,7 @@ public final class M10RMfm1B {
         public final double positiveBaseEv;
         public final double sideGeometryConfidence;
         public final double integralDominanceConfidence;
-        public final double darkRegionConfidence;
+            public final double positiveBaseConfidence;
         public final double positiveCandidateEv;
         public final double negativeCandidateEv;
         public final double rawBlendEv;
@@ -100,7 +100,7 @@ public final class M10RMfm1B {
                  double centerOverIntegralEv, double innerVsEdgeEv,
                  double positiveBaseEv,
                  double sideGeometryConfidence, double integralDominanceConfidence,
-                 double darkRegionConfidence,
+                 double positiveBaseConfidence,
                  double positiveCandidateEv, double negativeCandidateEv, double rawBlendEv,
                  int brightRegionCount, int darkRegionCount,
                  double brightRegionFraction, double darkRegionFraction,
@@ -127,7 +127,7 @@ public final class M10RMfm1B {
             this.positiveBaseEv=positiveBaseEv;
             this.sideGeometryConfidence=sideGeometryConfidence;
             this.integralDominanceConfidence=integralDominanceConfidence;
-            this.darkRegionConfidence=darkRegionConfidence;
+            this.positiveBaseConfidence=positiveBaseConfidence;
             this.positiveCandidateEv=positiveCandidateEv;
             this.negativeCandidateEv=negativeCandidateEv;
             this.rawBlendEv=rawBlendEv;
@@ -208,16 +208,17 @@ public final class M10RMfm1B {
         // mixed-brightness scene when no one side wins cleanly.
         double integralDominanceConfidence = smoothstep(integralVsMedianEv, 0.75, 1.50);
 
-        // Require a meaningful dark population so ordinary bright/flat scenes do
-        // not get a positive lift merely because one side is luminous.
-        double darkRegionConfidence = smoothstep(darkRegionFraction, 0.25, 0.40);
+        // Require a meaningful positive magnitude before geometry can activate.
+        // This gate is orientation-neutral and prevents ordinary high-contrast
+        // scenes with a luminous side from receiving a lift.
+        double positiveBaseConfidence = smoothstep(positiveBaseEv, 0.16, 0.32);
 
         double positiveGeometryConfidence =
                 Math.max(sideGeometryConfidence, integralDominanceConfidence);
 
         double positiveConfidence = smoothstep(sceneSpreadEv, 1.80, 3.50)
                 * smoothstep(brightRegionFraction, 0.08, 0.30)
-                * darkRegionConfidence
+                * positiveBaseConfidence
                 * positiveGeometryConfidence;
 
         double positiveCandidateEv =
@@ -254,7 +255,7 @@ public final class M10RMfm1B {
                 centerOverIntegralEv, innerVsEdgeEv,
                 positiveBaseEv,
                 sideGeometryConfidence, integralDominanceConfidence,
-                darkRegionConfidence,
+                positiveBaseConfidence,
                 positiveCandidateEv, negativeCandidateEv, rawBlendEv,
                 brightRegions, darkRegions, brightRegionFraction, darkRegionFraction,
                 positiveGeometryConfidence, positiveConfidence,
