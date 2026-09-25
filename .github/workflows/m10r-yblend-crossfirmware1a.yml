@@ -37,6 +37,9 @@ jobs:
           set -euo pipefail
           mkdir -p /tmp/fw
           curl -L --fail --retry 3 --retry-delay 2 \
+            'https://reddotforum.com/Firmware_files/M10-R-10.20.27.20-Customer.FW' \
+            -o /tmp/fw/M10-R-10.20.27.20-Customer.FW
+          curl -L --fail --retry 3 --retry-delay 2 \
             'https://reddotforum.com/Firmware_files/M10-R-20.20.47.37-Customer.FW' \
             -o /tmp/fw/M10-R-20.20.47.37-Customer.FW
           curl -L --fail --retry 3 --retry-delay 2 \
@@ -52,7 +55,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p crossfirmware1a_results
-          for V in 20.20.47.37 30.22.11.52 30.22.23.34; do
+          for V in 10.20.27.20 20.20.47.37 30.22.11.52 30.22.23.34; do
             FW="/tmp/fw/M10-R-${V}-Customer.FW"
             cp "$FW" /tmp/M10-R.FW
             rm -f /tmp/M10R_unpacked.bin
@@ -73,7 +76,7 @@ jobs:
           python3 - <<'PY'
           import json
           from pathlib import Path
-          versions=["20.20.47.37","30.22.11.52","30.22.23.34"]
+          versions=["10.20.27.20","20.20.47.37","30.22.11.52","30.22.23.34"]
           rows=[json.loads(Path(f"crossfirmware1a_results/{v}.json").read_text()) for v in versions]
           summary={
             "schema":"M10R_YBLEND_CROSSFIRMWARE1A_SUMMARY_V1",
