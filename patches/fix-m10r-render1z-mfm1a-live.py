@@ -281,9 +281,9 @@ def main():
     versions=re.findall(r"versionName\s+['\"]([^'\"]+)['\"]",g)
     if len(versions)!=1 or "render1y-meter1b-gridmap1a-ae1b-freeze1-render1t-colorrecon1a-tonecal1a-" not in versions[0]:
         raise RuntimeError("unexpected METER1B versionName: %r" % versions)
-    version=versions[0].replace(
-        "render1y-meter1b-gridmap1a-ae1b-freeze1-render1t-colorrecon1a-tonecal1a-",
-        "render1z-mfm1a-live-meter1b-gridmap1a-ae1b-freeze1-render1t-colorrecon1a-tonecal1a-",1)
+    # Keep the APK output path below filesystem NAME_MAX. Full provenance remains
+    # in the sidecar/provenance JSON rather than accumulating in versionName.
+    version="0.97-m10r1z-mfm1a"
     gradle.write_text(g.replace(versions[0],version,1))
 
     if hashlib.sha256(cpp.read_bytes()).hexdigest()!=CPP_SHA:
