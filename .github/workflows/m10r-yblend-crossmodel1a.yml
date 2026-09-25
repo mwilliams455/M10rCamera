@@ -91,6 +91,56 @@ jobs:
           cat crossmodel1a_results/status.txt
           git rev-parse HEAD > crossmodel1a_results/source_commit.txt
 
+      - name: Summarize and assert cross-model constraints
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          labels=["M10R-20.20.47.37","M10M-2.12.8.0","M10M-3.21.2.50"]
+          rows={k:json.loads(Path(f"crossmodel1a_results/{k}.json").read_text()) for k in labels}
+          def all_same(vals): return len({json.dumps(v,sort_keys=True) for v in vals})==1
+          summary={
+            "schema":"M10R_YBLEND_CROSSMODEL1A_SUMMARY_V1",
+            "labels":labels,
+            "record0d_equal_all":all_same([x["record_0x0d"]["u32"] for x in rows.values()]),
+            "record0c_equal_all":all_same([x["record_0x0c"]["u32"] for x in rows.values()]),
+            "sam7_equal_all":len({x["sections"]["sam7_sha256"] for x in rows.values()})==1,
+            "driver_bytes_equal_all":len({x["yblend_selector_driver"]["driver_first_0xf0_sha256"] for x in rows.values()})==1,
+            "driver_execution_equal_all":all_same([x["yblend_selector_driver"]["original_thumb_execution"] for x in rows.values()]),
+            "b2y_equal_all":len({x["sections"]["b2y_sha256"] for x in rows.values()})==1,
+            "monochrom_b2y_equal_between_versions":
+              rows["M10M-2.12.8.0"]["sections"]["b2y_sha256"]==rows["M10M-3.21.2.50"]["sections"]["b2y_sha256"],
+            "m10r_vs_monochrom_b2y_equal":
+              rows["M10R-20.20.47.37"]["sections"]["b2y_sha256"]==rows["M10M-3.21.2.50"]["sections"]["b2y_sha256"],
+            "items":{k:{
+              "firmware_sha256":v["firmware_sha256"],
+              "decoded_sha256":v["decoded_sha256"],
+              "b2y_file":v["sections"]["b2y_file"],
+              "b2y_identification":v["sections"]["b2y_identification"],
+              "b2y_sha256":v["sections"]["b2y_sha256"],
+              "img_sha256":v["sections"]["img_sha256"],
+              "sam7_sha256":v["sections"]["sam7_sha256"],
+              "record0d":v["record_0x0d"]["u32"],
+              "record0d_sha256":v["record_0x0d"]["raw_sha256"],
+              "record0c_sha256":v["record_0x0c"]["raw_sha256"],
+              "driver_sha256":v["yblend_selector_driver"]["driver_first_0xf0_sha256"],
+              "driver_execution":v["yblend_selector_driver"]["original_thumb_execution"],
+            } for k,v in rows.items()}
+          }
+          assert summary["record0d_equal_all"] is True
+          assert summary["record0c_equal_all"] is True
+          assert summary["sam7_equal_all"] is True
+          assert summary["driver_bytes_equal_all"] is True
+          assert summary["driver_execution_equal_all"] is True
+          assert summary["b2y_equal_all"] is False
+          assert summary["monochrom_b2y_equal_between_versions"] is False
+          assert summary["m10r_vs_monochrom_b2y_equal"] is False
+          Path("crossmodel1a_results/summary.json").write_text(json.dumps(summary,indent=2)+"\n")
+          print(json.dumps(summary,indent=2))
+          PY
+
       - uses: actions/upload-artifact@v4
         with:
           name: M10R-YBLEND-CROSSMODEL1A-RESULTS
