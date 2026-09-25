@@ -111,31 +111,36 @@ def plausible_yblend_windows(data:bytes):
     return out
 
 def pc_literal_refs_thumb(data:bytes,value:int):
-    """Find Thumb LDR-literal instructions whose resolved pool word equals value.
+    """Find Thumb LDR-literal instructions resolving to raw pool words == value.
 
-    Bounded static decode, not a control-flow proof.
+    Search is anchored to actual literal occurrences, then decodes only a bounded
+    backward window. This avoids a full-binary Capstone rescan for every value.
     """
     md=Cs(CS_ARCH_ARM,CS_MODE_THUMB);md.detail=True
     refs=[]
-    # Linear decode per halfword, single instruction, to avoid losing sync on data.
-    for pc in range(0,len(data)-4,2):
-        xs=list(md.disasm(data[pc:pc+4],pc,count=1))
-        if not xs:continue
-        i=xs[0]
-        if i.mnemonic not in ("ldr","ldr.w") or len(i.operands)<2:
-            continue
-        op=i.operands[1]
-        # Capstone ARM memory op: base PC and displacement.
-        if getattr(op,"type",None)!=3: # ARM_OP_MEM
-            continue
-        mem=op.mem
-        if i.reg_name(mem.base)!="pc":
-            continue
-        pool=((pc+4)&~3)+mem.disp
-        if 0<=pool<=len(data)-4:
-            v=struct.unpack_from("<I",data,pool)[0]
-            if v==value:
-                refs.append({"pc":hex(pc),"pool":hex(pool),"op":i.op_str})
+    raw=find_all(data,struct.pack("<I",value))
+    seen=set()
+    for pool_target in raw:
+        lo=max(0,pool_target-0x1000)
+        hi=min(pool_target+4,len(data)-3)
+        for pc in range(lo+(lo&1),hi,2):
+            xs=list(md.disasm(data[pc:pc+4],pc,count=1))
+            if not xs:continue
+            i=xs[0]
+            if i.mnemonic not in ("ldr","ldr.w") or len(i.operands)<2:
+                continue
+            op=i.operands[1]
+            if getattr(op,"type",None)!=3: # ARM_OP_MEM
+                continue
+            mem=op.mem
+            if i.reg_name(mem.base)!="pc":
+                continue
+            pool=((pc+4)&~3)+mem.disp
+            if pool==pool_target:
+                key=(pc,pool)
+                if key not in seen:
+                    seen.add(key)
+                    refs.append({"pc":hex(pc),"pool":hex(pool),"op":i.op_str})
     return refs
 
 def main():
