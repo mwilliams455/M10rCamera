@@ -1,0 +1,187 @@
+name: M10-R RENDER2B SKINTRACE1A diagnostic
+
+on:
+  push:
+    branches: [m10r-render2b-skintrace1a]
+    paths:
+      - '.github/workflows/m10r-render2b-skintrace1a.yml'
+      - 'patches/fix-m10r-render2b-skintrace1a.py'
+      - 'patches/fix-m10r-render2a-mfm1b-live.py'
+      - 'android/M10RMfm1B.java'
+      - 'android/M10RMfm1BState.java'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Validate patch syntax
+        run: |
+          set -euo pipefail
+          python3 -m py_compile patches/fix-m10r-render2b-skintrace1a.py
+          grep -F '"diagnosticOnly":True' patches/fix-m10r-render2b-skintrace1a.py
+          grep -F '"photographicIntentChanged":False' patches/fix-m10r-render2b-skintrace1a.py
+          grep -F '"captureExposureChanged":False' patches/fix-m10r-render2b-skintrace1a.py
+          grep -F '"mfm1bChanged":False' patches/fix-m10r-render2b-skintrace1a.py
+          grep -F '"privatePhotoFixtureCommitted":False' patches/fix-m10r-render2b-skintrace1a.py
+
+  build:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Reconstruct RENDER1T
+        run: |
+          set -euo pipefail
+          python3 -m pip install PyYAML==6.0.2
+          python3 - <<'PY'
+          from pathlib import Path
+          import yaml,subprocess,hashlib
+          w=yaml.safe_load(Path('.github/workflows/m10r-render1r-tonecal1a.yml').read_text())
+          steps=w['jobs']['build-candidate']['steps']
+          for name in ['Reconstruct and verify exact frozen RENDER1Q','Apply bounded native tone-only candidate']:
+              s=next(s for s in steps if s.get('name')==name)
+              subprocess.run(['bash','-euo','pipefail','-c',s['run']],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1s-gamut1a.py','PhotonCamera'],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1t-colorrecon1a.py','PhotonCamera'],check=True)
+          c=Path('PhotonCamera/app/src/main/cpp/m10rRender.cpp')
+          assert hashlib.sha256(c.read_bytes()).hexdigest()=='880ce125413bdf1e0f56fbbdcc56591ba91e794f9b5281488f63353dca724637'
+          PY
+
+      - name: Reconstruct current MFM1B baseline
+        run: |
+          set -euo pipefail
+          python3 patches/fix-m10r-render1u-ae1a-diagnostic.py PhotonCamera
+          python3 patches/fix-m10r-render1v-ae1b-live.py PhotonCamera
+          python3 patches/fix-m10r-render1w-ae1b-freeze1.py PhotonCamera
+          python3 patches/fix-m10r-render1x-meter1a-livegrid.py PhotonCamera
+          python3 patches/fix-m10r-render1y-meter1b-gridmap1a.py PhotonCamera
+          python3 patches/fix-m10r-render1z-mfm1a-live.py PhotonCamera
+          python3 patches/fix-m10r-render2a-mfm1b-live.py PhotonCamera
+          grep -F '0.97-m10r2a-mfm1b' PhotonCamera/app/build.gradle
+          grep -F 'm10rMfm1B' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          echo '880ce125413bdf1e0f56fbbdcc56591ba91e794f9b5281488f63353dca724637  PhotonCamera/app/src/main/cpp/m10rRender.cpp' | sha256sum -c -
+
+      - name: Apply SKINTRACE1A diagnostic
+        run: |
+          set -euo pipefail
+          python3 patches/fix-m10r-render2b-skintrace1a.py PhotonCamera
+          grep -F '0.97-m10r2b-skintrace1a' PhotonCamera/app/build.gradle
+          grep -F 'skinTrace1A' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          grep -F 'classificationUsesFaceDetection", false' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          grep -F 'struct Trace' PhotonCamera/app/src/main/cpp/m10rColorRecon1A.h
+          cp PhotonCamera/M10R_RENDER2B_SKINTRACE1A_PROVENANCE.json .
+
+      - name: Verify trace pointer does not change COLORRECON1A output
+        run: |
+          set -euo pipefail
+          cat > /tmp/skintrace_equiv.cpp <<'CPP'
+          #include <cmath>
+          #include <cstdint>
+          #include <cstring>
+          #include <iostream>
+          #include "m10rColorRecon1A.h"
+          static bool same(double a,double b){ return std::memcmp(&a,&b,sizeof(double))==0; }
+          int main(){
+              const double m[9]={2.0341,-0.7273,-0.3067,-0.2288,1.2317,-0.0029,-0.0086,-0.1533,1.1619};
+              const double cases[][6]={
+                  {0.20,0.14,0.10,0.40,0.35,0.30},
+                  {0.50,0.30,0.18,0.75,0.65,0.55},
+                  {0.08,0.05,0.03,0.20,0.18,0.16},
+                  {0.80,0.70,0.55,0.95,0.90,0.82},
+                  {0.30,0.30,0.30,0.45,0.45,0.45}
+              };
+              for(const auto& c:cases){
+                  double r0,g0,b0,r1,g1,b1;
+                  auto f0=m10r_colorrecon1a::apply(c[0],c[1],c[2],m,c[3],c[4],c[5],nullptr,nullptr,r0,g0,b0,nullptr);
+                  m10r_colorrecon1a::Trace t;
+                  auto f1=m10r_colorrecon1a::apply(c[0],c[1],c[2],m,c[3],c[4],c[5],nullptr,nullptr,r1,g1,b1,&t);
+                  if(f0!=f1 || !same(r0,r1) || !same(g0,g1) || !same(b0,b1)){
+                      std::cerr<<"trace changed output\n"; return 1;
+                  }
+              }
+              std::cout<<"SKINTRACE1A equivalence PASS\n";
+              return 0;
+          }
+          CPP
+          g++ -std=c++17 -O2             -I PhotonCamera/app/src/main/cpp             /tmp/skintrace_equiv.cpp -o /tmp/skintrace_equiv
+          /tmp/skintrace_equiv
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install Android build components
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'cmake;3.22.1' 'ndk;27.0.12077973'
+
+      - name: Build APK
+        run: |
+          set -o pipefail
+          chmod +x PhotonCamera/gradlew
+          cd PhotonCamera
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_RENDER2B_SKINTRACE1A_GRADLE.log"
+
+      - name: Package APK
+        run: |
+          set -euo pipefail
+          mkdir -p delivery
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,shutil,zipfile
+          apks=list(Path('PhotonCamera/app/build/outputs/apk/debug').glob('*.apk'))
+          assert len(apks)==1,apks
+          apk=apks[0]
+          z=zipfile.ZipFile(apk); assert z.testzip() is None
+          dex=b''.join(z.read(n) for n in z.namelist() if n.endswith('.dex'))
+          for marker in [b'skinTrace1A',b'warmMidProxy',b'neutralMidControl',
+                         b'm10rMfm1B',b'RENDER1T_COLORRECON1A_GAMUT1A_TONECAL1A']:
+              assert marker in dex,marker
+          out=Path('delivery/M10RCam_RENDER2B_SKINTRACE1A_MFM1B_RENDER1T.apk')
+          shutil.copy2(apk,out)
+          p={
+            'source_commit':os.environ['GITHUB_SHA'],
+            'run_id':os.environ['GITHUB_RUN_ID'],
+            'apk_bytes':out.stat().st_size,
+            'apk_sha256':hashlib.sha256(out.read_bytes()).hexdigest(),
+            'skintrace1a_diagnostic_only':True,
+            'mfm1b_unchanged':True,
+            'capture_exposure_unchanged_vs_mfm1b':True,
+            'face_detection_used':False,
+            'device_tested':False
+          }
+          Path('delivery/APK_PROVENANCE.json').write_text(json.dumps(p,indent=2)+'\n')
+          shutil.copy2('M10R_RENDER2B_SKINTRACE1A_PROVENANCE.json','delivery/')
+          PY
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose delivery/*.apk > delivery/signature_verification.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-RENDER2B-SKINTRACE1A-BUILDLOG
+          path: M10R_RENDER2B_SKINTRACE1A_GRADLE.log
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10RCam-RENDER2B-SKINTRACE1A-TEST-APK
+          path: delivery/
+          if-no-files-found: error
+          retention-days: 90
