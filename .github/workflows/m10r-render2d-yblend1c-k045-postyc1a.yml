@@ -1,0 +1,152 @@
+name: M10-R RENDER2D YBLEND1C K045 POSTYC1A
+
+on:
+  push:
+    branches: [m10r-render2d-yblend1c-k045-postyc1a]
+    paths:
+      - '.github/workflows/m10r-render2d-yblend1c-k045-postyc1a.yml'
+      - 'patches/fix-m10r-render2c-colorrecon1b-postyc1a.py'
+      - 'patches/fix-m10r-render2d-yblend1c-k045-postyc1a.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Validate patch syntax and scope
+        run: |
+          set -euo pipefail
+          python3 -m py_compile patches/fix-m10r-render2d-yblend1c-k045-postyc1a.py
+          grep -F '"probeK":0.45' patches/fix-m10r-render2d-yblend1c-k045-postyc1a.py
+          grep -F '"firmwareFormulaClaimed":False' patches/fix-m10r-render2d-yblend1c-k045-postyc1a.py
+          grep -F '"postYcCc1PlacementChanged":False' patches/fix-m10r-render2d-yblend1c-k045-postyc1a.py
+          grep -F '"mfm1bChanged":False' patches/fix-m10r-render2d-yblend1c-k045-postyc1a.py
+          grep -F '"privatePhotoFixtureCommitted":False' patches/fix-m10r-render2d-yblend1c-k045-postyc1a.py
+
+  build:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Reconstruct RENDER1T
+        run: |
+          set -euo pipefail
+          python3 -m pip install PyYAML==6.0.2
+          python3 - <<'PY'
+          from pathlib import Path
+          import yaml,subprocess,hashlib
+          w=yaml.safe_load(Path('.github/workflows/m10r-render1r-tonecal1a.yml').read_text())
+          steps=w['jobs']['build-candidate']['steps']
+          for name in ['Reconstruct and verify exact frozen RENDER1Q','Apply bounded native tone-only candidate']:
+              s=next(s for s in steps if s.get('name')==name)
+              subprocess.run(['bash','-euo','pipefail','-c',s['run']],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1s-gamut1a.py','PhotonCamera'],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1t-colorrecon1a.py','PhotonCamera'],check=True)
+          c=Path('PhotonCamera/app/src/main/cpp/m10rRender.cpp')
+          assert hashlib.sha256(c.read_bytes()).hexdigest()=='880ce125413bdf1e0f56fbbdcc56591ba91e794f9b5281488f63353dca724637'
+          PY
+
+      - name: Reconstruct RENDER2C baseline
+        run: |
+          set -euo pipefail
+          python3 patches/fix-m10r-render1u-ae1a-diagnostic.py PhotonCamera
+          python3 patches/fix-m10r-render1v-ae1b-live.py PhotonCamera
+          python3 patches/fix-m10r-render1w-ae1b-freeze1.py PhotonCamera
+          python3 patches/fix-m10r-render1x-meter1a-livegrid.py PhotonCamera
+          python3 patches/fix-m10r-render1y-meter1b-gridmap1a.py PhotonCamera
+          python3 patches/fix-m10r-render1z-mfm1a-live.py PhotonCamera
+          python3 patches/fix-m10r-render2a-mfm1b-live.py PhotonCamera
+          python3 patches/fix-m10r-render2b-skintrace1a.py PhotonCamera
+          python3 patches/fix-m10r-render2c-colorrecon1b-postyc1a.py PhotonCamera
+          grep -F '0.97-m10r2c-postyc1a' PhotonCamera/app/build.gradle
+          grep -F 'COLORRECON1B POSTYC1A' PhotonCamera/app/src/main/cpp/m10rRender.cpp
+
+      - name: Apply YBLEND1C K045
+        run: |
+          set -euo pipefail
+          python3 patches/fix-m10r-render2d-yblend1c-k045-postyc1a.py PhotonCamera
+          grep -F '0.97-m10r2d-yb1c-k045' PhotonCamera/app/build.gradle
+          grep -F '1.0 + 0.45 * (yRatio - 1.0)' PhotonCamera/app/src/main/cpp/m10rRender.cpp
+          grep -F 'yBlend1CPostYc1A' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          grep -F 'probeK", 0.45' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          grep -F 'colorRecon1BPostYc1A' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          cp PhotonCamera/M10R_RENDER2D_YBLEND1C_K045_POSTYC1A_PROVENANCE.json .
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install Android build components
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'cmake;3.22.1' 'ndk;27.0.12077973'
+
+      - name: Build APK
+        run: |
+          set -o pipefail
+          chmod +x PhotonCamera/gradlew
+          cd PhotonCamera
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_RENDER2D_YBLEND1C_K045_GRADLE.log"
+
+      - name: Package APK
+        run: |
+          set -euo pipefail
+          mkdir -p delivery
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,shutil,zipfile
+          apks=list(Path('PhotonCamera/app/build/outputs/apk/debug').glob('*.apk'))
+          assert len(apks)==1,apks
+          apk=apks[0]
+          z=zipfile.ZipFile(apk); assert z.testzip() is None
+          dex=b''.join(z.read(n) for n in z.namelist() if n.endswith('.dex'))
+          for marker in [b'yBlend1CPostYc1A',b'colorRecon1BPostYc1A',b'skinTrace1A',b'm10rMfm1B']:
+              assert marker in dex,marker
+          out=Path('delivery/M10RCam_RENDER2D_YBLEND1C_K045_POSTYC1A_MFM1B.apk')
+          shutil.copy2(apk,out)
+          p={
+            'source_commit':os.environ['GITHUB_SHA'],
+            'run_id':os.environ['GITHUB_RUN_ID'],
+            'apk_bytes':out.stat().st_size,
+            'apk_sha256':hashlib.sha256(out.read_bytes()).hexdigest(),
+            'yblend_k':0.45,
+            'postyc1a_retained':True,
+            'mfm1b_unchanged':True,
+            'skintrace1a_retained':True,
+            'firmware_formula_claimed':False,
+            'device_tested':False
+          }
+          Path('delivery/APK_PROVENANCE.json').write_text(json.dumps(p,indent=2)+'\n')
+          shutil.copy2('M10R_RENDER2D_YBLEND1C_K045_POSTYC1A_PROVENANCE.json','delivery/')
+          PY
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose delivery/*.apk > delivery/signature_verification.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-RENDER2D-YBLEND1C-K045-BUILDLOG
+          path: M10R_RENDER2D_YBLEND1C_K045_GRADLE.log
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10RCam-RENDER2D-YBLEND1C-K045-TEST-APK
+          path: delivery/
+          if-no-files-found: error
+          retention-days: 90
