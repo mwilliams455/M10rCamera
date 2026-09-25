@@ -21,14 +21,48 @@ def load_module_path(p:Path,name:str):
 def load_parser(repo:Path):
     return load_module_path(repo/"tools"/"m10r_b2y_assets.py","m10r_b2y_assets_crossfw")
 
+def section_rows(secdir:Path):
+    with (secdir/"sections.csv").open(newline="",encoding="utf-8") as f:
+        return list(csv.DictReader(f))
+
 def find_section(secdir:Path,needle:str)->Path:
     hits=[]
-    with (secdir/"sections.csv").open(newline="",encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            if needle.lower() in (r["name"]+" "+r["file"]).lower():
-                hits.append(secdir/r["file"])
+    for r in section_rows(secdir):
+        if needle.lower() in (r["name"]+" "+r["file"]).lower():
+            hits.append(secdir/r["file"])
     if len(hits)!=1:raise RuntimeError(f"{needle}: expected one section, found {hits}")
     return hits[0]
+
+def find_b2y_section(secdir:Path,mod):
+    # Newer firmware carries the full internal path in the section name.
+    named=[]
+    for r in section_rows(secdir):
+        s=(r["name"]+" "+r["file"]).lower()
+        if "data/calib/b2y.bin" in s:
+            named.append(secdir/r["file"])
+    if len(named)==1:
+        return named[0], "named_data_calib_B2Y"
+
+    # Early M10-family firmware has generic "Calibration Data" labels. Identify
+    # B2Y structurally with the proven parser and the adjacent 0x0C/0x0D ABIs.
+    hits=[]
+    for r in section_rows(secdir):
+        s=(r["name"]+" "+r["file"]).lower()
+        if "calibration data" not in s and "calib" not in s:
+            continue
+        p=secdir/r["file"]
+        try:
+            data=p.read_bytes()
+            recs=mod.parse_records(data)
+        except Exception:
+            continue
+        c0=[x for x in recs if x.record_id==0x0c and x.size==60]
+        d0=[x for x in recs if x.record_id==0x0d and x.size==24]
+        if len(c0)==1 and len(d0)==1:
+            hits.append(p)
+    if len(hits)!=1:
+        raise RuntimeError(f"structural B2Y identification expected one section, found {hits}")
+    return hits[0], "structural_record0C0D_ABI"
 
 def u32s(blob:bytes):return list(struct.unpack("<"+"I"*(len(blob)//4),blob))
 def s32(v:int):return v-0x100000000 if v&0x80000000 else v
@@ -134,12 +168,12 @@ def main():
     ap.add_argument("--out",type=Path,required=True)
     args=ap.parse_args()
 
-    b2yp=find_section(args.sections,"data/calib/B2Y.bin")
+    mod=load_parser(args.repo)
+    b2yp,b2y_identification=find_b2y_section(args.sections,mod)
     imgp=find_section(args.sections,"IMG-System")
     samp=find_section(args.sections,"IMG-SAM7")
     b2y=b2yp.read_bytes();img=imgp.read_bytes();sam=samp.read_bytes()
 
-    mod=load_parser(args.repo)
     records=mod.parse_records(b2y)
     r0d=[r for r in records if r.record_id==0x0d]
     r0c=[r for r in records if r.record_id==0x0c]
@@ -173,7 +207,7 @@ def main():
       "firmware_sha256":args.firmware_sha256,
       "decoded_sha256":args.decoded_sha256,
       "sections":{
-        "b2y_file":b2yp.name,"b2y_sha256":sha(b2y),
+        "b2y_file":b2yp.name,"b2y_identification":b2y_identification,"b2y_sha256":sha(b2y),
         "img_file":imgp.name,"img_sha256":sha(img),
         "sam7_file":samp.name,"sam7_sha256":sha(sam),
       },
