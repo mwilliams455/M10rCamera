@@ -311,9 +311,12 @@ def main():
 
     after = patch_java(before)
     versions = re.findall(r"versionName\s+['\"]([^'\"]+)['\"]", gradle)
-    if len(versions) != 1 or versions[0] != "0.0-render1t-colorrecon1a-tonecal1a-test":
+    if len(versions) != 1 or "render1t-colorrecon1a-tonecal1a-" not in versions[0]:
         raise RuntimeError("Unexpected RENDER1T versionName: %r" % versions)
-    version = "0.0-render1u-ae1a-diag-render1t-test"
+    version = versions[0].replace(
+        "render1t-colorrecon1a-tonecal1a-",
+        "render1u-ae1a-diag-render1t-colorrecon1a-tonecal1a-",
+        1)
 
     j.write_text(after)
     g.write_text(gradle.replace(versions[0], version, 1))
