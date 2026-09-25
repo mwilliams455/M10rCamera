@@ -13,8 +13,12 @@ public final class M10RLiveMeterStateHostTest {
         near(s.codeIntegralVsWholeEv,-1.0,1e-12,"code EV");
         near(s.linearIntegralVsWholeEv,-1.0,1e-12,"linear EV");
         if(s.linearGrid==null || s.linearGrid.length!=352) throw new AssertionError("grid");
+        M10RLiveMeterState.freezeCapture();
+        M10RLiveMeterState.Snapshot frozen=M10RLiveMeterState.frozenSnapshot();
+        if(!frozen.valid || frozen.generation!=1) throw new AssertionError("freeze");
         s.linearGrid[0]=9.0;
         if(M10RLiveMeterState.snapshot().linearGrid[0]==9.0) throw new AssertionError("copy");
+        if(M10RLiveMeterState.frozenSnapshot().linearGrid[0]==9.0) throw new AssertionError("frozen copy");
         System.out.println("M10RLiveMeterStateHostTest PASS");
     }
 }
