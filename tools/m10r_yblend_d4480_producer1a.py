@@ -72,16 +72,30 @@ def assert_selector_flow(img:bytes):
     } for i in seq if i.address in (0x154e20,0x154e48,0x154e4c,0x154e50,0x154e56,0x154e64,0x154e66,0x154e68)]
 
 def direct_bl_census(img:bytes,target:int):
-    # Decode all halfword-aligned potential Thumb-2 BL instructions. A data word
+    # Fast manual decode of halfword-aligned Thumb-2 BL encodings. A data word
     # can coincidentally encode a branch, so this is a direct-encoding census,
     # not proof against indirect calls.
-    md=Cs(CS_ARCH_ARM,CS_MODE_THUMB);md.detail=True
     hits=[]
-    for pc in range(0,len(img)-4,2):
-        xs=list(md.disasm(img[pc:pc+4],pc,count=1))
-        if not xs:continue
-        i=xs[0]
-        if i.mnemonic=="bl" and i.size==4 and i.operands and i.operands[0].type==ARM_OP_IMM and i.operands[0].imm==target:
+    n=len(img)
+    for pc in range(0,n-3,2):
+        h1=img[pc] | (img[pc+1]<<8)
+        if (h1 & 0xf800) != 0xf000:
+            continue
+        h2=img[pc+2] | (img[pc+3]<<8)
+        if (h2 & 0xd000) != 0xd000:
+            continue
+        s=(h1>>10)&1
+        imm10=h1&0x03ff
+        j1=(h2>>13)&1
+        j2=(h2>>11)&1
+        imm11=h2&0x07ff
+        i1=(~(j1^s))&1
+        i2=(~(j2^s))&1
+        imm=(s<<24)|(i1<<23)|(i2<<22)|(imm10<<12)|(imm11<<1)
+        if imm & (1<<24):
+            imm-=1<<25
+        dest=(pc+4+imm)&0xffffffff
+        if dest==target:
             hits.append(pc)
     return hits
 
