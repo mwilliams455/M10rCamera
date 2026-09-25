@@ -213,8 +213,11 @@ public final class M10RMfm1B {
         // scenes with a luminous side from receiving a lift.
         double positiveBaseConfidence = smoothstep(positiveBaseEv, 0.16, 0.32);
 
-        double positiveGeometryConfidence =
-                Math.max(sideGeometryConfidence, integralDominanceConfidence);
+        // Positive assist must have a directional bright-side signature.
+        // Integral dominance is retained as telemetry, but not allowed to activate
+        // the positive path by itself because a bright central subject can also
+        // dominate the Integral mask.
+        double positiveGeometryConfidence = sideGeometryConfidence;
 
         double positiveConfidence = smoothstep(sceneSpreadEv, 1.80, 3.50)
                 * smoothstep(brightRegionFraction, 0.08, 0.30)
