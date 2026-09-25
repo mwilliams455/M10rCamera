@@ -53,20 +53,20 @@ jobs:
           set -euo pipefail
           mkdir -p crossfirmware1a_results
           for V in 20.20.47.37 30.22.11.52 30.22.23.34; do
-            FW="/tmp/fw/M10-R-\${V}-Customer.FW"
+            FW="/tmp/fw/M10-R-${V}-Customer.FW"
             cp "$FW" /tmp/M10-R.FW
             rm -f /tmp/M10R_unpacked.bin
-            /tmp/unpack >/tmp/unpack_\${V}.txt
+            /tmp/unpack >/tmp/unpack_${V}.txt
             test -s /tmp/M10R_unpacked.bin
-            SEC="/tmp/sec_\${V}"
+            SEC="/tmp/sec_${V}"
             rm -rf "$SEC"
-            python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin "$SEC" >/tmp/sections_\${V}.txt
+            python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin "$SEC" >/tmp/sections_${V}.txt
             FW_SHA="$(sha256sum "$FW" | awk '{print $1}')"
             DEC_SHA="$(sha256sum /tmp/M10R_unpacked.bin | awk '{print $1}')"
             python3 tools/m10r_yblend_crossfirmware1a.py "$SEC" "$GITHUB_WORKSPACE" \
               --version "$V" --firmware-sha256 "$FW_SHA" --decoded-sha256 "$DEC_SHA" \
-              --out "crossfirmware1a_results/\${V}.json" \
-              > "crossfirmware1a_results/\${V}.stdout.txt"
+              --out "crossfirmware1a_results/${V}.json" \
+              > "crossfirmware1a_results/${V}.stdout.txt"
           done
           cp /tmp/fw/firmware_sha256.txt crossfirmware1a_results/
 
