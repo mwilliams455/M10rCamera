@@ -41,6 +41,8 @@ public final class M10RLiveMeterState {
 
     private static Snapshot snapshot = new Snapshot(false,0,0,0,0,
             Double.NaN,Double.NaN,Double.NaN,Double.NaN,Double.NaN,Double.NaN,null);
+    private static Snapshot frozen = new Snapshot(false,0,0,0,0,
+            Double.NaN,Double.NaN,Double.NaN,Double.NaN,Double.NaN,Double.NaN,null);
 
     public static synchronized void publish(long timestampNs,long previewExposureNs,int previewIso,
                                             double codeWholeMean,double codeIntegralMean,
@@ -57,7 +59,18 @@ public final class M10RLiveMeterState {
     }
 
     public static synchronized Snapshot snapshot() {
-        Snapshot s=snapshot;
+        return copy(snapshot);
+    }
+
+    public static synchronized void freezeCapture() {
+        frozen = copy(snapshot);
+    }
+
+    public static synchronized Snapshot frozenSnapshot() {
+        return copy(frozen);
+    }
+
+    private static Snapshot copy(Snapshot s) {
         return new Snapshot(s.valid,s.generation,s.timestampNs,s.previewExposureNs,s.previewIso,
                 s.codeWholeMean,s.codeIntegralMean,s.codeIntegralVsWholeEv,
                 s.linearWholeMean,s.linearIntegralMean,s.linearIntegralVsWholeEv,s.linearGrid);
