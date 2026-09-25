@@ -1,0 +1,142 @@
+name: M10-R RENDER1V AE1B live
+
+on:
+  push:
+    branches: [m10r-render1v-ae1b-live]
+    paths:
+      - '.github/workflows/m10r-render1v-ae1b-live.yml'
+      - 'android/M10RAeOracle.java'
+      - 'android/M10RAe1BPolicy.java'
+      - 'android/M10RAe1BState.java'
+      - 'tools/M10RAeOracleHostTest.java'
+      - 'tools/M10RAe1BPolicyHostTest.java'
+      - 'patches/fix-m10r-render1u-ae1a-diagnostic.py'
+      - 'patches/fix-m10r-render1v-ae1b-live.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate-ae1b:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Validate oracle, policy and patches
+        run: |
+          set -euo pipefail
+          python3 -m py_compile patches/fix-m10r-render1u-ae1a-diagnostic.py patches/fix-m10r-render1v-ae1b-live.py
+          rm -rf /tmp/m10r_ae1b_classes
+          mkdir -p /tmp/m10r_ae1b_classes
+          javac -d /tmp/m10r_ae1b_classes             android/M10RAeOracle.java android/M10RAe1BPolicy.java android/M10RAe1BState.java             tools/M10RAeOracleHostTest.java tools/M10RAe1BPolicyHostTest.java
+          java -cp /tmp/m10r_ae1b_classes M10RAeOracleHostTest
+          java -cp /tmp/m10r_ae1b_classes M10RAe1BPolicyHostTest
+      - name: Guard photographic scope
+        run: |
+          set -euo pipefail
+          grep -F '"realExposureMutated":True' patches/fix-m10r-render1v-ae1b-live.py
+          grep -F '"rendererNativeChanged":False' patches/fix-m10r-render1v-ae1b-live.py
+          grep -F '"fixedEvBoost":False' patches/fix-m10r-render1v-ae1b-live.py
+          grep -F '"postCaptureRawDeltaAppliedToExposure":False' patches/fix-m10r-render1v-ae1b-live.py
+          grep -F '"hdrEnabled":False' patches/fix-m10r-render1v-ae1b-live.py
+
+  build-candidate:
+    needs: validate-ae1b
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Reconstruct exact validated RENDER1T
+        run: |
+          set -euo pipefail
+          python3 -m pip install PyYAML==6.0.2
+          python3 - <<'PY'
+          from pathlib import Path
+          import yaml,subprocess,hashlib
+          w=yaml.safe_load(Path('.github/workflows/m10r-render1r-tonecal1a.yml').read_text())
+          steps=w['jobs']['build-candidate']['steps']
+          for name in ['Reconstruct and verify exact frozen RENDER1Q','Apply bounded native tone-only candidate']:
+              s=next(s for s in steps if s.get('name')==name)
+              subprocess.run(['bash','-euo','pipefail','-c',s['run']],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1s-gamut1a.py','PhotonCamera'],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1t-colorrecon1a.py','PhotonCamera'],check=True)
+          j=Path('PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java')
+          c=Path('PhotonCamera/app/src/main/cpp/m10rRender.cpp')
+          assert hashlib.sha256(j.read_bytes()).hexdigest()=='2eb29773aa07ddeec0b4d2db2e28565995138b3855ff3fa4343520057e714a96'
+          assert hashlib.sha256(c.read_bytes()).hexdigest()=='880ce125413bdf1e0f56fbbdcc56591ba91e794f9b5281488f63353dca724637'
+          PY
+      - name: Apply AE1A diagnostics then active AE1B
+        run: |
+          set -euo pipefail
+          python3 patches/fix-m10r-render1u-ae1a-diagnostic.py PhotonCamera
+          python3 patches/fix-m10r-render1v-ae1b-live.py PhotonCamera
+          grep -F 'render1v-ae1b-live-render1t-colorrecon1a-tonecal1a-' PhotonCamera/app/build.gradle
+          grep -F 'M10R AE1B preview=' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/parameters/IsoExpoSelector.java
+          grep -F 'M10R AE1B phone adapter' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/capture/CaptureController.java
+          grep -F 'M10R AE1B: a tap remains an AF operation' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/control/TouchFocus.java
+          grep -F 'appendAe1BState' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          echo '880ce125413bdf1e0f56fbbdcc56591ba91e794f9b5281488f63353dca724637  PhotonCamera/app/src/main/cpp/m10rRender.cpp' | sha256sum -c -
+          cp PhotonCamera/M10R_RENDER1V_AE1B_LIVE_PROVENANCE.json .
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install fixed Android build components
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'cmake;3.22.1' 'ndk;27.0.12077973'
+      - name: Build AE1B live APK
+        run: |
+          set -o pipefail
+          chmod +x PhotonCamera/gradlew
+          cd PhotonCamera
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_RENDER1V_AE1B_LIVE_GRADLE.log"
+      - name: Inspect and package install APK
+        run: |
+          set -euo pipefail
+          mkdir -p delivery
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,shutil,zipfile
+          apks=list(Path('PhotonCamera/app/build/outputs/apk/debug').glob('*.apk'))
+          assert len(apks)==1,apks
+          apk=apks[0];z=zipfile.ZipFile(apk);assert z.testzip() is None
+          dex=b''.join(z.read(n) for n in z.namelist() if n.endswith('.dex'))
+          for marker in [b'm10rAe1A',b'm10rAe1B',b'M10RAe1BPolicy',b'M10RAe1BState',
+                         b'RENDER1T_COLORRECON1A_GAMUT1A_TONECAL1A']:
+              assert marker in dex,marker
+          out=Path('delivery/M10RCam_RENDER1V_AE1B_LIVE_RENDER1T.apk');shutil.copy2(apk,out)
+          p={'source_commit':os.environ['GITHUB_SHA'],'run_id':os.environ['GITHUB_RUN_ID'],
+             'apk_bytes':out.stat().st_size,'apk_sha256':hashlib.sha256(out.read_bytes()).hexdigest(),
+             'active_capture_ae':True,'fixed_ev_boost':False,'post_capture_raw_delta_applied':False,
+             'meter':'Camera2 preview forced center weighted','allocator':'M10R recovered A-mode',
+             'auto_iso_policy':'1/f 35mm width equivalent','renderer_cpp_sha256':
+             '880ce125413bdf1e0f56fbbdcc56591ba91e794f9b5281488f63353dca724637',
+             'device_tested':False}
+          Path('delivery/APK_PROVENANCE.json').write_text(json.dumps(p,indent=2)+'\n')
+          shutil.copy2('M10R_RENDER1V_AE1B_LIVE_PROVENANCE.json','delivery/')
+          print(json.dumps(p,indent=2))
+          PY
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose delivery/*.apk > delivery/signature_verification.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-RENDER1V-AE1B-LIVE-BUILDLOG
+          path: M10R_RENDER1V_AE1B_LIVE_GRADLE.log
+          if-no-files-found: ignore
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10RCam-RENDER1V-AE1B-LIVE-TEST-APK
+          path: delivery/
+          if-no-files-found: error
+          retention-days: 90
