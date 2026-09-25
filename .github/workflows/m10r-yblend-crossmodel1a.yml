@@ -1,0 +1,113 @@
+name: M10-R Y_BLEND CROSSMODEL1A
+
+on:
+  push:
+    branches: [m10r-yblend-crossmodel1a]
+    paths:
+      - '.github/workflows/m10r-yblend-crossmodel1a.yml'
+      - 'tools/m10r_yblend_crossfirmware1a.py'
+  workflow_dispatch:
+
+permissions: {contents: read}
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned disassembly and emulation dependencies
+        run: python3 -m pip install --quiet capstone==5.0.3 unicorn==2.1.3
+
+      - name: Build verified Leica M10-family unpacker
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker)
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+
+      - name: Download M10-R and M10 Monochrom firmware
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/fw
+          curl -L --fail --retry 3 --retry-delay 2             'https://reddotforum.com/Firmware_files/M10-R-20.20.47.37-Customer.FW'             -o /tmp/fw/M10R-20.20.47.37.FW
+          curl -L --fail --retry 3 --retry-delay 2             'https://leica-camera.com/sites/default/files/M10-M-2.12.8.0-SYSTEM_0.FW'             -o /tmp/fw/M10M-2.12.8.0.FW
+          curl -L --fail --retry 3 --retry-delay 2             'https://leica-camera.com/sites/default/files/M10-M-3.21.2.50-Customer_0.FW'             -o /tmp/fw/M10M-3.21.2.50.FW
+          sha256sum /tmp/fw/* | tee /tmp/fw/firmware_sha256.txt
+
+      - name: Decode and compare B2Y Y BLEND controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p crossmodel1a_results
+          for SPEC in             'M10R-20.20.47.37|/tmp/fw/M10R-20.20.47.37.FW'             'M10M-2.12.8.0|/tmp/fw/M10M-2.12.8.0.FW'             'M10M-3.21.2.50|/tmp/fw/M10M-3.21.2.50.FW'
+          do
+            LABEL="${SPEC%%|*}"
+            FW="${SPEC#*|}"
+            cp "$FW" /tmp/M10-R.FW
+            rm -f /tmp/M10R_unpacked.bin
+            /tmp/unpack >"/tmp/unpack_${LABEL}.txt"
+            test -s /tmp/M10R_unpacked.bin
+            SEC="/tmp/sec_${LABEL}"
+            rm -rf "$SEC"
+            python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin "$SEC" >"/tmp/sections_${LABEL}.txt"
+            FW_SHA="$(sha256sum "$FW" | awk '{print $1}')"
+            DEC_SHA="$(sha256sum /tmp/M10R_unpacked.bin | awk '{print $1}')"
+            python3 tools/m10r_yblend_crossfirmware1a.py "$SEC" "$GITHUB_WORKSPACE"               --version "$LABEL" --firmware-sha256 "$FW_SHA" --decoded-sha256 "$DEC_SHA"               --out "crossmodel1a_results/${LABEL}.json"               > "crossmodel1a_results/${LABEL}.stdout.txt"
+          done
+          cp /tmp/fw/firmware_sha256.txt crossmodel1a_results/
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          labels=["M10R-20.20.47.37","M10M-2.12.8.0","M10M-3.21.2.50"]
+          rows={k:json.loads(Path(f"crossmodel1a_results/{k}.json").read_text()) for k in labels}
+          def slim(x):
+              return {
+                "firmware_sha256":x["firmware_sha256"],
+                "decoded_sha256":x["decoded_sha256"],
+                "b2y_sha256":x["sections"]["b2y_sha256"],
+                "img_sha256":x["sections"]["img_sha256"],
+                "sam7_sha256":x["sections"]["sam7_sha256"],
+                "record_0x0d":x["record_0x0d"],
+                "record_0x0c":x["record_0x0c"],
+                "selector_driver":x["yblend_selector_driver"],
+              }
+          r=rows["M10R-20.20.47.37"]
+          m0=rows["M10M-2.12.8.0"]
+          m1=rows["M10M-3.21.2.50"]
+          summary={
+            "schema":"M10R_YBLEND_CROSSMODEL1A_SUMMARY_V1",
+            "items":{k:slim(v) for k,v in rows.items()},
+            "monochrom_record0d_stable_between_versions":m0["record_0x0d"]["u32"]==m1["record_0x0d"]["u32"],
+            "monochrom_b2y_stable_between_versions":m0["sections"]["b2y_sha256"]==m1["sections"]["b2y_sha256"],
+            "m10r_vs_monochrom_record0d_equal":r["record_0x0d"]["u32"]==m1["record_0x0d"]["u32"],
+            "m10r_vs_monochrom_record0c_equal":r["record_0x0c"]["raw_sha256"]==m1["record_0x0c"]["raw_sha256"],
+            "m10r_vs_monochrom_b2y_equal":r["sections"]["b2y_sha256"]==m1["sections"]["b2y_sha256"],
+            "m10r_vs_monochrom_sam7_equal":r["sections"]["sam7_sha256"]==m1["sections"]["sam7_sha256"],
+            "m10r_vs_monochrom_yblend_driver_bytes_equal":
+              r["yblend_selector_driver"]["driver_first_0xf0_sha256"]==m1["yblend_selector_driver"]["driver_first_0xf0_sha256"],
+            "m10r_vs_monochrom_yblend_execution_equal":
+              r["yblend_selector_driver"]["original_thumb_execution"]==m1["yblend_selector_driver"]["original_thumb_execution"],
+          }
+          Path("crossmodel1a_results/summary.json").write_text(json.dumps(summary,indent=2)+"\n")
+          print(json.dumps(summary,indent=2))
+          PY
+
+          git rev-parse HEAD > crossmodel1a_results/source_commit.txt
+          sha256sum tools/m10r_yblend_crossfirmware1a.py > crossmodel1a_results/script_sha256.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-YBLEND-CROSSMODEL1A-RESULTS
+          path: crossmodel1a_results/
+          retention-days: 90
+          if-no-files-found: error
