@@ -56,7 +56,7 @@ def patch_renderer(s):
                     .put("positiveBaseEv", x.positiveBaseEv)
                     .put("sideGeometryConfidence", x.sideGeometryConfidence)
                     .put("integralDominanceConfidence", x.integralDominanceConfidence)
-                    .put("darkRegionConfidence", x.darkRegionConfidence)
+                    .put("positiveBaseConfidence", x.positiveBaseConfidence)
                     .put("positiveCandidateEv", x.positiveCandidateEv)
 '''
     s=once(s,anchor,repl)
@@ -70,7 +70,7 @@ def patch_renderer(s):
                         "rotation_invariant_brightest_side_vs_inner_plus_integral_dominance")
                 .put("positiveMagnitudeSemantic",
                         "0p65_integral_vs_median_plus_0p35_integral_vs_center_no_lower_half_penalty")
-                .put("darkPopulationGate", "smoothstep_dark_region_fraction_0p25_to_0p40")
+                .put("positiveBaseGate", "smoothstep_positive_base_ev_0p16_to_0p32")
                 .put("stateValid", s.valid)
 '''
     s=once(s,anchor2,repl2)
@@ -123,7 +123,7 @@ def main():
         "mfm1bChange":"rotation_invariant_positive_backlight_geometry",
         "positiveMagnitude":"0.65_integral_vs_median_plus_0.35_integral_vs_center",
         "positiveGeometry":"brightest_side_vs_inner_plus_integral_dominance",
-        "positiveDarkPopulationGate":"0.25_to_0.40_region_fraction_smoothstep",
+        "positiveBaseGate":"0.16_to_0.32_ev_smoothstep",
         "positiveGain":1.50,
         "positiveGainFirmwareClaimed":False,
         "positiveLimitEv":0.75,
