@@ -67,7 +67,7 @@ def patch_renderer(s):
     repl2='''                .put("deadBandEv", M10RMfm1B.DEAD_BAND_EV)
                 .put("positiveGain", M10RMfm1B.POSITIVE_GAIN)
                 .put("positiveGeometrySemantic",
-                        "rotation_invariant_brightest_side_vs_inner_plus_integral_dominance")
+                        "rotation_invariant_brightest_side_vs_inner_integral_dominance_telemetry_only")
                 .put("positiveMagnitudeSemantic",
                         "0p65_integral_vs_median_plus_0p35_integral_vs_center_no_lower_half_penalty")
                 .put("positiveBaseGate", "smoothstep_positive_base_ev_0p16_to_0p32")
@@ -122,7 +122,7 @@ def main():
         "exactCa9ThirteenFeatureParityClaimed":False,
         "mfm1bChange":"rotation_invariant_positive_backlight_geometry",
         "positiveMagnitude":"0.65_integral_vs_median_plus_0.35_integral_vs_center",
-        "positiveGeometry":"brightest_side_vs_inner_plus_integral_dominance",
+        "positiveGeometry":"brightest_side_vs_inner_directional_gate",
         "positiveBaseGate":"0.16_to_0.32_ev_smoothstep",
         "positiveGain":1.50,
         "positiveGainFirmwareClaimed":False,
