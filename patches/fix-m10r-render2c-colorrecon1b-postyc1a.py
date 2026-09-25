@@ -66,14 +66,15 @@ def patch_java(s):
             s=s.replace(a,b)
     # Rename main diagnostic object while preserving SKINTRACE1A.
     s=once(s,'d.put("colorRecon1A", new JSONObject()','d.put("colorRecon1B", new JSONObject()')
-    s=once(s,'.put("empiricalNotFirmware", true)
-                    .put("method", "post_Yc_working_CC1_colour_render1s_lightness_anchor_saturation_dependent_shoulder")',
-           '.put("empiricalNotFirmware", true)
+    s=once(s,
+'''            .put("empiricalNotFirmware", true)
+                    .put("method", "post_Yc_working_CC1_colour_render1s_lightness_anchor_saturation_dependent_shoulder")''',
+'''            .put("empiricalNotFirmware", true)
                     .put("method", "post_Yc_working_CC1_colour_render1s_lightness_anchor_saturation_dependent_shoulder")
                     .put("postYc1A", true)
                     .put("onlyPhotographicVariableVsRender2B", "CC1_input_preTone_working_to_postYc_reconstructed_working")
                     .put("cc1PlacementRestoredToRecoveredBoundary", true)
-                    .put("exactYBlendParityClaimed", false)')
+                    .put("exactYBlendParityClaimed", false)''')
     return s
 
 def main():
