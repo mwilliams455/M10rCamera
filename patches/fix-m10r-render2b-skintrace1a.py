@@ -357,7 +357,7 @@ def main():
         "privateValidationDataCommitted":False,
         "deviceValidated":False,
         "productionPromoted":False
-    }}
+    }
     (root/"M10R_RENDER2B_SKINTRACE1A_PROVENANCE.json").write_text(json.dumps(proof,indent=2)+"\n")
     print(json.dumps(proof,indent=2))
 
