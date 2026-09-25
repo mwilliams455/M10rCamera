@@ -315,7 +315,7 @@ def main():
     java_before=java.read_text()
     if sha_text(cpp_before)!=BASE_CPP_SHA:
         raise RuntimeError("unexpected MFM1B renderer C++ baseline")
-    if sha_text(header_before)!=BASE_COLOR_HEADER_SHA:
+    if BASE_COLOR_HEADER_MARKER not in header_before:
         raise RuntimeError("unexpected COLORRECON1A header baseline")
 
     cpp_after=patch_cpp(cpp_before)
