@@ -1,0 +1,56 @@
+name: M10-R B2Y SATURATION SETTER ABI1A
+on:
+  push:
+    branches: [m10r-b2y-saturation1a]
+    paths:
+      - '.github/workflows/m10r-b2y-saturation-setter-abi1a.yml'
+      - 'tools/m10r_b2y_saturation_setter_abi1a.py'
+      - 'tools/m10r_sections.py'
+  workflow_dispatch:
+permissions: {contents: write}
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone==5.0.3
+      - name: Build verified unpacker
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker);z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+      - name: Decode firmware and trace setter
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p saturation_abi1a_results
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R-20.20.47.37-Customer.FW' -o /tmp/M10-R.FW
+          echo '141f0b5fcffe315372bc2c673a3dfa371eab84198d46d6de26016ec0958d77b2  /tmp/M10-R.FW' | sha256sum -c -
+          /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sec > saturation_abi1a_results/sections.txt
+          python3 tools/m10r_b2y_saturation_setter_abi1a.py /tmp/sec --out saturation_abi1a_results/M10R_B2Y_SATURATION_SETTER_ABI1A.json | tee saturation_abi1a_results/disasm.txt
+      - name: Persist ABI trace
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/generated
+          cp saturation_abi1a_results/disasm.txt research/generated/M10R_B2Y_SATURATION_SETTER_ABI1A.txt
+          cp saturation_abi1a_results/M10R_B2Y_SATURATION_SETTER_ABI1A.json research/generated/M10R_B2Y_SATURATION_SETTER_ABI1A.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/generated/M10R_B2Y_SATURATION_SETTER_ABI1A.*
+          git commit -m "Research freeze saturation setter ABI1A" || exit 0
+          git push origin HEAD:m10r-b2y-saturation1a
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-B2Y-SATURATION-SETTER-ABI1A
+          path: saturation_abi1a_results/
+          retention-days: 90
