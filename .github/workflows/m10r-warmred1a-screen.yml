@@ -1,0 +1,69 @@
+name: M10-R WARMRED1A SCREEN
+on:
+  push:
+    branches: [m10r-warmred1a-screen]
+    paths:
+      - '.github/workflows/m10r-warmred1a-screen.yml'
+      - 'tools/m10r_warmred1a_screen.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install fixed validation dependencies
+        run: |
+          python3 -m pip install numpy==2.2.6 pillow==11.3.0 opencv-python-headless==4.13.0.92 rawpy==0.25.1
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl
+      - uses: actions/download-artifact@v4
+        with:
+          name: M10R-PHOTOAUDIT1A-RESEARCH-INPUTS
+          run-id: 35518775600
+          github-token: ${{ github.token }}
+          path: inputs
+      - name: Retrieve unchanged public reference pairs
+        run: python3 tools/m10r_tonecal1a_fetch_refs.py inputs
+      - name: Run constrained WARMRED1A screen
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/m10r_warmred1a_screen.py
+          mkdir -p warmred1a
+          python3 tools/m10r_warmred1a_screen.py inputs warmred1a
+          python3 - <<'PY'
+          import json
+          d=json.load(open('warmred1a/results.json'))
+          print('STATUS',d['status'])
+          print('PASSING',d['passing_candidates'])
+          print('PREFERRED',d['preferred_candidate'])
+          assert d['schema']=='M10R_WARMRED1A_SCREEN_V1'
+          PY
+      - name: Persist result
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp warmred1a/results.json research/M10R_WARMRED1A_SCREEN.json
+          cp warmred1a/REPORT.md research/M10R_WARMRED1A_SCREEN.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/M10R_WARMRED1A_SCREEN.*
+          git commit -m "Research freeze WARMRED1A screen" || exit 0
+          git pull --rebase origin m10r-warmred1a-screen
+          git push
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-WARMRED1A-SCREEN
+          path: |
+            warmred1a/
+            research/M10R_WARMRED1A_SCREEN.*
+          if-no-files-found: warn
+          retention-days: 90
