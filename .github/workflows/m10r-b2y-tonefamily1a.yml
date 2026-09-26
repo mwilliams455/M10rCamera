@@ -1,0 +1,137 @@
+name: M10-R B2Y TONEFAMILY1A
+on:
+  push:
+    branches: [m10r-b2y-tonefamily1a]
+    paths:
+      - '.github/workflows/m10r-b2y-tonefamily1a.yml'
+      - 'tools/m10r_b2y_tonefamily1a.py'
+      - 'tools/m10r_sections.py'
+      - 'tools/m10r_b2y_assets.py'
+  workflow_dispatch:
+permissions: {contents: write}
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build verified M10-family unpacker
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker);z=p.index("\n          CPP",a)
+          src=p[a:z]
+          old='int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;'
+          new='int main(int argc,char**argv){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=argc>1?stoul(argv[1],nullptr,0):0x38;'
+          if old not in src:
+              raise SystemExit("unpacker main anchor changed")
+          src=src.replace(old,new)
+          oldloop='for(int i=0;i<8;i++){size_t e=st+i*16;'
+          newloop='for(int i=0;out.size()<expected && i<32;i++){size_t e=st+i*16;'
+          if oldloop not in src:
+              raise SystemExit("unpacker segment-loop anchor changed")
+          src=src.replace(oldloop,newloop)
+          Path('/tmp/unpack.cpp').write_text(src)
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+      - name: Download and extract color M10-family B2Y
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/fw /tmp/b2y tonefamily1a_results
+          curl -L --fail --retry 3 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/fw/M10R.FW
+          curl -L --fail --retry 3 'https://reddotforum.com/Firmware_files/M10-3.22.23.38-Customer.FW' -o /tmp/fw/M10.FW
+          curl -L --fail --retry 3 'https://reddotforum.com/Firmware_files/M10-P-4.22.23.34-Customer.FW' -o /tmp/fw/M10P.FW
+          ARGS=()
+          for SPEC in 'M10R-30.22.23.34|M10R' 'M10-3.22.23.38|M10' 'M10P-4.22.23.34|M10P'; do
+            LABEL="${SPEC%%|*}"; STEM="${SPEC#*|}"; FW="/tmp/fw/${STEM}.FW"
+            cp "$FW" /tmp/M10-R.FW
+            CBASE="$(python3 - "$FW" <<'PY'
+          import struct,sys
+          from pathlib import Path
+          b=Path(sys.argv[1]).read_bytes()
+          def u32(o):
+              return struct.unpack_from('<I',b,o)[0]
+          candidates=[]
+          limit=min(0x1000,max(0,len(b)-0x200))
+          for C in range(0,limit+1,4):
+              try:
+                  h=u32(C+8); expected=u32(C+0x10)
+              except struct.error:
+                  continue
+              if not (0x80 <= h <= 0x20000): continue
+              if not (1_000_000 <= expected <= 500_000_000): continue
+              st=C+h
+              if st<0 or st+16>len(b): continue
+              total=0; ok=True; desc=[]
+              for i in range(32):
+                  e=st+i*16
+                  if e+16>len(b): ok=False; break
+                  ro,ps,us=u32(e+4),u32(e+8),u32(e+12)
+                  if not (ro>0 and ps>0 and us>0 and C+ro+ps<=len(b)):
+                      ok=False; break
+                  total+=us; desc.append((ro,ps,us))
+                  if total==expected: break
+                  if total>expected: ok=False; break
+              if ok and total==expected and C+0x154<=len(b):
+                  candidates.append((C,h,expected,desc))
+          if len(candidates)!=1:
+              raise SystemExit(f"expected one structural container base, got {[(hex(x[0]),hex(x[1]),x[2]) for x in candidates]}")
+          C,h,expected,desc=candidates[0]
+          print(hex(C))
+          print(f"CONTAINER base={C:#x} header={h:#x} expected={expected} segments={desc}",file=sys.stderr)
+          PY
+            )"
+            echo "${LABEL} container_base=${CBASE}" | tee -a tonefamily1a_results/container_bases.txt
+            rm -f /tmp/M10R_unpacked.bin
+            /tmp/unpack "$CBASE" >"/tmp/${STEM}_unpack.txt"
+            test -s /tmp/M10R_unpacked.bin
+            SEC="/tmp/sec_${STEM}"; rm -rf "$SEC"
+            python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin "$SEC" >/dev/null
+            B2Y="$(python3 - "$SEC" <<'PY'
+          import csv,sys
+          from pathlib import Path
+          root=Path(sys.argv[1]);sys.path.insert(0,str(Path.cwd()/'tools'))
+          import m10r_b2y_assets as mod
+          rows=list(csv.DictReader((root/'sections.csv').open()))
+          named=[root/r['file'] for r in rows if 'data/calib/b2y.bin' in (r['name']+' '+r['file']).lower()]
+          if len(named)==1: print(named[0]); raise SystemExit
+          hits=[]
+          for r in rows:
+              p=root/r['file']
+              try: recs=mod.parse_records(p.read_bytes())
+              except Exception: continue
+              if any(x.record_id==0x18 for x in recs) and any(x.record_id==0x0c for x in recs):
+                  hits.append(p)
+          if len(hits)!=1: raise SystemExit(f'B2Y candidates {hits}')
+          print(hits[0])
+          PY
+            )"
+            cp "$B2Y" "/tmp/b2y/${STEM}.bin"
+            ARGS+=(--item "${LABEL}|/tmp/b2y/${STEM}.bin")
+            sha256sum "$FW" "$B2Y" >> tonefamily1a_results/provenance.txt
+          done
+          python3 tools/m10r_b2y_tonefamily1a.py "${ARGS[@]}" \
+            --out tonefamily1a_results/M10R_B2Y_TONEFAMILY1A.json \
+            --report tonefamily1a_results/M10R_B2Y_TONEFAMILY1A.md \
+            | tee tonefamily1a_results/stdout.txt
+      - name: Persist
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/generated
+          cp tonefamily1a_results/M10R_B2Y_TONEFAMILY1A.* research/generated/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/generated/M10R_B2Y_TONEFAMILY1A.*
+          git commit -m "Research freeze M10-R tone-family audit" || exit 0
+          git push origin HEAD:m10r-b2y-tonefamily1a
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-B2Y-TONEFAMILY1A
+          path: tonefamily1a_results/
+          retention-days: 90
