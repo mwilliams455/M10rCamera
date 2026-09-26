@@ -113,9 +113,23 @@ def main():
         k=f"0x{rid:02x}";vals={l:items[l]["records"][k]["u32"] for l in LABELS};n=len(vals[LABELS[0]]);words=[]
         for i in range(n):
             v={l:vals[l][i] for l in LABELS};words.append(dict(index=i,offset=hex(i*4),status="equal" if len(set(v.values()))==1 else "changed",values={l:f"0x{x:08x}" for l,x in v.items()}))
+        matrices={}
+        for l in LABELS:
+            signed=[s32(x) for x in vals[l][2:11]]
+            matrices[l]=[signed[0:3],signed[3:6],signed[6:9]]
+        identity=[[512,0,0],[0,512,0],[0,0,512]]
+        mono_identity=(matrices[LABELS[1]]==identity and matrices[LABELS[2]]==identity)
+        changed_indices=[x["index"] for x in words if x["status"]=="changed"]
+        matrix_only_changed=(changed_indices==list(range(2,11)))
         result["records"][k]=dict(words=words,setter_code_sha256={l:items[l]["records"][k]["setter"]["sha256"] for l in LABELS},
-          setter_code_equal_all=len({items[l]["records"][k]["setter"]["sha256"] for l in LABELS})==1)
-        md += [f"## {k} {TARGETS[rid][0]}","",f"Changed words: {sum(x['status']=='changed' for x in words)} / {n}",f"Setter code equal all: {result['records'][k]['setter_code_equal_all']}","",
+          setter_code_equal_all=len({items[l]["records"][k]["setter"]["sha256"] for l in LABELS})==1,
+          matrices_q9=matrices,
+          matrix_row_sums={l:[sum(row) for row in matrices[l]] for l in LABELS},
+          monochrom_identity_q9=mono_identity,
+          changed_words_exactly_matrix_2_to_10=matrix_only_changed)
+        md += [f"## {k} {TARGETS[rid][0]}","",f"Changed words: {sum(x['status']=='changed' for x in words)} / {n}",f"Setter code equal all: {result['records'][k]['setter_code_equal_all']}",
+          f"Changed words exactly 2..10: {matrix_only_changed}",f"Both Monochrom matrices exact Q9 identity: {mono_identity}",
+          f"M10-R matrix Q9: {matrices[LABELS[0]]}",f"M10-R row sums: {result['records'][k]['matrix_row_sums'][LABELS[0]]}","",
           "| Word | Offset | M10-R | Mono 2.12.8.0 | Mono 3.21.2.50 |","|---:|---:|---:|---:|---:|"]
         for w in words:
             if w["status"]=="changed":
@@ -126,7 +140,10 @@ def main():
             md.append(f"- {l}: selector {s['record_id_pc']}, lookup {s['lookup_target']}, setter {s['setter_target']}, code SHA {st['sha256']}, MMIO literals {','.join(x['value'] for x in st['mmio_literals'])}")
         md += [""]
     md += ["## Interpretation","","0x06 and 0x0A are clean model-specific calibration differences. 0x0C and 0x0D remain invariant controls. No renderer change is justified until field/register semantics are traced and reproduced offline.",""]
-    a.out.parent.mkdir(parents=True,exist_ok=True);a.report.parent.mkdir(parents=True,exist_ok=True)
+    for k,v in result["records"].items():
+        if not v["monochrom_identity_q9"]:raise RuntimeError(f"{k} Monochrom matrix not Q9 identity")
+        if not v["changed_words_exactly_matrix_2_to_10"]:raise RuntimeError(f"{k} changes escape matrix words 2..10")
+        a.out.parent.mkdir(parents=True,exist_ok=True);a.report.parent.mkdir(parents=True,exist_ok=True)
     a.out.write_text(json.dumps(result,indent=2)+"\n");a.report.write_text("\n".join(md))
     print(json.dumps({k:{"changed_words":sum(x["status"]=="changed" for x in v["words"]),"setter_code_equal_all":v["setter_code_equal_all"]} for k,v in result["records"].items()},indent=2))
 if __name__=="__main__":main()
