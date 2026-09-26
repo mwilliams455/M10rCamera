@@ -1,0 +1,389 @@
+name: M10-R RENDER2K MFM1D SOURCEPROXY1B GENERIC
+
+on:
+  push:
+    branches: [m10r-render2k-mfm1d-sourceproxy1b]
+    paths:
+      - '.github/workflows/m10r-render2k-mfm1d-sourceproxy1b.yml'
+      - 'patches/fix-m10r-render2k-mfm1d-sourceproxy1b.py'
+      - 'patches/fix-m10r-render2j-mfm1d-sourceproxy1a.py'
+      - 'android/M10RMfm1DSourceProxy.java'
+      - 'android/M10RMfm1DSourceState.java'
+      - 'patches/fix-m10r-render2i-port1a-mfm1c.py'
+      - 'android/M10RMfm1CProxy.java'
+      - 'patches/fix-m10r-render2g-yatopology1a-live.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate live patch contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile patches/fix-m10r-render2g-yatopology1a-live.py
+          python3 -m py_compile patches/fix-m10r-render2i-port1a-mfm1c.py
+          python3 -m py_compile patches/fix-m10r-render2j-mfm1d-sourceproxy1a.py
+          python3 -m py_compile patches/fix-m10r-render2k-mfm1d-sourceproxy1b.py
+          grep -F 'public static final double FALLBACK_EXPONENT = 1.00;' android/M10RMfm1DSourceProxy.java
+          grep -F 'CAL_FP_A = "03d973b6411b4879"' android/M10RMfm1DSourceProxy.java
+          grep -F 'CAL_FP_B = "f76d00db34b9480f"' android/M10RMfm1DSourceProxy.java
+          grep -F 'SENSOR_INFO_ACTIVE_ARRAY_SIZE' android/M10RMfm1DSourceProxy.java
+          grep -F 'SENSOR_INFO_COLOR_FILTER_ARRANGEMENT' android/M10RMfm1DSourceProxy.java
+          grep -F 'SENSOR_INFO_PHYSICAL_SIZE' android/M10RMfm1DSourceProxy.java
+          grep -F 'SENSOR_INFO_WHITE_LEVEL' android/M10RMfm1DSourceProxy.java
+          grep -F 'SENSOR_REFERENCE_ILLUMINANT1' android/M10RMfm1DSourceProxy.java
+          grep -F 'SENSOR_REFERENCE_ILLUMINANT2' android/M10RMfm1DSourceProxy.java
+          grep -F 'sha256Prefix16' android/M10RMfm1DSourceProxy.java
+          ! grep -E 'XIAOMI|Xiaomi|15U|SUPERTELE|MAIN24' android/M10RMfm1DSourceProxy.java
+          grep -F '"manufacturerModelLensNameMatching":False' patches/fix-m10r-render2k-mfm1d-sourceproxy1b.py
+          grep -F '"mfmDecisionCore":"MFM1B_unchanged"' patches/fix-m10r-render2k-mfm1d-sourceproxy1b.py
+          python3 - <<'PY'
+          import hashlib
+          pairs=[
+            ("aw=4096;ah=3072;cfa=0;swum=13107;fumm=8720;apm=1630;wl=1023;i1=21;i2=17","03d973b6411b4879"),
+            ("aw=4080;ah=3072;cfa=0;swum=9139;fumm=25100;apm=2600;wl=1023;i1=21;i2=17","f76d00db34b9480f"),
+          ]
+          for text,expected in pairs:
+              got=hashlib.sha256(text.encode()).hexdigest()[:16]
+              assert got==expected,(text,got,expected)
+          print("generic fingerprint anchors verified")
+          PY
+          grep -F 'public static final double EXPONENT = 1.90;' android/M10RMfm1CProxy.java
+          grep -F 'CPP_SHA = "3f7b696cdf33e29348d7c0532f658c11819f9b8e54772b55753e357fb6018985"' patches/fix-m10r-render2i-port1a-mfm1c.py
+          grep -F '"rendererNativeChanged": False' patches/fix-m10r-render2i-port1a-mfm1c.py
+          grep -F '"perLensHsmApplied": False' patches/fix-m10r-render2i-port1a-mfm1c.py
+          grep -F '"cobaltRuntimeDependency": False' patches/fix-m10r-render2i-port1a-mfm1c.py
+          grep -F 'VALIDATED_CPP_SHA="3f7b696cdf33e29348d7c0532f658c11819f9b8e54772b55753e357fb6018985"' patches/fix-m10r-render2g-yatopology1a-live.py
+          grep -F '"mfm1bChanged":False' patches/fix-m10r-render2g-yatopology1a-live.py
+          grep -F '"captureExposureChanged":False' patches/fix-m10r-render2g-yatopology1a-live.py
+          grep -F '"whiteBalanceChanged":False' patches/fix-m10r-render2g-yatopology1a-live.py
+          grep -F '"hdrEnabled":False' patches/fix-m10r-render2g-yatopology1a-live.py
+          grep -F '"singleRaw":True' patches/fix-m10r-render2g-yatopology1a-live.py
+
+  build:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Reconstruct exact frozen RENDER1T
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install PyYAML==6.0.2
+          python3 - <<'PY'
+          from pathlib import Path
+          import yaml,subprocess,hashlib
+          w=yaml.safe_load(Path('.github/workflows/m10r-render1r-tonecal1a.yml').read_text())
+          steps=w['jobs']['build-candidate']['steps']
+          for name in ['Reconstruct and verify exact frozen RENDER1Q','Apply bounded native tone-only candidate']:
+              step=next(s for s in steps if s.get('name')==name)
+              subprocess.run(['bash','-euo','pipefail','-c',step['run']],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1s-gamut1a.py','PhotonCamera'],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1t-colorrecon1a.py','PhotonCamera'],check=True)
+          p=Path('PhotonCamera/app/src/main/cpp/m10rRender.cpp')
+          got=hashlib.sha256(p.read_bytes()).hexdigest()
+          assert got=='880ce125413bdf1e0f56fbbdcc56591ba91e794f9b5281488f63353dca724637',got
+          print('RENDER1T native SHA',got)
+          PY
+
+      - name: Reconstruct frozen RENDER2A MFM1B live capture baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 patches/fix-m10r-render1u-ae1a-diagnostic.py PhotonCamera
+          python3 patches/fix-m10r-render1v-ae1b-live.py PhotonCamera
+          python3 patches/fix-m10r-render1w-ae1b-freeze1.py PhotonCamera
+          python3 patches/fix-m10r-render1x-meter1a-livegrid.py PhotonCamera
+          python3 patches/fix-m10r-render1y-meter1b-gridmap1a.py PhotonCamera
+          python3 patches/fix-m10r-render1z-mfm1a-live.py PhotonCamera
+          python3 patches/fix-m10r-render2a-mfm1b-live.py PhotonCamera
+          grep -F "versionName '0.97-m10r2a-mfm1b'" PhotonCamera/app/build.gradle
+          grep -F '"m10rMfm1B"' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p=Path('PhotonCamera/app/src/main/cpp/m10rRender.cpp')
+          got=hashlib.sha256(p.read_bytes()).hexdigest()
+          assert got=='880ce125413bdf1e0f56fbbdcc56591ba91e794f9b5281488f63353dca724637',got
+          print('MFM1B preserved native RENDER1T SHA',got)
+          PY
+
+      - name: Apply validated YA_TOPOLOGY1A live renderer
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 patches/fix-m10r-render2g-yatopology1a-live.py PhotonCamera
+          grep -F "versionName '0.97-m10r2g-yatopology1a'" PhotonCamera/app/build.gradle
+          grep -F 'RENDER2G_YATOPOLOGY1A_GAMUT1A_TONECAL1A_MFM1B_EDGE0A' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          grep -F '"m10rMfm1B"' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          grep -F '"YA_TOPOLOGY1A"' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          grep -F '.put("enabled", false)' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          cpp=Path('PhotonCamera/app/src/main/cpp/m10rRender.cpp')
+          got=hashlib.sha256(cpp.read_bytes()).hexdigest()
+          expected='3f7b696cdf33e29348d7c0532f658c11819f9b8e54772b55753e357fb6018985'
+          assert got==expected,(got,expected)
+          s=cpp.read_text()
+          assert 'const double ytc = (1024.0*lr + 2661.0*lg + 410.0*lb) / 4096.0;' in s
+          assert 'const int dr = dg(xr, dgt, cnt);' in s
+          assert 'const int dgG = dg(xg, dgt, cnt);' in s
+          assert 'const int db = dg(xb, dgt, cnt);' in s
+          assert '0.35 * (yRatio - 1.0)' not in s
+          assert 'm10r_colorrecon1a::apply(' not in s
+          assert 'm10r_outputgamut1a::apply' in s
+          assert 'm10r_tonecal1a::apply' in s
+          proof=json.loads(Path('PhotonCamera/M10R_RENDER2G_YATOPOLOGY1A_PROVENANCE.json').read_text())
+          assert proof['candidateCppSha256']==expected
+          assert proof['publicReferenceValidationRunId']=='36244571736'
+          assert proof['mfm1bChanged'] is False
+          assert proof['captureExposureChanged'] is False
+          assert proof['colorRecon1AApplied'] is False
+          assert proof['empiricalChromaKApplied'] is False
+          print('Validated live native candidate SHA',got)
+          PY
+
+      - name: Apply PORT1A physical-source portability and MFM1C live RAW proxy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 patches/fix-m10r-render2i-port1a-mfm1c.py PhotonCamera
+          grep -F "versionName '0.97-m10r2i-port1a-mfm1c'" PhotonCamera/app/build.gradle
+          R=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          I=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/ImageSaver.java
+          D=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/DefaultSaver.java
+          X=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/parameters/IsoExpoSelector.java
+          grep -F 'RENDER2G_YATOPOLOGY1A_GAMUT1A_TONECAL1A_MFM1C_EDGE0A' "$R"
+          grep -F '"m10rMfm1C"' "$R"
+          grep -F '"cfaAuthority", "physical_camera2_characteristics"' "$R"
+          grep -F '"perLensHsmApplied", false' "$R"
+          grep -F '"cobaltHsmApplied", false' "$R"
+          grep -F '"targetRendererLensIndependent", true' "$R"
+          grep -F 'saveSingleRawM10RPhysicalCfa' "$I"
+          grep -F 'saveSingleRawM10RPhysicalCfa' "$D"
+          grep -F 'M10RMfm1CProxy.transform(meterSnapshot.linearGrid)' "$X"
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          cpp=Path('PhotonCamera/app/src/main/cpp/m10rRender.cpp')
+          got=hashlib.sha256(cpp.read_bytes()).hexdigest()
+          expected='3f7b696cdf33e29348d7c0532f658c11819f9b8e54772b55753e357fb6018985'
+          assert got==expected,(got,expected)
+          p=json.loads(Path('PhotonCamera/M10R_RENDER2I_PORT1A_MFM1C_PROVENANCE.json').read_text())
+          assert p['rendererNativeSha256']==expected
+          assert p['rendererNativeChanged'] is False
+          assert p['render2gPixelsChanged'] is False
+          assert p['physicalCamera2CfaAuthority'] is True
+          assert p['dngPhysicalCfaAuthority'] is True
+          assert p['supportedConventionalBayer']==['RGGB','GRBG','GBRG','BGGR']
+          assert p['perLensPhotographicTuningApplied'] is False
+          assert p['perLensHsmApplied'] is False
+          assert p['cobaltRuntimeDependency'] is False
+          assert p['liveRawProxyExponent']==1.90
+          assert p['rawCounterfactualTransformApplied'] is False
+          print('PORT1A/MFM1C preserved validated RENDER2G native SHA',got)
+          PY
+
+      - name: Apply MFM1D physical-sensor source proxy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 patches/fix-m10r-render2j-mfm1d-sourceproxy1a.py PhotonCamera
+          grep -F "versionName '0.97-m10r2j-mfm1d-sourceproxy1a'" PhotonCamera/app/build.gradle
+          R=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          X=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/parameters/IsoExpoSelector.java
+          grep -F 'RENDER2G_YATOPOLOGY1A_GAMUT1A_TONECAL1A_MFM1D_EDGE0A' "$R"
+          grep -F '"m10rMfm1D"' "$R"
+          grep -F 'MFM1D_SOURCEPROXY1A' "$R"
+          grep -F 'sourceProxyProfileId' "$R"
+          grep -F 'sourceNormalizationPerPhysicalSensor' "$R"
+          grep -F 'perLensLeicaMeterTuningApplied", false' "$R"
+          grep -F 'M10RMfm1DSourceProxy.resolve(sensor.getWidth(), focal, aperture, sourceCfa)' "$X"
+          grep -F 'M10RMfm1B.evaluate(mfm1dRawProxyGrid)' "$X"
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          cpp=Path('PhotonCamera/app/src/main/cpp/m10rRender.cpp')
+          got=hashlib.sha256(cpp.read_bytes()).hexdigest()
+          expected='3f7b696cdf33e29348d7c0532f658c11819f9b8e54772b55753e357fb6018985'
+          assert got==expected,(got,expected)
+          p=json.loads(Path('PhotonCamera/M10R_RENDER2J_MFM1D_SOURCEPROXY1A_PROVENANCE.json').read_text())
+          assert p['rendererNativeSha256']==expected
+          assert p['rendererNativeChanged'] is False
+          assert p['render2gPixelsChanged'] is False
+          assert p['port1aChanged'] is False
+          assert p['mfmDecisionCore']=='MFM1B_unchanged'
+          assert p['sourceNormalizationPerPhysicalSensor'] is True
+          assert p['profiles']['XIAOMI15U_MAIN24']['exponent']==1.90
+          assert p['profiles']['XIAOMI15U_SUPERTELE100']['exponent']==1.00
+          assert p['unknownPhysicalSensorExponent']==1.00
+          assert p['perLensLeicaMeterTuningApplied'] is False
+          assert p['perLensPhotographicTuningApplied'] is False
+          print('MFM1D preserved validated RENDER2G native SHA',got)
+          PY
+
+      - name: Replace source labels with generic physical-camera fingerprints
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 patches/fix-m10r-render2k-mfm1d-sourceproxy1b.py PhotonCamera
+          grep -F "versionName '0.97-m10r2k-mfm1d-sourceproxy1b'" PhotonCamera/app/build.gradle
+          R=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          X=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/parameters/IsoExpoSelector.java
+          P=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RMfm1DSourceProxy.java
+          S=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RMfm1DSourceState.java
+          grep -F 'MFM1D_SOURCEPROXY1B_GENERIC_FINGERPRINT' "$R"
+          grep -F 'sourceProxyPhysicalFingerprint' "$R"
+          grep -F 'sourceProxyCanonicalDescriptor' "$R"
+          grep -F 'sourceProxyCalibrationEvidenceId' "$R"
+          grep -F 'generic_Camera2_RAW_characteristics_fingerprint_not_brand_model_lens_name' "$R"
+          grep -F 'M10RMfm1DSourceProxy.resolve(characteristics, focal, aperture)' "$X"
+          grep -F 'CAL_FP_A = "03d973b6411b4879"' "$P"
+          grep -F 'CAL_FP_B = "f76d00db34b9480f"' "$P"
+          ! grep -E 'XIAOMI|Xiaomi|15U|SUPERTELE|MAIN24' "$P" "$S" "$X" "$R"
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          cpp=Path('PhotonCamera/app/src/main/cpp/m10rRender.cpp')
+          got=hashlib.sha256(cpp.read_bytes()).hexdigest()
+          expected='3f7b696cdf33e29348d7c0532f658c11819f9b8e54772b55753e357fb6018985'
+          assert got==expected,(got,expected)
+          p=json.loads(Path('PhotonCamera/M10R_RENDER2K_MFM1D_SOURCEPROXY1B_PROVENANCE.json').read_text())
+          assert p['rendererNativeSha256']==expected
+          assert p['rendererNativeChanged'] is False
+          assert p['render2gPixelsChanged'] is False
+          assert p['port1aChanged'] is False
+          assert p['mfmDecisionCore']=='MFM1B_unchanged'
+          assert p['manufacturerModelLensNameMatching'] is False
+          assert p['sourceNormalizationPerPhysicalSensor'] is True
+          assert p['calibrationRegistry']['03d973b6411b4879']['exponent']==1.90
+          assert p['calibrationRegistry']['f76d00db34b9480f']['exponent']==1.00
+          assert p['unknownPhysicalSensorExponent']==1.00
+          assert p['perLensLeicaMeterTuningApplied'] is False
+          assert p['perLensPhotographicTuningApplied'] is False
+          print('SOURCEPROXY1B preserved validated RENDER2G native SHA',got)
+          PY
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+
+      - name: Install Android build components
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'cmake;3.22.1' 'ndk;27.0.12077973'
+
+      - name: Build APK
+        shell: bash
+        run: |
+          set -o pipefail
+          chmod +x PhotonCamera/gradlew
+          cd PhotonCamera
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_RENDER2K_MFM1D_SOURCEPROXY1B_GRADLE.log"
+
+      - name: Package and verify candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p delivery
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,shutil,zipfile
+          apks=list(Path('PhotonCamera/app/build/outputs/apk/debug').glob('*.apk'))
+          assert len(apks)==1,apks
+          apk=apks[0]
+          z=zipfile.ZipFile(apk)
+          assert z.testzip() is None
+          dex=b''.join(z.read(n) for n in z.namelist() if n.endswith('.dex'))
+          for marker in [
+              b'YA_TOPOLOGY1A',
+              b'RENDER2G_YATOPOLOGY1A_GAMUT1A_TONECAL1A_MFM1D_EDGE0A',
+              b'm10rMfm1D',
+              b'MFM1D_SOURCEPROXY1B_GENERIC_FINGERPRINT',
+              b'sourceProxyPhysicalFingerprint',
+              b'03d973b6411b4879',
+              b'f76d00db34b9480f',
+              b'M10R_PORT1A',
+              b'publicReferenceValidated'
+          ]:
+              assert marker in dex,marker
+          out=Path('delivery/M10RCam_RENDER2K_MFM1D_SOURCEPROXY1B_TEST.apk')
+          shutil.copy2(apk,out)
+          src=Path('PhotonCamera/M10R_RENDER2G_YATOPOLOGY1A_PROVENANCE.json')
+          shutil.copy2(src,'delivery/')
+          port=Path('PhotonCamera/M10R_RENDER2I_PORT1A_MFM1C_PROVENANCE.json')
+          shutil.copy2(port,'delivery/')
+          generic=Path('PhotonCamera/M10R_RENDER2K_MFM1D_SOURCEPROXY1B_PROVENANCE.json')
+          shutil.copy2(generic,'delivery/')
+          p={
+            'schema':'M10R_RENDER2K_MFM1D_SOURCEPROXY1B_APK_V1',
+            'source_commit':os.environ['GITHUB_SHA'],
+            'run_id':os.environ['GITHUB_RUN_ID'],
+            'apk_bytes':out.stat().st_size,
+            'apk_sha256':hashlib.sha256(out.read_bytes()).hexdigest(),
+            'native_candidate_sha256':'3f7b696cdf33e29348d7c0532f658c11819f9b8e54772b55753e357fb6018985',
+            'public_reference_validation_run_id':'36244571736',
+            'public_reference_fresh_holdout':{
+              'render1s':{'L_mae':0.2867915787,'ab_error':4.5488179506,'DE76':4.5730922858},
+              'render1t':{'L_mae':0.3332802879,'ab_error':2.0804842854,'DE76':2.1321113123},
+              'ya_topology':{'L_mae':0.2645223106,'ab_error':1.2864271885,'DE76':1.3337094181}
+            },
+            'mfm1d_sourceproxy1b_generic_fingerprint':True,
+            'manufacturer_model_lens_name_matching':False,
+            'calibration_fingerprint_a_exponent':1.90,
+            'calibration_fingerprint_b_exponent':1.00,
+            'unknown_physical_sensor_exponent':1.00,
+            'mfm1b_decision_core_unchanged':True,
+            'physical_camera2_cfa_authority':True,
+            'dng_physical_cfa_authority':True,
+            'per_lens_hsm_applied':False,
+            'cobalt_runtime_dependency':False,
+            'capture_exposure_changed_by_mfm1d':True,
+            'white_balance_changed':False,
+            'source_processing_changed':False,
+            'gamut1a_unchanged':True,
+            'tonecal1a_unchanged':True,
+            'colorrecon_bypassed':True,
+            'empirical_chroma_k_removed':True,
+            'single_raw':True,
+            'hdr_enabled':False,
+            'exact_asic_gamma_bank_routing_claimed':False,
+            'device_tested':False,
+            'production_promoted':False
+          }
+          Path('delivery/APK_PROVENANCE.json').write_text(json.dumps(p,indent=2)+'\n')
+          print(json.dumps(p,indent=2))
+          PY
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose delivery/*.apk | tee delivery/signature_verification.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-RENDER2K-MFM1D-SOURCEPROXY1B-BUILDLOG
+          path: M10R_RENDER2K_MFM1D_SOURCEPROXY1B_GRADLE.log
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10RCam-RENDER2K-MFM1D-SOURCEPROXY1B-TEST-APK
+          path: delivery/
+          if-no-files-found: error
+          retention-days: 90
