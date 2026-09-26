@@ -1,0 +1,300 @@
+name: M10-R RENDER2I MFM1C RAWPROXY1A
+
+on:
+  push:
+    branches: [m10r-render2i-mfm1c-rawproxy1a]
+    paths:
+      - '.github/workflows/m10r-render2i-mfm1c-rawproxy1a.yml'
+      - 'patches/fix-m10r-render2i-mfm1c-rawproxy1a.py'
+      - 'android/M10RRawProxyMeter1A.java'
+      - 'patches/fix-m10r-render2h-port1a.py'
+      - 'patches/fix-m10r-render2g-yatopology1a-live.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate live patch contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile patches/fix-m10r-render2g-yatopology1a-live.py
+          python3 -m py_compile patches/fix-m10r-render2h-port1a.py
+          python3 -m py_compile patches/fix-m10r-render2i-mfm1c-rawproxy1a.py
+          grep -F 'VALIDATED_CPP_SHA="3f7b696cdf33e29348d7c0532f658c11819f9b8e54772b55753e357fb6018985"' patches/fix-m10r-render2g-yatopology1a-live.py
+          grep -F '"mfm1bChanged":False' patches/fix-m10r-render2g-yatopology1a-live.py
+          grep -F '"captureExposureChanged":False' patches/fix-m10r-render2g-yatopology1a-live.py
+          grep -F '"whiteBalanceChanged":False' patches/fix-m10r-render2g-yatopology1a-live.py
+          grep -F '"hdrEnabled":False' patches/fix-m10r-render2g-yatopology1a-live.py
+          grep -F '"singleRaw":True' patches/fix-m10r-render2g-yatopology1a-live.py
+
+  build:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Reconstruct exact frozen RENDER1T
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install PyYAML==6.0.2
+          python3 - <<'PY'
+          from pathlib import Path
+          import yaml,subprocess,hashlib
+          w=yaml.safe_load(Path('.github/workflows/m10r-render1r-tonecal1a.yml').read_text())
+          steps=w['jobs']['build-candidate']['steps']
+          for name in ['Reconstruct and verify exact frozen RENDER1Q','Apply bounded native tone-only candidate']:
+              step=next(s for s in steps if s.get('name')==name)
+              subprocess.run(['bash','-euo','pipefail','-c',step['run']],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1s-gamut1a.py','PhotonCamera'],check=True)
+          subprocess.run(['python3','patches/fix-m10r-render1t-colorrecon1a.py','PhotonCamera'],check=True)
+          p=Path('PhotonCamera/app/src/main/cpp/m10rRender.cpp')
+          got=hashlib.sha256(p.read_bytes()).hexdigest()
+          assert got=='880ce125413bdf1e0f56fbbdcc56591ba91e794f9b5281488f63353dca724637',got
+          print('RENDER1T native SHA',got)
+          PY
+
+      - name: Reconstruct frozen RENDER2A MFM1B live capture baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 patches/fix-m10r-render1u-ae1a-diagnostic.py PhotonCamera
+          python3 patches/fix-m10r-render1v-ae1b-live.py PhotonCamera
+          python3 patches/fix-m10r-render1w-ae1b-freeze1.py PhotonCamera
+          python3 patches/fix-m10r-render1x-meter1a-livegrid.py PhotonCamera
+          python3 patches/fix-m10r-render1y-meter1b-gridmap1a.py PhotonCamera
+          python3 patches/fix-m10r-render1z-mfm1a-live.py PhotonCamera
+          python3 patches/fix-m10r-render2a-mfm1b-live.py PhotonCamera
+          grep -F "versionName '0.97-m10r2a-mfm1b'" PhotonCamera/app/build.gradle
+          grep -F '"m10rMfm1B"' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p=Path('PhotonCamera/app/src/main/cpp/m10rRender.cpp')
+          got=hashlib.sha256(p.read_bytes()).hexdigest()
+          assert got=='880ce125413bdf1e0f56fbbdcc56591ba91e794f9b5281488f63353dca724637',got
+          print('MFM1B preserved native RENDER1T SHA',got)
+          PY
+
+      - name: Apply validated YA_TOPOLOGY1A live renderer
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 patches/fix-m10r-render2g-yatopology1a-live.py PhotonCamera
+          grep -F "versionName '0.97-m10r2g-yatopology1a'" PhotonCamera/app/build.gradle
+          grep -F 'RENDER2G_YATOPOLOGY1A_GAMUT1A_TONECAL1A_MFM1B_EDGE0A' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          grep -F '"m10rMfm1B"' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          grep -F '"YA_TOPOLOGY1A"' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          grep -F '.put("enabled", false)' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          cpp=Path('PhotonCamera/app/src/main/cpp/m10rRender.cpp')
+          got=hashlib.sha256(cpp.read_bytes()).hexdigest()
+          expected='3f7b696cdf33e29348d7c0532f658c11819f9b8e54772b55753e357fb6018985'
+          assert got==expected,(got,expected)
+          s=cpp.read_text()
+          assert 'const double ytc = (1024.0*lr + 2661.0*lg + 410.0*lb) / 4096.0;' in s
+          assert 'const int dr = dg(xr, dgt, cnt);' in s
+          assert 'const int dgG = dg(xg, dgt, cnt);' in s
+          assert 'const int db = dg(xb, dgt, cnt);' in s
+          assert '0.35 * (yRatio - 1.0)' not in s
+          assert 'm10r_colorrecon1a::apply(' not in s
+          assert 'm10r_outputgamut1a::apply' in s
+          assert 'm10r_tonecal1a::apply' in s
+          proof=json.loads(Path('PhotonCamera/M10R_RENDER2G_YATOPOLOGY1A_PROVENANCE.json').read_text())
+          assert proof['candidateCppSha256']==expected
+          assert proof['publicReferenceValidationRunId']=='36244571736'
+          assert proof['mfm1bChanged'] is False
+          assert proof['captureExposureChanged'] is False
+          assert proof['colorRecon1AApplied'] is False
+          assert proof['empiricalChromaKApplied'] is False
+          print('Validated live native candidate SHA',got)
+          PY
+
+      - name: Apply PORT1A physical-source portability
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 patches/fix-m10r-render2h-port1a.py PhotonCamera
+          grep -F "versionName '0.97-m10r2h-port1a'" PhotonCamera/app/build.gradle
+          R=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          grep -F 'cfaAuthority", "active_physical_Camera2_characteristics"' "$R"
+          grep -F 'cfaAwareGreenSelection", true' "$R"
+          grep -F 'targetRendererLensIndependent", true' "$R"
+          grep -F 'hsmRuntimeDependency", false' "$R"
+          grep -F 'saveSingleRawM10RPhysicalCfa' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/ImageSaver.java
+          grep -F 'saveSingleRawM10RPhysicalCfa' PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/DefaultSaver.java
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          cpp=Path('PhotonCamera/app/src/main/cpp/m10rRender.cpp')
+          expected='3f7b696cdf33e29348d7c0532f658c11819f9b8e54772b55753e357fb6018985'
+          got=hashlib.sha256(cpp.read_bytes()).hexdigest()
+          assert got==expected,(got,expected)
+          p=json.loads(Path('PhotonCamera/M10R_RENDER2H_PORT1A_PROVENANCE.json').read_text())
+          assert p['nativeRendererChanged'] is False
+          assert p['render2gColorToneGamutChanged'] is False
+          assert p['mfm1bFormulaChanged'] is False
+          assert p['cobaltRuntimeDependency'] is False
+          assert p['hsmRuntimeDependency'] is False
+          assert set(p['supportedConventionalBayer'])=={'RGGB','GRBG','GBRG','BGGR'}
+          assert p['rawMeterMainRggbSampleCoordinatesChanged'] is False
+          print('PORT1A retained RENDER2G native SHA',got)
+          PY
+
+      - name: Apply MFM1C RAWPROXY1A diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 patches/fix-m10r-render2i-mfm1c-rawproxy1a.py PhotonCamera
+          grep -F "versionName '0.97-m10r2i-mfm1c-rawproxy1a'" PhotonCamera/app/build.gradle
+          C=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/capture/CaptureController.java
+          I=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/processing/ImageSaver.java
+          R=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+          S=PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RRawProxyMeter1A.java
+          grep -F 'maybeM10rRawProxyMeter(result)' "$C"
+          grep -F 'M10R_RAWPROXY1A' "$C"
+          grep -F 'M10RRawProxyMeter1A.tryConsume' "$I"
+          grep -F 'm10rRawProxy1A' "$R"
+          grep -F 'activeCaptureUsesRawProxy", false' "$R"
+          grep -F 'MIN_INTERVAL_NS = 800_000_000L' "$S"
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          cpp=Path('PhotonCamera/app/src/main/cpp/m10rRender.cpp')
+          expected='3f7b696cdf33e29348d7c0532f658c11819f9b8e54772b55753e357fb6018985'
+          got=hashlib.sha256(cpp.read_bytes()).hexdigest()
+          assert got==expected,(got,expected)
+          p=json.loads(Path('PhotonCamera/M10R_RENDER2I_MFM1C_RAWPROXY1A_PROVENANCE.json').read_text())
+          assert p['diagnosticOnly'] is True
+          assert p['activeCaptureUsesRawProxy'] is False
+          assert p['mfm1bFormulaChanged'] is False
+          assert p['captureExposureChangedByRawProxy'] is False
+          assert p['probeGrid']=='16x22_semantic_green_pre_lens_shading'
+          print('RAWPROXY1A retained RENDER2G native SHA',got)
+          PY
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+
+      - name: Install Android build components
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'cmake;3.22.1' 'ndk;27.0.12077973'
+
+      - name: Build APK
+        shell: bash
+        run: |
+          set -o pipefail
+          chmod +x PhotonCamera/gradlew
+          cd PhotonCamera
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/M10R_RENDER2I_MFM1C_RAWPROXY1A_GRADLE.log"
+
+      - name: Package and verify candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p delivery
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,shutil,zipfile
+          apks=list(Path('PhotonCamera/app/build/outputs/apk/debug').glob('*.apk'))
+          assert len(apks)==1,apks
+          apk=apks[0]
+          z=zipfile.ZipFile(apk)
+          assert z.testzip() is None
+          dex=b''.join(z.read(n) for n in z.namelist() if n.endswith('.dex'))
+          for marker in [
+              b'YA_TOPOLOGY1A',
+              b'RENDER2G_YATOPOLOGY1A_GAMUT1A_TONECAL1A_MFM1B_EDGE0A',
+              b'm10rMfm1B',
+              b'publicReferenceValidated',
+              b'active_physical_Camera2_characteristics',
+              b'two_semantic_green_CFA_sites_per_8x8_tile',
+              b'hsmRuntimeDependency',
+              b'm10rRawProxy1A',
+              b'activeCaptureUsesRawProxy'
+          ]:
+              assert marker in dex,marker
+          out=Path('delivery/M10RCam_RENDER2I_MFM1C_RAWPROXY1A_TEST.apk')
+          shutil.copy2(apk,out)
+          src=Path('PhotonCamera/M10R_RENDER2G_YATOPOLOGY1A_PROVENANCE.json')
+          shutil.copy2(src,'delivery/')
+          port=Path('PhotonCamera/M10R_RENDER2H_PORT1A_PROVENANCE.json')
+          shutil.copy2(port,'delivery/')
+          rawproxy=Path('PhotonCamera/M10R_RENDER2I_MFM1C_RAWPROXY1A_PROVENANCE.json')
+          shutil.copy2(rawproxy,'delivery/')
+          p={
+            'schema':'M10R_RENDER2I_MFM1C_RAWPROXY1A_APK_V1',
+            'source_commit':os.environ['GITHUB_SHA'],
+            'run_id':os.environ['GITHUB_RUN_ID'],
+            'apk_bytes':out.stat().st_size,
+            'apk_sha256':hashlib.sha256(out.read_bytes()).hexdigest(),
+            'native_candidate_sha256':'3f7b696cdf33e29348d7c0532f658c11819f9b8e54772b55753e357fb6018985',
+            'public_reference_validation_run_id':'36244571736',
+            'public_reference_fresh_holdout':{
+              'render1s':{'L_mae':0.2867915787,'ab_error':4.5488179506,'DE76':4.5730922858},
+              'render1t':{'L_mae':0.3332802879,'ab_error':2.0804842854,'DE76':2.1321113123},
+              'ya_topology':{'L_mae':0.2645223106,'ab_error':1.2864271885,'DE76':1.3337094181}
+            },
+            'mfm1b_unchanged':True,
+            'capture_exposure_changed':False,
+            'white_balance_changed':False,
+            'source_processing_changed':False,
+            'physical_source_portability_layer':'PORT1A',
+            'mfm1c_probe':'RAWPROXY1A',
+            'rawproxy_diagnostic_only':True,
+            'active_capture_uses_rawproxy':False,
+            'rawproxy_probe_domain':'preview_time_RAW_SENSOR_semantic_green_pre_lens_shading',
+            'rawproxy_parity_target_ev':0.15,
+            'raw_meter_cfa_sampling':'semantic_green_all_4_conventional_Bayer',
+            'dng_cfa_authority':'active_physical_Camera2_characteristics',
+            'cobalt_runtime_dependency':False,
+            'hsm_runtime_dependency':False,
+            'per_lens_target_look':False,
+            'gamut1a_unchanged':True,
+            'tonecal1a_unchanged':True,
+            'colorrecon_bypassed':True,
+            'empirical_chroma_k_removed':True,
+            'single_raw':True,
+            'hdr_enabled':False,
+            'exact_asic_gamma_bank_routing_claimed':False,
+            'device_tested':False,
+            'production_promoted':False
+          }
+          Path('delivery/APK_PROVENANCE.json').write_text(json.dumps(p,indent=2)+'\n')
+          print(json.dumps(p,indent=2))
+          PY
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose delivery/*.apk | tee delivery/signature_verification.txt
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-RENDER2I-MFM1C-RAWPROXY1A-BUILDLOG
+          path: M10R_RENDER2I_MFM1C_RAWPROXY1A_GRADLE.log
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10RCam-RENDER2I-MFM1C-RAWPROXY1A-TEST-APK
+          path: delivery/
+          if-no-files-found: error
+          retention-days: 90
