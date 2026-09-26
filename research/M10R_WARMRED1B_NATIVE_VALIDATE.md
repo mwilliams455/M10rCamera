@@ -1,0 +1,24 @@
+# M10-R WARMRED1B NATIVE VALIDATION
+
+Status: **PASS_WARMRED1B_NATIVE**
+Native/Python max code error: **0**
+
+## target_native
+
+- RENDER1T: {'DE76_mean': 2.422881299008279, 'L_mae': 0.38231308775026646, 'ab_error_mean': 2.364417273937525}
+- WARMRED1B: {'DE76_mean': 2.391068369256238, 'L_mae': 0.3732304840452253, 'ab_error_mean': 2.3357898112437367}
+- DE ratio: 0.9868697943374021
+- ab ratio: 0.9878923813451446
+- L delta: -0.009082603705041159
+- wins/ties: 9/10
+- mean active fraction: 0.007852143172083648
+
+## white_normalized_control
+
+- RENDER1T: {'DE76_mean': 2.495683256926891, 'L_mae': 1.2066723882821555, 'ab_error_mean': 2.055241202940311}
+- WARMRED1B: {'DE76_mean': 2.4657798392447283, 'L_mae': 1.2056895649697321, 'ab_error_mean': 2.0250577171844912}
+- DE ratio: 0.9880179435434507
+- ab ratio: 0.9853138961438502
+- L delta: -0.0009828233124233865
+- wins/ties: 8/10
+- mean active fraction: 0.008772872574955909
