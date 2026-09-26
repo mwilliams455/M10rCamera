@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse,csv,struct,json
 from pathlib import Path
 from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
-from capstone.arm import ARM_OP_MEM,ARM_OP_REG,ARM_REG_PC
+from capstone.arm import ARM_OP_MEM,ARM_OP_REG,ARM_OP_IMM,ARM_REG_PC
 
 PAGE=0x20021100
 DIAG=b"Im_B2Y_Ctrl_Chroma_Suppress error."
@@ -34,14 +34,27 @@ def func_start(data,ref):
         if ins and ins.mnemonic=="push" and "lr" in ins.op_str: best=off
     return best
 
-def disfunc(data,start,maxlen=0x1000):
-    m=md();out=[];off=start
-    while off<min(len(data),start+maxlen):
+def disfunc(data,start,maxlen=0x1800):
+    m=md();out=[];off=start;seen=set();limit=min(len(data),start+maxlen)
+    while off<limit and off not in seen:
+        seen.add(off)
         ins=next(m.disasm(data[off:off+4],off,count=1),None)
         if ins is None: break
-        out.append(ins);off+=ins.size
+        out.append(ins)
         if len(out)>4 and ((ins.mnemonic=="pop" and "pc" in ins.op_str) or (ins.mnemonic=="bx" and ins.op_str.strip()=="lr")):
             break
+        # Follow unconditional branch-over-literal-pool jumps on the main path.
+        if ins.mnemonic=="b":
+            try:
+                ops=list(ins.operands)
+                if ops and ops[0].type==ARM_OP_IMM:
+                    target=int(ops[0].imm)
+                    if start<=target<limit:
+                        off=target
+                        continue
+            except Exception:
+                pass
+        off+=ins.size
     return out
 
 def fmt_ins(ins):
