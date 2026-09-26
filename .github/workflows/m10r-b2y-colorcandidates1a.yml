@@ -1,0 +1,110 @@
+name: M10-R B2Y COLOR CANDIDATES1A
+
+on:
+  push:
+    branches: [m10r-b2y-colorcandidates1a]
+    paths:
+      - '.github/workflows/m10r-b2y-colorcandidates1a.yml'
+      - 'tools/m10r_b2y_colorcandidates1a.py'
+      - 'tools/m10r_b2y_assets.py'
+      - 'tools/m10r_sections.py'
+  workflow_dispatch:
+
+permissions: {contents: write}
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build verified M10-family unpacker
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker);z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+
+      - name: Download validated firmware set
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/fw colorcandidates1a_results
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R-20.20.47.37-Customer.FW' -o /tmp/fw/M10R-20.20.47.37.FW
+          curl -L --fail --retry 3 --retry-delay 2 'https://leica-camera.com/sites/default/files/M10-M-2.12.8.0-SYSTEM_0.FW' -o /tmp/fw/M10M-2.12.8.0.FW
+          curl -L --fail --retry 3 --retry-delay 2 'https://leica-camera.com/sites/default/files/M10-M-3.21.2.50-Customer_0.FW' -o /tmp/fw/M10M-3.21.2.50.FW
+          sha256sum /tmp/fw/* | tee colorcandidates1a_results/firmware_sha256.txt
+
+      - name: Decode and audit candidate records
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARGS=()
+          for SPEC in \
+            'M10R-20.20.47.37|/tmp/fw/M10R-20.20.47.37.FW' \
+            'M10M-2.12.8.0|/tmp/fw/M10M-2.12.8.0.FW' \
+            'M10M-3.21.2.50|/tmp/fw/M10M-3.21.2.50.FW'
+          do
+            LABEL="${SPEC%%|*}"; FW="${SPEC#*|}"
+            cp "$FW" /tmp/M10-R.FW
+            rm -f /tmp/M10R_unpacked.bin
+            /tmp/unpack >"/tmp/unpack_${LABEL}.txt"
+            SEC="/tmp/sec_${LABEL}"; rm -rf "$SEC"
+            python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin "$SEC" >"/tmp/sections_${LABEL}.txt"
+            DISCOVERY="$(python3 - "$SEC" <<'PY'
+          import csv,sys
+          from pathlib import Path
+          secdir=Path(sys.argv[1]);sys.path.insert(0,str(Path.cwd()/'tools'))
+          import m10r_b2y_assets as mod
+          rows=list(csv.DictReader((secdir/'sections.csv').open()))
+          named=[secdir/r['file'] for r in rows if 'data/calib/b2y.bin' in (r['name']+' '+r['file']).lower()]
+          if len(named)==1:
+              print(str(named[0])+'|named_data_calib_B2Y');raise SystemExit
+          hits=[]
+          for r in rows:
+              s=(r['name']+' '+r['file']).lower()
+              if 'calibration data' not in s and 'calib' not in s:continue
+              p=secdir/r['file']
+              try:recs=mod.parse_records(p.read_bytes())
+              except Exception:continue
+              if len([x for x in recs if x.record_id==0x0c and x.size==60])==1 and len([x for x in recs if x.record_id==0x0d and x.size==24])==1:
+                  hits.append(p)
+          if len(hits)!=1:raise SystemExit(f'B2Y identification failed: {hits}')
+          print(str(hits[0])+'|structural_record0C0D_ABI')
+          PY
+            )"
+            B2Y="${DISCOVERY%%|*}"; IDENT="${DISCOVERY#*|}"
+            FW_SHA="$(sha256sum "$FW"|awk '{print $1}')"
+            DEC_SHA="$(sha256sum /tmp/M10R_unpacked.bin|awk '{print $1}')"
+            ARGS+=(--item "${LABEL}|${B2Y}|${FW_SHA}|${DEC_SHA}|${IDENT}")
+          done
+          python3 tools/m10r_b2y_colorcandidates1a.py "${ARGS[@]}" \
+            --out colorcandidates1a_results/M10R_B2Y_COLORCANDIDATES1A.json \
+            --report colorcandidates1a_results/M10R_B2Y_COLORCANDIDATES1A.md \
+            | tee colorcandidates1a_results/stdout.txt
+          cat colorcandidates1a_results/M10R_B2Y_COLORCANDIDATES1A.md
+
+      - name: Persist
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/generated
+          cp colorcandidates1a_results/M10R_B2Y_COLORCANDIDATES1A.* research/generated/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/generated/M10R_B2Y_COLORCANDIDATES1A.*
+          git commit -m "Research freeze combined B2Y color candidates1a" || exit 0
+          git push origin HEAD:m10r-b2y-colorcandidates1a
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-B2Y-COLOR-CANDIDATES1A
+          path: colorcandidates1a_results/
+          retention-days: 90
