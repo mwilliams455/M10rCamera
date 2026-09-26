@@ -1,0 +1,98 @@
+name: M10-R RENDER2C POSTYC1A REFERENCE1A
+on:
+  push:
+    branches: [m10r-render2c-reference1a]
+    paths:
+      - '.github/workflows/m10r-render2c-reference1a.yml'
+      - 'tools/m10r_postyc1a_validate.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install fixed validation dependencies
+        run: |
+          python3 -m pip install numpy==2.2.6 pillow==11.3.0 opencv-python-headless==4.13.0.92 rawpy==0.25.1
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl
+      - uses: actions/download-artifact@v4
+        with:
+          name: M10R-PHOTOAUDIT1A-RESEARCH-INPUTS
+          run-id: 35518775600
+          github-token: ${{ github.token }}
+          path: inputs
+      - name: Retrieve unchanged public reference pairs
+        run: python3 tools/m10r_tonecal1a_fetch_refs.py inputs
+      - name: Run POSTYC1A reference regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/m10r_postyc1a_validate.py
+          python3 tools/m10r_postyc1a_validate.py inputs validation
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('validation/results.json').read_text())
+          print('STATUS',d.get('status'))
+          print('GATE',d.get('apk_gate_passed'))
+          assert d['schema']=='POSTYC1A_REFERENCE_VALIDATION_V1'
+          assert d['apk_gate_passed'] is True
+          assert d['status']=='PASS_POSTYC1A_REFERENCE_CANDIDATE'
+          PY
+      - name: Summarize S vs RENDER1T vs POSTYC1A
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,statistics
+          from pathlib import Path
+          d=json.loads(Path('validation/results.json').read_text())
+          out=['# RENDER2C POSTYC1A REFERENCE1A','']
+          out.append('Public Leica reference regression only; no private household RAWs used.')
+          out.append('')
+          for mode in ['target_native','white_normalized_control']:
+              out.append('## '+mode)
+              out.append('')
+              for key in ['L_mae','ab_error_mean','DE76_mean']:
+                  vals={}
+                  for variant in ['baseline','render1t','candidate']:
+                      a=[d['cases'][sid]['conditions'][mode][variant]['all'][key] for sid in sorted(d['cases'])]
+                      vals[variant]=statistics.mean(a)
+                  out.append(f"- {key}: S={vals['baseline']:.6f}, RENDER1T={vals['render1t']:.6f}, POSTYC1A={vals['candidate']:.6f}")
+              wins_t=sum(d['cases'][sid]['conditions'][mode]['candidate']['all']['DE76_mean'] < d['cases'][sid]['conditions'][mode]['render1t']['all']['DE76_mean'] for sid in d['cases'])
+              wins_s=sum(d['cases'][sid]['conditions'][mode]['candidate']['all']['DE76_mean'] < d['cases'][sid]['conditions'][mode]['baseline']['all']['DE76_mean'] for sid in d['cases'])
+              out.append(f"- POSTYC1A ΔE wins vs RENDER1T: {wins_t}/10")
+              out.append(f"- POSTYC1A ΔE wins vs S: {wins_s}/10")
+              out.append('')
+          Path('research/M10R_RENDER2C_POSTYC1A_REFERENCE1A.md').write_text('\n'.join(out)+'\n')
+          print('\n'.join(out))
+          PY
+      - name: Persist research result
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp validation/results.json research/M10R_RENDER2C_POSTYC1A_REFERENCE1A.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/M10R_RENDER2C_POSTYC1A_REFERENCE1A.*
+          git commit -m "Research freeze POSTYC1A public reference result" || exit 0
+          git pull --rebase origin m10r-render2c-reference1a
+          git push
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-RENDER2C-POSTYC1A-REFERENCE1A
+          path: |
+            validation/
+            research/M10R_RENDER2C_POSTYC1A_REFERENCE1A.*
+          if-no-files-found: warn
+          retention-days: 90
