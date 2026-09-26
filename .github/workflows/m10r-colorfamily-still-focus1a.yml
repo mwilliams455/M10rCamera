@@ -1,0 +1,35 @@
+name: M10-R COLORFAMILY STILL FOCUS1A
+on:
+  push:
+    branches: [m10r-b2y-colorfamilydiff1a]
+    paths:
+      - '.github/workflows/m10r-colorfamily-still-focus1a.yml'
+      - 'tools/m10r_colorfamily_still_focus1a.py'
+      - 'research/generated/M10_FAMILY_B2Y_COLORFAMILYDIFF1A.json'
+  workflow_dispatch:
+permissions: {contents: write}
+jobs:
+  focus:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract saved-still candidates
+        run: |
+          set -euo pipefail
+          python3 tools/m10r_colorfamily_still_focus1a.py | tee /tmp/focus.txt
+      - name: Persist
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/generated/M10R_COLORFAMILY_STILL_FOCUS1A.json
+          git commit -m "Research freeze M10-R saved-still family differences" || exit 0
+          git pull --rebase origin m10r-b2y-colorfamilydiff1a
+          git push
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-COLORFAMILY-STILL-FOCUS1A
+          path: |
+            research/generated/M10R_COLORFAMILY_STILL_FOCUS1A.json
+            /tmp/focus.txt
+          retention-days: 90
