@@ -1,0 +1,130 @@
+{
+  "schema": "M10R_B2Y_SATURATIONFIELDS1A_V1",
+  "record_id": "0x18",
+  "selector": "color_dif_suppression",
+  "setter": "IMG-System +0xd0770",
+  "fields": [
+    {
+      "payload_offset": "0x10",
+      "mmio_address": "0x20021110",
+      "mask": "0x3fff",
+      "shift": 0,
+      "width": 14,
+      "probe_encoded_values": {
+        "0x0": 0,
+        "0x1": 1,
+        "0x1fff": 8191,
+        "0x2000": 8192,
+        "0x3fff": 16383,
+        "0x4000": 0,
+        "0x7fff": 16383,
+        "0xffff": 16383
+      }
+    },
+    {
+      "payload_offset": "0x14",
+      "mmio_address": "0x20021110",
+      "mask": "0x3fff0000",
+      "shift": 16,
+      "width": 14,
+      "probe_encoded_values": {
+        "0x0": 0,
+        "0x1": 1,
+        "0x1fff": 8191,
+        "0x2000": 8192,
+        "0x3fff": 16383,
+        "0x4000": 0,
+        "0x7fff": 16383,
+        "0xffff": 16383
+      }
+    },
+    {
+      "payload_offset": "0x18",
+      "mmio_address": "0x20021114",
+      "mask": "0x3fff",
+      "shift": 0,
+      "width": 14,
+      "probe_encoded_values": {
+        "0x0": 0,
+        "0x1": 1,
+        "0x1fff": 8191,
+        "0x2000": 8192,
+        "0x3fff": 16383,
+        "0x4000": 0,
+        "0x7fff": 16383,
+        "0xffff": 16383
+      }
+    },
+    {
+      "payload_offset": "0x1c",
+      "mmio_address": "0x20021114",
+      "mask": "0x3fff0000",
+      "shift": 16,
+      "width": 14,
+      "probe_encoded_values": {
+        "0x0": 0,
+        "0x1": 1,
+        "0x1fff": 8191,
+        "0x2000": 8192,
+        "0x3fff": 16383,
+        "0x4000": 0,
+        "0x7fff": 16383,
+        "0xffff": 16383
+      }
+    },
+    {
+      "payload_offset": "0x20",
+      "mmio_address": "0x20021118",
+      "mask": "0x3fff",
+      "shift": 0,
+      "width": 14,
+      "probe_encoded_values": {
+        "0x0": 0,
+        "0x1": 1,
+        "0x1fff": 8191,
+        "0x2000": 8192,
+        "0x3fff": 16383,
+        "0x4000": 0,
+        "0x7fff": 16383,
+        "0xffff": 16383
+      }
+    },
+    {
+      "payload_offset": "0x24",
+      "mmio_address": "0x20021118",
+      "mask": "0x3fff0000",
+      "shift": 16,
+      "width": 14,
+      "probe_encoded_values": {
+        "0x0": 0,
+        "0x1": 1,
+        "0x1fff": 8191,
+        "0x2000": 8192,
+        "0x3fff": 16383,
+        "0x4000": 0,
+        "0x7fff": 16383,
+        "0xffff": 16383
+      }
+    }
+  ],
+  "pair_registers": [
+    "0x20021110",
+    "0x20021114",
+    "0x20021118"
+  ],
+  "field_encoding": {
+    "width_bits": 14,
+    "pair_layout": "low field bits 0..13; high field bits 16..29; bits 14..15 and 30..31 preserved",
+    "input_behavior": "setter consumes low 14 bits of each payload halfword",
+    "medium_code": "0x2000",
+    "low_code": "0x1b34",
+    "high_code": "0x2666",
+    "q13_compatibility": "0x2000 equals 2^13 and LOW/HIGH are approximately 0.85x/1.20x, but hardware numeric semantics remain unproven until the consumer equation is recovered"
+  },
+  "guardrails": [
+    "This proves field packing and truncation in the original setter.",
+    "It does not prove that the hardware consumer interprets the fields as Q13 multipliers.",
+    "It does not prove pixel-stage placement.",
+    "No renderer code is changed."
+  ]
+}
