@@ -270,7 +270,16 @@ def main():
         raise RuntimeError("PORT1A DefaultSaver does not use physical-CFA DNG path")
 
     # No per-lens target lookup is allowed in the renderer.
-    for forbidden in ['m9_r35_calibration', 'Cobalt', 'HueSatMap']:
+    # Reject actual historical target-profile/HSM dependencies, not harmless
+    # documentation such as the phrase "Cobalt-free".
+    for forbidden in [
+        'm9_r35_calibration',
+        'M9R35Calibration',
+        'CobaltHueSatMap',
+        'cobaltSourceHsmRoleApplied", true',
+        'cobaltHueSatMapApplied", true',
+        'perLensHsmApplied", true',
+    ]:
         if forbidden in rr:
             raise RuntimeError("PORT1A forbidden target dependency in renderer: " + forbidden)
 
