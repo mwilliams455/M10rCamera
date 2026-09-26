@@ -182,15 +182,16 @@ def patch_default_saver(s):
 '''
     s = once(s, old, new, "PORT1A DNG call")
 
+    # DIAG1C later moved the sidecar to the JPEG sibling and wrapped the
+    # persist call with checked logging. Anchor only the invariant dngSaved
+    # telemetry so PORT1A remains independent of diagnostics transport.
     anchor = '''                    try { capture1b.diagnostics.put("dngSaved", dngSaved); } catch (Throwable ignored) {}
-                    M10RNativeRenderer.persistDiagnostics(capture1Dng, capture1b.diagnostics);
 '''
     repl = '''                    try {
                         capture1b.diagnostics.put("dngSaved", dngSaved);
                         capture1b.diagnostics.put("dngCfaAuthority",
                                 "physical_camera2_characteristics");
                     } catch (Throwable ignored) {}
-                    M10RNativeRenderer.persistDiagnostics(capture1Dng, capture1b.diagnostics);
 '''
     s = once(s, anchor, repl, "PORT1A DNG diagnostics")
     return s
