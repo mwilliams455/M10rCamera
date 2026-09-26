@@ -1,0 +1,69 @@
+name: M10-R YBLEND YBSOURCE1P
+on:
+  push:
+    branches: [m10r-yblend-ybsource1p]
+    paths:
+      - '.github/workflows/m10r-yblend-ybsource1p.yml'
+      - 'tools/m10r_yblend_ybsource1p.py'
+      - 'tools/m10r_yblend_topology1k.py'
+      - 'tools/m10r_yblend_topology1k_fetch_refs.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/download-artifact@v4
+        with:
+          name: M10R-PHOTOAUDIT1A-RESEARCH-INPUTS
+          run-id: 35518775600
+          github-token: ${{ github.token }}
+          path: inputs
+      - name: Install fixed dependencies
+        run: |
+          python3 -m pip install --quiet numpy==2.2.6 pillow==11.3.0 opencv-python-headless==4.13.0.92 rawpy==0.25.1
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl
+      - name: Fetch untouched public holdouts
+        run: python3 tools/m10r_yblend_topology1k_fetch_refs.py inputs
+      - name: Run Yb source discriminator
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p results
+          python3 -m py_compile tools/m10r_yblend_ybsource1p.py
+          python3 tools/m10r_yblend_ybsource1p.py inputs results | tee results/stdout.txt
+          python3 - <<'PY'
+          import json
+          d=json.load(open('results/results.json'))
+          assert d['status']=='PASS_YBSOURCE1P_EXECUTION'
+          assert len(d['scenes'])==10
+          assert set(d['models'])=={'CURRENT_K035','POSTCC0_YB','PRECC0_YB','YA_A1'}
+          PY
+      - name: Persist research result
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/generated
+          cp results/results.json research/generated/M10R_YBLEND_YBSOURCE1P.json
+          cp results/REPORT.md research/generated/M10R_YBLEND_YBSOURCE1P.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin m10r-yblend-ybsource1p
+          git add research/generated/M10R_YBLEND_YBSOURCE1P.*
+          git commit -m "Research freeze pre-CC0 Yb source discriminator" || exit 0
+          git push origin HEAD:m10r-yblend-ybsource1p
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-YBLEND-YBSOURCE1P
+          path: results/
+          retention-days: 90
