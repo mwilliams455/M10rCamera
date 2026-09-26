@@ -1,78 +1,141 @@
 package com.particlesdevs.photoncamera.m10r;
 
+import android.graphics.Rect;
+import android.hardware.camera2.CameraCharacteristics;
+import android.util.SizeF;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Locale;
+
 /**
- * MFM1D SOURCEPROXY1A: physical-sensor preview -> common RAW-proxy adapter.
+ * MFM1D SOURCEPROXY1B: generic physical-camera preview -> common RAW-proxy adapter.
  *
- * This is source normalization, not Leica look tuning. The shared MFM1B
- * spatial decision remains unchanged for every lens/sensor.
+ * This class contains no manufacturer/model/lens-name matching. A physical camera
+ * is identified only by a deterministic fingerprint derived from Camera2/RAW
+ * characteristics. Calibration belongs to the phone-source adapter, not to the
+ * shared Leica MFM logic or photographic renderer.
  */
 public final class M10RMfm1DSourceProxy {
     public static final double FALLBACK_EXPONENT = 1.00;
 
+    // Calibration registry keys are generic physical-camera fingerprints.
+    // They intentionally carry no manufacturer/model/lens semantics.
+    private static final String CAL_FP_A = "03d973b6411b4879";
+    private static final String CAL_FP_B = "f76d00db34b9480f";
+
     public static final class Profile {
         public final String id;
+        public final String fingerprint;
+        public final String canonicalDescriptor;
         public final double exponent;
         public final String calibrationStatus;
+        public final String calibrationEvidenceId;
         public final String basis;
+        public final int activeWidth;
+        public final int activeHeight;
+        public final int cfa;
         public final double sensorWidthMm;
         public final double physicalFocalMm;
         public final double aperture;
-        public final int cfa;
+        public final int whiteLevel;
+        public final int referenceIlluminant1;
+        public final int referenceIlluminant2;
 
-        Profile(String id, double exponent, String calibrationStatus, String basis,
-                double sensorWidthMm, double physicalFocalMm, double aperture, int cfa) {
+        Profile(String id, String fingerprint, String canonicalDescriptor,
+                double exponent, String calibrationStatus, String calibrationEvidenceId,
+                String basis, int activeWidth, int activeHeight, int cfa,
+                double sensorWidthMm, double physicalFocalMm, double aperture,
+                int whiteLevel, int referenceIlluminant1, int referenceIlluminant2) {
             this.id=id;
+            this.fingerprint=fingerprint;
+            this.canonicalDescriptor=canonicalDescriptor;
             this.exponent=exponent;
             this.calibrationStatus=calibrationStatus;
+            this.calibrationEvidenceId=calibrationEvidenceId;
             this.basis=basis;
+            this.activeWidth=activeWidth;
+            this.activeHeight=activeHeight;
+            this.cfa=cfa;
             this.sensorWidthMm=sensorWidthMm;
             this.physicalFocalMm=physicalFocalMm;
             this.aperture=aperture;
-            this.cfa=cfa;
+            this.whiteLevel=whiteLevel;
+            this.referenceIlluminant1=referenceIlluminant1;
+            this.referenceIlluminant2=referenceIlluminant2;
         }
     }
 
     private M10RMfm1DSourceProxy() {}
 
-    public static Profile resolve(double sensorWidthMm,
+    public static Profile resolve(CameraCharacteristics characteristics,
                                   double physicalFocalMm,
-                                  double aperture,
-                                  int cfa) {
-        // Xiaomi 15 Ultra main sensor. Paired live/RAW anchors established that
-        // the GL-preview meter requires substantial nonlinear decompression.
-        if (near(sensorWidthMm, 13.1072, 0.30)
-                && near(physicalFocalMm, 8.72, 0.35)
-                && near(aperture, 1.63, 0.20)) {
-            return new Profile(
-                    "XIAOMI15U_MAIN24",
-                    1.90,
+                                  double aperture) {
+        Rect active = characteristics != null
+                ? characteristics.get(CameraCharacteristics.SENSOR_INFO_ACTIVE_ARRAY_SIZE) : null;
+        Integer cfaObj = characteristics != null
+                ? characteristics.get(CameraCharacteristics.SENSOR_INFO_COLOR_FILTER_ARRANGEMENT) : null;
+        SizeF sensor = characteristics != null
+                ? characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE) : null;
+        Integer whiteObj = characteristics != null
+                ? characteristics.get(CameraCharacteristics.SENSOR_INFO_WHITE_LEVEL) : null;
+        Integer illum1Obj = characteristics != null
+                ? characteristics.get(CameraCharacteristics.SENSOR_REFERENCE_ILLUMINANT1) : null;
+        Integer illum2Obj = characteristics != null
+                ? characteristics.get(CameraCharacteristics.SENSOR_REFERENCE_ILLUMINANT2) : null;
+
+        int activeWidth = active != null ? active.width() : -1;
+        int activeHeight = active != null ? active.height() : -1;
+        int cfa = cfaObj != null ? cfaObj : -1;
+        double sensorWidthMm = sensor != null ? sensor.getWidth() : Double.NaN;
+        int whiteLevel = whiteObj != null ? whiteObj : -1;
+        int illum1 = illum1Obj != null ? illum1Obj : -1;
+        int illum2 = illum2Obj != null ? illum2Obj : -1;
+
+        long swum = finite(sensorWidthMm) ? Math.round(sensorWidthMm * 1000.0) : -1L;
+        long fumm = finite(physicalFocalMm) ? Math.round(physicalFocalMm * 1000.0) : -1L;
+        long apm = finite(aperture) ? Math.round(aperture * 1000.0) : -1L;
+
+        String canonical = String.format(Locale.US,
+                "aw=%d;ah=%d;cfa=%d;swum=%d;fumm=%d;apm=%d;wl=%d;i1=%d;i2=%d",
+                activeWidth, activeHeight, cfa, swum, fumm, apm,
+                whiteLevel, illum1, illum2);
+        String fingerprint = sha256Prefix16(canonical);
+
+        if (CAL_FP_A.equals(fingerprint)) {
+            return profile(fingerprint, canonical, 1.90,
                     "paired_live_raw_validated",
-                    "15U_main_24mm_equiv_live_RAW_pairs",
-                    sensorWidthMm, physicalFocalMm, aperture, cfa);
+                    "PAIR_A_20260926",
+                    "generic_physical_camera_fingerprint_calibration",
+                    activeWidth,activeHeight,cfa,sensorWidthMm,physicalFocalMm,aperture,
+                    whiteLevel,illum1,illum2);
         }
-
-        // Xiaomi 15 Ultra ~100 mm physical camera. The first paired live/RAW
-        // capture showed the unmodified linearized preview already tracked RAW
-        // closely; applying 1.90 created a false positive exposure assist.
-        if (near(sensorWidthMm, 9.1392, 0.30)
-                && near(physicalFocalMm, 25.10, 0.60)
-                && near(aperture, 2.60, 0.25)) {
-            return new Profile(
-                    "XIAOMI15U_SUPERTELE100",
-                    1.00,
+        if (CAL_FP_B.equals(fingerprint)) {
+            return profile(fingerprint, canonical, 1.00,
                     "single_pair_provisional",
-                    "15U_100mm_equiv_live_RAW_pair_no_decompression",
-                    sensorWidthMm, physicalFocalMm, aperture, cfa);
+                    "PAIR_B_20260926",
+                    "generic_physical_camera_fingerprint_calibration",
+                    activeWidth,activeHeight,cfa,sensorWidthMm,physicalFocalMm,aperture,
+                    whiteLevel,illum1,illum2);
         }
 
-        // Safe portability default. Unknown sensors are not forced through the
-        // main-camera transfer until a paired capture demonstrates the need.
-        return new Profile(
-                "UNVALIDATED_PHYSICAL_SENSOR",
-                FALLBACK_EXPONENT,
+        return profile(fingerprint, canonical, FALLBACK_EXPONENT,
                 "uncalibrated_identity_fallback",
-                "identity_until_sensor_specific_live_RAW_pair_available",
-                sensorWidthMm, physicalFocalMm, aperture, cfa);
+                "NONE",
+                "identity_until_paired_live_raw_calibration_exists",
+                activeWidth,activeHeight,cfa,sensorWidthMm,physicalFocalMm,aperture,
+                whiteLevel,illum1,illum2);
+    }
+
+    private static Profile profile(String fingerprint, String canonical,
+                                   double exponent, String status, String evidenceId,
+                                   String basis, int activeWidth, int activeHeight, int cfa,
+                                   double sensorWidthMm, double physicalFocalMm, double aperture,
+                                   int whiteLevel, int illum1, int illum2) {
+        return new Profile("FP_" + fingerprint, fingerprint, canonical,
+                exponent, status, evidenceId, basis,
+                activeWidth, activeHeight, cfa, sensorWidthMm, physicalFocalMm, aperture,
+                whiteLevel, illum1, illum2);
     }
 
     public static double[] transform(double[] linearPreviewGrid, Profile profile) {
@@ -92,8 +155,16 @@ public final class M10RMfm1DSourceProxy {
         return out;
     }
 
-    private static boolean near(double v,double target,double tol) {
-        return finite(v) && Math.abs(v-target) <= tol;
+    private static String sha256Prefix16(String s) {
+        try {
+            MessageDigest md=MessageDigest.getInstance("SHA-256");
+            byte[] h=md.digest(s.getBytes(StandardCharsets.UTF_8));
+            StringBuilder b=new StringBuilder(32);
+            for (int i=0;i<8;i++) b.append(String.format(Locale.US,"%02x",h[i] & 0xff));
+            return b.toString();
+        } catch (Throwable ignored) {
+            return "hash_unavailable";
+        }
     }
 
     private static boolean finite(double v) {
