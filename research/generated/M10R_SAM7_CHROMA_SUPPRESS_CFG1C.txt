@@ -1,0 +1,106 @@
+{
+  "entry": "0x51f1a",
+  "reachable_instruction_count": 294,
+  "reachable_min": "0x51f1a",
+  "reachable_max": "0x5223c",
+  "reaches_main_programmer": true,
+  "reaches_error_tail": true,
+  "page_refs": [
+    {
+      "pc": "0x51f24",
+      "pool": "0x52034"
+    }
+  ],
+  "string_refs": [
+    {
+      "pc": "0x52230",
+      "target": "0x5243c"
+    }
+  ],
+  "calls": [
+    {
+      "pc": "0x51f20",
+      "target": "0x4d1b4"
+    },
+    {
+      "pc": "0x5221e",
+      "target": "0x4d118"
+    },
+    {
+      "pc": "0x5222c",
+      "target": "0x4548"
+    },
+    {
+      "pc": "0x52232",
+      "target": "0x4548"
+    },
+    {
+      "pc": "0x52236",
+      "target": "0x454a"
+    }
+  ]
+}
+
+=== REACHABLE CODE ===
+0x051f1a: push     {r4, r5, r6, lr}
+0x051f1c: movs     r4, r0
+0x051f1e: beq      #0x51f68
+0x051f20: bl       #0x4d1b4
+0x051f24: ldr      r1, [pc, #0x10c] ; LIT 0x52034->0x20021100
+0x051f26: ldr      r0, [r1]
+0x051f28: ldrb     r2, [r4]
+0x051f2a: lsrs     r0, r0, #1
+0x051f2c: lsls     r0, r0, #1
+0x051f2e: lsls     r2, r2, #0x1f
+0x051f30: lsrs     r2, r2, #0x1f
+0x051f32: orrs     r0, r2
+0x051f34: str      r0, [r1]
+0x051f36: ldr      r0, [r1]
+0x051f38: ldrb     r3, [r4, #1]
+0x051f3a: movs     r2, #0x10
+0x051f3c: bics     r0, r2
+0x051f3e: lsls     r3, r3, #0x1f
+0x051f40: lsrs     r3, r3, #0x1b
+0x051f42: orrs     r0, r3
+0x051f44: str      r0, [r1]
+0x051f46: ldr      r0, [r1]
+0x051f48: movs     r3, #0xf
+0x051f4a: lsls     r3, r3, #0x10
+0x051f4c: bics     r0, r3
+0x051f4e: ldrb     r3, [r4, #2]
+0x051f50: lsls     r3, r3, #0x1c
+0x051f52: lsrs     r3, r3, #0xc
+0x051f54: orrs     r0, r3
+0x051f56: str      r0, [r1]
+0x051f58: ldr      r0, [r1]
+0x051f5a: lsls     r3, r2, #0x14
+0x051f5c: bics     r0, r3
+0x051f5e: ldrb     r3, [r4, #3]
+0x051f60: lsls     r3, r3, #0x1f
+0x051f62: lsrs     r3, r3, #7
+0x051f64: orrs     r0, r3
+0x051f66: b        #0x52038
+0x051f68: b        #0x52226
+0x052038: str      r0, [r1]
+0x052048: str      r0, [r1, #0x10]
+0x052110: ldr      r0, [r1, #0x44]
+0x052144: str      r0, [r1, #0x50]
+0x052210: ldr      r0, [r1, #0x68]
+0x052212: ldrh     r2, [r4, #0xc]
+0x052214: lsls     r0, r0, #0x10
+0x052216: lsrs     r0, r0, #0x10
+0x052218: lsls     r2, r2, #0x10
+0x05221a: orrs     r0, r2
+0x05221c: str      r0, [r1, #0x68]
+0x05221e: bl       #0x4d118
+0x052222: movs     r0, #0
+0x052224: pop      {r4, r5, r6, pc}
+0x052226: ldr      r2, [pc, #0x208] ; LIT 0x52430->0x11c1
+0x052228: ldr      r1, [pc, #0x208] ; LIT 0x52434->0x43102100
+0x05222a: ldr      r0, [pc, #0x20c] ; LIT 0x52438->0x4304ddf0
+0x05222c: bl       #0x4548
+0x052230: adr      r0, #0x208 ; ADR 0x5243c
+0x052232: bl       #0x4548
+0x052236: bl       #0x454a
+0x05223a: ldr      r0, [pc, #0x23c] ; LIT 0x52478->0xb000001
+0x05223c: pop      {r4, r5, r6, pc}
