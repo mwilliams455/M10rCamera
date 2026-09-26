@@ -1,0 +1,37 @@
+name: M10-R YBLEND TOPOLOGY1K RECOVER
+on:
+  push:
+    branches: [m10r-yblend-topology1k]
+    paths:
+      - '.github/workflows/m10r-yblend-topology1k-recover.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/download-artifact@v4
+        with:
+          name: M10R-YBLEND-TOPOLOGY1K
+          run-id: 36241047143
+          github-token: ${{ github.token }}
+          path: recovered
+      - name: Persist completed discriminator result
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f recovered/results.json
+          test -f recovered/REPORT.md
+          mkdir -p research/generated
+          cp recovered/results.json research/generated/M10R_YBLEND_TOPOLOGY1K.json
+          cp recovered/REPORT.md research/generated/M10R_YBLEND_TOPOLOGY1K.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin m10r-yblend-topology1k
+          git add research/generated/M10R_YBLEND_TOPOLOGY1K.*
+          git commit -m "Research freeze two-luminance YBLEND topology discriminator" || exit 0
+          git push origin HEAD:m10r-yblend-topology1k
