@@ -1,0 +1,89 @@
+name: M10-R YBLEND CROSSCOLOR1D
+on:
+  push:
+    branches: [m10r-yblend-crosscolor1d]
+    paths:
+      - '.github/workflows/m10r-yblend-crosscolor1d.yml'
+      - 'tools/m10r_yblend_crosscolor1d.py'
+      - 'tools/m10r_b2y_assets.py'
+      - 'tools/m10r_sections.py'
+  workflow_dispatch:
+permissions: {contents: write}
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build verified M10-family unpacker
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker);z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+      - name: Download and decode M10 color family
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/fw /tmp/decoded results
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/fw/M10R.FW
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-P-4.22.23.34-Customer.FW' -o /tmp/fw/M10P.FW
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-3.22.23.38-Customer.FW' -o /tmp/fw/M10.FW
+          sha256sum /tmp/fw/* | tee results/firmware_sha256.txt
+          : > /tmp/items.txt
+          for SPEC in 'M10-R|M10R.FW' 'M10-P|M10P.FW' 'M10|M10.FW'; do
+            LABEL="${SPEC%%|*}"; FN="${SPEC#*|}"; FW="/tmp/fw/$FN"
+            cp "$FW" /tmp/M10-R.FW
+            rm -f /tmp/M10R_unpacked.bin
+            /tmp/unpack >"/tmp/unpack_${LABEL}.txt"
+            SEC="/tmp/decoded/${LABEL}";rm -rf "$SEC"
+            python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin "$SEC" >"/tmp/sections_${LABEL}.txt"
+            B2Y="$(python3 - "$SEC" <<'PY'
+          import csv,sys
+          from pathlib import Path
+          sec=Path(sys.argv[1]);sys.path.insert(0,str(Path.cwd()/"tools"))
+          import m10r_b2y_assets as mod
+          rows=list(csv.DictReader((sec/"sections.csv").open()))
+          named=[sec/r["file"] for r in rows if "data/calib/b2y.bin" in (r["name"]+" "+r["file"]).lower()]
+          if len(named)==1:
+              print(named[0]);raise SystemExit
+          hits=[]
+          for r in rows:
+              s=(r["name"]+" "+r["file"]).lower()
+              if "calib" not in s:continue
+              p=sec/r["file"]
+              try:recs=mod.parse_records(p.read_bytes())
+              except Exception:continue
+              if any(x.record_id==0x0c for x in recs) and any(x.record_id==0x0d for x in recs):hits.append(p)
+          if len(hits)!=1:raise SystemExit(f"B2Y identification failed: {hits}")
+          print(hits[0])
+          PY
+            )"
+            FW_SHA="$(sha256sum "$FW"|awk '{print $1}')"
+            printf '%s|%s|%s\n' "$LABEL" "$B2Y" "$FW_SHA" >> /tmp/items.txt
+          done
+          ARGS=()
+          while IFS='|' read -r L P H; do ARGS+=(--item "$L|$P|$H"); done </tmp/items.txt
+          python3 tools/m10r_yblend_crosscolor1d.py "${ARGS[@]}" --out results/M10R_YBLEND_CROSSCOLOR1D.json | tee results/M10R_YBLEND_CROSSCOLOR1D.txt
+      - name: Persist
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/generated
+          cp results/M10R_YBLEND_CROSSCOLOR1D.* research/generated/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/generated/M10R_YBLEND_CROSSCOLOR1D.*
+          git commit -m "Research freeze M10-family color Y BLEND comparison" || exit 0
+          git push origin HEAD:m10r-yblend-crosscolor1d
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-YBLEND-CROSSCOLOR1D
+          path: results/
+          retention-days: 90
