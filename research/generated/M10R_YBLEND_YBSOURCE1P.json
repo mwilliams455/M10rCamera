@@ -1,0 +1,2688 @@
+{
+  "schema": "M10R_YBLEND_YBSOURCE1P_V1",
+  "status": "PASS_YBSOURCE1P_EXECUTION",
+  "models": [
+    "CURRENT_K035",
+    "POSTCC0_YB",
+    "PRECC0_YB",
+    "YA_A1"
+  ],
+  "only_variable": "Yb source tap: pre-CC0 post-WB RGB vs post-CC0 working RGB",
+  "fixed": {
+    "rgbPath": "CC0 -> TCYC MEDIUM gain -> common DG per RGB -> YC",
+    "YbTone": "disabled",
+    "YbDG": "same recovered DG curve in both Yb candidates",
+    "finalY": "Yb for POSTCC0/PRECC0 candidates",
+    "CbCr": "from nonlinear RGB YC and unchanged by Yb"
+  },
+  "evidenceBoundary": {
+    "sourceBacked": "Fujitsu architecture forms Yb from RGB before color correction; related R2Y labels CCYC as coefficient of Yb convert.",
+    "M10RProven": "CCYC row, TCYC row, RGB-tone enabled, Yb-tone disabled, generic five-bank DG writer.",
+    "notProven": "Exact M10-R CCYC pixel tap or Yb gamma-bank contents."
+  },
+  "splits": {
+    "reused_development": [
+      "01",
+      "03",
+      "05"
+    ],
+    "reused_validation": [
+      "02",
+      "04",
+      "06"
+    ],
+    "fresh_holdout": [
+      "07",
+      "08",
+      "09",
+      "10"
+    ]
+  },
+  "scenes": {
+    "01": {
+      "metadata": {
+        "checks": {
+          "Model": true,
+          "SerialNumber": true,
+          "ImageUniqueID": true,
+          "DateTimeOriginal": true,
+          "ISO": true,
+          "ExposureTime": true,
+          "FNumber": true,
+          "FocalLength": true
+        },
+        "ISO": 320,
+        "kelvin": 5668.0,
+        "jpg_sha256": "b6e6fb0975c4da3201be8c3092d9f32107c1ad4e5aaafe905a27f17aefc8401b",
+        "dng_sha256": "b1ca50cac49347ec8b977de62b636b3cea193c8f41125ef1588c6b0159d716b9"
+      },
+      "whiteY": 0.9433272666917027,
+      "conditions": {
+        "target_native": {
+          "alignment": {
+            "corr": 0.9797196984291077,
+            "k": 0,
+            "dx": 3,
+            "dy": 1,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 2133,
+              "L_mae": 2.0466807634127404,
+              "ab_error": 5.473320612323948,
+              "DE76": 6.044537995116861,
+              "chroma_ratio_ref_ge20": 0.7034750299569832,
+              "hue_abs_error_deg_ref_ge20": 2.9639645210354457,
+              "warm_n": 114,
+              "warm_ab_error": 7.233665978288934,
+              "warm_chroma_ratio": 0.875402295487797,
+              "warm_hue_abs_error_deg": 8.040952045355137,
+              "L_bias": 2.0466807634127404,
+              "patches": 2133
+            },
+            "POSTCC0_YB": {
+              "n": 2133,
+              "L_mae": 5.872105680269867,
+              "ab_error": 1.5763507147479119,
+              "DE76": 6.19289054982697,
+              "chroma_ratio_ref_ge20": 0.9973393109823354,
+              "hue_abs_error_deg_ref_ge20": 2.33470069126944,
+              "warm_n": 114,
+              "warm_ab_error": 4.803441109672402,
+              "warm_chroma_ratio": 1.05225220461718,
+              "warm_hue_abs_error_deg": 4.392933932734469,
+              "L_bias": 5.872105680269867,
+              "patches": 2133,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.3635827569607582,
+                "mean_finalY": 0.3908678205658569,
+                "mean_finalY_minus_Ya": 0.02728506360509877,
+                "mean_abs_finalY_minus_Ya": 0.03073342113944205,
+                "mean_tone_gain": 0.8592612977567758,
+                "post_cc1_high_R_fraction": 0.06797524565381709,
+                "post_cc1_high_G_fraction": 0.005504377676996725,
+                "post_cc1_high_B_fraction": 6.69249181153943e-06,
+                "mean_Yb_preDG": 0.09761740359345684,
+                "mean_Yb_postDG": 0.3908678205658569
+              }
+            },
+            "PRECC0_YB": {
+              "n": 2133,
+              "L_mae": 3.333418032846929,
+              "ab_error": 1.827337469766413,
+              "DE76": 4.050184143811059,
+              "chroma_ratio_ref_ge20": 1.0282672346233457,
+              "hue_abs_error_deg_ref_ge20": 2.7096796660461218,
+              "warm_n": 114,
+              "warm_ab_error": 10.69819190650932,
+              "warm_chroma_ratio": 1.177126496219562,
+              "warm_hue_abs_error_deg": 5.583205776967032,
+              "L_bias": 1.2148943407905533,
+              "patches": 2133,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.3635827569607582,
+                "mean_finalY": 0.33254805957448724,
+                "mean_finalY_minus_Ya": -0.0310346973862714,
+                "mean_abs_finalY_minus_Ya": 0.04336893570643722,
+                "mean_tone_gain": 0.8592612977567758,
+                "post_cc1_high_R_fraction": 0.04328191924918116,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0,
+                "mean_Yb_preDG": 0.07316103519746506,
+                "mean_Yb_postDG": 0.33254805957448724
+              }
+            },
+            "YA_A1": {
+              "n": 2133,
+              "L_mae": 2.2884635370883144,
+              "ab_error": 1.4508739036248606,
+              "DE76": 2.7802461116349986,
+              "chroma_ratio_ref_ge20": 1.0082152629662673,
+              "hue_abs_error_deg_ref_ge20": 2.4521797459704326,
+              "warm_n": 114,
+              "warm_ab_error": 5.954537085944451,
+              "warm_chroma_ratio": 1.0922603542304552,
+              "warm_hue_abs_error_deg": 4.738380434400197,
+              "L_bias": 2.2884635370883144,
+              "patches": 2133,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.3635827569607582,
+                "mean_finalY": 0.3635827569607582,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.8592612977567758,
+                "post_cc1_high_R_fraction": 0.06583601033005795,
+                "post_cc1_high_G_fraction": 0.005546107331821618,
+                "post_cc1_high_B_fraction": 7.086167800453515e-06
+              }
+            }
+          }
+        },
+        "white_normalized_control": {
+          "alignment": {
+            "corr": 0.978561520576477,
+            "k": 0,
+            "dx": 3,
+            "dy": 1,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 2133,
+              "L_mae": 3.2242815649906236,
+              "ab_error": 5.138403178160009,
+              "DE76": 6.294517457915637,
+              "chroma_ratio_ref_ge20": 0.7310370020539156,
+              "hue_abs_error_deg_ref_ge20": 2.9704856683672642,
+              "warm_n": 114,
+              "warm_ab_error": 7.2881599330584965,
+              "warm_chroma_ratio": 0.8910564552092217,
+              "warm_hue_abs_error_deg": 8.216611811536128,
+              "L_bias": 3.2242815649906236,
+              "patches": 2133
+            },
+            "POSTCC0_YB": {
+              "n": 2133,
+              "L_mae": 6.977760540282173,
+              "ab_error": 1.7499870696278683,
+              "DE76": 7.2887924479317965,
+              "chroma_ratio_ref_ge20": 1.0234987434333367,
+              "hue_abs_error_deg_ref_ge20": 2.4380149549003685,
+              "warm_n": 114,
+              "warm_ab_error": 5.309273355126303,
+              "warm_chroma_ratio": 1.0575508592275853,
+              "warm_hue_abs_error_deg": 4.445906366696784,
+              "L_bias": 6.977760540282173,
+              "patches": 2133,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.37677022177773384,
+                "mean_finalY": 0.402815219961546,
+                "mean_finalY_minus_Ya": 0.026044998183812427,
+                "mean_abs_finalY_minus_Ya": 0.029639860911046305,
+                "mean_tone_gain": 0.8696569113329434,
+                "post_cc1_high_R_fraction": 0.06969521604938271,
+                "post_cc1_high_G_fraction": 0.0056024029982363315,
+                "post_cc1_high_B_fraction": 7.086167800453515e-06,
+                "mean_Yb_preDG": 0.1029813669966234,
+                "mean_Yb_postDG": 0.402815219961546
+              }
+            },
+            "PRECC0_YB": {
+              "n": 2133,
+              "L_mae": 3.5283184811591655,
+              "ab_error": 2.0671026821744385,
+              "DE76": 4.357429790845999,
+              "chroma_ratio_ref_ge20": 1.0554171120369726,
+              "hue_abs_error_deg_ref_ge20": 2.8049360590993424,
+              "warm_n": 114,
+              "warm_ab_error": 10.802424141757117,
+              "warm_chroma_ratio": 1.187639342045229,
+              "warm_hue_abs_error_deg": 5.5646692667486874,
+              "L_bias": 2.247301290362752,
+              "patches": 2133,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.37677022177773384,
+                "mean_finalY": 0.34352416567718774,
+                "mean_finalY_minus_Ya": -0.03324605610054577,
+                "mean_abs_finalY_minus_Ya": 0.044657693672567424,
+                "mean_tone_gain": 0.8696569113329434,
+                "post_cc1_high_R_fraction": 0.046404950869236586,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0,
+                "mean_Yb_preDG": 0.07718548990951862,
+                "mean_Yb_postDG": 0.34352416567718774
+              }
+            },
+            "YA_A1": {
+              "n": 2133,
+              "L_mae": 3.4611883936943273,
+              "ab_error": 1.6482675887383627,
+              "DE76": 3.9144988338364364,
+              "chroma_ratio_ref_ge20": 1.0346437738102034,
+              "hue_abs_error_deg_ref_ge20": 2.557918202268457,
+              "warm_n": 114,
+              "warm_ab_error": 6.019781775371097,
+              "warm_chroma_ratio": 1.097830083848012,
+              "warm_hue_abs_error_deg": 4.733595515135351,
+              "L_bias": 3.4611883936943273,
+              "patches": 2133,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.37677022177773384,
+                "mean_finalY": 0.37677022177773384,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.8696569113329434,
+                "post_cc1_high_R_fraction": 0.06798469387755102,
+                "post_cc1_high_G_fraction": 0.0056394085411942555,
+                "post_cc1_high_B_fraction": 7.479843789367599e-06
+              }
+            }
+          }
+        }
+      },
+      "alignment": {
+        "corr": 0.9797196984291077,
+        "k": 0,
+        "dx": 3,
+        "dy": 1,
+        "margin": 16
+      }
+    },
+    "02": {
+      "metadata": {
+        "checks": {
+          "Model": true,
+          "SerialNumber": true,
+          "ImageUniqueID": true,
+          "DateTimeOriginal": true,
+          "ISO": true,
+          "ExposureTime": true,
+          "FNumber": true,
+          "FocalLength": true
+        },
+        "ISO": 640,
+        "kelvin": 5250.0,
+        "jpg_sha256": "21eac5f68d80129c650ba7372d6042245b233358bcb3b5abb349c547403f3c32",
+        "dng_sha256": "e4d404590c1ff9ce3bc1fa2c0d4fe438e41954ed80094d7bed3fd02bccec84f6"
+      },
+      "whiteY": 0.9422072158521254,
+      "conditions": {
+        "target_native": {
+          "alignment": {
+            "corr": 0.9818412065505981,
+            "k": 0,
+            "dx": 2,
+            "dy": 2,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 5993,
+              "L_mae": 2.676351373151489,
+              "ab_error": 2.9032005424779475,
+              "DE76": 4.155777978099015,
+              "chroma_ratio_ref_ge20": 0.7982924453032051,
+              "hue_abs_error_deg_ref_ge20": 7.073537748074701,
+              "warm_n": 496,
+              "warm_ab_error": 9.838925479187083,
+              "warm_chroma_ratio": 0.7936739412541474,
+              "warm_hue_abs_error_deg": 6.838392827997655,
+              "L_bias": 2.676351373151489,
+              "patches": 5993
+            },
+            "POSTCC0_YB": {
+              "n": 5993,
+              "L_mae": 2.729180951996079,
+              "ab_error": 1.9231438307848838,
+              "DE76": 3.4679442565337335,
+              "chroma_ratio_ref_ge20": 1.1567576093471081,
+              "hue_abs_error_deg_ref_ge20": 2.9799508241429953,
+              "warm_n": 496,
+              "warm_ab_error": 7.46203723522161,
+              "warm_chroma_ratio": 1.1617346803360933,
+              "warm_hue_abs_error_deg": 2.742756085935888,
+              "L_bias": 2.729180951996079,
+              "patches": 5993,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.4933361728727673,
+                "mean_finalY": 0.5013932599106633,
+                "mean_finalY_minus_Ya": 0.00805708703789642,
+                "mean_abs_finalY_minus_Ya": 0.022608115286586242,
+                "mean_tone_gain": 0.9459110303522111,
+                "post_cc1_high_R_fraction": 4.330435878054926e-06,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0,
+                "mean_Yb_preDG": 0.12862296319267444,
+                "mean_Yb_postDG": 0.5013932599106633
+              }
+            },
+            "PRECC0_YB": {
+              "n": 5993,
+              "L_mae": 5.140463760454906,
+              "ab_error": 2.1260468885467003,
+              "DE76": 5.954270107686603,
+              "chroma_ratio_ref_ge20": 1.1770706207223702,
+              "hue_abs_error_deg_ref_ge20": 4.878910174340249,
+              "warm_n": 496,
+              "warm_ab_error": 9.180851773427621,
+              "warm_chroma_ratio": 1.183390231766922,
+              "warm_hue_abs_error_deg": 4.684945643649099,
+              "L_bias": -3.9481079162668946,
+              "patches": 5993,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.4933361728727673,
+                "mean_finalY": 0.4345561717902802,
+                "mean_finalY_minus_Ya": -0.0587800010824869,
+                "mean_abs_finalY_minus_Ya": 0.06476387992941005,
+                "mean_tone_gain": 0.9459110303522111,
+                "post_cc1_high_R_fraction": 0.0,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0,
+                "mean_Yb_preDG": 0.09838739335137113,
+                "mean_Yb_postDG": 0.4345561717902802
+              }
+            },
+            "YA_A1": {
+              "n": 5993,
+              "L_mae": 2.702401051552332,
+              "ab_error": 2.0398099841254176,
+              "DE76": 3.5391949825333913,
+              "chroma_ratio_ref_ge20": 1.1805394501268474,
+              "hue_abs_error_deg_ref_ge20": 3.776434872302284,
+              "warm_n": 496,
+              "warm_ab_error": 8.56636904487312,
+              "warm_chroma_ratio": 1.1860665126348853,
+              "warm_hue_abs_error_deg": 3.562389648482717,
+              "L_bias": 2.702401051552332,
+              "patches": 5993,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.4933361728727673,
+                "mean_finalY": 0.4933361728727673,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.9459110303522111,
+                "post_cc1_high_R_fraction": 0.0,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0
+              }
+            }
+          }
+        },
+        "white_normalized_control": {
+          "alignment": {
+            "corr": 0.9795408248901367,
+            "k": 0,
+            "dx": 2,
+            "dy": 2,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 5993,
+              "L_mae": 4.2045441768651965,
+              "ab_error": 2.8206665438826386,
+              "DE76": 5.30159554220742,
+              "chroma_ratio_ref_ge20": 0.8375895806982533,
+              "hue_abs_error_deg_ref_ge20": 7.029436538713366,
+              "warm_n": 496,
+              "warm_ab_error": 8.538406118087462,
+              "warm_chroma_ratio": 0.8332492824254175,
+              "warm_hue_abs_error_deg": 6.786770232985522,
+              "L_bias": 4.2045441768651965,
+              "patches": 5993
+            },
+            "POSTCC0_YB": {
+              "n": 5993,
+              "L_mae": 4.221587783403554,
+              "ab_error": 2.180324253745698,
+              "DE76": 4.842356356670953,
+              "chroma_ratio_ref_ge20": 1.1983147924636466,
+              "hue_abs_error_deg_ref_ge20": 2.837014382106965,
+              "warm_n": 496,
+              "warm_ab_error": 9.02895768950001,
+              "warm_chroma_ratio": 1.2049434733668694,
+              "warm_hue_abs_error_deg": 2.62112638127382,
+              "L_bias": 4.221587783403554,
+              "patches": 5993,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.5081945776082025,
+                "mean_finalY": 0.5157245676093425,
+                "mean_finalY_minus_Ya": 0.007529990001140399,
+                "mean_abs_finalY_minus_Ya": 0.02175480285404459,
+                "mean_tone_gain": 0.9513709963218714,
+                "post_cc1_high_R_fraction": 3.503716301335349e-05,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0,
+                "mean_Yb_preDG": 0.1365123945440695,
+                "mean_Yb_postDG": 0.5157245676093425
+              }
+            },
+            "PRECC0_YB": {
+              "n": 5993,
+              "L_mae": 3.942600188501168,
+              "ab_error": 2.373642202870531,
+              "DE76": 4.940445200998958,
+              "chroma_ratio_ref_ge20": 1.2187630965478675,
+              "hue_abs_error_deg_ref_ge20": 4.939072807699761,
+              "warm_n": 496,
+              "warm_ab_error": 10.662415283070889,
+              "warm_chroma_ratio": 1.2266959372691935,
+              "warm_hue_abs_error_deg": 4.774294311923662,
+              "L_bias": -2.420212497262431,
+              "patches": 5993,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.5081945776082025,
+                "mean_finalY": 0.448484449784501,
+                "mean_finalY_minus_Ya": -0.059710127823701754,
+                "mean_abs_finalY_minus_Ya": 0.06555846154457574,
+                "mean_tone_gain": 0.9513709963218714,
+                "post_cc1_high_R_fraction": 0.0,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0,
+                "mean_Yb_preDG": 0.10442224565473132,
+                "mean_Yb_postDG": 0.448484449784501
+              }
+            },
+            "YA_A1": {
+              "n": 5993,
+              "L_mae": 4.194929077413232,
+              "ab_error": 2.297645275063248,
+              "DE76": 5.016006986264061,
+              "chroma_ratio_ref_ge20": 1.221712335690044,
+              "hue_abs_error_deg_ref_ge20": 3.7248151726891248,
+              "warm_n": 496,
+              "warm_ab_error": 10.074992109380581,
+              "warm_chroma_ratio": 1.228728486372409,
+              "warm_hue_abs_error_deg": 3.533974686780367,
+              "L_bias": 4.194929077413232,
+              "patches": 5993,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.5081945776082025,
+                "mean_finalY": 0.5081945776082025,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.9513709963218714,
+                "post_cc1_high_R_fraction": 3.5430839002267575e-06,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0
+              }
+            }
+          }
+        }
+      },
+      "alignment": {
+        "corr": 0.9818412065505981,
+        "k": 0,
+        "dx": 2,
+        "dy": 2,
+        "margin": 16
+      }
+    },
+    "03": {
+      "metadata": {
+        "checks": {
+          "Model": true,
+          "SerialNumber": true,
+          "ImageUniqueID": true,
+          "DateTimeOriginal": true,
+          "ISO": true,
+          "ExposureTime": true,
+          "FNumber": true,
+          "FocalLength": true
+        },
+        "ISO": 100,
+        "kelvin": 5640.0,
+        "jpg_sha256": "08d8c31c9e747102d5e63f89ee97cc010b3c8edd462b374dedcd82cd8f263d51",
+        "dng_sha256": "3010f38076625588e2b9b91927a145ce5e8c607d51d21773cc465ccfaef9a5f6"
+      },
+      "whiteY": 0.9430835640705194,
+      "conditions": {
+        "target_native": {
+          "alignment": {
+            "corr": 0.9881322383880615,
+            "k": 0,
+            "dx": 3,
+            "dy": 2,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 5368,
+              "L_mae": 2.6575227785750046,
+              "ab_error": 7.907410906307464,
+              "DE76": 8.639131238782994,
+              "chroma_ratio_ref_ge20": 0.7049801169887852,
+              "hue_abs_error_deg_ref_ge20": 4.782649515619777,
+              "warm_n": 655,
+              "warm_ab_error": 7.500666849931075,
+              "warm_chroma_ratio": 0.8333606578350652,
+              "warm_hue_abs_error_deg": 10.483269343698936,
+              "L_bias": 2.6575227785750046,
+              "patches": 5368
+            },
+            "POSTCC0_YB": {
+              "n": 5368,
+              "L_mae": 5.36445015055945,
+              "ab_error": 2.1925231592782555,
+              "DE76": 5.974925546103014,
+              "chroma_ratio_ref_ge20": 1.0203937858224914,
+              "hue_abs_error_deg_ref_ge20": 3.5709216355182236,
+              "warm_n": 655,
+              "warm_ab_error": 4.213279228261903,
+              "warm_chroma_ratio": 1.1020803123698477,
+              "warm_hue_abs_error_deg": 4.891902658364718,
+              "L_bias": 5.36445015055945,
+              "patches": 5368,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.3831897460031649,
+                "mean_finalY": 0.4024266748565885,
+                "mean_finalY_minus_Ya": 0.019236928853423367,
+                "mean_abs_finalY_minus_Ya": 0.025140998205973597,
+                "mean_tone_gain": 0.9067409872637935,
+                "post_cc1_high_R_fraction": 0.0,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0,
+                "mean_Yb_preDG": 0.08162028802887653,
+                "mean_Yb_postDG": 0.4024266748565885
+              }
+            },
+            "PRECC0_YB": {
+              "n": 5368,
+              "L_mae": 3.1610423513034416,
+              "ab_error": 2.621779833259942,
+              "DE76": 4.446812149555572,
+              "chroma_ratio_ref_ge20": 1.0293746010721234,
+              "hue_abs_error_deg_ref_ge20": 4.019360790528418,
+              "warm_n": 655,
+              "warm_ab_error": 5.810866344613948,
+              "warm_chroma_ratio": 1.158452385863602,
+              "warm_hue_abs_error_deg": 5.418798103088679,
+              "L_bias": -1.1706981857913794,
+              "patches": 5368,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.3831897460031649,
+                "mean_finalY": 0.3391204583665538,
+                "mean_finalY_minus_Ya": -0.044069287636611124,
+                "mean_abs_finalY_minus_Ya": 0.049503913259527514,
+                "mean_tone_gain": 0.9067409872637935,
+                "post_cc1_high_R_fraction": 0.0,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0,
+                "mean_Yb_preDG": 0.06124507997973892,
+                "mean_Yb_postDG": 0.3391204583665538
+              }
+            },
+            "YA_A1": {
+              "n": 5368,
+              "L_mae": 3.116907838915215,
+              "ab_error": 2.2414598100908547,
+              "DE76": 3.9190373279729096,
+              "chroma_ratio_ref_ge20": 1.0199113763405387,
+              "hue_abs_error_deg_ref_ge20": 3.6755553803930536,
+              "warm_n": 655,
+              "warm_ab_error": 4.502988171682206,
+              "warm_chroma_ratio": 1.1136739090605932,
+              "warm_hue_abs_error_deg": 4.995614780332772,
+              "L_bias": 3.116907838915215,
+              "patches": 5368,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.3831897460031649,
+                "mean_finalY": 0.3831897460031649,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.9067409872637935,
+                "post_cc1_high_R_fraction": 0.0,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0
+              }
+            }
+          }
+        },
+        "white_normalized_control": {
+          "alignment": {
+            "corr": 0.9866384863853455,
+            "k": 0,
+            "dx": 2,
+            "dy": 2,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 5346,
+              "L_mae": 4.360486967841026,
+              "ab_error": 7.293401009883309,
+              "DE76": 8.946520921274303,
+              "chroma_ratio_ref_ge20": 0.7346804127906444,
+              "hue_abs_error_deg_ref_ge20": 4.765439119243126,
+              "warm_n": 649,
+              "warm_ab_error": 7.054812196626465,
+              "warm_chroma_ratio": 0.8662801456165837,
+              "warm_hue_abs_error_deg": 10.510274467241208,
+              "L_bias": 4.360486967841026,
+              "patches": 5346
+            },
+            "POSTCC0_YB": {
+              "n": 5346,
+              "L_mae": 6.8117289430765995,
+              "ab_error": 2.463009688656821,
+              "DE76": 7.358444600483474,
+              "chroma_ratio_ref_ge20": 1.047872990290152,
+              "hue_abs_error_deg_ref_ge20": 3.6427126755501384,
+              "warm_n": 649,
+              "warm_ab_error": 4.705259714594571,
+              "warm_chroma_ratio": 1.1235428001823697,
+              "warm_hue_abs_error_deg": 4.801210129568519,
+              "L_bias": 6.8117289430765995,
+              "patches": 5346,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.3985801154742856,
+                "mean_finalY": 0.4159153297100397,
+                "mean_finalY_minus_Ya": 0.01733521423575416,
+                "mean_abs_finalY_minus_Ya": 0.023514587975561208,
+                "mean_tone_gain": 0.9184751469211254,
+                "post_cc1_high_R_fraction": 0.0,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0,
+                "mean_Yb_preDG": 0.0865461886289149,
+                "mean_Yb_postDG": 0.4159153297100397
+              }
+            },
+            "PRECC0_YB": {
+              "n": 5346,
+              "L_mae": 2.8330405107206325,
+              "ab_error": 2.8665648086793114,
+              "DE76": 4.396551868584475,
+              "chroma_ratio_ref_ge20": 1.0564614021187773,
+              "hue_abs_error_deg_ref_ge20": 4.095121121848175,
+              "warm_n": 649,
+              "warm_ab_error": 6.3705365663822136,
+              "warm_chroma_ratio": 1.1805740672111555,
+              "warm_hue_abs_error_deg": 5.341740886068006,
+              "L_bias": 0.17193509896417883,
+              "patches": 5346,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.3985801154742856,
+                "mean_finalY": 0.35132640100170065,
+                "mean_finalY_minus_Ya": -0.047253714472585084,
+                "mean_abs_finalY_minus_Ya": 0.05207896754044212,
+                "mean_tone_gain": 0.9184751469211254,
+                "post_cc1_high_R_fraction": 0.0,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0,
+                "mean_Yb_preDG": 0.06494130776216063,
+                "mean_Yb_postDG": 0.35132640100170065
+              }
+            },
+            "YA_A1": {
+              "n": 5346,
+              "L_mae": 4.791998444003109,
+              "ab_error": 2.4946320942552793,
+              "DE76": 5.498190729999071,
+              "chroma_ratio_ref_ge20": 1.0473356754346692,
+              "hue_abs_error_deg_ref_ge20": 3.7455130954682123,
+              "warm_n": 649,
+              "warm_ab_error": 4.953544828802785,
+              "warm_chroma_ratio": 1.1331154513950934,
+              "warm_hue_abs_error_deg": 4.8837724544931715,
+              "L_bias": 4.791998444003109,
+              "patches": 5346,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.3985801154742856,
+                "mean_finalY": 0.3985801154742856,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.9184751469211254,
+                "post_cc1_high_R_fraction": 0.0,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0
+              }
+            }
+          }
+        }
+      },
+      "alignment": {
+        "corr": 0.9881322383880615,
+        "k": 0,
+        "dx": 3,
+        "dy": 2,
+        "margin": 16
+      }
+    },
+    "04": {
+      "metadata": {
+        "checks": {
+          "Model": true,
+          "SerialNumber": true,
+          "ImageUniqueID": true,
+          "DateTimeOriginal": true,
+          "ISO": true,
+          "ExposureTime": true,
+          "FNumber": true,
+          "FocalLength": true
+        },
+        "ISO": 100,
+        "kelvin": 5325.0,
+        "jpg_sha256": "d078c134adcf2f87f1dde42d92cff53849326800be0b33db5f8f3a55acf36180",
+        "dng_sha256": "2918e6995dbd3d6fd6de9e3a62dbd357cec00169abf7c201ea7c3d798dcc3a0a"
+      },
+      "whiteY": 0.9414977008059502,
+      "conditions": {
+        "target_native": {
+          "alignment": {
+            "corr": 0.9896899461746216,
+            "k": 0,
+            "dx": 2,
+            "dy": 2,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 2593,
+              "L_mae": 2.4604229498589953,
+              "ab_error": 3.517955560415447,
+              "DE76": 4.706797371300643,
+              "chroma_ratio_ref_ge20": 0.9049499788821841,
+              "hue_abs_error_deg_ref_ge20": 4.732615177299921,
+              "warm_n": 1,
+              "warm_ab_error": 14.47277380603404,
+              "warm_chroma_ratio": 0.8431199221101887,
+              "warm_hue_abs_error_deg": 11.558370334403627,
+              "L_bias": 2.447646288535239,
+              "patches": 2593
+            },
+            "POSTCC0_YB": {
+              "n": 2593,
+              "L_mae": 4.062481640022416,
+              "ab_error": 1.2387268646906835,
+              "DE76": 4.404522031244367,
+              "chroma_ratio_ref_ge20": 0.9992324291134222,
+              "hue_abs_error_deg_ref_ge20": 4.261490897816514,
+              "warm_n": 1,
+              "warm_ab_error": 11.496878822369574,
+              "warm_chroma_ratio": 1.1824492700862608,
+              "warm_hue_abs_error_deg": 3.257646994066853,
+              "L_bias": 4.062481640022416,
+              "patches": 2593,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.4572779369297301,
+                "mean_finalY": 0.46737952401210253,
+                "mean_finalY_minus_Ya": 0.010101587082372498,
+                "mean_abs_finalY_minus_Ya": 0.020142930774804155,
+                "mean_tone_gain": 0.9446883234689188,
+                "post_cc1_high_R_fraction": 0.0011341805240614765,
+                "post_cc1_high_G_fraction": 0.0008015243134290753,
+                "post_cc1_high_B_fraction": 0.003748189090450995,
+                "mean_Yb_preDG": 0.11528382821984576,
+                "mean_Yb_postDG": 0.46737952401210253
+              }
+            },
+            "PRECC0_YB": {
+              "n": 2593,
+              "L_mae": 3.538054772614973,
+              "ab_error": 1.24881885910814,
+              "DE76": 3.9799162756640984,
+              "chroma_ratio_ref_ge20": 1.0131105750710356,
+              "hue_abs_error_deg_ref_ge20": 4.7667521994616795,
+              "warm_n": 1,
+              "warm_ab_error": 11.695393390668823,
+              "warm_chroma_ratio": 1.1494782371872907,
+              "warm_hue_abs_error_deg": 6.775969032576185,
+              "L_bias": -1.441044040596076,
+              "patches": 2593,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.4572779369297301,
+                "mean_finalY": 0.4103959732179487,
+                "mean_finalY_minus_Ya": -0.046881963711781174,
+                "mean_abs_finalY_minus_Ya": 0.052033190889288296,
+                "mean_tone_gain": 0.9446883234689188,
+                "post_cc1_high_R_fraction": 4.5666414714033764e-05,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0,
+                "mean_Yb_preDG": 0.09059942933320843,
+                "mean_Yb_postDG": 0.4103959732179487
+              }
+            },
+            "YA_A1": {
+              "n": 2593,
+              "L_mae": 2.5596303825805053,
+              "ab_error": 1.1987888198638836,
+              "DE76": 2.8846013756149187,
+              "chroma_ratio_ref_ge20": 1.0016829930804185,
+              "hue_abs_error_deg_ref_ge20": 4.33891064078441,
+              "warm_n": 1,
+              "warm_ab_error": 11.724675585197442,
+              "warm_chroma_ratio": 1.1803817879407965,
+              "warm_hue_abs_error_deg": 4.105091113946692,
+              "L_bias": 2.5596303825805053,
+              "patches": 2593,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.4572779369297301,
+                "mean_finalY": 0.4572779369297301,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.9446883234689188,
+                "post_cc1_high_R_fraction": 0.0010979623330813807,
+                "post_cc1_high_G_fraction": 0.0007877456538170824,
+                "post_cc1_high_B_fraction": 0.003970616024187453
+              }
+            }
+          }
+        },
+        "white_normalized_control": {
+          "alignment": {
+            "corr": 0.9887349009513855,
+            "k": 0,
+            "dx": 2,
+            "dy": 2,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 2593,
+              "L_mae": 4.046103598480284,
+              "ab_error": 3.356130960714328,
+              "DE76": 5.754202501786643,
+              "chroma_ratio_ref_ge20": 0.9329536178219958,
+              "hue_abs_error_deg_ref_ge20": 4.663041636282164,
+              "warm_n": 1,
+              "warm_ab_error": 13.41353240434823,
+              "warm_chroma_ratio": 0.8814245396849496,
+              "warm_hue_abs_error_deg": 11.672136651666548,
+              "L_bias": 4.042968279231344,
+              "patches": 2593
+            },
+            "POSTCC0_YB": {
+              "n": 2593,
+              "L_mae": 5.498217764022127,
+              "ab_error": 1.2477175597586805,
+              "DE76": 5.728476893811627,
+              "chroma_ratio_ref_ge20": 1.014490305634555,
+              "hue_abs_error_deg_ref_ge20": 4.218028487252396,
+              "warm_n": 1,
+              "warm_ab_error": 13.063883000949604,
+              "warm_chroma_ratio": 1.2108482774477478,
+              "warm_hue_abs_error_deg": 3.0619973995602265,
+              "L_bias": 5.498217764022127,
+              "patches": 2593,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.47335972857405395,
+                "mean_finalY": 0.48180385734936526,
+                "mean_finalY_minus_Ya": 0.008444128775311083,
+                "mean_abs_finalY_minus_Ya": 0.01899302828767944,
+                "mean_tone_gain": 0.9540455931444922,
+                "post_cc1_high_R_fraction": 0.002245527840765936,
+                "post_cc1_high_G_fraction": 0.0005901203073822121,
+                "post_cc1_high_B_fraction": 0.003663548752834467,
+                "mean_Yb_preDG": 0.12237062657195626,
+                "mean_Yb_postDG": 0.48180385734936526
+              }
+            },
+            "PRECC0_YB": {
+              "n": 2593,
+              "L_mae": 3.052350981006556,
+              "ab_error": 1.3023866742867174,
+              "DE76": 3.571142685179877,
+              "chroma_ratio_ref_ge20": 1.028382195700937,
+              "hue_abs_error_deg_ref_ge20": 4.718087856983407,
+              "warm_n": 1,
+              "warm_ab_error": 13.128729008956846,
+              "warm_chroma_ratio": 1.178675262680613,
+              "warm_hue_abs_error_deg": 6.776073382418481,
+              "L_bias": -0.05177042909998072,
+              "patches": 2593,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.47335972857405395,
+                "mean_finalY": 0.42403593301510223,
+                "mean_finalY_minus_Ya": -0.04932379555895179,
+                "mean_abs_finalY_minus_Ya": 0.053922290948377076,
+                "mean_tone_gain": 0.9540455931444922,
+                "post_cc1_high_R_fraction": 5.511463844797178e-05,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0,
+                "mean_Yb_preDG": 0.0961550835086071,
+                "mean_Yb_postDG": 0.42403593301510223
+              }
+            },
+            "YA_A1": {
+              "n": 2593,
+              "L_mae": 4.149463210747686,
+              "ab_error": 1.2359086352428417,
+              "DE76": 4.3867890406259145,
+              "chroma_ratio_ref_ge20": 1.0165755435077,
+              "hue_abs_error_deg_ref_ge20": 4.2733116402376305,
+              "warm_n": 1,
+              "warm_ab_error": 13.025253416440695,
+              "warm_chroma_ratio": 1.2065976523422592,
+              "warm_hue_abs_error_deg": 3.6700221334256824,
+              "L_bias": 4.149463210747686,
+              "patches": 2593,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.47335972857405395,
+                "mean_finalY": 0.47335972857405395,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.9540455931444922,
+                "post_cc1_high_R_fraction": 0.0021927752582514485,
+                "post_cc1_high_G_fraction": 0.0005814594356261022,
+                "post_cc1_high_B_fraction": 0.0038899124464600657
+              }
+            }
+          }
+        }
+      },
+      "alignment": {
+        "corr": 0.9896899461746216,
+        "k": 0,
+        "dx": 2,
+        "dy": 2,
+        "margin": 16
+      }
+    },
+    "05": {
+      "metadata": {
+        "checks": {
+          "Model": true,
+          "SerialNumber": true,
+          "ImageUniqueID": true,
+          "DateTimeOriginal": true,
+          "ISO": true,
+          "ExposureTime": true,
+          "FNumber": true,
+          "FocalLength": true
+        },
+        "ISO": 100,
+        "kelvin": 5713.0,
+        "jpg_sha256": "97e231a765802c7f9921875b1305e1794df307c7f099e73df50e00105d37d5a5",
+        "dng_sha256": "8eb1480fb983860c7603a7686c0ac3d07ce1c7e611ca4a9038db376f5fdafd4e"
+      },
+      "whiteY": 0.9437952859330795,
+      "conditions": {
+        "target_native": {
+          "alignment": {
+            "corr": 0.9742819666862488,
+            "k": 0,
+            "dx": 2,
+            "dy": 2,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 2177,
+              "L_mae": 1.9225625636986106,
+              "ab_error": 10.860783861256808,
+              "DE76": 11.088113782439303,
+              "chroma_ratio_ref_ge20": 0.6872672478637385,
+              "hue_abs_error_deg_ref_ge20": 3.2481480456851193,
+              "warm_n": 0,
+              "warm_ab_error": null,
+              "warm_chroma_ratio": null,
+              "warm_hue_abs_error_deg": null,
+              "L_bias": 1.9225625636986106,
+              "patches": 2177
+            },
+            "POSTCC0_YB": {
+              "n": 2177,
+              "L_mae": 7.191519853331706,
+              "ab_error": 3.7513097277419574,
+              "DE76": 8.425116831224948,
+              "chroma_ratio_ref_ge20": 1.029177861528995,
+              "hue_abs_error_deg_ref_ge20": 4.06441757901336,
+              "warm_n": 0,
+              "warm_ab_error": null,
+              "warm_chroma_ratio": null,
+              "warm_hue_abs_error_deg": null,
+              "L_bias": 7.191519853331706,
+              "patches": 2177,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.36541585399282894,
+                "mean_finalY": 0.39572528259875767,
+                "mean_finalY_minus_Ya": 0.030309428605928532,
+                "mean_abs_finalY_minus_Ya": 0.03238403120448659,
+                "mean_tone_gain": 0.8500186483642972,
+                "post_cc1_high_R_fraction": 0.026933342781557068,
+                "post_cc1_high_G_fraction": 0.013109016754850088,
+                "post_cc1_high_B_fraction": 0.00020943562610229276,
+                "mean_Yb_preDG": 0.10697644121377756,
+                "mean_Yb_postDG": 0.39572528259875767
+              }
+            },
+            "PRECC0_YB": {
+              "n": 2177,
+              "L_mae": 3.1671779003502527,
+              "ab_error": 3.416921547620947,
+              "DE76": 5.000541690159926,
+              "chroma_ratio_ref_ge20": 1.0068911757870367,
+              "hue_abs_error_deg_ref_ge20": 3.997173381304417,
+              "warm_n": 0,
+              "warm_ab_error": null,
+              "warm_chroma_ratio": null,
+              "warm_hue_abs_error_deg": null,
+              "L_bias": 2.1999234719510796,
+              "patches": 2177,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.36541585399282894,
+                "mean_finalY": 0.34132606532822013,
+                "mean_finalY_minus_Ya": -0.024089788664608598,
+                "mean_abs_finalY_minus_Ya": 0.03764008181777735,
+                "mean_tone_gain": 0.8500186483642972,
+                "post_cc1_high_R_fraction": 0.01151305429579239,
+                "post_cc1_high_G_fraction": 0.0016022612748803225,
+                "post_cc1_high_B_fraction": 9.133282942806753e-05,
+                "mean_Yb_preDG": 0.08105879040770594,
+                "mean_Yb_postDG": 0.34132606532822013
+              }
+            },
+            "YA_A1": {
+              "n": 2177,
+              "L_mae": 2.6510677591725997,
+              "ab_error": 2.8828986465644233,
+              "DE76": 4.057228720945568,
+              "chroma_ratio_ref_ge20": 1.0055898451997987,
+              "hue_abs_error_deg_ref_ge20": 3.7711485792380324,
+              "warm_n": 0,
+              "warm_ab_error": null,
+              "warm_chroma_ratio": null,
+              "warm_hue_abs_error_deg": null,
+              "L_bias": 2.6510677591725997,
+              "patches": 2177,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.36541585399282894,
+                "mean_finalY": 0.36541585399282894,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.8500186483642972,
+                "post_cc1_high_R_fraction": 0.021986016628873773,
+                "post_cc1_high_G_fraction": 0.010750110229276896,
+                "post_cc1_high_B_fraction": 0.00018305933484504913
+              }
+            }
+          }
+        },
+        "white_normalized_control": {
+          "alignment": {
+            "corr": 0.9725815653800964,
+            "k": 0,
+            "dx": 2,
+            "dy": 2,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 2177,
+              "L_mae": 3.286458595006029,
+              "ab_error": 9.914730195196844,
+              "DE76": 10.505257065172017,
+              "chroma_ratio_ref_ge20": 0.7172767663921992,
+              "hue_abs_error_deg_ref_ge20": 3.256969402420279,
+              "warm_n": 0,
+              "warm_ab_error": null,
+              "warm_chroma_ratio": null,
+              "warm_hue_abs_error_deg": null,
+              "L_bias": 3.286458595006029,
+              "patches": 2177
+            },
+            "POSTCC0_YB": {
+              "n": 2177,
+              "L_mae": 8.435209990095315,
+              "ab_error": 4.416528154306329,
+              "DE76": 9.797089740019743,
+              "chroma_ratio_ref_ge20": 1.0618910037237443,
+              "hue_abs_error_deg_ref_ge20": 4.267098172470059,
+              "warm_n": 0,
+              "warm_ab_error": null,
+              "warm_chroma_ratio": null,
+              "warm_hue_abs_error_deg": null,
+              "L_bias": 8.435209990095315,
+              "patches": 2177,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.37799651270234436,
+                "mean_finalY": 0.40738829428555823,
+                "mean_finalY_minus_Ya": 0.029391781583213816,
+                "mean_abs_finalY_minus_Ya": 0.03154881966063649,
+                "mean_tone_gain": 0.859601669047992,
+                "post_cc1_high_R_fraction": 0.02912178760393046,
+                "post_cc1_high_G_fraction": 0.014418383093978332,
+                "post_cc1_high_B_fraction": 0.0002086482741244646,
+                "mean_Yb_preDG": 0.11269059803943457,
+                "mean_Yb_postDG": 0.40738829428555823
+              }
+            },
+            "PRECC0_YB": {
+              "n": 2177,
+              "L_mae": 3.7340590862927767,
+              "ab_error": 3.9098812090176236,
+              "DE76": 5.807850764836787,
+              "chroma_ratio_ref_ge20": 1.0389058002051268,
+              "hue_abs_error_deg_ref_ge20": 4.203930325960195,
+              "warm_n": 0,
+              "warm_ab_error": null,
+              "warm_chroma_ratio": null,
+              "warm_hue_abs_error_deg": null,
+              "L_bias": 3.3548280630957166,
+              "patches": 2177,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.37799651270234436,
+                "mean_finalY": 0.3521267269858922,
+                "mean_finalY_minus_Ya": -0.025869785716451724,
+                "mean_abs_finalY_minus_Ya": 0.03847034633225055,
+                "mean_tone_gain": 0.859601669047992,
+                "post_cc1_high_R_fraction": 0.012330719324766945,
+                "post_cc1_high_G_fraction": 0.0016247008062484252,
+                "post_cc1_high_B_fraction": 9.68442932728647e-05,
+                "mean_Yb_preDG": 0.08540006228687284,
+                "mean_Yb_postDG": 0.3521267269858922
+              }
+            },
+            "YA_A1": {
+              "n": 2177,
+              "L_mae": 3.9882451391680065,
+              "ab_error": 3.4932389947742095,
+              "DE76": 5.496558064807008,
+              "chroma_ratio_ref_ge20": 1.0401117942260685,
+              "hue_abs_error_deg_ref_ge20": 4.048886058894484,
+              "warm_n": 0,
+              "warm_ab_error": null,
+              "warm_chroma_ratio": null,
+              "warm_hue_abs_error_deg": null,
+              "L_bias": 3.9882451391680065,
+              "patches": 2177,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.37799651270234436,
+                "mean_finalY": 0.37799651270234436,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.859601669047992,
+                "post_cc1_high_R_fraction": 0.023581585411942555,
+                "post_cc1_high_G_fraction": 0.011859489166036786,
+                "post_cc1_high_B_fraction": 0.00017754787100025194
+              }
+            }
+          }
+        }
+      },
+      "alignment": {
+        "corr": 0.9742819666862488,
+        "k": 0,
+        "dx": 2,
+        "dy": 2,
+        "margin": 16
+      }
+    },
+    "06": {
+      "metadata": {
+        "checks": {
+          "Model": true,
+          "SerialNumber": true,
+          "ImageUniqueID": true,
+          "DateTimeOriginal": true,
+          "ISO": true,
+          "ExposureTime": true,
+          "FNumber": true,
+          "FocalLength": true
+        },
+        "ISO": 100,
+        "kelvin": 5792.0,
+        "jpg_sha256": "cc108b529df0249b77b2a66f99421105c02f5943074a6336a0a01727f6fffab7",
+        "dng_sha256": "cdca7b909ce48d56bcd3f31b92cc55b53f72cd12df0d7ce26e512a67ddd810eb"
+      },
+      "whiteY": 0.9435248502567741,
+      "conditions": {
+        "target_native": {
+          "alignment": {
+            "corr": 0.9853515028953552,
+            "k": 0,
+            "dx": 3,
+            "dy": 1,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 4494,
+              "L_mae": 2.478976688970711,
+              "ab_error": 11.695716917300004,
+              "DE76": 12.051196236298091,
+              "chroma_ratio_ref_ge20": 0.7224955686965269,
+              "hue_abs_error_deg_ref_ge20": 3.5091732432937213,
+              "warm_n": 0,
+              "warm_ab_error": null,
+              "warm_chroma_ratio": null,
+              "warm_hue_abs_error_deg": null,
+              "L_bias": 2.4787702505250055,
+              "patches": 4494
+            },
+            "POSTCC0_YB": {
+              "n": 4494,
+              "L_mae": 5.3324055554976075,
+              "ab_error": 3.479037552157198,
+              "DE76": 6.802723228354358,
+              "chroma_ratio_ref_ge20": 0.9737427964759308,
+              "hue_abs_error_deg_ref_ge20": 3.4658545500983324,
+              "warm_n": 0,
+              "warm_ab_error": null,
+              "warm_chroma_ratio": null,
+              "warm_hue_abs_error_deg": null,
+              "L_bias": 5.3324055554976075,
+              "patches": 4494,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.37623979385305834,
+                "mean_finalY": 0.39842485993218363,
+                "mean_finalY_minus_Ya": 0.022185066079124842,
+                "mean_abs_finalY_minus_Ya": 0.025191695427772595,
+                "mean_tone_gain": 0.8756161277646091,
+                "post_cc1_high_R_fraction": 0.009538769211388258,
+                "post_cc1_high_G_fraction": 0.0015943877551020409,
+                "post_cc1_high_B_fraction": 1.417233560090703e-05,
+                "mean_Yb_preDG": 0.098537738674128,
+                "mean_Yb_postDG": 0.39842485993218363
+              }
+            },
+            "PRECC0_YB": {
+              "n": 4494,
+              "L_mae": 2.731736119078911,
+              "ab_error": 3.5925425450554727,
+              "DE76": 4.818566325044729,
+              "chroma_ratio_ref_ge20": 0.9616539395752285,
+              "hue_abs_error_deg_ref_ge20": 3.7008264468929304,
+              "warm_n": 0,
+              "warm_ab_error": null,
+              "warm_chroma_ratio": null,
+              "warm_hue_abs_error_deg": null,
+              "L_bias": -0.48499860708375053,
+              "patches": 4494,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.37623979385305834,
+                "mean_finalY": 0.34193946766674743,
+                "mean_finalY_minus_Ya": -0.03430032618631074,
+                "mean_abs_finalY_minus_Ya": 0.04422702269666323,
+                "mean_tone_gain": 0.8756161277646091,
+                "post_cc1_high_R_fraction": 0.00012991307634164777,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0,
+                "mean_Yb_preDG": 0.0746483997360616,
+                "mean_Yb_postDG": 0.34193946766674743
+              }
+            },
+            "YA_A1": {
+              "n": 4494,
+              "L_mae": 2.8551686536910323,
+              "ab_error": 3.2474014179419552,
+              "DE76": 4.499414877275493,
+              "chroma_ratio_ref_ge20": 0.9677977568055312,
+              "hue_abs_error_deg_ref_ge20": 3.4576576922794224,
+              "warm_n": 0,
+              "warm_ab_error": null,
+              "warm_chroma_ratio": null,
+              "warm_hue_abs_error_deg": null,
+              "L_bias": 2.8551686536910323,
+              "patches": 4494,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.37623979385305834,
+                "mean_finalY": 0.37623979385305834,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.8756161277646091,
+                "post_cc1_high_R_fraction": 0.009504519400352733,
+                "post_cc1_high_G_fraction": 0.001614071554547745,
+                "post_cc1_high_B_fraction": 1.417233560090703e-05
+              }
+            }
+          }
+        },
+        "white_normalized_control": {
+          "alignment": {
+            "corr": 0.9829944372177124,
+            "k": 0,
+            "dx": 3,
+            "dy": 1,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 4494,
+              "L_mae": 3.993243432649783,
+              "ab_error": 10.771224401972134,
+              "DE76": 11.605925723930389,
+              "chroma_ratio_ref_ge20": 0.7497896146772708,
+              "hue_abs_error_deg_ref_ge20": 3.494524438100386,
+              "warm_n": 0,
+              "warm_ab_error": null,
+              "warm_chroma_ratio": null,
+              "warm_hue_abs_error_deg": null,
+              "L_bias": 3.993028845318063,
+              "patches": 4494
+            },
+            "POSTCC0_YB": {
+              "n": 4494,
+              "L_mae": 6.682071592418364,
+              "ab_error": 3.720569560559626,
+              "DE76": 7.999607838575452,
+              "chroma_ratio_ref_ge20": 0.9955318271344886,
+              "hue_abs_error_deg_ref_ge20": 3.6332525053042706,
+              "warm_n": 0,
+              "warm_ab_error": null,
+              "warm_chroma_ratio": null,
+              "warm_hue_abs_error_deg": null,
+              "L_bias": 6.682071592418364,
+              "patches": 4494,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.389361355590821,
+                "mean_finalY": 0.41054487345327995,
+                "mean_finalY_minus_Ya": 0.021183517862458784,
+                "mean_abs_finalY_minus_Ya": 0.02433381523414947,
+                "mean_tone_gain": 0.8842980299172767,
+                "post_cc1_high_R_fraction": 0.010216679264298312,
+                "post_cc1_high_G_fraction": 0.0018498834719072813,
+                "post_cc1_high_B_fraction": 1.535336356764928e-05,
+                "mean_Yb_preDG": 0.10400157660179109,
+                "mean_Yb_postDG": 0.41054487345327995
+              }
+            },
+            "PRECC0_YB": {
+              "n": 4494,
+              "L_mae": 2.4557700197485537,
+              "ab_error": 3.677464952617153,
+              "DE76": 4.834976181112742,
+              "chroma_ratio_ref_ge20": 0.9831315143282251,
+              "hue_abs_error_deg_ref_ge20": 3.868151543191269,
+              "warm_n": 0,
+              "warm_ab_error": null,
+              "warm_chroma_ratio": null,
+              "warm_hue_abs_error_deg": null,
+              "L_bias": 0.7986967649574432,
+              "patches": 4494,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.389361355590821,
+                "mean_finalY": 0.35318887323835196,
+                "mean_finalY_minus_Ya": -0.03617248235246914,
+                "mean_abs_finalY_minus_Ya": 0.045674706010762955,
+                "mean_tone_gain": 0.8842980299172767,
+                "post_cc1_high_R_fraction": 0.00020943562610229276,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0,
+                "mean_Yb_preDG": 0.07878425586795207,
+                "mean_Yb_postDG": 0.35318887323835196
+              }
+            },
+            "YA_A1": {
+              "n": 4494,
+              "L_mae": 4.309421568167279,
+              "ab_error": 3.432396134934058,
+              "DE76": 5.743544654672022,
+              "chroma_ratio_ref_ge20": 0.989954670466626,
+              "hue_abs_error_deg_ref_ge20": 3.637697643802401,
+              "warm_n": 0,
+              "warm_ab_error": null,
+              "warm_chroma_ratio": null,
+              "warm_hue_abs_error_deg": null,
+              "L_bias": 4.309421568167279,
+              "patches": 4494,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.389361355590821,
+                "mean_finalY": 0.389361355590821,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.8842980299172767,
+                "post_cc1_high_R_fraction": 0.010042280801209372,
+                "post_cc1_high_G_fraction": 0.0018750787351977827,
+                "post_cc1_high_B_fraction": 1.4959687578735198e-05
+              }
+            }
+          }
+        }
+      },
+      "alignment": {
+        "corr": 0.9853515028953552,
+        "k": 0,
+        "dx": 3,
+        "dy": 1,
+        "margin": 16
+      }
+    },
+    "07": {
+      "metadata": {
+        "checks": {
+          "Model": true,
+          "SerialNumber": true,
+          "ImageUniqueID": true,
+          "DateTimeOriginal": true,
+          "ISO": true,
+          "ExposureTime": true,
+          "FNumber": true,
+          "FocalLength": true
+        },
+        "ISO": 100,
+        "kelvin": 6186.0,
+        "jpg_sha256": "3e54dddfa7aa7db1f597df91393031c74830c9968f3a0f6097b78f5003f5f684",
+        "dng_sha256": "d0704e74295ac70dc24795e180114d29514571168f4c60dbe26ef09230c112dd"
+      },
+      "whiteY": 0.9442017567254568,
+      "conditions": {
+        "target_native": {
+          "alignment": {
+            "corr": 0.986202597618103,
+            "k": 0,
+            "dx": 2,
+            "dy": 1,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 2779,
+              "L_mae": 1.2083379602037603,
+              "ab_error": 5.447825587277313,
+              "DE76": 5.622372352279032,
+              "chroma_ratio_ref_ge20": 0.6729358240382138,
+              "hue_abs_error_deg_ref_ge20": 2.48320390455414,
+              "warm_n": 5,
+              "warm_ab_error": 7.474537308613951,
+              "warm_chroma_ratio": 0.6881751950386954,
+              "warm_hue_abs_error_deg": 7.319263673985892,
+              "L_bias": 1.203040486404732,
+              "patches": 2779
+            },
+            "POSTCC0_YB": {
+              "n": 2779,
+              "L_mae": 6.913220878126125,
+              "ab_error": 1.9649137541894408,
+              "DE76": 7.296140999166253,
+              "chroma_ratio_ref_ge20": 0.9969381124693498,
+              "hue_abs_error_deg_ref_ge20": 2.7353308053839402,
+              "warm_n": 5,
+              "warm_ab_error": 2.2460590179241295,
+              "warm_chroma_ratio": 1.048878221849045,
+              "warm_hue_abs_error_deg": 4.948372095400077,
+              "L_bias": 6.913220878126125,
+              "patches": 2779,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.3610212087795809,
+                "mean_finalY": 0.3858286346639455,
+                "mean_finalY_minus_Ya": 0.024807425884364694,
+                "mean_abs_finalY_minus_Ya": 0.029485733257226872,
+                "mean_tone_gain": 0.8337995069838187,
+                "post_cc1_high_R_fraction": 0.03418170508944318,
+                "post_cc1_high_G_fraction": 0.005955530360292265,
+                "post_cc1_high_B_fraction": 0.000495638070042832,
+                "mean_Yb_preDG": 0.11523023498693902,
+                "mean_Yb_postDG": 0.3858286346639455
+              }
+            },
+            "PRECC0_YB": {
+              "n": 2779,
+              "L_mae": 3.396159498414448,
+              "ab_error": 1.6584184330860432,
+              "DE76": 3.849280578732183,
+              "chroma_ratio_ref_ge20": 1.0128686771737292,
+              "hue_abs_error_deg_ref_ge20": 3.279408492417518,
+              "warm_n": 5,
+              "warm_ab_error": 3.2460367264873766,
+              "warm_chroma_ratio": 1.0945905590044347,
+              "warm_hue_abs_error_deg": 6.1484030466343,
+              "L_bias": 2.803505715297769,
+              "patches": 2779,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.3610212087795809,
+                "mean_finalY": 0.3316623854865441,
+                "mean_finalY_minus_Ya": -0.029358823293036792,
+                "mean_abs_finalY_minus_Ya": 0.042819866328520924,
+                "mean_tone_gain": 0.8337995069838187,
+                "post_cc1_high_R_fraction": 0.0005775226757369614,
+                "post_cc1_high_G_fraction": 2.007747543461829e-05,
+                "post_cc1_high_B_fraction": 3.188775510204082e-05,
+                "mean_Yb_preDG": 0.08729907062086757,
+                "mean_Yb_postDG": 0.3316623854865441
+              }
+            },
+            "YA_A1": {
+              "n": 2779,
+              "L_mae": 1.6383535873122077,
+              "ab_error": 1.2091119276172018,
+              "DE76": 2.086221489361322,
+              "chroma_ratio_ref_ge20": 1.0043261444761846,
+              "hue_abs_error_deg_ref_ge20": 3.054167970992834,
+              "warm_n": 5,
+              "warm_ab_error": 2.974241328204516,
+              "warm_chroma_ratio": 1.0802031257442892,
+              "warm_hue_abs_error_deg": 5.861453410536339,
+              "L_bias": 1.6383535873122077,
+              "patches": 2779,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.3610212087795809,
+                "mean_finalY": 0.3610212087795809,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.8337995069838187,
+                "post_cc1_high_R_fraction": 0.03403722600151172,
+                "post_cc1_high_G_fraction": 0.005933090828924162,
+                "post_cc1_high_B_fraction": 0.0004920949861426052
+              }
+            }
+          }
+        },
+        "white_normalized_control": {
+          "alignment": {
+            "corr": 0.9843184947967529,
+            "k": 0,
+            "dx": 2,
+            "dy": 1,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 2779,
+              "L_mae": 2.1051440491183877,
+              "ab_error": 5.024513775490579,
+              "DE76": 5.524735777997108,
+              "chroma_ratio_ref_ge20": 0.7042086363022947,
+              "hue_abs_error_deg_ref_ge20": 2.5025502630351086,
+              "warm_n": 5,
+              "warm_ab_error": 6.868414701559682,
+              "warm_chroma_ratio": 0.7192325092728901,
+              "warm_hue_abs_error_deg": 7.229213536216247,
+              "L_bias": 2.104810211631882,
+              "patches": 2779
+            },
+            "POSTCC0_YB": {
+              "n": 2779,
+              "L_mae": 7.844816347213476,
+              "ab_error": 2.316824202139097,
+              "DE76": 8.298791243780803,
+              "chroma_ratio_ref_ge20": 1.032379809211586,
+              "hue_abs_error_deg_ref_ge20": 2.7833967042081644,
+              "warm_n": 5,
+              "warm_ab_error": 2.8752983605140963,
+              "warm_chroma_ratio": 1.0897063045191875,
+              "warm_hue_abs_error_deg": 5.104135539519566,
+              "L_bias": 7.844816347213476,
+              "patches": 2779,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.372755653611578,
+                "mean_finalY": 0.3967058607386226,
+                "mean_finalY_minus_Ya": 0.02395020712704444,
+                "mean_abs_finalY_minus_Ya": 0.028819295733844816,
+                "mean_tone_gain": 0.8420859183300596,
+                "post_cc1_high_R_fraction": 0.036036312673217434,
+                "post_cc1_high_G_fraction": 0.006348418997228521,
+                "post_cc1_high_B_fraction": 0.0005739795918367347,
+                "mean_Yb_preDG": 0.12048791719778823,
+                "mean_Yb_postDG": 0.3967058607386226
+              }
+            },
+            "PRECC0_YB": {
+              "n": 2779,
+              "L_mae": 4.007488414082179,
+              "ab_error": 2.0962698643928737,
+              "DE76": 4.607192421940297,
+              "chroma_ratio_ref_ge20": 1.0477069265394565,
+              "hue_abs_error_deg_ref_ge20": 3.356601023028338,
+              "warm_n": 5,
+              "warm_ab_error": 3.9861567028579628,
+              "warm_chroma_ratio": 1.1362594572841327,
+              "warm_hue_abs_error_deg": 6.283857237536742,
+              "L_bias": 3.6229515556124054,
+              "patches": 2779,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.372755653611578,
+                "mean_finalY": 0.3416608875617816,
+                "mean_finalY_minus_Ya": -0.031094766049796514,
+                "mean_abs_finalY_minus_Ya": 0.04392110280475492,
+                "mean_tone_gain": 0.8420859183300596,
+                "post_cc1_high_R_fraction": 0.0007212144116906022,
+                "post_cc1_high_G_fraction": 2.676996724615772e-05,
+                "post_cc1_high_B_fraction": 3.621819098009574e-05,
+                "mean_Yb_preDG": 0.09127295808359567,
+                "mean_Yb_postDG": 0.3416608875617816
+              }
+            },
+            "YA_A1": {
+              "n": 2779,
+              "L_mae": 2.551658276217839,
+              "ab_error": 1.5987543273096816,
+              "DE76": 3.075169745079468,
+              "chroma_ratio_ref_ge20": 1.0396904070870694,
+              "hue_abs_error_deg_ref_ge20": 3.1170018358127054,
+              "warm_n": 5,
+              "warm_ab_error": 3.5303175554619495,
+              "warm_chroma_ratio": 1.1185292256381223,
+              "warm_hue_abs_error_deg": 5.657120879577522,
+              "L_bias": 2.551658276217839,
+              "patches": 2779,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.372755653611578,
+                "mean_finalY": 0.372755653611578,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.8420859183300596,
+                "post_cc1_high_R_fraction": 0.035837899974804736,
+                "post_cc1_high_G_fraction": 0.006309838750314941,
+                "post_cc1_high_B_fraction": 0.0005743732678256488
+              }
+            }
+          }
+        }
+      },
+      "alignment": {
+        "corr": 0.986202597618103,
+        "k": 0,
+        "dx": 2,
+        "dy": 1,
+        "margin": 16
+      }
+    },
+    "08": {
+      "metadata": {
+        "checks": {
+          "Model": true,
+          "SerialNumber": true,
+          "ImageUniqueID": true,
+          "DateTimeOriginal": true,
+          "ISO": true,
+          "ExposureTime": true,
+          "FNumber": true,
+          "FocalLength": true
+        },
+        "ISO": 100,
+        "kelvin": 6105.0,
+        "jpg_sha256": "027a78131af229d440476acb8303a9e419fe4ac56dd035e45c063cf338a954c7",
+        "dng_sha256": "31274a006301a00b3bb2d1ffe5fbf5fcde4459d1bfd54a82d17fe4f4ce96b45f"
+      },
+      "whiteY": 0.9445525678627753,
+      "conditions": {
+        "target_native": {
+          "alignment": {
+            "corr": 0.9860901832580566,
+            "k": 0,
+            "dx": 2,
+            "dy": 1,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 2407,
+              "L_mae": 1.4935787059877441,
+              "ab_error": 5.776266771722503,
+              "DE76": 6.025774341527675,
+              "chroma_ratio_ref_ge20": 0.744487545791234,
+              "hue_abs_error_deg_ref_ge20": 4.047303615396558,
+              "warm_n": 10,
+              "warm_ab_error": 6.296918518581581,
+              "warm_chroma_ratio": 0.8070066586084987,
+              "warm_hue_abs_error_deg": 9.85611247798519,
+              "L_bias": 1.4935787059877441,
+              "patches": 2407
+            },
+            "POSTCC0_YB": {
+              "n": 2407,
+              "L_mae": 7.176616115593841,
+              "ab_error": 1.7619932795053832,
+              "DE76": 7.550311949691924,
+              "chroma_ratio_ref_ge20": 0.9805935006009199,
+              "hue_abs_error_deg_ref_ge20": 3.4241230874076414,
+              "warm_n": 10,
+              "warm_ab_error": 2.7399566975959675,
+              "warm_chroma_ratio": 1.042094677600299,
+              "warm_hue_abs_error_deg": 5.836644384870196,
+              "L_bias": 7.176616115593841,
+              "patches": 2407,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.39526606918153273,
+                "mean_finalY": 0.4196149414230117,
+                "mean_finalY_minus_Ya": 0.024348872241479486,
+                "mean_abs_finalY_minus_Ya": 0.029634036630352058,
+                "mean_tone_gain": 0.8546654850601951,
+                "post_cc1_high_R_fraction": 0.030216994205089442,
+                "post_cc1_high_G_fraction": 0.009386810279667422,
+                "post_cc1_high_B_fraction": 0.0008176650289745528,
+                "mean_Yb_preDG": 0.12661729642060768,
+                "mean_Yb_postDG": 0.4196149414230117
+              }
+            },
+            "PRECC0_YB": {
+              "n": 2407,
+              "L_mae": 3.9806814475033754,
+              "ab_error": 1.6165698492032257,
+              "DE76": 4.3643956857329105,
+              "chroma_ratio_ref_ge20": 0.9973165074490162,
+              "hue_abs_error_deg_ref_ge20": 3.8915981854782897,
+              "warm_n": 10,
+              "warm_ab_error": 3.662588902134641,
+              "warm_chroma_ratio": 1.0840562135990066,
+              "warm_hue_abs_error_deg": 6.808449331303048,
+              "L_bias": 2.631634600092179,
+              "patches": 2407,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.39526606918153273,
+                "mean_finalY": 0.3628418421519139,
+                "mean_finalY_minus_Ya": -0.03242422702961876,
+                "mean_abs_finalY_minus_Ya": 0.04637835916601709,
+                "mean_tone_gain": 0.8546654850601951,
+                "post_cc1_high_R_fraction": 0.003320263290501386,
+                "post_cc1_high_G_fraction": 0.00016613126732174352,
+                "post_cc1_high_B_fraction": 5.353993449231544e-05,
+                "mean_Yb_preDG": 0.09596369208414068,
+                "mean_Yb_postDG": 0.3628418421519139
+              }
+            },
+            "YA_A1": {
+              "n": 2407,
+              "L_mae": 1.874058227792636,
+              "ab_error": 1.2679971029695658,
+              "DE76": 2.3284383329552014,
+              "chroma_ratio_ref_ge20": 0.9872772218686439,
+              "hue_abs_error_deg_ref_ge20": 3.633375349985538,
+              "warm_n": 10,
+              "warm_ab_error": 2.8750080191576033,
+              "warm_chroma_ratio": 1.0442541220891972,
+              "warm_hue_abs_error_deg": 6.053959185568415,
+              "L_bias": 1.874058227792636,
+              "patches": 2407,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.39526606918153273,
+                "mean_finalY": 0.39526606918153273,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.8546654850601951,
+                "post_cc1_high_R_fraction": 0.02881708238851096,
+                "post_cc1_high_G_fraction": 0.008895108969513732,
+                "post_cc1_high_B_fraction": 0.0008306563366087176
+              }
+            }
+          }
+        },
+        "white_normalized_control": {
+          "alignment": {
+            "corr": 0.9847021102905273,
+            "k": 0,
+            "dx": 2,
+            "dy": 1,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 2407,
+              "L_mae": 2.52795851374247,
+              "ab_error": 5.375506956280353,
+              "DE76": 6.027889704504452,
+              "chroma_ratio_ref_ge20": 0.7752807851091511,
+              "hue_abs_error_deg_ref_ge20": 4.0812985956930445,
+              "warm_n": 10,
+              "warm_ab_error": 5.727296583682653,
+              "warm_chroma_ratio": 0.8363904182338668,
+              "warm_hue_abs_error_deg": 9.503993489426415,
+              "L_bias": 2.52795851374247,
+              "patches": 2407
+            },
+            "POSTCC0_YB": {
+              "n": 2407,
+              "L_mae": 8.193765599845502,
+              "ab_error": 2.0038597315538036,
+              "DE76": 8.582420683442571,
+              "chroma_ratio_ref_ge20": 1.004890695629577,
+              "hue_abs_error_deg_ref_ge20": 3.4158428310572466,
+              "warm_n": 10,
+              "warm_ab_error": 3.0018222185360797,
+              "warm_chroma_ratio": 1.0606377916183753,
+              "warm_hue_abs_error_deg": 5.862303576298922,
+              "L_bias": 8.193765599845502,
+              "patches": 2407,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.4074442400835524,
+                "mean_finalY": 0.43101844837628506,
+                "mean_finalY_minus_Ya": 0.02357420829273277,
+                "mean_abs_finalY_minus_Ya": 0.02887573513254347,
+                "mean_tone_gain": 0.8627486496458168,
+                "post_cc1_high_R_fraction": 0.03209167926429831,
+                "post_cc1_high_G_fraction": 0.010145423910304863,
+                "post_cc1_high_B_fraction": 0.0008712049634668682,
+                "mean_Yb_preDG": 0.132741889105648,
+                "mean_Yb_postDG": 0.43101844837628506
+              }
+            },
+            "PRECC0_YB": {
+              "n": 2407,
+              "L_mae": 4.522821721963284,
+              "ab_error": 1.9921170119766725,
+              "DE76": 5.042992331589189,
+              "chroma_ratio_ref_ge20": 1.0214009919741205,
+              "hue_abs_error_deg_ref_ge20": 3.8636929315381563,
+              "warm_n": 10,
+              "warm_ab_error": 3.957896217205178,
+              "warm_chroma_ratio": 1.1005920170830055,
+              "warm_hue_abs_error_deg": 6.889737159526554,
+              "L_bias": 3.5597341210207207,
+              "patches": 2407,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.4074442400835524,
+                "mean_finalY": 0.3735043871436751,
+                "mean_finalY_minus_Ya": -0.03393985293987706,
+                "mean_abs_finalY_minus_Ya": 0.04700339329615198,
+                "mean_tone_gain": 0.8627486496458168,
+                "post_cc1_high_R_fraction": 0.0035568625598387505,
+                "post_cc1_high_G_fraction": 0.0001984126984126984,
+                "post_cc1_high_B_fraction": 5.787037037037037e-05,
+                "mean_Yb_preDG": 0.10059733716943553,
+                "mean_Yb_postDG": 0.3735043871436751
+              }
+            },
+            "YA_A1": {
+              "n": 2407,
+              "L_mae": 2.9144223715984627,
+              "ab_error": 1.6340232166826982,
+              "DE76": 3.4158138727089473,
+              "chroma_ratio_ref_ge20": 1.0113462006589455,
+              "hue_abs_error_deg_ref_ge20": 3.6375684375825164,
+              "warm_n": 10,
+              "warm_ab_error": 3.1013540173492973,
+              "warm_chroma_ratio": 1.0615982722515707,
+              "warm_hue_abs_error_deg": 6.047122142714538,
+              "L_bias": 2.9144223715984627,
+              "patches": 2407,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.4074442400835524,
+                "mean_finalY": 0.4074442400835524,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.8627486496458168,
+                "post_cc1_high_R_fraction": 0.03061657533383724,
+                "post_cc1_high_G_fraction": 0.009572231670445956,
+                "post_cc1_high_B_fraction": 0.0008822278911564626
+              }
+            }
+          }
+        }
+      },
+      "alignment": {
+        "corr": 0.9860901832580566,
+        "k": 0,
+        "dx": 2,
+        "dy": 1,
+        "margin": 16
+      }
+    },
+    "09": {
+      "metadata": {
+        "checks": {
+          "Model": true,
+          "SerialNumber": true,
+          "ImageUniqueID": true,
+          "DateTimeOriginal": true,
+          "ISO": true,
+          "ExposureTime": true,
+          "FNumber": true,
+          "FocalLength": true
+        },
+        "ISO": 100,
+        "kelvin": 5856.0,
+        "jpg_sha256": "96d134820e699fd1bef3fcac69176167961465af45265aad79532e215cfdcf5a",
+        "dng_sha256": "714df858e66b396de91644e1735ad5b1a9941d072ffa571096d84e12bc96569a"
+      },
+      "whiteY": 0.9442003630118534,
+      "conditions": {
+        "target_native": {
+          "alignment": {
+            "corr": 0.9907983541488647,
+            "k": 0,
+            "dx": 2,
+            "dy": 1,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 3690,
+              "L_mae": 1.9829478690294715,
+              "ab_error": 3.941409475669833,
+              "DE76": 4.7596935276170065,
+              "chroma_ratio_ref_ge20": 1.052649279229329,
+              "hue_abs_error_deg_ref_ge20": 15.015852306990274,
+              "warm_n": 51,
+              "warm_ab_error": 7.412946917415091,
+              "warm_chroma_ratio": 0.7646582288309882,
+              "warm_hue_abs_error_deg": 9.37647375651718,
+              "L_bias": 1.9829478690294715,
+              "patches": 3690
+            },
+            "POSTCC0_YB": {
+              "n": 3690,
+              "L_mae": 4.2671364885035565,
+              "ab_error": 1.35066253573887,
+              "DE76": 4.6705060865488734,
+              "chroma_ratio_ref_ge20": 0.9644952660876889,
+              "hue_abs_error_deg_ref_ge20": 8.958143991477101,
+              "warm_n": 51,
+              "warm_ab_error": 3.491769471264572,
+              "warm_chroma_ratio": 1.0869999929894503,
+              "warm_hue_abs_error_deg": 5.264040622459192,
+              "L_bias": 4.2671364885035565,
+              "patches": 3690,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.4491342309521606,
+                "mean_finalY": 0.4654383220564035,
+                "mean_finalY_minus_Ya": 0.016304091104243412,
+                "mean_abs_finalY_minus_Ya": 0.02541592049883547,
+                "mean_tone_gain": 0.8871608681977499,
+                "post_cc1_high_R_fraction": 0.002574247291509196,
+                "post_cc1_high_G_fraction": 0.0003527336860670194,
+                "post_cc1_high_B_fraction": 0.0004696554547745024,
+                "mean_Yb_preDG": 0.13681899922503854,
+                "mean_Yb_postDG": 0.4654383220564035
+              }
+            },
+            "PRECC0_YB": {
+              "n": 3690,
+              "L_mae": 3.9274965198382454,
+              "ab_error": 1.4152519683351108,
+              "DE76": 4.3451084900838035,
+              "chroma_ratio_ref_ge20": 0.9941731592279077,
+              "hue_abs_error_deg_ref_ge20": 9.527471368446895,
+              "warm_n": 51,
+              "warm_ab_error": 4.777504257107548,
+              "warm_chroma_ratio": 1.1377046497119847,
+              "warm_hue_abs_error_deg": 6.081999214513923,
+              "L_bias": -0.4499118050262534,
+              "patches": 3690,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.4491342309521606,
+                "mean_finalY": 0.4149165495524454,
+                "mean_finalY_minus_Ya": -0.03421768139971498,
+                "mean_abs_finalY_minus_Ya": 0.04676988005372857,
+                "mean_tone_gain": 0.8871608681977499,
+                "post_cc1_high_R_fraction": 0.0001291257243638196,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0,
+                "mean_Yb_preDG": 0.10802072451227808,
+                "mean_Yb_postDG": 0.4149165495524454
+              }
+            },
+            "YA_A1": {
+              "n": 3690,
+              "L_mae": 1.982226694825542,
+              "ab_error": 1.365965691854976,
+              "DE76": 2.4954326658413506,
+              "chroma_ratio_ref_ge20": 0.9735928638342822,
+              "hue_abs_error_deg_ref_ge20": 9.059250475930087,
+              "warm_n": 51,
+              "warm_ab_error": 3.861277368502436,
+              "warm_chroma_ratio": 1.1039691275142691,
+              "warm_hue_abs_error_deg": 5.4401058247014085,
+              "L_bias": 1.982226694825542,
+              "patches": 3690,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.4491342309521606,
+                "mean_finalY": 0.4491342309521606,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.8871608681977499,
+                "post_cc1_high_R_fraction": 0.0025100781053162004,
+                "post_cc1_high_G_fraction": 0.0003531273620559335,
+                "post_cc1_high_B_fraction": 0.0006019305870496347
+              }
+            }
+          }
+        },
+        "white_normalized_control": {
+          "alignment": {
+            "corr": 0.9895121455192566,
+            "k": 0,
+            "dx": 2,
+            "dy": 1,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 3690,
+              "L_mae": 3.0867314532520327,
+              "ab_error": 3.9628651189701016,
+              "DE76": 5.5494773895269764,
+              "chroma_ratio_ref_ge20": 1.060019129598446,
+              "hue_abs_error_deg_ref_ge20": 14.089389256386356,
+              "warm_n": 51,
+              "warm_ab_error": 6.801552125363965,
+              "warm_chroma_ratio": 0.7973603513474288,
+              "warm_hue_abs_error_deg": 9.399520543791624,
+              "L_bias": 3.0867314532520327,
+              "patches": 3690
+            },
+            "POSTCC0_YB": {
+              "n": 3690,
+              "L_mae": 5.404375277883638,
+              "ab_error": 1.4112360919148446,
+              "DE76": 5.707902904911592,
+              "chroma_ratio_ref_ge20": 0.9727787142106543,
+              "hue_abs_error_deg_ref_ge20": 8.831870876965258,
+              "warm_n": 51,
+              "warm_ab_error": 4.006759959319769,
+              "warm_chroma_ratio": 1.116668204723779,
+              "warm_hue_abs_error_deg": 5.076164150054926,
+              "L_bias": 5.404375277883638,
+              "patches": 3690,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.46185638703280013,
+                "mean_finalY": 0.4774744117768007,
+                "mean_finalY_minus_Ya": 0.01561802474400086,
+                "mean_abs_finalY_minus_Ya": 0.024476393671841422,
+                "mean_tone_gain": 0.8937275767838107,
+                "post_cc1_high_R_fraction": 0.002771478961955152,
+                "post_cc1_high_G_fraction": 0.00032517636684303354,
+                "post_cc1_high_B_fraction": 0.0011467781557067272,
+                "mean_Yb_preDG": 0.14478771093977155,
+                "mean_Yb_postDG": 0.4774744117768007
+              }
+            },
+            "PRECC0_YB": {
+              "n": 3690,
+              "L_mae": 3.555354089917852,
+              "ab_error": 1.4783725025029304,
+              "DE76": 4.049306654906873,
+              "chroma_ratio_ref_ge20": 1.0020655869157966,
+              "hue_abs_error_deg_ref_ge20": 9.39339563422956,
+              "warm_n": 51,
+              "warm_ab_error": 5.3326203190326975,
+              "warm_chroma_ratio": 1.1669621237446528,
+              "warm_hue_abs_error_deg": 5.90796285492217,
+              "L_bias": 0.6927357908832995,
+              "patches": 3690,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.46185638703280013,
+                "mean_finalY": 0.4266559239763037,
+                "mean_finalY_minus_Ya": -0.03520046305649662,
+                "mean_abs_finalY_minus_Ya": 0.04714586036745243,
+                "mean_tone_gain": 0.8937275767838107,
+                "post_cc1_high_R_fraction": 0.00015589569160997732,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 0.0,
+                "mean_Yb_preDG": 0.1143132492269523,
+                "mean_Yb_postDG": 0.4266559239763037
+              }
+            },
+            "YA_A1": {
+              "n": 3690,
+              "L_mae": 3.1018843818809283,
+              "ab_error": 1.4360645463797697,
+              "DE76": 3.522786609743369,
+              "chroma_ratio_ref_ge20": 0.9796895875094007,
+              "hue_abs_error_deg_ref_ge20": 8.893834008803024,
+              "warm_n": 51,
+              "warm_ab_error": 4.324886703347954,
+              "warm_chroma_ratio": 1.1300097932792672,
+              "warm_hue_abs_error_deg": 5.234188932020464,
+              "L_bias": 3.1018843818809283,
+              "patches": 3690,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.46185638703280013,
+                "mean_finalY": 0.46185638703280013,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.8937275767838107,
+                "post_cc1_high_R_fraction": 0.0026998299319727893,
+                "post_cc1_high_G_fraction": 0.0003259637188208617,
+                "post_cc1_high_B_fraction": 0.0013365299823633156
+              }
+            }
+          }
+        }
+      },
+      "alignment": {
+        "corr": 0.9907983541488647,
+        "k": 0,
+        "dx": 2,
+        "dy": 1,
+        "margin": 16
+      }
+    },
+    "10": {
+      "metadata": {
+        "checks": {
+          "Model": true,
+          "SerialNumber": true,
+          "ImageUniqueID": true,
+          "DateTimeOriginal": true,
+          "ISO": true,
+          "ExposureTime": true,
+          "FNumber": true,
+          "FocalLength": true
+        },
+        "ISO": 100,
+        "kelvin": 5339.0,
+        "jpg_sha256": "979205e5448d330e3f48b88a5ba4bd03961804d2233e6d5cd5faefa29354956c",
+        "dng_sha256": "ef19bacc3b346dd1b09a736d638a85f865d00bd188267b2717d5c84538668720"
+      },
+      "whiteY": 0.9427515741704314,
+      "conditions": {
+        "target_native": {
+          "alignment": {
+            "corr": 0.9885939359664917,
+            "k": 0,
+            "dx": 2,
+            "dy": 1,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 3331,
+              "L_mae": 1.8097574307874889,
+              "ab_error": 3.1745560389852017,
+              "DE76": 3.9146206008067344,
+              "chroma_ratio_ref_ge20": 0.7606062528527282,
+              "hue_abs_error_deg_ref_ge20": 1.9514369197292782,
+              "warm_n": 11,
+              "warm_ab_error": 9.722752240376302,
+              "warm_chroma_ratio": 0.8238942971689113,
+              "warm_hue_abs_error_deg": 8.028066568071152,
+              "L_bias": 1.8097574307874889,
+              "patches": 3331
+            },
+            "POSTCC0_YB": {
+              "n": 3331,
+              "L_mae": 3.801478784172358,
+              "ab_error": 1.3804519242801776,
+              "DE76": 4.17990801699592,
+              "chroma_ratio_ref_ge20": 0.9581652949142208,
+              "hue_abs_error_deg_ref_ge20": 0.9805915724142026,
+              "warm_n": 11,
+              "warm_ab_error": 7.8215654676926984,
+              "warm_chroma_ratio": 1.1667084309943234,
+              "warm_hue_abs_error_deg": 1.9183742928898633,
+              "L_bias": 3.8013981613301184,
+              "patches": 3331,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.4283856875731846,
+                "mean_finalY": 0.44482185428360316,
+                "mean_finalY_minus_Ya": 0.016436166710418528,
+                "mean_abs_finalY_minus_Ya": 0.02351357284501904,
+                "mean_tone_gain": 0.8731744120848294,
+                "post_cc1_high_R_fraction": 0.044192098135550514,
+                "post_cc1_high_G_fraction": 0.0006377551020408163,
+                "post_cc1_high_B_fraction": 0.0009003369866465104,
+                "mean_Yb_preDG": 0.14723382680712407,
+                "mean_Yb_postDG": 0.44482185428360316
+              }
+            },
+            "PRECC0_YB": {
+              "n": 3331,
+              "L_mae": 2.856824606325991,
+              "ab_error": 1.3968553708622122,
+              "DE76": 3.2839917965826366,
+              "chroma_ratio_ref_ge20": 0.9676247735736666,
+              "hue_abs_error_deg_ref_ge20": 1.2281871187192557,
+              "warm_n": 11,
+              "warm_ab_error": 9.732308394141375,
+              "warm_chroma_ratio": 1.2128329588258728,
+              "warm_hue_abs_error_deg": 0.9125741888446351,
+              "L_bias": -0.3424473547498874,
+              "patches": 3331,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.4283856875731846,
+                "mean_finalY": 0.40003180619883605,
+                "mean_finalY_minus_Ya": -0.028353881374348532,
+                "mean_abs_finalY_minus_Ya": 0.041134757598900354,
+                "mean_tone_gain": 0.8731744120848294,
+                "post_cc1_high_R_fraction": 0.0002558893927941547,
+                "post_cc1_high_G_fraction": 0.0,
+                "post_cc1_high_B_fraction": 1.5747039556563368e-05,
+                "mean_Yb_preDG": 0.11781646689152986,
+                "mean_Yb_postDG": 0.40003180619883605
+              }
+            },
+            "YA_A1": {
+              "n": 3331,
+              "L_mae": 1.8666001992410313,
+              "ab_error": 1.305091281400253,
+              "DE76": 2.3580959224947953,
+              "chroma_ratio_ref_ge20": 0.9632860646483555,
+              "hue_abs_error_deg_ref_ge20": 0.9825555525099103,
+              "warm_n": 11,
+              "warm_ab_error": 9.185244152107076,
+              "warm_chroma_ratio": 1.2010123296781143,
+              "warm_hue_abs_error_deg": 1.2751133383777313,
+              "L_bias": 1.8666001992410313,
+              "patches": 3331,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.4283856875731846,
+                "mean_finalY": 0.4283856875731846,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.8731744120848294,
+                "post_cc1_high_R_fraction": 0.044134227765180147,
+                "post_cc1_high_G_fraction": 0.0006401171579743008,
+                "post_cc1_high_B_fraction": 0.0009393109095490047
+              }
+            }
+          }
+        },
+        "white_normalized_control": {
+          "alignment": {
+            "corr": 0.9876176714897156,
+            "k": 0,
+            "dx": 2,
+            "dy": 1,
+            "margin": 16
+          },
+          "models": {
+            "CURRENT_K035": {
+              "n": 3331,
+              "L_mae": 2.8882986645339237,
+              "ab_error": 3.2234559079925864,
+              "DE76": 4.742017548869523,
+              "chroma_ratio_ref_ge20": 0.7907892628452857,
+              "hue_abs_error_deg_ref_ge20": 1.9621697164238077,
+              "warm_n": 11,
+              "warm_ab_error": 8.437929152172247,
+              "warm_chroma_ratio": 0.8658998454811416,
+              "warm_hue_abs_error_deg": 7.947332371244425,
+              "L_bias": 2.8882986645339237,
+              "patches": 3331
+            },
+            "POSTCC0_YB": {
+              "n": 3331,
+              "L_mae": 4.875246779190746,
+              "ab_error": 1.442443424805922,
+              "DE76": 5.162361561569367,
+              "chroma_ratio_ref_ge20": 0.9764134167445041,
+              "hue_abs_error_deg_ref_ge20": 0.9477882485306678,
+              "warm_n": 11,
+              "warm_ab_error": 9.645100616435009,
+              "warm_chroma_ratio": 1.209165803084115,
+              "warm_hue_abs_error_deg": 1.7763055579696627,
+              "L_bias": 4.875246779190746,
+              "patches": 3331,
+              "stage_stats": {
+                "ybSource": "POSTCC0_YB",
+                "mean_Ya": 0.4405368171572808,
+                "mean_finalY": 0.4561342676936285,
+                "mean_finalY_minus_Ya": 0.015597450536347793,
+                "mean_abs_finalY_minus_Ya": 0.022778323131125405,
+                "mean_tone_gain": 0.8798831111007462,
+                "post_cc1_high_R_fraction": 0.04481883030990174,
+                "post_cc1_high_G_fraction": 0.0002232142857142857,
+                "post_cc1_high_B_fraction": 0.0005590199042579995,
+                "mean_Yb_preDG": 0.1536758172055469,
+                "mean_Yb_postDG": 0.4561342676936285
+              }
+            },
+            "PRECC0_YB": {
+              "n": 3331,
+              "L_mae": 2.4788500632083084,
+              "ab_error": 1.4722933160778962,
+              "DE76": 3.0253856757736615,
+              "chroma_ratio_ref_ge20": 0.9860946236751098,
+              "hue_abs_error_deg_ref_ge20": 1.1271649706590416,
+              "warm_n": 11,
+              "warm_ab_error": 11.663733753817768,
+              "warm_chroma_ratio": 1.257494149770924,
+              "warm_hue_abs_error_deg": 0.7342222159157966,
+              "L_bias": 0.7303604955109202,
+              "patches": 3331,
+              "stage_stats": {
+                "ybSource": "PRECC0_YB",
+                "mean_Ya": 0.4405368171572808,
+                "mean_finalY": 0.4109686120334228,
+                "mean_finalY_minus_Ya": -0.029568205123858136,
+                "mean_abs_finalY_minus_Ya": 0.04202539855729453,
+                "mean_tone_gain": 0.8798831111007462,
+                "post_cc1_high_R_fraction": 0.00020431783824640968,
+                "post_cc1_high_G_fraction": 3.9367598891408415e-07,
+                "post_cc1_high_B_fraction": 2.2439531368102798e-05,
+                "mean_Yb_preDG": 0.1229826573203604,
+                "mean_Yb_postDG": 0.4109686120334228
+              }
+            },
+            "YA_A1": {
+              "n": 3331,
+              "L_mae": 2.9452880199733564,
+              "ab_error": 1.3753354446462671,
+              "DE76": 3.345794741435702,
+              "chroma_ratio_ref_ge20": 0.980486076770743,
+              "hue_abs_error_deg_ref_ge20": 0.8650076060838201,
+              "warm_n": 11,
+              "warm_ab_error": 10.984627379133757,
+              "warm_chroma_ratio": 1.2432285230758535,
+              "warm_hue_abs_error_deg": 1.0806418143454202,
+              "L_bias": 2.9452880199733564,
+              "patches": 3331,
+              "stage_stats": {
+                "ybSource": "YA_A1",
+                "mean_Ya": 0.4405368171572808,
+                "mean_finalY": 0.4405368171572808,
+                "mean_finalY_minus_Ya": 0.0,
+                "mean_abs_finalY_minus_Ya": 0.0,
+                "mean_tone_gain": 0.8798831111007462,
+                "post_cc1_high_R_fraction": 0.04477080183925422,
+                "post_cc1_high_G_fraction": 0.00022636369362559838,
+                "post_cc1_high_B_fraction": 0.0005901203073822121
+              }
+            }
+          }
+        }
+      },
+      "alignment": {
+        "corr": 0.9885939359664917,
+        "k": 0,
+        "dx": 2,
+        "dy": 1,
+        "margin": 16
+      }
+    }
+  },
+  "aggregates": {
+    "reused_development": {
+      "target_native": {
+        "CURRENT_K035": {
+          "L_mae": 2.208922035228785,
+          "L_bias": 2.208922035228785,
+          "ab_error": 8.080505126629406,
+          "DE76": 8.590594338779718,
+          "chroma_ratio_ref_ge20": 0.6985741316031691,
+          "hue_abs_error_deg_ref_ge20": 3.6649206941134476,
+          "warm_ab_error": 7.367166414110004,
+          "warm_chroma_ratio": 0.854381476661431,
+          "warm_hue_abs_error_deg": 9.262110694527037
+        },
+        "POSTCC0_YB": {
+          "L_mae": 6.142691894720341,
+          "L_bias": 6.142691894720341,
+          "ab_error": 2.5067278672560414,
+          "DE76": 6.864310975718311,
+          "chroma_ratio_ref_ge20": 1.015636986111274,
+          "hue_abs_error_deg_ref_ge20": 3.323346635267008,
+          "warm_ab_error": 4.508360168967153,
+          "warm_chroma_ratio": 1.0771662584935138,
+          "warm_hue_abs_error_deg": 4.642418295549594
+        },
+        "PRECC0_YB": {
+          "L_mae": 3.2205460948335407,
+          "L_bias": 0.7480398756500845,
+          "ab_error": 2.6220129502157676,
+          "DE76": 4.499179327842186,
+          "chroma_ratio_ref_ge20": 1.021511003827502,
+          "hue_abs_error_deg_ref_ge20": 3.575404612626319,
+          "warm_ab_error": 8.254529125561634,
+          "warm_chroma_ratio": 1.1677894410415819,
+          "warm_hue_abs_error_deg": 5.501001940027855
+        },
+        "YA_A1": {
+          "L_mae": 2.6854797117253764,
+          "L_bias": 2.6854797117253764,
+          "ab_error": 2.1917441200933796,
+          "DE76": 3.5855040535178255,
+          "chroma_ratio_ref_ge20": 1.0112388281688682,
+          "hue_abs_error_deg_ref_ge20": 3.2996279018671726,
+          "warm_ab_error": 5.228762628813328,
+          "warm_chroma_ratio": 1.1029671316455243,
+          "warm_hue_abs_error_deg": 4.866997607366485
+        }
+      },
+      "white_normalized_control": {
+        "CURRENT_K035": {
+          "L_mae": 3.6237423759458927,
+          "L_bias": 3.6237423759458927,
+          "ab_error": 7.448844794413387,
+          "DE76": 8.582098481453984,
+          "chroma_ratio_ref_ge20": 0.7276647270789197,
+          "hue_abs_error_deg_ref_ge20": 3.6642980633435562,
+          "warm_ab_error": 7.171486064842481,
+          "warm_chroma_ratio": 0.8786683004129028,
+          "warm_hue_abs_error_deg": 9.363443139388668
+        },
+        "POSTCC0_YB": {
+          "L_mae": 7.408233157818029,
+          "L_bias": 7.408233157818029,
+          "ab_error": 2.876508304197006,
+          "DE76": 8.148108929478338,
+          "chroma_ratio_ref_ge20": 1.044420912482411,
+          "hue_abs_error_deg_ref_ge20": 3.449275267640189,
+          "warm_ab_error": 5.007266534860436,
+          "warm_chroma_ratio": 1.0905468297049774,
+          "warm_hue_abs_error_deg": 4.623558248132651
+        },
+        "PRECC0_YB": {
+          "L_mae": 3.365139359390858,
+          "L_bias": 1.9246881508075493,
+          "ab_error": 2.947849566623791,
+          "DE76": 4.853944141422421,
+          "chroma_ratio_ref_ge20": 1.0502614381202922,
+          "hue_abs_error_deg_ref_ge20": 3.7013291689692367,
+          "warm_ab_error": 8.586480354069664,
+          "warm_chroma_ratio": 1.1841067046281921,
+          "warm_hue_abs_error_deg": 5.453205076408347
+        },
+        "YA_A1": {
+          "L_mae": 4.080477325621814,
+          "L_bias": 4.080477325621814,
+          "ab_error": 2.5453795592559505,
+          "DE76": 4.969749209547505,
+          "chroma_ratio_ref_ge20": 1.0406970811569805,
+          "hue_abs_error_deg_ref_ge20": 3.450772452210385,
+          "warm_ab_error": 5.48666330208694,
+          "warm_chroma_ratio": 1.1154727676215526,
+          "warm_hue_abs_error_deg": 4.808683984814261
+        }
+      }
+    },
+    "reused_validation": {
+      "target_native": {
+        "CURRENT_K035": {
+          "L_mae": 2.538583670660399,
+          "L_bias": 2.5342559707372447,
+          "ab_error": 6.0389576733978,
+          "DE76": 6.971257195232583,
+          "chroma_ratio_ref_ge20": 0.8085793309606387,
+          "hue_abs_error_deg_ref_ge20": 5.105108722889448,
+          "warm_ab_error": 12.155849642610562,
+          "warm_chroma_ratio": 0.818396931682168,
+          "warm_hue_abs_error_deg": 9.19838158120064
+        },
+        "POSTCC0_YB": {
+          "L_mae": 4.041356049172034,
+          "L_bias": 4.041356049172034,
+          "ab_error": 2.213636082544255,
+          "DE76": 4.89172983871082,
+          "chroma_ratio_ref_ge20": 1.0432442783121536,
+          "hue_abs_error_deg_ref_ge20": 3.5690987573526143,
+          "warm_ab_error": 9.479458028795591,
+          "warm_chroma_ratio": 1.1720919752111771,
+          "warm_hue_abs_error_deg": 3.0002015400013704
+        },
+        "PRECC0_YB": {
+          "L_mae": 3.80341821738293,
+          "L_bias": -1.9580501879822405,
+          "ab_error": 2.3224694309034377,
+          "DE76": 4.91758423613181,
+          "chroma_ratio_ref_ge20": 1.0506117117895448,
+          "hue_abs_error_deg_ref_ge20": 4.448829606898287,
+          "warm_ab_error": 10.438122582048223,
+          "warm_chroma_ratio": 1.1664342344771064,
+          "warm_hue_abs_error_deg": 5.730457338112642
+        },
+        "YA_A1": {
+          "L_mae": 2.7057333626079565,
+          "L_bias": 2.7057333626079565,
+          "ab_error": 2.1620000739770853,
+          "DE76": 3.6410704118079344,
+          "chroma_ratio_ref_ge20": 1.050006733337599,
+          "hue_abs_error_deg_ref_ge20": 3.857667735122039,
+          "warm_ab_error": 10.145522315035281,
+          "warm_chroma_ratio": 1.183224150287841,
+          "warm_hue_abs_error_deg": 3.8337403812147044
+        }
+      },
+      "white_normalized_control": {
+        "CURRENT_K035": {
+          "L_mae": 4.081297069331755,
+          "L_bias": 4.080180433804868,
+          "ab_error": 5.649340635523033,
+          "DE76": 7.553907922641483,
+          "chroma_ratio_ref_ge20": 0.8401109377325066,
+          "hue_abs_error_deg_ref_ge20": 5.062334204365305,
+          "warm_ab_error": 10.975969261217845,
+          "warm_chroma_ratio": 0.8573369110551836,
+          "warm_hue_abs_error_deg": 9.229453442326035
+        },
+        "POSTCC0_YB": {
+          "L_mae": 5.467292379948016,
+          "L_bias": 5.467292379948016,
+          "ab_error": 2.3828704580213347,
+          "DE76": 6.19014702968601,
+          "chroma_ratio_ref_ge20": 1.06944564174423,
+          "hue_abs_error_deg_ref_ge20": 3.562765124887877,
+          "warm_ab_error": 11.046420345224806,
+          "warm_chroma_ratio": 1.2078958754073086,
+          "warm_hue_abs_error_deg": 2.8415618904170232
+        },
+        "PRECC0_YB": {
+          "L_mae": 3.1502403964187593,
+          "L_bias": -0.5577620538016562,
+          "ab_error": 2.4511646099248003,
+          "DE76": 4.4488546890971925,
+          "chroma_ratio_ref_ge20": 1.0767589355256766,
+          "hue_abs_error_deg_ref_ge20": 4.508437402624812,
+          "warm_ab_error": 11.895572146013867,
+          "warm_chroma_ratio": 1.2026855999749033,
+          "warm_hue_abs_error_deg": 5.775183847171071
+        },
+        "YA_A1": {
+          "L_mae": 4.217937952109399,
+          "L_bias": 4.217937952109399,
+          "ab_error": 2.3219833484133825,
+          "DE76": 5.048780227187333,
+          "chroma_ratio_ref_ge20": 1.0760808498881234,
+          "hue_abs_error_deg_ref_ge20": 3.878608152243052,
+          "warm_ab_error": 11.550122762910638,
+          "warm_chroma_ratio": 1.217663069357334,
+          "warm_hue_abs_error_deg": 3.6019984101030245
+        }
+      }
+    },
+    "fresh_holdout": {
+      "target_native": {
+        "CURRENT_K035": {
+          "L_mae": 1.6236554915021162,
+          "L_bias": 1.6223311230523592,
+          "ab_error": 4.585014468413712,
+          "DE76": 5.080615205557612,
+          "chroma_ratio_ref_ge20": 0.8076697254778762,
+          "hue_abs_error_deg_ref_ge20": 5.8744491866675626,
+          "warm_ab_error": 7.726788746246731,
+          "warm_chroma_ratio": 0.7709335949117734,
+          "warm_hue_abs_error_deg": 8.644979119139855
+        },
+        "POSTCC0_YB": {
+          "L_mae": 5.53961306659897,
+          "L_bias": 5.539592910888411,
+          "ab_error": 1.6145053734284678,
+          "DE76": 5.924216763100743,
+          "chroma_ratio_ref_ge20": 0.9750480435180447,
+          "hue_abs_error_deg_ref_ge20": 4.024547364170721,
+          "warm_ab_error": 4.074837663619341,
+          "warm_chroma_ratio": 1.0861703308582795,
+          "warm_hue_abs_error_deg": 4.491857848904831
+        },
+        "PRECC0_YB": {
+          "L_mae": 3.540290518020515,
+          "L_bias": 1.1606952889034516,
+          "ab_error": 1.521773905371648,
+          "DE76": 3.960694137782883,
+          "chroma_ratio_ref_ge20": 0.99299577935608,
+          "hue_abs_error_deg_ref_ge20": 4.481666291265489,
+          "warm_ab_error": 5.354609569967735,
+          "warm_chroma_ratio": 1.1322960952853247,
+          "warm_hue_abs_error_deg": 4.987856445323977
+        },
+        "YA_A1": {
+          "L_mae": 1.8403096772928542,
+          "L_bias": 1.8403096772928542,
+          "ab_error": 1.2870415009604992,
+          "DE76": 2.3170471026631674,
+          "chroma_ratio_ref_ge20": 0.9821205737068666,
+          "hue_abs_error_deg_ref_ge20": 4.182337337354593,
+          "warm_ab_error": 4.723942716992909,
+          "warm_chroma_ratio": 1.1073596762564675,
+          "warm_hue_abs_error_deg": 4.657657939795974
+        }
+      },
+      "white_normalized_control": {
+        "CURRENT_K035": {
+          "L_mae": 2.6520331701617037,
+          "L_bias": 2.6519497107900767,
+          "ab_error": 4.396585439683405,
+          "DE76": 5.461030105224515,
+          "chroma_ratio_ref_ge20": 0.8325744534637943,
+          "hue_abs_error_deg_ref_ge20": 5.658851957884579,
+          "warm_ab_error": 6.958798140694636,
+          "warm_chroma_ratio": 0.8047207810838318,
+          "warm_hue_abs_error_deg": 8.520014985169677
+        },
+        "POSTCC0_YB": {
+          "L_mae": 6.579551001033341,
+          "L_bias": 6.579551001033341,
+          "ab_error": 1.7935908626034167,
+          "DE76": 6.937869098426083,
+          "chroma_ratio_ref_ge20": 0.9966156589490803,
+          "hue_abs_error_deg_ref_ge20": 3.994724665190334,
+          "warm_ab_error": 4.882245288701238,
+          "warm_chroma_ratio": 1.1190445259863642,
+          "warm_hue_abs_error_deg": 4.454727205960769
+        },
+        "PRECC0_YB": {
+          "L_mae": 3.6411285722929057,
+          "L_bias": 2.1514454907568363,
+          "ab_error": 1.759763173737593,
+          "DE76": 4.181219271052505,
+          "chroma_ratio_ref_ge20": 1.014317032276121,
+          "hue_abs_error_deg_ref_ge20": 4.435213639863774,
+          "warm_ab_error": 6.235101748228402,
+          "warm_chroma_ratio": 1.1653269369706787,
+          "warm_hue_abs_error_deg": 4.953944866975315
+        },
+        "YA_A1": {
+          "L_mae": 2.8783132624176466,
+          "L_bias": 2.8783132624176466,
+          "ab_error": 1.5110443837546041,
+          "DE76": 3.3398912422418716,
+          "chroma_ratio_ref_ge20": 1.0028030680065396,
+          "hue_abs_error_deg_ref_ge20": 4.128352972070517,
+          "warm_ab_error": 5.485296413823239,
+          "warm_chroma_ratio": 1.1383414535612033,
+          "warm_hue_abs_error_deg": 4.504768442164486
+        }
+      }
+    }
+  },
+  "script_sha256": "7a3669d0f06c9b304208b80775b574eadf3c1b6d0f1eabdc68d3d9fbebd5c0af"
+}
