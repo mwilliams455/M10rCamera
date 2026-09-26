@@ -1,0 +1,134 @@
+CALLS [
+  {
+    "pc": "0x15470c",
+    "target_va": "0x420cf474",
+    "target_offset": "0xcf474"
+  },
+  {
+    "pc": "0x154726",
+    "target_va": "0x4204efd8",
+    "target_offset": "0x4efd8"
+  },
+  {
+    "pc": "0x154730",
+    "target_va": "0x4204f1f8",
+    "target_offset": "0x4f1f8"
+  },
+  {
+    "pc": "0x15473a",
+    "target_va": "0x42140154",
+    "target_offset": "0x140154"
+  },
+  {
+    "pc": "0x154744",
+    "target_va": "0x421a0fc4",
+    "target_offset": "0x1a0fc4"
+  },
+  {
+    "pc": "0x15475c",
+    "target_va": "0x42140154",
+    "target_offset": "0x140154"
+  },
+  {
+    "pc": "0x154764",
+    "target_va": "0x420d3088",
+    "target_offset": "0xd3088"
+  },
+  {
+    "pc": "0x15477a",
+    "target_va": "0x42140154",
+    "target_offset": "0x140154"
+  }
+]
+MMIO []
+STRINGS
+0x1543e8   img_b2y_select_interploation_paraset
+0x154494 B2Y.bin
+0x15449c NO VALID STRING   img_b2y_select_interpolation_gamma_paraset
+0x1546c8 B2Y.bin
+0x15478b @LUM NOISE REDUCTION     String:%s
+0x1547b0 B2Y.bin
+0x15481f @OFFSET    String:%s
+0x154834 B2Y.bin
+0x15483c NO VALID STRING   img_b2y_select_offset_paraset
+0x1548f4 B2Y.bin
+0x1548fc NO VALID STRING   img_b2y_select_post_processing_filter_paraset
+0x1549b0 B2Y.bin
+0x1549b8 NO VALID STRING   img_b2y_select_shift_paraset
+0x154a88 B2Y.bin
+0x154a90 NO VALID STRING   img_b2y_select_subpre_light_paraset
+0x154b70 B2Y.bin
+0x154b78 NO VALID STRING   img_b2y_select_texture_enhancement_paraset
+0x154ccc B2Y.bin
+0x154cd7 BNO VALID STRING   img_b2y_select_tone_control_paraset   TBL0
+0x154d18 NO VALID STRING   img_b2y_select_tone_control_paraset   TBL1
+0x154dd8 B2Y.bin
+0x1546e8: push     {r4, r5, r6, r7, lr}
+0x1546ea: sub      sp, #0x44
+0x1546ec: movs     r4, r0
+0x1546ee: movs     r6, r1
+0x1546f0: movs     r7, #0
+0x1546f2: ldrh     r0, [r4]
+0x1546f4: ldr      r1, [pc, #0x8c] ; LIT=0x154784->0x408cedc0
+0x1546f6: ldrh     r1, [r1]
+0x1546f8: cmp      r0, r1
+0x1546fa: bne      #0x4215470c
+0x1546fc: movs     r0, #0xb0
+0x1546fe: ldr      r0, [r0, r4]
+0x154700: ldr      r1, [pc, #0x84] ; LIT=0x154788->0x408cedc4
+0x154702: ldr      r1, [r1]
+0x154704: cmp      r0, r1
+0x154706: bne      #0x4215470c
+0x154708: cmp      r6, #1
+0x15470a: beq      #0x4215477e
+0x15470c: bl       #0x420cf474 ; CALL=0x420cf474
+0x154710: cmp      r0, #1
+0x154712: bne      #0x4215476a
+0x154714: ldrh     r0, [r4]
+0x154716: ldr      r1, [pc, #0x6c] ; LIT=0x154784->0x408cedc0
+0x154718: strh     r0, [r1]
+0x15471a: movs     r0, #0xb0
+0x15471c: ldr      r0, [r0, r4]
+0x15471e: ldr      r1, [pc, #0x68] ; LIT=0x154788->0x408cedc4
+0x154720: str      r0, [r1]
+0x154722: adds     r1, r4, #2
+0x154724: add      r0, sp, #4
+0x154726: bl       #0x4204efd8 ; CALL=0x4204efd8
+0x15472a: movs     r1, r4
+0x15472c: adds     r1, #0xb4
+0x15472e: add      r0, sp, #4
+0x154730: bl       #0x4204f1f8 ; CALL=0x4204f1f8
+0x154734: add      r2, sp, #4
+0x154736: adr      r1, #0x54
+0x154738: movs     r0, #2
+0x15473a: bl       #0x42140154 ; CALL=0x42140154
+0x15473e: add      r2, sp, #4
+0x154740: movs     r1, #0xe
+0x154742: adr      r0, #0x6c
+0x154744: bl       #0x421a0fc4 ; CALL=0x421a0fc4
+0x154748: movs     r5, r0
+0x15474a: cmp      r5, #0
+0x15474c: bne      #0x42154760
+0x15474e: movs     r7, #1
+0x154750: ldr      r1, [pc, #0x30] ; LIT=0x154784->0x408cedc0
+0x154752: strh     r0, [r1]
+0x154754: ldr      r1, [pc, #0x30] ; LIT=0x154788->0x408cedc4
+0x154756: str      r0, [r1]
+0x154758: ldr      r1, [pc, #0x5c] ; LIT=0x1547b8->0x4283cf30
+0x15475a: movs     r0, #4
+0x15475c: bl       #0x42140154 ; CALL=0x42140154
+0x154760: movs     r1, r7
+0x154762: movs     r0, r5
+0x154764: bl       #0x420d3088 ; CALL=0x420d3088
+0x154768: b        #0x4215477e
+0x15476a: movs     r7, #1
+0x15476c: movs     r0, #0
+0x15476e: ldr      r1, [pc, #0x14] ; LIT=0x154784->0x408cedc0
+0x154770: strh     r0, [r1]
+0x154772: ldr      r1, [pc, #0x14] ; LIT=0x154788->0x408cedc4
+0x154774: str      r0, [r1]
+0x154776: ldr      r1, [pc, #0x44] ; LIT=0x1547bc->0x4283cd08
+0x154778: movs     r0, #4
+0x15477a: bl       #0x42140154 ; CALL=0x42140154
+0x15477e: add      sp, #0x44
+0x154780: pop      {r4, r5, r6, r7, pc}
