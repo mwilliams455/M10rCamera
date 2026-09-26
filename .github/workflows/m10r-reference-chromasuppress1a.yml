@@ -1,0 +1,250 @@
+name: M10-R REFERENCE CHROMASUPPRESS1A
+
+on:
+  push:
+    branches: [m10r-reference-chromasuppress1a]
+    paths:
+      - '.github/workflows/m10r-reference-chromasuppress1a.yml'
+      - 'app/src/main/java/com/m10r/diagnostic/M10RChromaSuppress1ARenderer.java'
+      - 'tools/M10RChromaSuppress1ACli.java'
+      - 'tools/m10r_reference_chromasuppress1a_fit.py'
+  workflow_dispatch:
+
+permissions: {contents: write}
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl >/dev/null
+          python3 -m pip install --quiet rawpy pillow numpy
+
+      - name: Extract exact nonlinear assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 \
+            'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' \
+            -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker);z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          /tmp/unpack
+          echo '859c936b6ac8efe0bc4ce7f05623013644fc5d8aee3c6835f09860f452adc2e0  /tmp/M10R_unpacked.bin' | sha256sum -c -
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          python3 tools/m10r_b2y_assets.py \
+            /tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin \
+            /tmp/assets >/dev/null
+          echo '2fd6ca209f290c75aa96976b3d7692e55c41a55c0017a063aba9808da3b41a00  /tmp/assets/tone_medium_q15.u32le' | sha256sum -c -
+          echo '9e65de24d52271be0783f4e2728f20f482c0ba43b63159b75033b4a4fc75457d  /tmp/assets/dg_expanded_u16le.bin' | sha256sum -c -
+
+      - name: Compile reference harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile \
+            tools/m10r_reference_chromasuppress1a_fit.py \
+            tools/m10r_reference_transfer_rgb_fit.py \
+            tools/m10r_reference_order_fit.py
+          mkdir -p /tmp/classes
+          javac -d /tmp/classes \
+            app/src/main/java/com/m10r/diagnostic/{DngMetadataReader.java,DngRawDecoder.java,LosslessJpegDecoder.java,SensorPreviewCore.java,M10RColorSpecCore.java,M10RReferenceColorCore.java,M10RNeutralClipReferenceRenderer.java,M10RChromaSuppress1ARenderer.java} \
+            tools/M10RChromaSuppress1ACli.java
+
+      - name: Render and score six genuine Leica pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cs1a
+          for id in 01 02 03 04 05 06; do
+            base="https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_${id}"
+            curl -L --fail --retry 3 "$base.jpg" -o /tmp/cs1a/$id.jpg
+            curl -L --fail --retry 3 "$base.dng" -o /tmp/cs1a/$id.dng
+            exiftool -j -n \
+              -Make -Model -SerialNumber -ImageUniqueID -DateTimeOriginal -CreateDate \
+              -ExposureTime -FNumber -ISO -FocalLength -ExposureCompensation \
+              -WhiteBalance -Contrast -Saturation -Sharpness \
+              /tmp/cs1a/$id.jpg /tmp/cs1a/$id.dng > /tmp/cs1a/${id}_exif.json
+
+            java -cp /tmp/classes com.m10r.diagnostic.M10RChromaSuppress1ACli \
+              /tmp/cs1a/$id.dng \
+              /tmp/assets/tone_medium_q15.u32le \
+              /tmp/assets/dg_expanded_u16le.bin \
+              /tmp/cs1a/$id 2000 \
+              | tee /tmp/cs1a/${id}_render.txt
+
+            python3 tools/m10r_reference_chromasuppress1a_fit.py \
+              --jpg /tmp/cs1a/$id.jpg \
+              --dng /tmp/cs1a/$id.dng \
+              --prefix /tmp/cs1a/$id \
+              --sample $id \
+              --metadata-json /tmp/cs1a/${id}_exif.json \
+              --render-log /tmp/cs1a/${id}_render.txt \
+              --out /tmp/cs1a/${id}_metrics.json
+
+            rm -f /tmp/cs1a/$id.jpg /tmp/cs1a/$id.dng /tmp/cs1a/$id_*.ppm
+          done
+
+      - name: Aggregate constrained screen
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,re,statistics
+          from pathlib import Path
+
+          modes=[
+            "baseline",
+            "cs_20000_30000","cs_20000_40000","cs_20000_50000",
+            "cs_30000_40000","cs_30000_50000","cs_40000_50000",
+          ]
+          base="baseline"
+          rows=[json.loads(p.read_text()) for p in sorted(Path('/tmp/cs1a').glob('*_metrics.json'))]
+          valid=[r for r in rows if r['metadata'].get('identity_supported') is True and r['metadata'].get('default_jpeg_controls') is True]
+          if len(valid)!=6:
+              raise SystemExit(f"expected 6 valid Leica pairs, got {len(valid)}")
+
+          keys=['encoded_rgb_rmse','encoded_rgb_mae','luma_rmse','luma_mae',
+                'delta_e76_mean','hue_error_deg_mean','saturation_error_abs_mean']
+          bins=('shadow','midtone','highlight','neutral_pixels','colourful_pixels')
+
+          def med(m,k):
+              return statistics.median(r['metrics'][m][k] for r in valid)
+          def bm(m,b):
+              return statistics.median(r['metrics'][m]['bins'][b]['rgb_rmse'] for r in valid)
+          def win(m,k):
+              return sum(r['metrics'][m][k] < r['metrics'][base][k] for r in valid)
+          def bwin(m,b):
+              return sum(r['metrics'][m]['bins'][b]['rgb_rmse'] < r['metrics'][base]['bins'][b]['rgb_rmse'] for r in valid)
+
+          agg={'valid':6,'medians':{},'bins':{},'wins':{},'ratios':{},'screen':{},'render_stats':{}}
+          for m in modes:
+              agg['medians'][m]={k:med(m,k) for k in keys}
+              agg['bins'][m]={b:bm(m,b) for b in bins}
+              if m!=base:
+                  agg['wins'][m]={
+                    'rgb':win(m,'encoded_rgb_rmse'),
+                    'de':win(m,'delta_e76_mean'),
+                    'hue':win(m,'hue_error_deg_mean'),
+                    'saturation':win(m,'saturation_error_abs_mean'),
+                    'colourful':bwin(m,'colourful_pixels'),
+                    'neutral':bwin(m,'neutral_pixels'),
+                  }
+
+          b=agg['medians'][base];bb=agg['bins'][base]
+          passing=[]
+          for m in modes[1:]:
+              q=agg['medians'][m];qb=agg['bins'][m];w=agg['wins'][m]
+              ratios={
+                'rgb':q['encoded_rgb_rmse']/b['encoded_rgb_rmse'],
+                'de':q['delta_e76_mean']/b['delta_e76_mean'],
+                'hue':q['hue_error_deg_mean']/b['hue_error_deg_mean'],
+                'saturation':q['saturation_error_abs_mean']/b['saturation_error_abs_mean'],
+                'colourful':qb['colourful_pixels']/bb['colourful_pixels'],
+                'neutral':qb['neutral_pixels']/bb['neutral_pixels'],
+                'highlight':qb['highlight']/bb['highlight'],
+              }
+              agg['ratios'][m]=ratios
+              passed=(ratios['rgb']<1.0 and ratios['de']<1.0 and ratios['colourful']<1.0
+                      and q['hue_error_deg_mean']<=b['hue_error_deg_mean']
+                      and q['saturation_error_abs_mean']<=b['saturation_error_abs_mean']
+                      and w['rgb']>=4 and w['de']>=4)
+              agg['screen'][m]={'broad_improvement':passed}
+              if passed:passing.append(m)
+
+          # Parse actual candidate coverage from the Java render log.
+          pat=re.compile(r'(cs_\d+_\d+)\{suppressed=(\d+),meanGain=([0-9.]+)\}')
+          for m in modes[1:]:
+              vals=[]
+              for r in valid:
+                  mm={name:(int(n),float(g)) for name,n,g in pat.findall(r.get('render_log',''))}
+                  if m in mm:vals.append(mm[m])
+              if vals:
+                  agg['render_stats'][m]={
+                    'median_suppressed_pixels':statistics.median(v[0] for v in vals),
+                    'median_mean_gain':statistics.median(v[1] for v in vals),
+                    'per_sample':[{'suppressed_pixels':v[0],'mean_gain':v[1]} for v in vals],
+                  }
+
+          agg['passing_candidates']=passing
+          agg['best_rgb']=min(modes[1:],key=lambda m:agg['ratios'][m]['rgb'])
+          agg['best_de']=min(modes[1:],key=lambda m:agg['ratios'][m]['de'])
+          agg['best_colourful']=min(modes[1:],key=lambda m:agg['ratios'][m]['colourful'])
+          agg['verdict']='CHROMASUPPRESS1A_HAS_BROAD_REFERENCE_SUPPORT' if passing else 'CHROMASUPPRESS1A_DIRECT_THRESHOLD_MAPPING_NOT_SUPPORTED'
+          agg['run']=os.environ.get('GITHUB_RUN_ID')
+          agg['commit']=os.environ.get('GITHUB_SHA')
+
+          out=[
+            '# M10-R REFERENCE CHROMASUPPRESS1A',
+            '',
+            'Constrained six-pair screen of a Fujitsu-family low-chroma suppression topology inside the exact RGB1G Leica YC path.',
+            '',
+            'No continuous fitting. Candidate inner/outer thresholds come only from M10-R record-0x18 MEDIUM values 20000/30000/40000/50000.',
+            'Normalization hypothesis: CsumCode=(abs(Cb)+abs(Cr))*65536.',
+            '',
+            '## Baseline',
+            '',
+            str(agg['medians'][base]),
+            '',
+            '## Candidates',
+            '',
+          ]
+          for m in modes[1:]:
+              out.append(f"{m}: ratios={agg['ratios'][m]} wins={agg['wins'][m]} screen={agg['screen'][m]} render={agg['render_stats'].get(m)}")
+          out += [
+            '',
+            '## Result',
+            '',
+            f"Passing candidates: {passing}",
+            f"Best RGB ratio: {agg['best_rgb']} = {agg['ratios'][agg['best_rgb']]['rgb']}",
+            f"Best DeltaE ratio: {agg['best_de']} = {agg['ratios'][agg['best_de']]['de']}",
+            f"Best colourful-pixel ratio: {agg['best_colourful']} = {agg['ratios'][agg['best_colourful']]['colourful']}",
+            '',
+            'VERDICT '+agg['verdict'],
+            '',
+            'Interpretation boundary: failure falsifies this direct threshold/normalization mapping, not the firmware-proven existence of the color_dif_suppression block. Success would justify deeper mapping/offline replication, not immediate Android promotion.',
+            '',
+            f"Workflow run id: {agg['run']}",
+            f"Analysis input commit: {agg['commit']}",
+          ]
+          Path('research/M10R_REFERENCE_CHROMASUPPRESS1A.md').write_text('\n'.join(out)+'\n')
+          Path('research/M10R_REFERENCE_CHROMASUPPRESS1A.json').write_text(json.dumps({'samples':rows,'aggregate':agg},indent=2,sort_keys=True)+'\n')
+          print('\n'.join(out))
+          PY
+
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: M10R-REFERENCE-CHROMASUPPRESS1A
+          path: |
+            /tmp/cs1a/*_metrics.json
+            /tmp/cs1a/*_render.txt
+            research/M10R_REFERENCE_CHROMASUPPRESS1A.md
+            research/M10R_REFERENCE_CHROMASUPPRESS1A.json
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Commit evidence
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/M10R_REFERENCE_CHROMASUPPRESS1A.*
+          git commit -m 'research: record constrained chroma suppression screen' || exit 0
+          git pull --rebase origin m10r-reference-chromasuppress1a
+          git push
