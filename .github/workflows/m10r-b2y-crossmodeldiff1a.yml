@@ -11,7 +11,7 @@ on:
       - 'research/M10R_v094_b2y_selector_inventory.txt'
   workflow_dispatch:
 
-permissions: {contents: read}
+permissions: {contents: write}
 
 jobs:
   diff:
@@ -156,6 +156,26 @@ jobs:
           assert d["summary"]["changed"] + d["summary"]["missing_or_added"] > 0
           print(json.dumps(d["summary"],indent=2))
           PY
+
+      - name: Persist validated research freeze on isolated branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/generated
+          cp crossmodeldiff1a_results/M10R_B2Y_CROSSMODEL_DIFF1A.json \
+            research/generated/M10R_B2Y_CROSSMODEL_DIFF1A.json
+          cp crossmodeldiff1a_results/M10R_B2Y_CROSSMODEL_DIFF1A.md \
+            research/generated/M10R_B2Y_CROSSMODEL_DIFF1A.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/generated/M10R_B2Y_CROSSMODEL_DIFF1A.json \
+                  research/generated/M10R_B2Y_CROSSMODEL_DIFF1A.md
+          if git diff --cached --quiet; then
+            echo "Research freeze already current"
+          else
+            git commit -m "Research freeze B2Y cross-model diff1a results"
+            git push origin HEAD:m10r-b2y-crossmodeldiff1a
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
