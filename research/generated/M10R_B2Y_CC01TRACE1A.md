@@ -6,6 +6,10 @@ Static firmware trace only; renderer remains frozen.
 
 Changed words: 9 / 16
 Setter code equal all: True
+Changed words exactly 2..10: True
+Both Monochrom matrices exact Q9 identity: True
+M10-R matrix Q9: [[955, -338, -105], [-135, 716, -69], [2, -258, 768]]
+M10-R row sums: [512, 512, 512]
 
 | Word | Offset | M10-R | Mono 2.12.8.0 | Mono 3.21.2.50 |
 |---:|---:|---:|---:|---:|
@@ -29,6 +33,10 @@ Setter code equal all: True
 
 Changed words: 9 / 17
 Setter code equal all: True
+Changed words exactly 2..10: True
+Both Monochrom matrices exact Q9 identity: True
+M10-R matrix Q9: [[1041, -372, -157], [-117, 630, -2], [-4, -79, 595]]
+M10-R row sums: [512, 511, 512]
 
 | Word | Offset | M10-R | Mono 2.12.8.0 | Mono 3.21.2.50 |
 |---:|---:|---:|---:|---:|
