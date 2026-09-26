@@ -1,0 +1,47 @@
+name: M10-R B2Y SATURATION ABI1A
+
+on:
+  push:
+    branches: [m10r-b2y-saturation1a]
+    paths:
+      - '.github/workflows/m10r-b2y-saturation-abi1a.yml'
+      - 'tools/m10r_b2y_saturation_abi1a.py'
+  workflow_dispatch:
+
+permissions: {contents: write}
+
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone==5.0.3
+      - name: Build unpacker and decode M10-R
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n";a=p.index(marker)+len(marker);z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R-20.20.47.37-Customer.FW' -o /tmp/M10-R.FW
+          echo '141f0b5fcffe315372bc2c673a3dfa371eab84198d46d6de26016ec0958d77b2  /tmp/M10-R.FW' | sha256sum -c -
+          /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sec >/dev/null
+      - name: Dump exact selector and setter
+        run: |
+          mkdir -p research/generated
+          python3 tools/m10r_b2y_saturation_abi1a.py /tmp/sec --out research/generated/M10R_B2Y_SATURATION_ABI1A.txt
+      - name: Persist
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/generated/M10R_B2Y_SATURATION_ABI1A.txt
+          git commit -m "Research freeze saturation setter ABI1A" || exit 0
+          git push origin HEAD:m10r-b2y-saturation1a
