@@ -1,0 +1,81 @@
+name: M10-R YBLEND TCYC YB1A
+
+on:
+  push:
+    branches: [m10r-yblend-tcyc-yb1a]
+    paths:
+      - '.github/workflows/m10r-yblend-tcyc-yb1a.yml'
+      - 'tools/m10r_yblend_tcyc_yb1a.py'
+      - 'tools/m10r_yblend_reference1e.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  discriminate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install fixed analysis dependencies
+        run: |
+          python3 -m pip install numpy==2.2.6 pillow==11.3.0 opencv-python-headless==4.13.0.92 rawpy==0.25.1
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: M10R-PHOTOAUDIT1A-RESEARCH-INPUTS
+          run-id: 35518775600
+          github-token: ${{ github.token }}
+          path: inputs
+
+      - name: Run TCYC/Yb holdout discriminator
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/m10r_yblend_reference1e.py tools/m10r_yblend_tcyc_yb1a.py
+          python3 tools/m10r_yblend_tcyc_yb1a.py inputs results
+          python3 - <<'PY'
+          import json
+          d=json.load(open('results/results.json'))
+          assert d['schema']=='M10R_YBLEND_TCYC_YB1A_V1'
+          assert d['status']=='PASS_TCYC_YB_DISCRIMINATOR'
+          assert d['primary_holdout']==['07','08','09','10']
+          assert len(d['scenes'])==10
+          print('DE ranking',d['holdout_ranking_DE76'])
+          print('ab ranking',d['holdout_ranking_ab'])
+          PY
+
+      - name: Persist research freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp results/results.json research/M10R_YBLEND_TCYC_YB1A.json
+          cp results/REPORT.md research/M10R_YBLEND_TCYC_YB1A.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/M10R_YBLEND_TCYC_YB1A.*
+          git commit -m "Research freeze TCYC/Yb two-luminance discriminator" || exit 0
+          git pull --rebase origin m10r-yblend-tcyc-yb1a
+          git push
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-YBLEND-TCYC-YB1A
+          path: |
+            results/results.json
+            results/REPORT.md
+            results/07_*.jpg
+            results/08_*.jpg
+            results/09_*.jpg
+            results/10_*.jpg
+          if-no-files-found: warn
+          retention-days: 90
