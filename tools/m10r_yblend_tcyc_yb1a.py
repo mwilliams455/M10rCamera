@@ -56,9 +56,7 @@ def fresh(sid:str,inputs:Path):
         p=d/f"{sid}.{ext}"
         u=f"https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_{sid}.{ext}"
         if not p.exists():
-            req=urllib.request.Request(u,headers={"User-Agent":"Mozilla/5.0"})
-            with urllib.request.urlopen(req,timeout=120) as r,p.open("wb") as out:
-                shutil.copyfileobj(r,out)
+            subprocess.run(["curl","-L","--fail","--retry","3","--retry-delay","2",u,"-o",str(p)],check=True)
         paths.append(p)
     meta=json.loads(subprocess.check_output(["exiftool","-j","-n",*map(str,paths)]))
     with rawpy.imread(str(paths[1])) as r:
