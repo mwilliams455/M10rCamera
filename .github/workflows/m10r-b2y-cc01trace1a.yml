@@ -105,9 +105,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          cp cc01trace1a_results/M10R_B2Y_CC01TRACE1A.json /tmp/M10R_B2Y_CC01TRACE1A.json
+          cp cc01trace1a_results/M10R_B2Y_CC01TRACE1A.md /tmp/M10R_B2Y_CC01TRACE1A.md
+          git fetch origin m10r-b2y-cc01trace1a
+          git checkout -B m10r-b2y-cc01trace1a origin/m10r-b2y-cc01trace1a
           mkdir -p research/generated
-          cp cc01trace1a_results/M10R_B2Y_CC01TRACE1A.json research/generated/M10R_B2Y_CC01TRACE1A.json
-          cp cc01trace1a_results/M10R_B2Y_CC01TRACE1A.md research/generated/M10R_B2Y_CC01TRACE1A.md
+          cp /tmp/M10R_B2Y_CC01TRACE1A.json research/generated/M10R_B2Y_CC01TRACE1A.json
+          cp /tmp/M10R_B2Y_CC01TRACE1A.md research/generated/M10R_B2Y_CC01TRACE1A.md
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add research/generated/M10R_B2Y_CC01TRACE1A.json research/generated/M10R_B2Y_CC01TRACE1A.md
@@ -115,10 +119,11 @@ jobs:
             echo 'Research freeze already current'
           else
             git commit -m 'Research freeze B2Y CC01TRACE1A results'
-            git push origin HEAD:m10r-b2y-cc01trace1a
+            git push origin m10r-b2y-cc01trace1a
           fi
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: M10R-B2Y-CC01TRACE1A-RESULTS
           path: cc01trace1a_results/
