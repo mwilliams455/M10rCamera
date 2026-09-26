@@ -1,0 +1,120 @@
+name: M10-R B2Y CC01TRACE1A
+
+on:
+  push:
+    branches: [m10r-b2y-cc01trace1a]
+    paths:
+      - '.github/workflows/m10r-b2y-cc01trace1a.yml'
+      - 'tools/m10r_b2y_cc01trace1a.py'
+      - 'tools/m10r_b2y_assets.py'
+      - 'tools/m10r_sections.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned disassembler
+        run: python3 -m pip install --quiet capstone==5.0.3
+
+      - name: Build verified Leica M10-family unpacker
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker)
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+
+      - name: Download validated firmware set
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/fw cc01trace1a_results
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R-20.20.47.37-Customer.FW' -o /tmp/fw/M10R.FW
+          curl -L --fail --retry 3 --retry-delay 2 'https://leica-camera.com/sites/default/files/M10-M-2.12.8.0-SYSTEM_0.FW' -o /tmp/fw/M10M-old.FW
+          curl -L --fail --retry 3 --retry-delay 2 'https://leica-camera.com/sites/default/files/M10-M-3.21.2.50-Customer_0.FW' -o /tmp/fw/M10M-new.FW
+          sha256sum /tmp/fw/* | tee cc01trace1a_results/firmware_sha256.txt
+
+      - name: Decode and trace CC0 CC1
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARGS=()
+          for SPEC in \
+            'M10R-20.20.47.37|/tmp/fw/M10R.FW' \
+            'M10M-2.12.8.0|/tmp/fw/M10M-old.FW' \
+            'M10M-3.21.2.50|/tmp/fw/M10M-new.FW'
+          do
+            LABEL="${SPEC%%|*}"
+            FW="${SPEC#*|}"
+            cp "$FW" /tmp/M10-R.FW
+            rm -f /tmp/M10R_unpacked.bin
+            /tmp/unpack >"/tmp/unpack_${LABEL}.txt"
+            test -s /tmp/M10R_unpacked.bin
+            SEC="/tmp/sec_${LABEL}"
+            rm -rf "$SEC"
+            python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin "$SEC" >"/tmp/sections_${LABEL}.txt"
+            FW_SHA="$(sha256sum "$FW" | awk '{print $1}')"
+            DEC_SHA="$(sha256sum /tmp/M10R_unpacked.bin | awk '{print $1}')"
+            ARGS+=(--item "${LABEL}|${SEC}|${FW_SHA}|${DEC_SHA}")
+          done
+
+          python3 tools/m10r_b2y_cc01trace1a.py \
+            "${ARGS[@]}" \
+            --out cc01trace1a_results/M10R_B2Y_CC01TRACE1A.json \
+            --report cc01trace1a_results/M10R_B2Y_CC01TRACE1A.md \
+            | tee cc01trace1a_results/stdout.txt
+          git rev-parse HEAD > cc01trace1a_results/source_commit.txt
+          cat cc01trace1a_results/M10R_B2Y_CC01TRACE1A.md
+
+      - name: Assert research constraints
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('cc01trace1a_results/M10R_B2Y_CC01TRACE1A.json').read_text())
+          assert d['schema']=='M10R_B2Y_CC01TRACE1A_V1'
+          for k in ('0x06','0x0a'):
+              assert sum(x['status']=='changed' for x in d['records'][k]['words']) > 0
+          print({k:{'changed':sum(x['status']=='changed' for x in v['words']),
+                    'setter_code_equal_all':v['setter_code_equal_all']}
+                 for k,v in d['records'].items()})
+          PY
+
+      - name: Persist research freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/generated
+          cp cc01trace1a_results/M10R_B2Y_CC01TRACE1A.json research/generated/M10R_B2Y_CC01TRACE1A.json
+          cp cc01trace1a_results/M10R_B2Y_CC01TRACE1A.md research/generated/M10R_B2Y_CC01TRACE1A.md
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/generated/M10R_B2Y_CC01TRACE1A.json research/generated/M10R_B2Y_CC01TRACE1A.md
+          if git diff --cached --quiet; then
+            echo 'Research freeze already current'
+          else
+            git commit -m 'Research freeze B2Y CC01TRACE1A results'
+            git push origin HEAD:m10r-b2y-cc01trace1a
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-B2Y-CC01TRACE1A-RESULTS
+          path: cc01trace1a_results/
+          retention-days: 90
+          if-no-files-found: error
