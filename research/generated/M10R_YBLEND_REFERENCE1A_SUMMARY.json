@@ -1,0 +1,100 @@
+{
+  "schema": "M10R_YBLEND_REFERENCE1A_SUMMARY_V1",
+  "date": "2026-09-26",
+  "run_id": 36222566705,
+  "artifact": {
+    "name": "M10R-YBLEND-REFERENCE1A",
+    "id": 10898904272,
+    "zip_sha256": "37e0926a631621c03d454cf83562761a8e3d58fc7815624000ded16d4854102a"
+  },
+  "family": "chromaScale = 1 + k*(mappedY/inputY - 1)",
+  "k_grid": {
+    "min": 0,
+    "max": 1,
+    "step": 0.05
+  },
+  "per_scene_best_k": {
+    "01": {
+      "colourful_rgb_rmse": 1,
+      "saturation_error": 1,
+      "delta_e76": 0.75,
+      "hue_error": 0.8,
+      "encoded_rgb_rmse": 1,
+      "luma_rmse": 1
+    },
+    "02": {
+      "colourful_rgb_rmse": 1,
+      "saturation_error": 1,
+      "delta_e76": 0.65,
+      "hue_error": 0.9,
+      "encoded_rgb_rmse": 1,
+      "luma_rmse": 1
+    },
+    "03": {
+      "colourful_rgb_rmse": 1,
+      "saturation_error": 1,
+      "delta_e76": 0.5,
+      "hue_error": 1,
+      "encoded_rgb_rmse": 1,
+      "luma_rmse": 0
+    },
+    "04": {
+      "colourful_rgb_rmse": 1,
+      "saturation_error": 0.7,
+      "delta_e76": 0.15,
+      "hue_error": 1,
+      "encoded_rgb_rmse": 1,
+      "luma_rmse": 0
+    },
+    "05": {
+      "colourful_rgb_rmse": 1,
+      "saturation_error": 0.9,
+      "delta_e76": 0.45,
+      "hue_error": 1,
+      "encoded_rgb_rmse": 1,
+      "luma_rmse": 0
+    },
+    "06": {
+      "colourful_rgb_rmse": 1,
+      "saturation_error": 1,
+      "delta_e76": 0.6,
+      "hue_error": 1,
+      "encoded_rgb_rmse": 1,
+      "luma_rmse": 0
+    }
+  },
+  "aggregate": {
+    "colourful_rgb_rmse": {
+      "best_k": 1,
+      "current_k_0_35_percent_above_best": 7.035
+    },
+    "saturation_error": {
+      "best_k": 0.95,
+      "current_k_0_35_percent_above_best": 37.971
+    },
+    "delta_e76": {
+      "best_k": 0.4,
+      "current_k_0_35_percent_above_best": 0.082
+    },
+    "hue_error": {
+      "best_k": 1,
+      "current_k_0_35_percent_above_best": 6.256
+    },
+    "encoded_rgb_rmse": {
+      "best_k": 1,
+      "current_k_0_35_percent_above_best": 4.269
+    },
+    "luma_rmse": {
+      "best_k": 0,
+      "current_k_0_35_percent_above_best": 0.485
+    }
+  },
+  "workflow_verdict": "CONSTANT_K_FAMILY_NOT_SUPPORTED_BY_SIX_SCENES",
+  "interpretation": [
+    "Color-specific metrics strongly prefer the upper test boundary.",
+    "This rejects k=0.35 as a good explanation in this simplified reference pipeline.",
+    "Boundary optimum does not justify promoting k=1.0.",
+    "Full default record 0x18 Chroma Suppress must be accounted for before extending k."
+  ],
+  "renderer_changed": false
+}
