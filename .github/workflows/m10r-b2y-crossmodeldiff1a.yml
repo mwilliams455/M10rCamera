@@ -1,0 +1,165 @@
+name: M10-R B2Y CROSSMODEL-DIFF1A
+
+on:
+  push:
+    branches: [m10r-b2y-crossmodeldiff1a]
+    paths:
+      - '.github/workflows/m10r-b2y-crossmodeldiff1a.yml'
+      - 'tools/m10r_b2y_crossmodeldiff1a.py'
+      - 'tools/m10r_b2y_assets.py'
+      - 'tools/m10r_sections.py'
+      - 'research/M10R_v094_b2y_selector_inventory.txt'
+  workflow_dispatch:
+
+permissions: {contents: read}
+
+jobs:
+  diff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build verified Leica M10-family unpacker
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker)
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+
+      - name: Download validated M10-R and M10 Monochrom firmware
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/fw
+          curl -L --fail --retry 3 --retry-delay 2 \
+            'https://reddotforum.com/Firmware_files/M10-R-20.20.47.37-Customer.FW' \
+            -o /tmp/fw/M10R-20.20.47.37.FW
+          curl -L --fail --retry 3 --retry-delay 2 \
+            'https://leica-camera.com/sites/default/files/M10-M-2.12.8.0-SYSTEM_0.FW' \
+            -o /tmp/fw/M10M-2.12.8.0.FW
+          curl -L --fail --retry 3 --retry-delay 2 \
+            'https://leica-camera.com/sites/default/files/M10-M-3.21.2.50-Customer_0.FW' \
+            -o /tmp/fw/M10M-3.21.2.50.FW
+          mkdir -p crossmodeldiff1a_results
+          sha256sum /tmp/fw/* | tee crossmodeldiff1a_results/firmware_sha256.txt
+
+      - name: Decode, identify B2Y, and build record-by-record diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p crossmodeldiff1a_results
+          ARGS=()
+          : > crossmodeldiff1a_results/input_provenance.txt
+
+          for SPEC in \
+            'M10R-20.20.47.37|/tmp/fw/M10R-20.20.47.37.FW' \
+            'M10M-2.12.8.0|/tmp/fw/M10M-2.12.8.0.FW' \
+            'M10M-3.21.2.50|/tmp/fw/M10M-3.21.2.50.FW'
+          do
+            LABEL="${SPEC%%|*}"
+            FW="${SPEC#*|}"
+
+            cp "$FW" /tmp/M10-R.FW
+            rm -f /tmp/M10R_unpacked.bin
+            /tmp/unpack >"/tmp/unpack_${LABEL}.txt"
+            test -s /tmp/M10R_unpacked.bin
+
+            SEC="/tmp/sec_${LABEL}"
+            rm -rf "$SEC"
+            python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin "$SEC" >"/tmp/sections_${LABEL}.txt"
+            cp "$SEC/sections.csv" "crossmodeldiff1a_results/${LABEL}_sections.csv"
+
+            DISCOVERY="$(python3 - "$SEC" <<'PY'
+          import csv,sys
+          from pathlib import Path
+
+          secdir=Path(sys.argv[1])
+          sys.path.insert(0,str(Path.cwd()/"tools"))
+          import m10r_b2y_assets as mod
+
+          rows=list(csv.DictReader((secdir/"sections.csv").open(encoding="utf-8")))
+          named=[]
+          for r in rows:
+              s=(r["name"]+" "+r["file"]).lower()
+              if "data/calib/b2y.bin" in s:
+                  named.append(secdir/r["file"])
+          if len(named)==1:
+              print(str(named[0])+"|named_data_calib_B2Y")
+              raise SystemExit(0)
+
+          hits=[]
+          for r in rows:
+              s=(r["name"]+" "+r["file"]).lower()
+              if "calibration data" not in s and "calib" not in s:
+                  continue
+              p=secdir/r["file"]
+              try:
+                  data=p.read_bytes()
+                  recs=mod.parse_records(data)
+              except Exception:
+                  continue
+              c0=[x for x in recs if x.record_id==0x0c and x.size==60]
+              d0=[x for x in recs if x.record_id==0x0d and x.size==24]
+              if len(c0)==1 and len(d0)==1:
+                  hits.append(p)
+          if len(hits)!=1:
+              raise SystemExit(f"structural B2Y identification expected one section, found {hits}")
+          print(str(hits[0])+"|structural_record0C0D_ABI")
+          PY
+            )"
+            B2Y_PATH="${DISCOVERY%%|*}"
+            IDENT="${DISCOVERY#*|}"
+            test -s "$B2Y_PATH"
+
+            FW_SHA="$(sha256sum "$FW" | awk '{print $1}')"
+            DEC_SHA="$(sha256sum /tmp/M10R_unpacked.bin | awk '{print $1}')"
+            B2Y_SHA="$(sha256sum "$B2Y_PATH" | awk '{print $1}')"
+
+            printf '%s|%s|%s|%s|%s\n' "$LABEL" "$FW_SHA" "$DEC_SHA" "$B2Y_SHA" "$IDENT" \
+              >> crossmodeldiff1a_results/input_provenance.txt
+            ARGS+=(--item "${LABEL}|${B2Y_PATH}|${FW_SHA}|${DEC_SHA}|${IDENT}")
+          done
+
+          python3 tools/m10r_b2y_crossmodeldiff1a.py \
+            --inventory research/M10R_v094_b2y_selector_inventory.txt \
+            "${ARGS[@]}" \
+            --out crossmodeldiff1a_results/M10R_B2Y_CROSSMODEL_DIFF1A.json \
+            --report crossmodeldiff1a_results/M10R_B2Y_CROSSMODEL_DIFF1A.md \
+            | tee crossmodeldiff1a_results/stdout.txt
+
+          git rev-parse HEAD > crossmodeldiff1a_results/source_commit.txt
+          cat crossmodeldiff1a_results/M10R_B2Y_CROSSMODEL_DIFF1A.md
+
+      - name: Assert invariant controls and research-only scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          p=Path("crossmodeldiff1a_results/M10R_B2Y_CROSSMODEL_DIFF1A.json")
+          d=json.loads(p.read_text())
+          assert d["schema"]=="M10R_B2Y_CROSSMODEL_DIFF1A_V1"
+          assert d["summary"]["invariant_controls_verified"]==["0x0c#0","0x0d#0"]
+          by_key={r["key"]:r for r in d["records"]}
+          assert by_key["0x0c#0"]["all_status"]=="exact_equal"
+          assert by_key["0x0d#0"]["all_status"]=="exact_equal"
+          assert d["summary"]["changed"] + d["summary"]["missing_or_added"] > 0
+          print(json.dumps(d["summary"],indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-B2Y-CROSSMODEL-DIFF1A-RESULTS
+          path: crossmodeldiff1a_results/
+          retention-days: 90
+          if-no-files-found: error
