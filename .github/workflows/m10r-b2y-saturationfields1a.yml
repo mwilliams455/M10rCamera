@@ -1,0 +1,103 @@
+name: M10-R B2Y SATURATIONFIELDS1A
+
+on:
+  push:
+    branches: [m10r-b2y-saturationfields1a]
+    paths:
+      - '.github/workflows/m10r-b2y-saturationfields1a.yml'
+      - 'tools/m10r_b2y_saturationfields1a.py'
+      - 'tools/m10r_b2y_saturation1a.py'
+      - 'tools/m10r_yblend_bit15_audit1a.py'
+      - 'tools/m10r_b2y_assets.py'
+      - 'tools/m10r_sections.py'
+  workflow_dispatch:
+
+permissions: {contents: write}
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned dependencies
+        run: python3 -m pip install --quiet capstone==5.0.3 unicorn==2.1.3
+
+      - name: Build unpacker and decode matched M10-R firmware
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p saturationfields1a_results
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker)
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          curl -L --fail --retry 3 --retry-delay 2 \
+            'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' \
+            -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sec > saturationfields1a_results/sections.txt
+          python3 - <<'PY'
+          import csv,hashlib
+          from pathlib import Path
+          rows=list(csv.DictReader(open('/tmp/sec/sections.csv',encoding='utf-8')))
+          hit=[Path('/tmp/sec')/r['file'] for r in rows if 'data/calib/b2y.bin' in (r['name']+' '+r['file']).lower()]
+          assert len(hit)==1,hit
+          got=hashlib.sha256(hit[0].read_bytes()).hexdigest()
+          exp='ea935a8006ea3b0a765660bd1d89f6a52c9f60508ee5ba76650005d80372335b'
+          assert got==exp,(got,exp)
+          print('B2Y invariant hash verified',got)
+          PY
+
+      - name: Prove saturation field packing
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/m10r_b2y_saturationfields1a.py /tmp/sec \
+            --out saturationfields1a_results/M10R_B2Y_SATURATIONFIELDS1A.json \
+            --report saturationfields1a_results/M10R_B2Y_SATURATIONFIELDS1A.md \
+            | tee saturationfields1a_results/stdout.txt
+          git rev-parse HEAD > saturationfields1a_results/source_commit.txt
+          cat saturationfields1a_results/M10R_B2Y_SATURATIONFIELDS1A.md
+
+      - name: Assert six 14-bit fields
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('saturationfields1a_results/M10R_B2Y_SATURATIONFIELDS1A.json').read_text())
+          assert d['schema']=='M10R_B2Y_SATURATIONFIELDS1A_V1'
+          assert len(d['fields'])==6
+          assert all(x['width']==14 for x in d['fields'])
+          assert d['pair_registers']==['0x20021110','0x20021114','0x20021118']
+          print(json.dumps(d['fields'],indent=2))
+          PY
+
+      - name: Persist research freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/generated
+          cp saturationfields1a_results/M10R_B2Y_SATURATIONFIELDS1A.json research/generated/M10R_B2Y_SATURATIONFIELDS1A.json
+          cp saturationfields1a_results/M10R_B2Y_SATURATIONFIELDS1A.md research/generated/M10R_B2Y_SATURATIONFIELDS1A.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/generated/M10R_B2Y_SATURATIONFIELDS1A.*
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Research freeze saturation 14-bit field map"
+          git push origin HEAD:m10r-b2y-saturationfields1a
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-B2Y-SATURATIONFIELDS1A-RESULTS
+          path: saturationfields1a_results/
+          retention-days: 90
+          if-no-files-found: error
