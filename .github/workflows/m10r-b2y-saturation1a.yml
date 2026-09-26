@@ -1,0 +1,102 @@
+name: M10-R B2Y SATURATION1A
+
+on:
+  push:
+    branches: [m10r-b2y-saturation1a]
+    paths:
+      - '.github/workflows/m10r-b2y-saturation1a.yml'
+      - 'tools/m10r_b2y_saturation1a.py'
+      - 'tools/m10r_b2y_assets.py'
+      - 'tools/m10r_yblend_bit15_audit1a.py'
+      - 'tools/m10r_sections.py'
+  workflow_dispatch:
+
+permissions: {contents: write}
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned emulation dependencies
+        run: python3 -m pip install --quiet capstone==5.0.3 unicorn==2.1.3
+
+      - name: Build verified Leica M10-family unpacker
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker)
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+
+      - name: Download and decode M10-R 20.20.47.37
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p saturation1a_results
+          curl -L --fail --retry 3 --retry-delay 2 \
+            'https://reddotforum.com/Firmware_files/M10-R-20.20.47.37-Customer.FW' \
+            -o /tmp/M10-R.FW
+          echo '141f0b5fcffe315372bc2c673a3dfa371eab84198d46d6de26016ec0958d77b2  /tmp/M10-R.FW' | sha256sum -c -
+          /tmp/unpack
+          test -s /tmp/M10R_unpacked.bin
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sec > saturation1a_results/sections.txt
+          sha256sum /tmp/M10-R.FW /tmp/M10R_unpacked.bin > saturation1a_results/provenance_sha256.txt
+
+      - name: Execute original saturation setter
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/m10r_b2y_saturation1a.py /tmp/sec \
+            --out saturation1a_results/M10R_B2Y_SATURATION1A.json \
+            --report saturation1a_results/M10R_B2Y_SATURATION1A.md \
+            | tee saturation1a_results/stdout.txt
+          git rev-parse HEAD > saturation1a_results/source_commit.txt
+          cat saturation1a_results/M10R_B2Y_SATURATION1A.md
+
+      - name: Assert isolated saturation delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("saturation1a_results/M10R_B2Y_SATURATION1A.json").read_text())
+          assert d["schema"]=="M10R_B2Y_SATURATION1A_V1"
+          assert d["scale_words"]["LOW"]==[0x1b34]*6
+          assert d["scale_words"]["MEDIUM"]==[0x2000]*6
+          assert d["scale_words"]["HIGH"]==[0x2666]*6
+          assert d["programmer"]["six_scale_words_fully_explain_low_high_programmer_delta"] is True
+          assert d["programmer"]["scale_output_addresses"]
+          print(json.dumps(d["scale_relative_to_medium"],indent=2))
+          print(d["programmer"]["scale_output_addresses"])
+          PY
+
+      - name: Persist research freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/generated
+          cp saturation1a_results/M10R_B2Y_SATURATION1A.json research/generated/M10R_B2Y_SATURATION1A.json
+          cp saturation1a_results/M10R_B2Y_SATURATION1A.md research/generated/M10R_B2Y_SATURATION1A.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/generated/M10R_B2Y_SATURATION1A.*
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Research freeze M10-R saturation1a"
+          git push origin HEAD:m10r-b2y-saturation1a
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-B2Y-SATURATION1A-RESULTS
+          path: saturation1a_results/
+          retention-days: 90
+          if-no-files-found: error
