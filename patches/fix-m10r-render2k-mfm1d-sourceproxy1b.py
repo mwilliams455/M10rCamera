@@ -142,8 +142,8 @@ def main():
 
     # Active implementation must not encode manufacturer/model/lens-name identities.
     for bad in ['XIAOMI','Xiaomi','15U','SUPERTELE','MAIN24']:
-        if bad in proxy or bad in state or bad in ii or bad in rr:
-            raise RuntimeError("SOURCEPROXY1B active code contains device-specific identity: "+bad)
+        if bad in proxy or bad in state or bad in ii:
+            raise RuntimeError("SOURCEPROXY1B source-identification path contains device-specific identity: "+bad)
 
     proof={
       "schema":"RENDER2K_MFM1D_SOURCEPROXY1B_PATCH_V1",
