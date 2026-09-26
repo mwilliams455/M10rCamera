@@ -1,0 +1,91 @@
+CALLS [
+  {
+    "pc": "0x1547e2",
+    "target_va": "0x4204efd8",
+    "target_offset": "0x4efd8"
+  },
+  {
+    "pc": "0x1547ec",
+    "target_va": "0x42140154",
+    "target_offset": "0x140154"
+  },
+  {
+    "pc": "0x1547f6",
+    "target_va": "0x421a0fc4",
+    "target_offset": "0x1a0fc4"
+  },
+  {
+    "pc": "0x15480a",
+    "target_va": "0x42140154",
+    "target_offset": "0x140154"
+  },
+  {
+    "pc": "0x154814",
+    "target_va": "0x420d3284",
+    "target_offset": "0xd3284"
+  }
+]
+MMIO []
+STRINGS
+0x1546c8 B2Y.bin
+0x15478b @LUM NOISE REDUCTION     String:%s
+0x1547b0 B2Y.bin
+0x15481f @OFFSET    String:%s
+0x154834 B2Y.bin
+0x15483c NO VALID STRING   img_b2y_select_offset_paraset
+0x1548f4 B2Y.bin
+0x1548fc NO VALID STRING   img_b2y_select_post_processing_filter_paraset
+0x1549b0 B2Y.bin
+0x1549b8 NO VALID STRING   img_b2y_select_shift_paraset
+0x154a88 B2Y.bin
+0x154a90 NO VALID STRING   img_b2y_select_subpre_light_paraset
+0x154b70 B2Y.bin
+0x154b78 NO VALID STRING   img_b2y_select_texture_enhancement_paraset
+0x154ccc B2Y.bin
+0x154cd7 BNO VALID STRING   img_b2y_select_tone_control_paraset   TBL0
+0x154d18 NO VALID STRING   img_b2y_select_tone_control_paraset   TBL1
+0x154dd8 B2Y.bin
+0x154de0 NO VALID STRING   img_b2y_select_wbcliplevel_paraset
+0x154e90 B2Y.bin
+0x154e98 NO VALID STRING   img_b2y_select_y_blend
+0x1547c0: push     {r4, r5, r6, r7, lr}
+0x1547c2: sub      sp, #0x44
+0x1547c4: movs     r4, r0
+0x1547c6: movs     r6, r1
+0x1547c8: movs     r7, #0
+0x1547ca: ldrh     r0, [r4]
+0x1547cc: ldr      r1, [pc, #0x4c] ; LIT=0x15481c->0x408ceda6
+0x1547ce: ldrh     r1, [r1]
+0x1547d0: cmp      r0, r1
+0x1547d2: bne      #0x421547d8
+0x1547d4: cmp      r6, #1
+0x1547d6: beq      #0x42154818
+0x1547d8: ldrh     r0, [r4]
+0x1547da: ldr      r1, [pc, #0x40] ; LIT=0x15481c->0x408ceda6
+0x1547dc: strh     r0, [r1]
+0x1547de: adds     r1, r4, #2
+0x1547e0: add      r0, sp, #4
+0x1547e2: bl       #0x4204efd8 ; CALL=0x4204efd8
+0x1547e6: add      r2, sp, #4
+0x1547e8: adr      r1, #0x34
+0x1547ea: movs     r0, #2
+0x1547ec: bl       #0x42140154 ; CALL=0x42140154
+0x1547f0: add      r2, sp, #4
+0x1547f2: movs     r1, #2
+0x1547f4: adr      r0, #0x3c
+0x1547f6: bl       #0x421a0fc4 ; CALL=0x421a0fc4
+0x1547fa: movs     r5, r0
+0x1547fc: cmp      r5, #0
+0x1547fe: bne      #0x4215480e
+0x154800: movs     r7, #1
+0x154802: ldr      r1, [pc, #0x18] ; LIT=0x15481c->0x408ceda6
+0x154804: strh     r0, [r1]
+0x154806: adr      r1, #0x34
+0x154808: movs     r0, #4
+0x15480a: bl       #0x42140154 ; CALL=0x42140154
+0x15480e: movs     r7, #1
+0x154810: movs     r1, r7
+0x154812: movs     r0, r5
+0x154814: blx      #0x420d3284 ; CALL=0x420d3284
+0x154818: add      sp, #0x44
+0x15481a: pop      {r4, r5, r6, r7, pc}
