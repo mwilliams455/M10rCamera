@@ -56,7 +56,7 @@ jobs:
           hit=[Path('/tmp/sec')/r['file'] for r in rows if 'data/calib/b2y.bin' in (r['name']+' '+r['file']).lower()]
           assert len(hit)==1,hit
           got=hashlib.sha256(hit[0].read_bytes()).hexdigest()
-          assert got=='ea935a8006ea3b0a765660bd1d89f6a52c9f60508ee5ba76650005d80372335',got
+          assert got=='ea935a8006ea3b0a765660bd1d89f6a52c9f60508ee5ba76650005d80372335b',got
           print('B2Y invariant hash verified',got)
           PY
           sha256sum /tmp/M10-R.FW /tmp/M10R_unpacked.bin > saturation1a_results/provenance_sha256.txt
