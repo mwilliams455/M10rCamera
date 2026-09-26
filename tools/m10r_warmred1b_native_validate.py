@@ -103,7 +103,7 @@ def main():
 
     for sid in [f"{i:02}" for i in range(1,11)]:
         sample,ref,ca,work,wy,meta=c.data(sid,inp,js)
-        scene={"metadata":meta,"conditions":{}}
+        scene={"metadata":meta,"pixel_count":int(np.prod(sample.shape[:2])),"conditions":{}}
         for mode,scale in [("target_native",1.0),("white_normalized_control",1.0/wy)]:
             src=eye*scale
             rr,_,taps,_=c.native(R,sample,src,ca,work,dst,tone,dg,tap=True)
@@ -135,7 +135,7 @@ def main():
                  result["cases"][sid]["conditions"][mode]["render1t"]["all"]["DE76_mean"]
                  for sid in result["cases"])
         active=statistics.mean(result["cases"][sid]["conditions"][mode]["oracle"]["active"]/
-              np.prod(c.data(sid,inp,js)[0].shape[:2]) for sid in result["cases"])
+              result["cases"][sid]["pixel_count"] for sid in result["cases"])
         summary[mode]={"render1t":base,"warmred1b":cand,
           "DE_ratio":cand["DE76_mean"]/base["DE76_mean"],
           "ab_ratio":cand["ab_error_mean"]/base["ab_error_mean"],
