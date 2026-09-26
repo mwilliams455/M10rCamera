@@ -1,0 +1,51 @@
+name: M10 FAMILY FW CONTAINER PROBE1A
+on:
+  push:
+    branches: [m10r-b2y-colorfamily-sector1a]
+    paths:
+      - '.github/workflows/m10-family-fw-container-probe1a.yml'
+      - 'tools/m10_family_fw_container_probe1a.py'
+  workflow_dispatch:
+permissions: {contents: write}
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download firmware set
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/fw probe1a_results
+          curl -L --fail --retry 3 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/fw/M10R.FW
+          curl -L --fail --retry 3 'https://reddotforum.com/Firmware_files/M10-3.22.23.38-Customer.FW' -o /tmp/fw/M10.FW
+          curl -L --fail --retry 3 'https://reddotforum.com/Firmware_files/M10-P-4.22.23.34-Customer.FW' -o /tmp/fw/M10P.FW
+          sha256sum /tmp/fw/* | tee probe1a_results/firmware_sha256.txt
+      - name: Probe container geometry
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/m10_family_fw_container_probe1a.py \
+            --item 'M10R-30.22.23.34|/tmp/fw/M10R.FW' \
+            --item 'M10-3.22.23.38|/tmp/fw/M10.FW' \
+            --item 'M10P-4.22.23.34|/tmp/fw/M10P.FW' \
+            --out probe1a_results/M10_FAMILY_FW_CONTAINER_PROBE1A.json \
+            | tee probe1a_results/stdout.txt
+      - name: Persist
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/generated
+          cp probe1a_results/M10_FAMILY_FW_CONTAINER_PROBE1A.json research/generated/
+          cp probe1a_results/stdout.txt research/generated/M10_FAMILY_FW_CONTAINER_PROBE1A.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/generated/M10_FAMILY_FW_CONTAINER_PROBE1A.*
+          git commit -m "Research freeze M10-family container probe" || exit 0
+          git push origin HEAD:m10r-b2y-colorfamily-sector1a
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10-FAMILY-FW-CONTAINER-PROBE1A
+          path: probe1a_results/
+          retention-days: 90
