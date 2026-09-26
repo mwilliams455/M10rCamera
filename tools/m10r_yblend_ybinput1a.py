@@ -329,7 +329,7 @@ def main():
     hold=result["aggregates"]["holdout_07_10"]["target_native"]
     result["holdout_ranking_DE76"]=sorted(MODELS,key=lambda m:hold[m]["DE76"])
     result["holdout_ranking_ab"]=sorted(MODELS,key=lambda m:hold[m]["ab_error"])
-    result["status"]="PASS_TCYC_YB_DISCRIMINATOR"
+    result["status"]="PASS_YBINPUT_DISCRIMINATOR"
     result["script_sha256"]=sha(__file__)
     (out/"results.json").write_text(json.dumps(result,indent=2)+"\n")
 
