@@ -81,7 +81,7 @@ public final class M10RMfm1DSourceProxy {
                 ? characteristics.get(CameraCharacteristics.SENSOR_INFO_WHITE_LEVEL) : null;
         Integer illum1Obj = characteristics != null
                 ? characteristics.get(CameraCharacteristics.SENSOR_REFERENCE_ILLUMINANT1) : null;
-        Integer illum2Obj = characteristics != null
+        Byte illum2Obj = characteristics != null
                 ? characteristics.get(CameraCharacteristics.SENSOR_REFERENCE_ILLUMINANT2) : null;
 
         int activeWidth = active != null ? active.width() : -1;
@@ -90,7 +90,7 @@ public final class M10RMfm1DSourceProxy {
         double sensorWidthMm = sensor != null ? sensor.getWidth() : Double.NaN;
         int whiteLevel = whiteObj != null ? whiteObj : -1;
         int illum1 = illum1Obj != null ? illum1Obj : -1;
-        int illum2 = illum2Obj != null ? illum2Obj : -1;
+        int illum2 = illum2Obj != null ? (illum2Obj & 0xff) : -1;
 
         long swum = finite(sensorWidthMm) ? Math.round(sensorWidthMm * 1000.0) : -1L;
         long fumm = finite(physicalFocalMm) ? Math.round(physicalFocalMm * 1000.0) : -1L;
