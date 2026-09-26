@@ -1,0 +1,248 @@
+name: M10-R Y_BLEND REFERENCE1A
+
+on:
+  push:
+    branches: [m10r-yblend-reference1a]
+    paths:
+      - '.github/workflows/m10r-yblend-reference1a.yml'
+      - 'app/src/main/java/com/m10r/diagnostic/M10RYBlendReference1ARenderer.java'
+      - 'tools/M10RYBlendReference1ACli.java'
+      - 'tools/m10r_yblend_reference1a_score.py'
+  workflow_dispatch:
+
+permissions: {contents: write}
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl >/dev/null
+          python3 -m pip install --quiet rawpy pillow numpy
+
+      - name: Extract exact MEDIUM and DG assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -L --fail --retry 3 --retry-delay 2 \
+            'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' \
+            -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker);z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sections >/dev/null
+          rm -rf /tmp/assets
+          python3 tools/m10r_b2y_assets.py \
+            /tmp/sections/074_IMG_Calibration_Data_data_calib_B2Y.bin.bin /tmp/assets >/dev/null
+          echo '2fd6ca209f290c75aa96976b3d7692e55c41a55c0017a063aba9808da3b41a00  /tmp/assets/tone_medium_q15.u32le' | sha256sum -c -
+          echo '9e65de24d52271be0783f4e2728f20f482c0ba43b63159b75033b4a4fc75457d  /tmp/assets/dg_expanded_u16le.bin' | sha256sum -c -
+
+      - name: Compile Y_BLEND host renderer
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/m10r_yblend_reference1a_score.py tools/m10r_reference_transfer_rgb_fit.py tools/m10r_reference_order_fit.py
+          mkdir -p /tmp/classes
+          javac -d /tmp/classes \
+            app/src/main/java/com/m10r/diagnostic/DngMetadataReader.java \
+            app/src/main/java/com/m10r/diagnostic/DngRawDecoder.java \
+            app/src/main/java/com/m10r/diagnostic/LosslessJpegDecoder.java \
+            app/src/main/java/com/m10r/diagnostic/SensorPreviewCore.java \
+            app/src/main/java/com/m10r/diagnostic/M10RColorSpecCore.java \
+            app/src/main/java/com/m10r/diagnostic/M10RReferenceColorCore.java \
+            app/src/main/java/com/m10r/diagnostic/M10RNeutralClipReferenceRenderer.java \
+            app/src/main/java/com/m10r/diagnostic/M10RYBlendReference1ARenderer.java \
+            tools/M10RYBlendReference1ACli.java
+
+      - name: Render and score six verified same-capture pairs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/yblend1a
+          for id in 01 02 03 04 05 06; do
+            echo "=== Y_BLEND REFERENCE1A sample $id ==="
+            base="https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_${id}"
+            curl -L --fail --retry 3 --retry-delay 2 "$base.jpg" -o "/tmp/yblend1a/$id.jpg"
+            curl -L --fail --retry 3 --retry-delay 2 "$base.dng" -o "/tmp/yblend1a/$id.dng"
+            exiftool -j -n \
+              -Make -Model -SerialNumber -ImageUniqueID -DateTimeOriginal -CreateDate \
+              -ExposureTime -FNumber -ISO -FocalLength -ExposureCompensation \
+              -WhiteBalance -Contrast -Saturation -Sharpness \
+              "/tmp/yblend1a/$id.jpg" "/tmp/yblend1a/$id.dng" > "/tmp/yblend1a/${id}_exif.json"
+
+            rm -rf "/tmp/yblend1a/${id}_renders"
+            java -cp /tmp/classes com.m10r.diagnostic.M10RYBlendReference1ACli \
+              "/tmp/yblend1a/$id.dng" \
+              /tmp/assets/tone_medium_q15.u32le /tmp/assets/dg_expanded_u16le.bin \
+              "/tmp/yblend1a/${id}_renders" 1000 \
+              | tee "/tmp/yblend1a/${id}_render.txt"
+
+            python3 tools/m10r_yblend_reference1a_score.py \
+              --jpg "/tmp/yblend1a/$id.jpg" --dng "/tmp/yblend1a/$id.dng" \
+              --render-dir "/tmp/yblend1a/${id}_renders" --sample "$id" \
+              --metadata-json "/tmp/yblend1a/${id}_exif.json" \
+              --out "/tmp/yblend1a/${id}_metrics.json"
+
+            rm -rf "/tmp/yblend1a/${id}_renders"
+            rm -f "/tmp/yblend1a/$id.jpg" "/tmp/yblend1a/$id.dng"
+          done
+
+      - name: Aggregate constant-k family evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/generated
+          python3 - <<'PY'
+          import json,math,os,statistics
+          from pathlib import Path
+
+          rows=[json.loads(p.read_text()) for p in sorted(Path('/tmp/yblend1a').glob('*_metrics.json'))]
+          valid=[r for r in rows if r['metadata'].get('identity_supported') is True and r['metadata'].get('default_jpeg_controls') is True]
+          if len(valid)!=6:
+              raise RuntimeError(f'expected 6 verified/default pairs, got {len(valid)}')
+
+          ks=[round(i*.05,2) for i in range(21)]
+          def value(r,k,metric):
+              q=r['metrics'][f'{k:.2f}']
+              if metric=='colourful_rgb_rmse': return q['bins']['colourful_pixels']['rgb_rmse']
+              if metric=='saturation_error': return q['saturation_error_abs_mean']
+              if metric=='delta_e76': return q['delta_e76_mean']
+              if metric=='hue_error': return q['hue_error_deg_mean']
+              if metric=='encoded_rgb_rmse': return q['encoded_rgb_rmse']
+              if metric=='luma_rmse': return q['luma_rmse']
+              raise KeyError(metric)
+          metrics=['colourful_rgb_rmse','saturation_error','delta_e76','hue_error','encoded_rgb_rmse','luma_rmse']
+
+          aggregate={}
+          for metric in metrics:
+              aggregate[metric]={f'{k:.2f}':statistics.median(value(r,k,metric) for r in valid) for k in ks}
+          best_global={m:min(ks,key=lambda k:aggregate[m][f'{k:.2f}']) for m in metrics}
+          best_by_sample={r['sample']:r['best_k_by_metric'] for r in valid}
+
+          dispersion={}
+          for m in metrics:
+              vals=[float(r['best_k_by_metric'][m]) for r in valid]
+              med=statistics.median(vals)
+              dispersion[m]={
+                  'values':vals,'median':med,
+                  'min':min(vals),'max':max(vals),'range':max(vals)-min(vals),
+                  'mad':statistics.median(abs(x-med) for x in vals),
+                  'within_0p10_of_global':sum(abs(x-best_global[m])<=0.1000001 for x in vals),
+                  'within_0p15_of_global':sum(abs(x-best_global[m])<=0.1500001 for x in vals),
+              }
+
+          current=0.35
+          comparisons={}
+          for m in metrics:
+              bk=best_global[m]
+              bv=aggregate[m][f'{bk:.2f}'];cv=aggregate[m][f'{current:.2f}']
+              comparisons[m]={
+                'aggregate_best_k':bk,'aggregate_best':bv,'current_k_0p35':cv,
+                'current_minus_best_percent':100.0*(cv/bv-1.0) if bv else None,
+                'k0':aggregate[m]['0.00'],'k0p5':aggregate[m]['0.50'],'k1':aggregate[m]['1.00']
+              }
+
+          primary='colourful_rgb_rmse'; secondary='saturation_error'
+          pg=best_global[primary]
+          coherent=(dispersion[primary]['within_0p10_of_global']>=5 and
+                    dispersion[secondary]['within_0p15_of_global']>=4 and
+                    0.0<pg<1.0)
+          if coherent:
+              verdict='CONSTANT_K_FAMILY_EMPIRICALLY_COHERENT_NOT_FIRMWARE_PROOF'
+          elif pg in (0.0,1.0) or dispersion[primary]['within_0p10_of_global']<=3:
+              verdict='CONSTANT_K_FAMILY_NOT_SUPPORTED_BY_SIX_SCENES'
+          else:
+              verdict='CONSTANT_K_FAMILY_INCONCLUSIVE'
+
+          result={
+            'schema':'M10R_YBLEND_REFERENCE1A_AGGREGATE_V1',
+            'pair_count':len(valid),'k_grid':ks,
+            'family':'scale=1+k*(mappedY/inputY-1)',
+            'firmware_formula_claim':False,
+            'pipeline':'CA9 -> internal RGB -> exact YC -> MEDIUM -> DG(Y) -> constant-k CbCr -> exact inverse -> corrected sRGB CC1 -> sRGB publication',
+            'aggregate_medians':aggregate,
+            'best_global_k':best_global,
+            'best_k_by_sample':best_by_sample,
+            'dispersion':dispersion,
+            'comparisons':comparisons,
+            'verdict':verdict,
+            'run_id':os.environ.get('GITHUB_RUN_ID'),
+            'source_commit':os.environ.get('GITHUB_SHA'),
+            'limitations':[
+              'The same-capture JPEG is strong photographic evidence but does not reveal the hardware equation directly.',
+              'Current production-only COLORRECON/GAMUT/TONECAL stages are not fitted or reproduced here; they are held outside this Y_BLEND family test.',
+              'A coherent constant-k result would constrain the operator but would not prove p1=32 semantics.',
+              'An incoherent result falsifies this simple family more strongly than it identifies an alternative.'
+            ]
+          }
+          Path('research/generated/M10R_YBLEND_REFERENCE1A.json').write_text(json.dumps({'samples':rows,'aggregate':result},indent=2,sort_keys=True)+'\n')
+
+          lines=[
+            '# M10-R Y_BLEND REFERENCE1A — CONSTANT-k FAMILY FALSIFICATION',
+            '',
+            'Six verified same-capture default Leica M10-R JPEG+DNG pairs.',
+            '',
+            'Candidate family (offline only): `chromaScale = 1 + k*(mappedY/inputY - 1)`, k=0.00..1.00 in 0.05 steps.',
+            'No Android renderer change. No firmware formula claim.',
+            '',
+            '## Per-scene best k',
+            '',
+            '| Sample | Colourful RGB | Saturation | dE76 | Hue | RGB | Luma |',
+            '|---|---:|---:|---:|---:|---:|---:|'
+          ]
+          for r in valid:
+              b=r['best_k_by_metric']
+              lines.append(f"| {r['sample']} | {b['colourful_rgb_rmse']:.2f} | {b['saturation_error']:.2f} | {b['delta_e76']:.2f} | {b['hue_error']:.2f} | {b['encoded_rgb_rmse']:.2f} | {b['luma_rmse']:.2f} |")
+          lines += ['','## Aggregate best k','']
+          for m in metrics:
+              q=comparisons[m];d=dispersion[m]
+              lines.append(f"- **{m}**: best k={q['aggregate_best_k']:.2f}; current 0.35 is {q['current_minus_best_percent']:.3f}% above best; scene range={d['min']:.2f}..{d['max']:.2f}, MAD={d['mad']:.3f}, within ±0.10={d['within_0p10_of_global']}/6.")
+          lines += [
+            '',
+            '## Verdict',
+            '',
+            f"**{verdict}**",
+            '',
+            'Interpretation boundary: this is photographic model discrimination. It does not convert p1=32 into a denominator or prove hardware arithmetic.',
+            '',
+            'If the family is incoherent across scenes, do not tune k again; replace the constant-k model. If coherent, use the cluster only as a constraint for the next hardware/operator hypothesis.',
+            ''
+          ]
+          Path('research/generated/M10R_YBLEND_REFERENCE1A.md').write_text('\n'.join(lines))
+          print('\n'.join(lines))
+          PY
+
+      - name: Persist reference evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/generated/M10R_YBLEND_REFERENCE1A.json research/generated/M10R_YBLEND_REFERENCE1A.md
+          git commit -m "Research freeze Y_BLEND reference1a" || exit 0
+          git push origin HEAD:m10r-yblend-reference1a
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-YBLEND-REFERENCE1A
+          path: |
+            /tmp/yblend1a/*_metrics.json
+            /tmp/yblend1a/*_render.txt
+            research/generated/M10R_YBLEND_REFERENCE1A.json
+            research/generated/M10R_YBLEND_REFERENCE1A.md
+          if-no-files-found: warn
+          retention-days: 90
