@@ -1,0 +1,91 @@
+name: M10-R B2Y CHROMACROSSWALK1A
+
+on:
+  push:
+    branches: [m10r-b2y-saturationfields1a]
+    paths:
+      - '.github/workflows/m10r-b2y-chromacrosswalk1a.yml'
+      - 'tools/m10r_b2y_chromacrosswalk1a.py'
+      - 'tools/m10r_b2y_saturation1a.py'
+      - 'tools/m10r_yblend_bit15_audit1a.py'
+      - 'tools/m10r_b2y_assets.py'
+      - 'tools/m10r_sections.py'
+  workflow_dispatch:
+
+permissions: {contents: write}
+
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone==5.0.3 unicorn==2.1.3
+
+      - name: Decode matched M10-R firmware
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p chromacrosswalk1a_results
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          x=p.index(marker)+len(marker); y=p.index("\n          CPP",x)
+          Path('/tmp/unpack.cpp').write_text(p[x:y])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          curl -L --fail --retry 3 --retry-delay 2 \
+            'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' \
+            -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sec >/dev/null
+
+      - name: Cross-execute IMG and SAM7 writers
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/m10r_b2y_chromacrosswalk1a.py /tmp/sec --cases 256 \
+            --out chromacrosswalk1a_results/M10R_B2Y_CHROMACROSSWALK1A.json \
+            --report chromacrosswalk1a_results/M10R_B2Y_CHROMACROSSWALK1A.md \
+            | tee chromacrosswalk1a_results/stdout.txt
+          git rev-parse HEAD > chromacrosswalk1a_results/source_commit.txt
+          cat chromacrosswalk1a_results/M10R_B2Y_CHROMACROSSWALK1A.md
+
+      - name: Assert exact writer equivalence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('chromacrosswalk1a_results/M10R_B2Y_CHROMACROSSWALK1A.json').read_text())
+          assert d['schema']=='M10R_B2Y_CHROMACROSSWALK1A_V1'
+          assert d['all_mmio_identical'] is True
+          assert d['random_cases_passed']==256
+          assert len(d['real_modes'])==4 and all(x['mmio_identical'] for x in d['real_modes'])
+          assert d['sam7_api']['name']=='Im_B2Y_Ctrl_Chroma_Suppress'
+          print('exact crosswalk proven')
+          PY
+
+      - name: Persist research freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/generated
+          cp chromacrosswalk1a_results/M10R_B2Y_CHROMACROSSWALK1A.json research/generated/M10R_B2Y_CHROMACROSSWALK1A.json
+          cp chromacrosswalk1a_results/M10R_B2Y_CHROMACROSSWALK1A.md research/generated/M10R_B2Y_CHROMACROSSWALK1A.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/generated/M10R_B2Y_CHROMACROSSWALK1A.*
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Research freeze chroma suppress IMG SAM7 crosswalk"
+          git push origin HEAD:m10r-b2y-saturationfields1a
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-B2Y-CHROMACROSSWALK1A-RESULTS
+          path: chromacrosswalk1a_results/
+          retention-days: 90
+          if-no-files-found: error
