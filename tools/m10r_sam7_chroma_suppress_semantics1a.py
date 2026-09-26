@@ -3,12 +3,12 @@ from __future__ import annotations
 import argparse,csv,json,struct
 from pathlib import Path
 from capstone import Cs,CS_ARCH_ARM,CS_MODE_THUMB,CS_MODE_LITTLE_ENDIAN
-from capstone.arm import ARM_OP_IMM
+from capstone.arm import ARM_OP_IMM,ARM_OP_MEM,ARM_REG_PC
 
 MAIN_RETURN=0x52224
 ERROR_RETURN=0x5223c
 DIAG_ADR=0x52230
-SEARCH_LO=0x51f00
+SEARCH_LO=0x51d00
 SEARCH_HI=0x52240
 
 def one(md,b,pc):
@@ -25,7 +25,9 @@ def main():
     pro=[]
     for pc in range(SEARCH_LO,SEARCH_HI,2):
         i=one(md,b,pc)
-        if i and i.mnemonic=="push" and "lr" in i.op_str: pro.append(pc)
+        if i and ((i.mnemonic.startswith("push") and "lr" in i.op_str) or
+                  (i.mnemonic.startswith("stm") and "sp" in i.op_str and "lr" in i.op_str)):
+            pro.append(pc)
 
     adr=one(md,b,DIAG_ADR)
     diag_target=None
@@ -33,22 +35,41 @@ def main():
         # Capstone Thumb ADR operand is displacement in this binary.
         diag_target=((DIAG_ADR+4)&~3)+int(adr.operands[1].imm)
 
-    candidates=[]
-    for start in pro:
-        ins=[];pc=start
-        while pc<=ERROR_RETURN:
-            i=one(md,b,pc)
-            if not i: break
-            ins.append({"address":hex(pc),"mnemonic":i.mnemonic,"op_str":i.op_str})
-            pc+=i.size
-        # Candidate must reach the known Chroma Suppress main body and both returns.
-        addrs={int(x["address"],16) for x in ins}
-        if 0x52038 in addrs and MAIN_RETURN in addrs and ERROR_RETURN in addrs:
-            candidates.append({"start":hex(start),"instruction_count":len(ins),"instructions":ins})
+    # Locate the function's own MMIO-base load. The register programmer uses r1
+    # as the page pointer, so the literal can sit before the six-field body.
+    page_loads=[]
+    for pc in range(SEARCH_LO,0x52040,2):
+        i=one(md,b,pc)
+        if not i: continue
+        try:ops=list(i.operands)
+        except Exception:ops=[]
+        for op in ops:
+            if op.type==ARM_OP_MEM and op.mem.base==ARM_REG_PC:
+                pool=((pc+4)&~3)+int(op.mem.disp)
+                v=struct.unpack_from("<I",b,pool)[0] if 0<=pool<=len(b)-4 else None
+                if v==0x20021100: page_loads.append(pc)
+    if not page_loads:
+        raise RuntimeError("no 0x20021100 page load before Chroma Suppress body")
+    anchor=min(page_loads)
 
-    if len(candidates)!=1:
-        raise RuntimeError(f"expected one enclosing candidate, got {[x['start'] for x in candidates]}")
-    start=int(candidates[0]["start"],16)
+    # Function start is the last real prologue preceding that page-load anchor.
+    prev=[p for p in pro if p<=anchor]
+    if not prev:
+        raise RuntimeError(f"no prologue before page load {anchor:#x}; prologues={list(map(hex,pro))}")
+    start=max(prev)
+
+    # Verify that sequential decoding from the selected prologue reaches the
+    # known six-field body and the normal return. The inline diagnostic tail
+    # after the normal return is verified separately by its ADR.
+    ins=[];pc=start
+    while pc<=MAIN_RETURN:
+        i=one(md,b,pc)
+        if not i: break
+        ins.append({"address":hex(pc),"mnemonic":i.mnemonic,"op_str":i.op_str})
+        pc+=i.size
+    addrs={int(x["address"],16) for x in ins}
+    if 0x52038 not in addrs or MAIN_RETURN not in addrs:
+        raise RuntimeError(f"selected prologue {start:#x} does not reach body/return")
 
     callers=[]
     for pc in range(0,len(b)-4,2):
@@ -75,7 +96,7 @@ def main():
     result={"schema":"M10R_SAM7_CHROMA_SUPPRESS_SEMANTICS1A_V1",
       "function_start":hex(start),"main_return":hex(MAIN_RETURN),"error_return":hex(ERROR_RETURN),
       "diagnostic_adr":hex(DIAG_ADR),"diagnostic_target":None if diag_target is None else hex(diag_target),
-      "diagnostic_string":diag,"direct_callers":callers,"six_lane_packing":six,
+      "diagnostic_string":diag,"page_loads":[hex(x) for x in page_loads],"direct_callers":callers,"six_lane_packing":six,
       "guardrails":["Lane ordering is proven; hue/color names for lanes are not yet proven.",
                     "This is register-programming evidence, not pixel arithmetic."]}
     a.out.parent.mkdir(parents=True,exist_ok=True);a.out.write_text(json.dumps(result,indent=2)+"\n")
