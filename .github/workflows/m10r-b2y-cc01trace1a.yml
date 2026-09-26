@@ -12,6 +12,10 @@ on:
     branches: [m10r-b2y-crossmodeldiff1a]
   workflow_dispatch:
 
+concurrency:
+  group: m10r-b2y-cc01trace1a-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
