@@ -1,0 +1,94 @@
+name: M10-R SATURATION SEMANTICS1A
+on:
+  push:
+    branches: [m10r-b2y-saturationsemantics1a]
+    paths:
+      - '.github/workflows/m10r-saturation-semantics1a.yml'
+      - 'tools/m10r_sam7_chroma_suppress_semantics1a.py'
+      - 'tools/m10r_sections.py'
+  workflow_dispatch:
+permissions: {contents: write}
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone==5.0.3
+      - name: Decode M10-R 30.22.23.34
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n";a=p.index(marker)+len(marker);z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sec >/dev/null
+      - name: Recover Chroma Suppress function identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p semantics1a_results
+          python3 tools/m10r_sam7_chroma_suppress_semantics1a.py /tmp/sec --out semantics1a_results/M10R_SAM7_CHROMA_SUPPRESS_SEMANTICS1A.json | tee semantics1a_results/stdout.txt
+      - name: Build freeze report
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('semantics1a_results/M10R_SAM7_CHROMA_SUPPRESS_SEMANTICS1A.json').read_text())
+          assert 'Chroma_Suppress' in d['diagnostic_string']
+          assert len(d['six_lane_packing'])==6
+          lines=[
+            '# M10-R B2Y SATURATIONSEMANTICS1A',
+            '',
+            'The six M10-R saturation fields are now bound to the SAM7 Chroma Suppress control routine itself.',
+            '',
+            f"Function start: `{d['function_start']}`",
+            f"Diagnostic: `{d['diagnostic_string']}`",
+            f"Diagnostic ADR: `{d['diagnostic_adr']}` -> `{d['diagnostic_target']}`",
+            '',
+            '## Six-lane layout',
+            '',
+            '| Lane | SAM7 parameter | MMIO word offset | Field |',
+            '|---:|---:|---:|---|',
+          ]
+          for x in d['six_lane_packing']:
+              lines.append(f"| {x['lane']} | {x['param_offset']} | {x['dest_offset']} | bits {x['bits']} |")
+          lines += [
+            '',
+            'The IMG calibration setter and SAM7 Chroma Suppress routine therefore agree on the same six 14-bit lane geometry.',
+            '',
+            'With Leica STILL saturation keys, all six lanes are 0x1B34 for LOW, 0x2000 for MEDIUM, 0x2666 for HIGH, and zero in the monochrome saturation payload. This supports six saturation-gain lanes with a neutral MEDIUM reference.',
+            '',
+            'What remains unresolved is the semantic name/order of each lane (for example, specific hue sectors). Do not invent those names.',
+            '',
+            'No renderer change is made here. Pixel arithmetic and placement relative to CC1/Yc remain separate questions.',
+            '',
+          ]
+          Path('semantics1a_results/M10R_B2Y_SATURATIONSEMANTICS1A.md').write_text('\n'.join(lines))
+          PY
+      - name: Persist
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/generated
+          cp semantics1a_results/M10R_SAM7_CHROMA_SUPPRESS_SEMANTICS1A.json research/generated/
+          cp semantics1a_results/M10R_B2Y_SATURATIONSEMANTICS1A.md research/generated/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/generated/M10R_SAM7_CHROMA_SUPPRESS_SEMANTICS1A.json research/generated/M10R_B2Y_SATURATIONSEMANTICS1A.md
+          git commit -m "Research freeze saturation semantics1a" || exit 0
+          git push origin HEAD:m10r-b2y-saturationsemantics1a
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-SATURATION-SEMANTICS1A
+          path: semantics1a_results/
+          retention-days: 90
