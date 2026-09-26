@@ -24,7 +24,12 @@ jobs:
           p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
           marker="cat >/tmp/unpack.cpp <<'CPP'\n"
           a=p.index(marker)+len(marker);z=p.index("\n          CPP",a)
-          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          src=p[a:z]
+          old='int main(){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=0x38;'
+          new='int main(int argc,char**argv){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=argc>1?stoul(argv[1],nullptr,0):0x38;'
+          if old not in src:
+              raise SystemExit("unpacker main anchor changed")
+          Path('/tmp/unpack.cpp').write_text(src.replace(old,new))
           PY
           g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
       - name: Download and extract color M10-family B2Y
@@ -39,8 +44,42 @@ jobs:
           for SPEC in 'M10R-30.22.23.34|M10R' 'M10-3.22.23.38|M10' 'M10P-4.22.23.34|M10P'; do
             LABEL="${SPEC%%|*}"; STEM="${SPEC#*|}"; FW="/tmp/fw/${STEM}.FW"
             cp "$FW" /tmp/M10-R.FW
+            CBASE="$(python3 - "$FW" <<'PY'
+          import struct,sys
+          from pathlib import Path
+          b=Path(sys.argv[1]).read_bytes()
+          def u32(o):
+              return struct.unpack_from('<I',b,o)[0]
+          candidates=[]
+          limit=min(0x1000,max(0,len(b)-0x200))
+          for C in range(0,limit+1,4):
+              try:
+                  h=u32(C+8); expected=u32(C+0x10)
+              except struct.error:
+                  continue
+              if not (0x80 <= h <= 0x20000): continue
+              if not (1_000_000 <= expected <= 500_000_000): continue
+              st=C+h
+              if st<0 or st+8*16>len(b): continue
+              total=0; ok=True; desc=[]
+              for i in range(8):
+                  e=st+i*16
+                  ro,ps,us=u32(e+4),u32(e+8),u32(e+12)
+                  if not (ro>0 and ps>0 and us>0 and C+ro+ps<=len(b)):
+                      ok=False; break
+                  total+=us; desc.append((ro,ps,us))
+              if ok and total==expected and C+0x154<=len(b):
+                  candidates.append((C,h,expected,desc))
+          if len(candidates)!=1:
+              raise SystemExit(f"expected one structural container base, got {[(hex(x[0]),hex(x[1]),x[2]) for x in candidates]}")
+          C,h,expected,desc=candidates[0]
+          print(hex(C))
+          print(f"CONTAINER base={C:#x} header={h:#x} expected={expected} segments={desc}",file=sys.stderr)
+          PY
+            )"
+            echo "${LABEL} container_base=${CBASE}" | tee -a sector1a_results/container_bases.txt
             rm -f /tmp/M10R_unpacked.bin
-            /tmp/unpack >"/tmp/${STEM}_unpack.txt"
+            /tmp/unpack "$CBASE" >"/tmp/${STEM}_unpack.txt"
             test -s /tmp/M10R_unpacked.bin
             SEC="/tmp/sec_${STEM}"; rm -rf "$SEC"
             python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin "$SEC" >/dev/null
