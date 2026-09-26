@@ -1,0 +1,163 @@
+ENTRY 0xd3284 ISA ARM INSNS 104
+MMIO [
+  {
+    "pc": "0xd3290",
+    "value": "0x20020080",
+    "pool": "0xd3424"
+  },
+  {
+    "pc": "0xd32b4",
+    "value": "0x20020080",
+    "pool": "0xd3424"
+  },
+  {
+    "pc": "0xd32f0",
+    "value": "0x20020080",
+    "pool": "0xd3424"
+  },
+  {
+    "pc": "0xd332c",
+    "value": "0x20020080",
+    "pool": "0xd3424"
+  },
+  {
+    "pc": "0xd336c",
+    "value": "0x20020080",
+    "pool": "0xd3424"
+  },
+  {
+    "pc": "0xd3378",
+    "value": "0x20020080",
+    "pool": "0xd3424"
+  },
+  {
+    "pc": "0xd3394",
+    "value": "0x20020000",
+    "pool": "0xd3430"
+  },
+  {
+    "pc": "0xd33b8",
+    "value": "0x20020000",
+    "pool": "0xd3430"
+  },
+  {
+    "pc": "0xd33ec",
+    "value": "0x20020080",
+    "pool": "0xd3424"
+  },
+  {
+    "pc": "0xd3418",
+    "value": "0x20020080",
+    "pool": "0xd3424"
+  }
+]
+CALLS []
+STRINGS
+0xd34bb  IMG: -----ERROR------drv_img_b2y_set_operation_mode
+0xd42ab  ------ERROR------    drv_img_b2y_set_tone_control1
+0xd4408 IMG: ----------ERROR----------- drv_img_b2y_set_wbgain1
+0xd4440 IMG: ----------ERROR----------- drv_img_b2y_set_wbgain2
+0xd3284: push     {r4, r5, r6, lr}
+0xd3288: cmp      r1, #0
+0xd328c: bne      #0x420d3378
+0xd3290: ldr      r2, [pc, #0x18c] ; LIT=0xd3424->0x20020080
+0xd3294: ldrd     r2, r3, [r2]
+0xd3298: ldr      r4, [pc, #0x188] ; LIT=0xd3428->0xffffc000
+0xd329c: and      ip, r2, r4
+0xd32a0: ldr      r2, [r0, #4]
+0xd32a4: asr      r4, r2, #0x1f
+0xd32a8: ldr      r6, [pc, #0x17c] ; LIT=0xd342c->0x3fff
+0xd32ac: and      r2, r2, r6
+0xd32b0: orr      r2, r2, ip
+0xd32b4: ldr      ip, [pc, #0x168] ; LIT=0xd3424->0x20020080
+0xd32b8: strd     r2, r3, [ip]
+0xd32bc: add      r2, ip, #0
+0xd32c0: ldrd     r2, r3, [r2]
+0xd32c4: mvn      r5, r6
+0xd32c8: mov      ip, r2
+0xd32cc: and      r3, r3, r5
+0xd32d0: mov      r4, #0
+0xd32d4: bic      r5, r6, r4
+0xd32d8: and      r4, r4, r4
+0xd32dc: ldr      r2, [r0, #0xc]
+0xd32e0: and      r2, r2, r5
+0xd32e4: orr      ip, ip, r4
+0xd32e8: orr      r3, r3, r2
+0xd32ec: mov      r2, ip
+0xd32f0: ldr      ip, [pc, #0x12c] ; LIT=0xd3424->0x20020080
+0xd32f4: strd     r2, r3, [ip]
+0xd32f8: add      r2, ip, #0
+0xd32fc: ldrd     r2, r3, [r2]
+0xd3300: mvn      r5, r5, lsl #16
+0xd3304: mov      ip, r2
+0xd3308: and      r3, r3, r5
+0xd330c: ldrh     r2, [r0, #8]
+0xd3310: lsl      r5, r2, #0x10
+0xd3314: mov      r4, #0
+0xd3318: lsl      r6, r6, #0x10
+0xd331c: and      r2, r4, r4
+0xd3320: and      r4, r5, r6
+0xd3324: orr      r2, r2, ip
+0xd3328: orr      r3, r3, r4
+0xd332c: ldr      ip, [pc, #0xf0] ; LIT=0xd3424->0x20020080
+0xd3330: strd     r2, r3, [ip]
+0xd3334: add      r2, ip, #0
+0xd3338: ldrd     r2, r3, [r2]
+0xd333c: mvn      r4, r6
+0xd3340: mov      r5, r2
+0xd3344: mov      r2, r3
+0xd3348: and      r3, r5, r4
+0xd334c: mov      ip, r2
+0xd3350: ldr      r2, [r0]
+0xd3354: asr      r4, r2, #0x1f
+0xd3358: lsl      r4, r4, #0x10
+0xd335c: orr      r4, r4, r2, lsr #16
+0xd3360: and      r6, r6, r2, lsl #16
+0xd3364: orr      r2, r3, r6
+0xd3368: mov      r3, ip
+0xd336c: ldr      ip, [pc, #0xb0] ; LIT=0xd3424->0x20020080
+0xd3370: strd     r2, r3, [ip]
+0xd3374: b        #0x420d3420
+0xd3378: ldr      r2, [pc, #0xa4] ; LIT=0xd3424->0x20020080
+0xd337c: ldrd     r2, r3, [r2]
+0xd3380: ldr      r4, [pc, #0xa0] ; LIT=0xd3428->0xffffc000
+0xd3384: and      r2, r2, r4
+0xd3388: mov      ip, #0
+0xd338c: orr      r2, r2, ip
+0xd3390: orr      r3, r3, ip
+0xd3394: ldr      ip, [pc, #0x94] ; LIT=0xd3430->0x20020000
+0xd3398: strd     r2, r3, [ip, #0x80]
+0xd339c: add      r2, ip, #0
+0xd33a0: ldrd     r2, r3, [r2, #0x80]
+0xd33a4: mov      ip, r4
+0xd33a8: and      r4, r3, ip
+0xd33ac: mov      ip, #0
+0xd33b0: orr      r2, r2, ip
+0xd33b4: orr      r3, r4, ip
+0xd33b8: ldr      ip, [pc, #0x70] ; LIT=0xd3430->0x20020000
+0xd33bc: strd     r2, r3, [ip, #0x80]
+0xd33c0: add      r2, ip, #0x80
+0xd33c4: ldrd     r2, r3, [r2]
+0xd33c8: ldr      r5, [pc, #0x64] ; LIT=0xd3434->0xc000ffff
+0xd33cc: mov      ip, r2
+0xd33d0: and      r4, r3, r5
+0xd33d4: mov      r3, #0
+0xd33d8: mov      r2, r3
+0xd33dc: orr      r3, r3, ip
+0xd33e0: orr      ip, r4, r2
+0xd33e4: mov      r2, r3
+0xd33e8: mov      r3, ip
+0xd33ec: ldr      ip, [pc, #0x30] ; LIT=0xd3424->0x20020080
+0xd33f0: strd     r2, r3, [ip]
+0xd33f4: add      r2, ip, #0
+0xd33f8: ldrd     r2, r3, [r2]
+0xd33fc: mov      r4, r5
+0xd3400: and      ip, r2, r4
+0xd3404: mov      r4, r3
+0xd3408: mov      r2, #0
+0xd340c: mov      r3, r2
+0xd3410: orr      r2, r2, ip
+0xd3414: orr      r3, r3, r4
+0xd3418: ldr      ip, [pc, #4] ; LIT=0xd3424->0x20020080
+0xd341c: strd     r2, r3, [ip]
+0xd3420: pop      {r4, r5, r6, pc}
