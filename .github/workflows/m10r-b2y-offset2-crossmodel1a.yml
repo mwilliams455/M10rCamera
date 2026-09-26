@@ -1,0 +1,115 @@
+name: M10-R B2Y OFFSET2 CROSSMODEL1A
+
+on:
+  push:
+    branches: [m10r-b2y-offset2-crossmodel1a]
+    paths:
+      - '.github/workflows/m10r-b2y-offset2-crossmodel1a.yml'
+      - 'tools/m10r_b2y_offset2_crossmodel1a.py'
+      - 'tools/m10r_b2y_assets.py'
+      - 'tools/m10r_sections.py'
+  workflow_dispatch:
+
+permissions: {contents: write}
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build verified Leica M10-family unpacker
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker)
+          z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+
+      - name: Download validated firmware set
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/fw offset2_1a_results
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R-20.20.47.37-Customer.FW' -o /tmp/fw/M10R-20.20.47.37.FW
+          curl -L --fail --retry 3 --retry-delay 2 'https://leica-camera.com/sites/default/files/M10-M-2.12.8.0-SYSTEM_0.FW' -o /tmp/fw/M10M-2.12.8.0.FW
+          curl -L --fail --retry 3 --retry-delay 2 'https://leica-camera.com/sites/default/files/M10-M-3.21.2.50-Customer_0.FW' -o /tmp/fw/M10M-3.21.2.50.FW
+          sha256sum /tmp/fw/* | tee offset2_1a_results/firmware_sha256.txt
+
+      - name: Decode and compare keyed offset payloads
+        shell: bash
+        run: |
+          set -euo pipefail
+          ARGS=()
+          for SPEC in \
+            'M10R-20.20.47.37|/tmp/fw/M10R-20.20.47.37.FW' \
+            'M10M-2.12.8.0|/tmp/fw/M10M-2.12.8.0.FW' \
+            'M10M-3.21.2.50|/tmp/fw/M10M-3.21.2.50.FW'
+          do
+            LABEL="${SPEC%%|*}"; FW="${SPEC#*|}"
+            cp "$FW" /tmp/M10-R.FW
+            rm -f /tmp/M10R_unpacked.bin
+            /tmp/unpack >"/tmp/unpack_${LABEL}.txt"
+            SEC="/tmp/sec_${LABEL}"; rm -rf "$SEC"
+            python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin "$SEC" >"/tmp/sections_${LABEL}.txt"
+            DISCOVERY="$(python3 - "$SEC" <<'PY'
+          import csv,sys
+          from pathlib import Path
+          secdir=Path(sys.argv[1]); sys.path.insert(0,str(Path.cwd()/"tools"))
+          import m10r_b2y_assets as mod
+          rows=list(csv.DictReader((secdir/"sections.csv").open(encoding="utf-8")))
+          named=[secdir/r["file"] for r in rows if "data/calib/b2y.bin" in (r["name"]+" "+r["file"]).lower()]
+          if len(named)==1:
+              print(str(named[0])+"|named_data_calib_B2Y"); raise SystemExit
+          hits=[]
+          for r in rows:
+              s=(r["name"]+" "+r["file"]).lower()
+              if "calibration data" not in s and "calib" not in s: continue
+              p=secdir/r["file"]
+              try: recs=mod.parse_records(p.read_bytes())
+              except Exception: continue
+              c=[x for x in recs if x.record_id==0x0c and x.size==60]
+              d=[x for x in recs if x.record_id==0x0d and x.size==24]
+              if len(c)==1 and len(d)==1: hits.append(p)
+          if len(hits)!=1: raise SystemExit(f"B2Y identification failed: {hits}")
+          print(str(hits[0])+"|structural_record0C0D_ABI")
+          PY
+            )"
+            B2Y="${DISCOVERY%%|*}"; IDENT="${DISCOVERY#*|}"
+            FW_SHA="$(sha256sum "$FW"|awk '{print $1}')"
+            DEC_SHA="$(sha256sum /tmp/M10R_unpacked.bin|awk '{print $1}')"
+            ARGS+=(--item "${LABEL}|${B2Y}|${FW_SHA}|${DEC_SHA}|${IDENT}")
+          done
+
+          python3 tools/m10r_b2y_offset2_crossmodel1a.py "${ARGS[@]}" \
+            --out offset2_1a_results/M10R_B2Y_OFFSET2_CROSSMODEL1A.json \
+            --report offset2_1a_results/M10R_B2Y_OFFSET2_CROSSMODEL1A.md \
+            | tee offset2_1a_results/stdout.txt
+          cat offset2_1a_results/M10R_B2Y_OFFSET2_CROSSMODEL1A.md
+
+      - name: Persist research freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/generated
+          cp offset2_1a_results/M10R_B2Y_OFFSET2_CROSSMODEL1A.json research/generated/M10R_B2Y_OFFSET2_CROSSMODEL1A.json
+          cp offset2_1a_results/M10R_B2Y_OFFSET2_CROSSMODEL1A.md research/generated/M10R_B2Y_OFFSET2_CROSSMODEL1A.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/generated/M10R_B2Y_OFFSET2_CROSSMODEL1A.*
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Research freeze B2Y record 0x02 Offset cross-model audit"
+          git push origin HEAD:m10r-b2y-offset2-crossmodel1a
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-B2Y-OFFSET2-CROSSMODEL1A
+          path: offset2_1a_results/
+          retention-days: 90
