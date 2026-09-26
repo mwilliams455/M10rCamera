@@ -1,0 +1,55 @@
+name: M10-R B2Y LUMNR DRIVER1D
+on:
+  push:
+    branches: [m10r-b2y-offset-crossmodel1a]
+    paths:
+      - '.github/workflows/m10r-b2y-lumnr-driver1d.yml'
+      - 'tools/m10r_b2y_lumnr_driver1d.py'
+      - 'tools/m10r_sections.py'
+  workflow_dispatch:
+permissions: {contents: write}
+jobs:
+  trace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m pip install --quiet capstone==5.0.3
+      - name: Decode canonical M10-R firmware
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/m10r-v135-wb-mode-switch.yml').read_text()
+          marker="cat >/tmp/unpack.cpp <<'CPP'\n"
+          a=p.index(marker)+len(marker);z=p.index("\n          CPP",a)
+          Path('/tmp/unpack.cpp').write_text(p[a:z])
+          PY
+          g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
+          curl -L --fail --retry 3 --retry-delay 2 'https://reddotforum.com/Firmware_files/M10-R/M10-R-30.22.23.34-Customer.FW' -o /tmp/M10-R.FW
+          echo 'ec8df72dc7d4c90332abb3cdbc07c6db837ffed802c1a9712b6f3d6e0edf6498  /tmp/M10-R.FW' | sha256sum -c -
+          /tmp/unpack
+          python3 tools/m10r_sections.py /tmp/M10R_unpacked.bin /tmp/sec >/dev/null
+      - name: Trace real LUM NR driver
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p lumnr1d_results
+          python3 tools/m10r_b2y_lumnr_driver1d.py /tmp/sec --out lumnr1d_results/M10R_B2Y_LUMNR_DRIVER1D.json | tee lumnr1d_results/M10R_B2Y_LUMNR_DRIVER1D.txt
+      - name: Persist
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/generated
+          cp lumnr1d_results/M10R_B2Y_LUMNR_DRIVER1D.* research/generated/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/generated/M10R_B2Y_LUMNR_DRIVER1D.*
+          git commit -m "Research freeze B2Y luminance NR driver1d" || exit 0
+          git push origin HEAD:m10r-b2y-offset-crossmodel1a
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-B2Y-LUMNR-DRIVER1D
+          path: lumnr1d_results/
+          retention-days: 90
