@@ -36,7 +36,15 @@ def page_near(data,target,page):
     return data.find(struct.pack("<I",page),max(0,target),min(len(data),target+0x380))>=0
 def selector(img,rid,page):
     md=Cs(CS_ARCH_ARM,CS_MODE_THUMB);md.detail=True;hits=[]
-    for pc in range(0,len(img)-4,2):
+    needle=bytes((rid&0xff,0x21))
+    pcs=[];pos=0
+    while True:
+        pc=img.find(needle,pos)
+        if pc<0:break
+        pos=pc+1
+        if pc&1:continue
+        pcs.append(pc)
+    for pc in pcs:
         i=one(md,img,pc)
         if not i or i.mnemonic!="movs" or len(i.operands)<2:continue
         if i.operands[0].type!=ARM_OP_REG or i.reg_name(i.operands[0].reg)!="r1":continue
