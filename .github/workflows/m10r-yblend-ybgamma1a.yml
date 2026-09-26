@@ -1,0 +1,106 @@
+name: M10-R YBLEND YBGAMMA1A
+
+on:
+  push:
+    branches: [m10r-yblend-ybgamma1a]
+    paths:
+      - '.github/workflows/m10r-yblend-ybgamma1a.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download frozen YBPATH evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: M10R-YBLEND-YBPATH1A-EVIDENCE
+          run-id: 35509666868
+          github-token: ${{ github.token }}
+          path: ybpath
+
+      - name: Extract Leica gamma state
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          p=Path('ybpath/results/ybpath_results.json')
+          d=json.loads(p.read_text())
+          recs={r['id']:r for r in d['calibration_records']}
+          r8=recs[8]['values']
+          r9=recs[9]['values']
+          r11=recs[11]['values']
+          r6=recs[6]['values']
+          r12=recs[12]['values']
+          r13=recs[13]['values']
+
+          out={
+            'schema':'M10R_YBLEND_YBGAMMA1A_V1',
+            'source_run':35509666868,
+            'source_status':d['status'],
+            'record6_values':r6,
+            'record8_values':r8,
+            'record9_values':r9,
+            'record11_values':r11,
+            'record12_values':r12,
+            'record13_values':r13,
+            'normal_gamma_compact_controls':r9[:2]+r11,
+            'normal_tone_controls':{
+              'rgb_tone_enable':r8[0],
+              'second_tone_enable':r8[1],
+              'selector':r8[5],
+            },
+            'gamma_destinations':[
+              'record 0x09 slot0 -> 0x20020800 bit16',
+              'record 0x09 slot1 -> 0x20020800 bit17',
+              'record 0x0B slot0 -> 0x20020800 bit24',
+              'record 0x0B slot1 -> 0x20020800 bit25',
+            ],
+            'guardrail':'The related SDK has Yb gamma-table controls, but Leica field-name correspondence is not proven.'
+          }
+          Path('research/M10R_YBLEND_YBGAMMA1A.json').write_text(json.dumps(out,indent=2)+'\n')
+
+          g=out['normal_gamma_compact_controls']
+          lines=[
+            '# M10-R YBLEND YBGAMMA1A','',
+            'Extraction from the already verified YBPATH1A evidence; no firmware or renderer change.','',
+            f"- Record 0x09 values: {r9}",
+            f"- Record 0x0B values: {r11}",
+            f"- Normal four gamma-related control bits: **{g}**",'',
+            'Destinations:',
+            '- record 0x09 slot0 -> 0x20020800 bit16',
+            '- record 0x09 slot1 -> 0x20020800 bit17',
+            '- record 0x0B slot0 -> 0x20020800 bit24',
+            '- record 0x0B slot1 -> 0x20020800 bit25','',
+            'Boundary: the public related R2Y SDK exposes a separate Yb gamma-table path, but its ABI differs from Leica. These Leica bits must not be renamed as Yb controls without stronger evidence.','',
+            'Next: use the extracted normal state plus table routing to decide whether an untone-mapped Yb candidate should nevertheless pass the recovered DG/gamma transfer before Y_BLEND.'
+          ]
+          Path('research/M10R_YBLEND_YBGAMMA1A.md').write_text('\n'.join(lines)+'\n')
+          print('\n'.join(lines))
+          PY
+
+      - name: Persist
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/M10R_YBLEND_YBGAMMA1A.*
+          git commit -m "Research freeze Leica Yb/gamma control state" || exit 0
+          git push origin HEAD:m10r-yblend-ybgamma1a
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-YBLEND-YBGAMMA1A
+          path: research/M10R_YBLEND_YBGAMMA1A.*
+          retention-days: 90
