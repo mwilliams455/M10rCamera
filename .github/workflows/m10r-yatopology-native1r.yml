@@ -1,0 +1,75 @@
+name: M10-R YA TOPOLOGY NATIVE1R
+
+on:
+  push:
+    branches: [m10r-render2g-yatopology1a-reference]
+    paths:
+      - '.github/workflows/m10r-yatopology-native1r.yml'
+      - 'tools/m10r_yatopology_native1r.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OPENBLAS_NUM_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install fixed validation dependencies
+        run: |
+          python3 -m pip install numpy==2.2.6 pillow==11.3.0 opencv-python-headless==4.13.0.92 rawpy==0.25.1
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq libimage-exiftool-perl
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: M10R-PHOTOAUDIT1A-RESEARCH-INPUTS
+          run-id: 35518775600
+          github-token: ${{ github.token }}
+          path: inputs
+
+      - name: Run full native YA topology reference validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/m10r_yatopology_native1r.py
+          python3 tools/m10r_yatopology_native1r.py inputs validation | tee validation_stdout.txt
+          python3 - <<'PY'
+          import json
+          d=json.load(open('validation/results.json'))
+          assert d['schema']=='M10R_YA_TOPOLOGY_NATIVE1R_V1'
+          assert d['status']=='PASS_YA_TOPOLOGY_NATIVE1R_EXECUTION'
+          assert len(d['cases'])==10
+          print(json.dumps(d['summary']['fresh_holdout']['target_native'],indent=2))
+          PY
+
+      - name: Persist research freeze
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp validation/results.json research/M10R_YA_TOPOLOGY_NATIVE1R.json
+          cp validation/REPORT.md research/M10R_YA_TOPOLOGY_NATIVE1R.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/M10R_YA_TOPOLOGY_NATIVE1R.*
+          git commit -m "Research freeze full native Ya topology validation" || exit 0
+          git pull --rebase origin m10r-render2g-yatopology1a-reference
+          git push
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-YA-TOPOLOGY-NATIVE1R
+          path: |
+            validation/
+            validation_stdout.txt
+            research/M10R_YA_TOPOLOGY_NATIVE1R.*
+          if-no-files-found: warn
+          retention-days: 90
