@@ -29,7 +29,13 @@ jobs:
           new='int main(int argc,char**argv){ifstream f("/tmp/M10-R.FW",ios::binary);vector<uint8_t>fw((istreambuf_iterator<char>(f)),{});const size_t C=argc>1?stoul(argv[1],nullptr,0):0x38;'
           if old not in src:
               raise SystemExit("unpacker main anchor changed")
-          Path('/tmp/unpack.cpp').write_text(src.replace(old,new))
+          src=src.replace(old,new)
+          oldloop='for(int i=0;i<8;i++){size_t e=st+i*16;'
+          newloop='for(int i=0;out.size()<expected && i<32;i++){size_t e=st+i*16;'
+          if oldloop not in src:
+              raise SystemExit("unpacker segment-loop anchor changed")
+          src=src.replace(oldloop,newloop)
+          Path('/tmp/unpack.cpp').write_text(src)
           PY
           g++ -O3 -std=c++17 /tmp/unpack.cpp -o /tmp/unpack
       - name: Download and extract color M10-family B2Y
@@ -60,14 +66,17 @@ jobs:
               if not (0x80 <= h <= 0x20000): continue
               if not (1_000_000 <= expected <= 500_000_000): continue
               st=C+h
-              if st<0 or st+8*16>len(b): continue
+              if st<0 or st+16>len(b): continue
               total=0; ok=True; desc=[]
-              for i in range(8):
+              for i in range(32):
                   e=st+i*16
+                  if e+16>len(b): ok=False; break
                   ro,ps,us=u32(e+4),u32(e+8),u32(e+12)
                   if not (ro>0 and ps>0 and us>0 and C+ro+ps<=len(b)):
                       ok=False; break
                   total+=us; desc.append((ro,ps,us))
+                  if total==expected: break
+                  if total>expected: ok=False; break
               if ok and total==expected and C+0x154<=len(b):
                   candidates.append((C,h,expected,desc))
           if len(candidates)!=1:
