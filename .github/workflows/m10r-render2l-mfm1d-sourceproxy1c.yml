@@ -1,0 +1,114 @@
+name: M10-R RENDER2L SOURCEPROXY1C STABLE IDENTITY
+on:
+  push:
+    branches: [m10r-render2l-mfm1d-sourceproxy1c]
+    paths:
+      - '.github/workflows/m10r-render2l-mfm1d-sourceproxy1c.yml'
+      - 'patches/fix-m10r-render2l-mfm1d-sourceproxy1c.py'
+      - 'android/sourceproxy1c/**'
+      - 'tests/test-sourceproxy1c.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: sourceproxy1c-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Run stable identity and unchanged-transform host tests
+        run: |
+          python3 -m py_compile patches/fix-m10r-render2l-mfm1d-sourceproxy1c.py
+          python3 tests/test-sourceproxy1c.py SOURCEPROXY1C_HOST_TEST_RESULTS.json
+      - name: Reconstruct exact RENDER2K through existing verified patch chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install PyYAML==6.0.2
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess, yaml
+          old=yaml.safe_load(Path('.github/workflows/m10r-render2k-mfm1d-sourceproxy1b.yml').read_text())
+          names=[
+            'Reconstruct exact frozen RENDER1T',
+            'Reconstruct frozen RENDER2A MFM1B live capture baseline',
+            'Apply validated YA_TOPOLOGY1A live renderer',
+            'Apply PORT1A physical-source portability and MFM1C live RAW proxy',
+            'Apply MFM1D physical-sensor source proxy',
+            'Replace source labels with generic physical-camera fingerprints',
+          ]
+          for name in names:
+              steps=[s for s in old['jobs']['build']['steps'] if s.get('name')==name]
+              assert len(steps)==1,name
+              subprocess.run(['bash','-euo','pipefail','-c',steps[0]['run']],check=True)
+          PY
+      - name: Apply SOURCEPROXY1C and verify frozen source and target paths
+        run: python3 patches/fix-m10r-render2l-mfm1d-sourceproxy1c.py PhotonCamera
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install Android build components
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'cmake;3.22.1' 'ndk;27.0.12077973'
+      - name: Build APK against real Android SDK
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x PhotonCamera/gradlew
+          cd PhotonCamera
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/SOURCEPROXY1C_GRADLE.log"
+      - name: Verify and package test APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p delivery
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,shutil,zipfile
+          apks=list(Path('PhotonCamera/app/build/outputs/apk/debug').glob('*.apk'))
+          assert len(apks)==1,apks
+          with zipfile.ZipFile(apks[0]) as z:
+              assert z.testzip() is None
+              dex=b''.join(z.read(n) for n in z.namelist() if n.endswith('.dex'))
+              for marker in [b'MFM1D_SOURCEPROXY1C_STABLE_FINGERPRINT',b'SOURCEPROXY1C_STATIC_V1',b'inherited_pair_seed_provisional',b'YA_TOPOLOGY1A',b'M10R_PORT1A']:
+                  assert marker in dex,marker
+          out=Path('delivery/M10RCam_RENDER2L_MFM1D_SOURCEPROXY1C_TEST.apk')
+          shutil.copy2(apks[0],out)
+          proof=Path('PhotonCamera/M10R_RENDER2L_SOURCEPROXY1C_PROVENANCE.json')
+          p=json.loads(proof.read_text())
+          assert p['frozenFilesUnchanged'] and p['sharedMeterAndAllocatorUnchanged']
+          assert p['port1aAndDngSaverUnchanged'] and p['sameInputRendererCodeUnchanged']
+          assert not p['currentFocalApertureInIdentity']
+          shutil.copy2(proof,'delivery/')
+          shutil.copy2('SOURCEPROXY1C_HOST_TEST_RESULTS.json','delivery/')
+          p.update(source_commit=os.environ['GITHUB_SHA'],run_id=os.environ['GITHUB_RUN_ID'],
+                   apk_bytes=out.stat().st_size,apk_sha256=hashlib.sha256(out.read_bytes()).hexdigest())
+          Path('delivery/APK_PROVENANCE.json').write_text(json.dumps(p,indent=2)+'\n')
+          print(json.dumps(p,indent=2))
+          PY
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose delivery/*.apk | tee delivery/signature_verification.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-RENDER2L-SOURCEPROXY1C-BUILDLOG
+          path: |
+            SOURCEPROXY1C_GRADLE.log
+            SOURCEPROXY1C_HOST_TEST_RESULTS.json
+          if-no-files-found: ignore
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10RCam-RENDER2L-MFM1D-SOURCEPROXY1C-TEST-APK
+          path: delivery/
+          if-no-files-found: error
+          retention-days: 90
