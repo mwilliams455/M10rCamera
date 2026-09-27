@@ -1,0 +1,110 @@
+name: M10-R RENDER2N AMaZE1A source-only candidate
+on:
+  push:
+    branches: [m10r-render2n-amaze1a]
+    paths:
+      - 'patches/amaze1a/**'
+      - '.github/workflows/m10r-render2n-amaze1a.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: m10r-amaze1a-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/checkout@v4
+        with:
+          repository: mwilliams455/M9Camera_refresh
+          ref: a00e722bf25b4c609ae9addcc4b612e6d8e434d6
+          path: m9-reference
+          sparse-checkout: patches/colourtrial1c/upstream
+      - name: Compile actual AMaZE and execute native and JNI host tests
+        run: python3 patches/amaze1a/test.py m9-reference/patches/colourtrial1c/upstream validation
+      - name: Reconstruct exact RENDER2M baseline
+        run: |
+          python3 -m pip install PyYAML==6.0.2
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess,yaml
+          w=yaml.safe_load(Path('.github/workflows/m10r-render2m-meterarea1a.yml').read_text())
+          for name in ['Reconstruct verified RENDER2L baseline','Insert shadow probe and prove frozen photometric code']:
+              steps=[s for s in w['jobs']['build']['steps'] if s.get('name')==name]
+              assert len(steps)==1,name
+              subprocess.run(['bash','-euo','pipefail','-c',steps[0]['run']],check=True)
+          PY
+          python3 tests/test-meterarea1a.py validation/METERAREA1A_HOST_TEST_RESULTS.json
+          python3 tests/test-sourceproxy1c.py validation/SOURCEPROXY1C_HOST_TEST_RESULTS.json
+      - name: Apply AMaZE-only and verify frozen target/exposure sources
+        run: |
+          python3 patches/amaze1a/apply.py PhotonCamera m9-reference/patches/colourtrial1c/upstream
+          python3 patches/amaze1a/apply.py PhotonCamera m9-reference/patches/colourtrial1c/upstream
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install Android build components
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'cmake;3.22.1' 'ndk;27.0.12077973'
+      - name: Build candidate APK
+        run: |
+          set -euo pipefail
+          chmod +x PhotonCamera/gradlew
+          cd PhotonCamera
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/AMAZE1A_GRADLE.log"
+      - name: Verify and package candidate
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,shutil,zipfile
+          dest=Path('delivery');dest.mkdir()
+          apks=list(Path('PhotonCamera/app/build/outputs/apk/debug').glob('*.apk'))
+          assert len(apks)==1,apks
+          with zipfile.ZipFile(apks[0]) as z:
+              assert z.testzip() is None
+              for abi in ['arm64-v8a','armeabi-v7a']:
+                  assert 'lib/'+abi+'/libm10ramaze.so' in z.namelist()
+              assert not any(n.endswith('/libomp.so') for n in z.namelist())
+              dex=b''.join(z.read(n) for n in z.namelist() if n.endswith('.dex'))
+              for marker in [b'RENDER2N_AMAZE1A_SOURCE_ONLY',b'METERAREA1A_SHADOW',b'YA_TOPOLOGY1A',b'M10R_PORT1A']:
+                  assert marker in dex,marker
+              assert 'assets/amaze1a/LICENSE.txt' in z.namelist()
+          out=dest/'M10RCam_RENDER2N_AMAZE1A_TEST.apk';shutil.copyfile(apks[0],out)
+          p=json.loads(Path('PhotonCamera/M10R_AMAZE1A_SOURCE_PROOF.json').read_text())
+          for key in ['rendererInsertionRemovalExact','nativeTargetRendererUnchanged','allExistingAssetsUnchanged','exposureCaptureDngAndPreviewSourcesUnchanged']:assert p[key],key
+          p.update(source_commit=os.environ['GITHUB_SHA'],run_id=os.environ['GITHUB_RUN_ID'],apk_bytes=out.stat().st_size,apk_sha256=hashlib.sha256(out.read_bytes()).hexdigest())
+          (dest/'APK_PROVENANCE.json').write_text(json.dumps(p,indent=2)+'\n')
+          for f in Path('validation').glob('*.json'):shutil.copyfile(f,dest/f.name)
+          with zipfile.ZipFile(dest/'AMAZE1A_SOURCE.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for root in [Path('patches/amaze1a'),Path('PhotonCamera/app/src/main/cpp/amaze1a')]:
+                  for f in root.rglob('*'):
+                      if f.is_file():z.write(f)
+              for rel in ['app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java','app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RAmaze1A.java','app/src/main/cpp/CMakeLists.txt']:
+                  z.write(Path('PhotonCamera')/rel)
+          print(json.dumps({k:v for k,v in p.items() if k not in ['before','after','upstream']},indent=2))
+          PY
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose delivery/*.apk | tee delivery/signature_verification.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-AMAZE1A-TESTS-AND-BUILDLOG
+          path: |
+            validation/*.json
+            AMAZE1A_GRADLE.log
+          if-no-files-found: ignore
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10RCam-RENDER2N-AMAZE1A-TEST-APK
+          path: delivery/
+          if-no-files-found: error
+          retention-days: 90
