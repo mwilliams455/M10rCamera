@@ -57,7 +57,8 @@ def main():
     capture.write_text(s)
 
     s=originals[renderer]
-    s=insert(s,'        d.put("schema", SCHEMA);\n',
+    # SCHEMA is also written by the failure-sidecar method; captureMode is render-only.
+    s=insert(s,'        d.put("captureMode", "single_frame_raw");\n',
         '        final M10RMeterArea1A.Bound meterAreaBound = M10RMeterArea1A.bind();')
     s=insert(s,'        long whiteClipCount = 0L;\n','''
         // Separate CFA-aware references; leave the legacy raw counterfactual unchanged.
