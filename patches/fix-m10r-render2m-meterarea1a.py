@@ -57,9 +57,10 @@ def main():
     capture.write_text(s)
 
     s=originals[renderer]
-    # SCHEMA is also written by the failure-sidecar method; captureMode is render-only.
-    s=insert(s,'        d.put("captureMode", "single_frame_raw");\n',
-        '        final M10RMeterArea1A.Bound meterAreaBound = M10RMeterArea1A.bind();')
+    # Both success and failure sidecars write schema/captureMode. Source-model
+    # initialization is unique to the actual renderer and precedes pixel work.
+    s=insert(s,'        SourceModel source = buildSourceModel(characteristics, captureResult, d);\n',
+        '        final M10RMeterArea1A.Bound meterAreaBound = M10RMeterArea1A.bind();',before=True)
     s=insert(s,'        long whiteClipCount = 0L;\n','''
         // Separate CFA-aware references; leave the legacy raw counterfactual unchanged.
         double[] meterAreaPreSum = new double[352];
