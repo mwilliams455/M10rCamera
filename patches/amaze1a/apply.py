@@ -3,6 +3,7 @@
 from pathlib import Path
 import hashlib,json,re,shutil,sys
 HERE=Path(__file__).resolve().parent
+from prepare_upstream import prepare
 CPP_SHA='3f7b696cdf33e29348d7c0532f658c11819f9b8e54772b55753e357fb6018985'
 JAVA='app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java'
 CMAKE='app/src/main/cpp/CMakeLists.txt'
@@ -16,7 +17,7 @@ CMAKE_EXTRA='''
 # AMAZE1A isolated source-reconstruction library; existing native targets untouched.
 add_library(m10ramaze SHARED
     ${CMAKE_CURRENT_SOURCE_DIR}/amaze1a/jni.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/amaze1a/upstream/amaze.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/amaze1a/upstream/amaze_m10r_fix1.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/amaze1a/upstream/border.cc
 )
 set_target_properties(m10ramaze PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
@@ -75,23 +76,26 @@ def main(root,upstream):
  (root/JAVA).write_text(s)
  (root/CMAKE).write_text((root/CMAKE).read_text()+CMAKE_EXTRA)
  (root/GRADLE).write_text((root/GRADLE).read_text().replace(
-  "versionName '0.97-m10r2m-meterarea1a'","versionName '0.97-m10r2n-amaze1a'"))
+  "versionName '0.97-m10r2m-meterarea1a'","versionName '0.97-m10r2n-amaze1a-fix1'"))
  dest=root/'app/src/main/cpp/amaze1a';dest.mkdir()
  for name in ['session.h','jni.cpp']:shutil.copyfile(HERE/name,dest/name)
- shutil.copytree(upstream,dest/'upstream')
+ upstreamFix=prepare(upstream,dest/'upstream')
  shutil.copyfile(HERE/'M10RAmaze1A.java',root/JAVA.replace('M10RNativeRenderer.java','M10RAmaze1A.java'))
  notices=root/'app/src/main/assets/amaze1a';notices.mkdir(parents=True)
  for name in ['LICENSE.txt','PROVENANCE.json']:shutil.copyfile(upstream/name,notices/name)
+ shutil.copyfile(dest/'upstream/M10R_FIX1_PROVENANCE.json',notices/'M10R_FIX1_PROVENANCE.json')
  after=inventory(root)
  modified={p for p in before if after.get(p)!=before[p]}
  if modified!={JAVA,CMAKE}:raise RuntimeError('unexpected changed existing source '+repr(modified))
  if sha(root/'app/src/main/cpp/m10rRender.cpp')!=CPP_SHA:raise RuntimeError('target renderer changed')
- proof={'schema':'M10R_RENDER2N_AMAZE1A_SOURCE_ONLY_V1',
+ proof={'schema':'M10R_RENDER2N_AMAZE1A_SOURCE_ONLY_FIX1_V1',
   'baselineCommit':'42d13b16b787474eb88a9c4c1bdfa035ba4ab3e7',
   'before':before,'after':after,'gradleAfter':sha(root/GRADLE),
   'changedExistingFiles':sorted(changed),'rendererInsertionRemovalExact':True,
   'nativeTargetRendererUnchanged':True,'allExistingAssetsUnchanged':True,
   'exposureCaptureDngAndPreviewSourcesUnchanged':True,
+  'shortTailReflectionFixed':True,'extraScratchRows':16,
+  'tileScratchInitializationFixed':True,'upstreamFix':upstreamFix,
   'noiseCorrection':False,'directionalChroma':False,'hdr':False,
   'border':'existing_OpenCV_EA_16_pixels','cropOriginAssumptionChanged':False,
   'sameRawPhotographicReplayPerformed':False,'phoneValidated':False,

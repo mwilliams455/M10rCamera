@@ -55,6 +55,31 @@ int main(int argc,char**) {
         if(kind==0)check(flat,"flat channel order/colour retained within one code");
         ++cases;
     }
+    // TAIL1A: the old suite's nonconstant frames ended 18 or 45 rows after
+    // a tile boundary. Sweep every short remainder with nonconstant input.
+    // Full-frame reconstruction is the oracle; compare within each backend.
+    int shortTailCases=0;
+    for(int cfa=0;cfa<4;++cfa)for(int tail=1;tail<=20;++tail) {
+        const int w=192,h=256+tail;
+        std::vector<uint16_t> raw(size_t(w)*h);
+        for(auto& v:raw)v=uint16_t(rng());
+        auto full=render(raw,w,h,cfa,.5,.4,1.5,h,1);
+        check(full==render(raw,w,h,cfa,.5,.4,1.5,128,1),"short tail full/128 parity");
+        check(full==render(raw,w,h,cfa,.5,.4,1.5,256,1),"short tail full/256 parity");
+        check(full==render(raw,w,h,cfa,.5,.4,1.5,256,4),"short tail worker parity");
+        Session lattice(w,h,cfa,.5,.4,1.5,1);
+        bool samples=true,borders=true;
+        for(int y=0;y<h;++y)for(int x=0;x<w;++x) {
+            if(x<16 || y<16 || x>=w-16 || y>=h-16) {
+                for(int ch=0;ch<3;++ch)borders &= full[(size_t(y)*w+x)*3+ch]==12345;
+            } else {
+                samples &= full[(size_t(y)*w+x)*3+lattice.channel(y,x)]==raw[size_t(y)*w+x];
+            }
+        }
+        check(samples,"short tail measured CFA samples retained");
+        check(borders,"short tail EA border untouched");
+        ++shortTailCases;++cases;
+    }
     for(double scale:{1.0,.5,.25,1./64})for(const auto& n:neutrals) {
         Session s(64,64,0,scale,n[0],n[1],1);
         check(std::abs(1.0/s.initGain-scale/s.headroom)<1e-15,"clip coordinate relation");
@@ -80,6 +105,7 @@ int main(int argc,char**) {
         auto out=render(large,4096,3072,0,.5,.7,.4,256,4);
         check(out[(size_t(1000)*4096+1000)*3]==20000,"12MP smoke");
     }
-    std::cout<<"{\"status\":\"pass\",\"cases\":"<<cases<<",\"assertions\":"<<checks<<",\"realRawReplay\":false,\"deviceValidated\":false}"<<std::endl;
+    std::cout<<"{\"status\":\"pass\",\"cases\":"<<cases<<",\"assertions\":"<<checks<<",\"shortTailCases\":"<<shortTailCases<<",\"actualAmazeExecuted\":true,\"realRawReplay\":false,\"deviceValidated\":false}"<<std::endl;
+    return 0;
  }catch(const std::exception& e){std::cerr<<"FAILED after "<<checks<<" checks / "<<cases<<" cases: "<<e.what()<<std::endl;return 1;}
 }

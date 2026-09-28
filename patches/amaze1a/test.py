@@ -3,6 +3,7 @@
 from pathlib import Path
 import hashlib,json,os,subprocess,sys,shutil
 HERE=Path(__file__).resolve().parent
+from prepare_upstream import prepare
 STUBS={
 'android/util/Rational.java':'''package android.util;
 public class Rational extends Number {
@@ -49,16 +50,25 @@ def main():
   assert hashlib.sha256((upstream/name).read_bytes()).hexdigest()==digest,name
  assert hashlib.sha256((upstream/'amaze.cc').read_bytes()).hexdigest()=='a43f01c7ffe70efdf92dec473d5a785658c11756365d78df617d7a4c28117f1e'
  def run(args,file=None):
-  result=subprocess.run([str(x) for x in args],cwd=out,text=True,capture_output=True,timeout=180)
+  result=subprocess.run([str(x) for x in args],cwd=out,text=True,capture_output=True,timeout=180,env=dict(os.environ,OMP_WAIT_POLICY="PASSIVE"))
   if file:(out/file).write_text(result.stdout+result.stderr)
   if result.returncode:raise RuntimeError('command failed: '+repr(args)+'\n'+result.stdout+result.stderr)
-  print(result.stdout,end='');return result
+  print(result.stdout,end='',flush=True);return result
  common=[os.environ.get('CXX','g++'),'-std=c++17','-fopenmp','-ffp-contract=off','-I',upstream/'include']
- sources=[upstream/'amaze.cc',upstream/'border.cc']
+ compiled=out/'compiled_upstream'
+ proof=prepare(upstream,compiled)
+ (out/'UPSTREAM_FIX1_RESULTS.json').write_text(json.dumps(proof,indent=2)+'\n')
+ sources=[compiled/'amaze_m10r_fix1.cc',compiled/'border.cc']
  run(common+['-O2',HERE/'host_test.cpp']+sources+['-o',out/'host_test'])
  run([out/'host_test','full'],'HOST_TEST_RESULTS.json')
  run(common+['-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer',HERE/'host_test.cpp']+sources+['-o',out/'host_test_asan'])
  run([out/'host_test_asan'],'HOST_SANITIZER_RESULTS.json')
+ # Android ARM builds use the non-SSE implementation. Test that branch too;
+ # compare full/banded/worker outputs within it, not across SIMD variants.
+ run(common+['-U__SSE2__','-O2',HERE/'host_test.cpp']+sources+['-o',out/'host_test_scalar'])
+ run([out/'host_test_scalar','full'],'HOST_SCALAR_RESULTS.json')
+ run(common+['-U__SSE2__','-O1','-g','-fsanitize=address,undefined','-fno-omit-frame-pointer',HERE/'host_test.cpp']+sources+['-o',out/'host_test_scalar_asan'])
+ run([out/'host_test_scalar_asan'],'HOST_SCALAR_SANITIZER_RESULTS.json')
  jdk=Path(shutil.which('javac')).resolve().parents[1]
  run(common+['-O2','-fPIC','-shared','-I',jdk/'include','-I',jdk/'include/linux',HERE/'jni.cpp']+sources+['-o',out/'libm10ramaze.so'])
  java=[]

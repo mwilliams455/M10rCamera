@@ -1,7 +1,7 @@
-name: M10-R RENDER2N AMaZE1A source-only candidate
+name: M10-R RENDER2N AMaZE1A FIX1
 on:
   push:
-    branches: [m10r-render2n-amaze1a]
+    branches: [m10r-render2n-amaze1a-fix1]
     paths:
       - 'patches/amaze1a/**'
       - '.github/workflows/m10r-render2n-amaze1a.yml'
@@ -10,7 +10,7 @@ permissions:
   contents: read
   actions: read
 concurrency:
-  group: m10r-amaze1a-${{ github.ref }}
+  group: m10r-amaze1a-fix1-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build:
@@ -28,7 +28,7 @@ jobs:
           ref: a00e722bf25b4c609ae9addcc4b612e6d8e434d6
           path: m9-reference
           sparse-checkout: patches/colourtrial1c/upstream
-      - name: Compile actual AMaZE and execute native and JNI host tests
+      - name: Test actual AMaZE SSE and scalar paths, short tails, sanitizers and JNI
         run: python3 patches/amaze1a/test.py m9-reference/patches/colourtrial1c/upstream validation
       - name: Reconstruct exact RENDER2M baseline
         run: |
@@ -44,7 +44,7 @@ jobs:
           PY
           python3 tests/test-meterarea1a.py validation/METERAREA1A_HOST_TEST_RESULTS.json
           python3 tests/test-sourceproxy1c.py validation/SOURCEPROXY1C_HOST_TEST_RESULTS.json
-      - name: Apply AMaZE-only and verify frozen target/exposure sources
+      - name: Apply AMaZE FIX1 and verify frozen target/exposure sources
         run: |
           python3 patches/amaze1a/apply.py PhotonCamera m9-reference/patches/colourtrial1c/upstream
           python3 patches/amaze1a/apply.py PhotonCamera m9-reference/patches/colourtrial1c/upstream
@@ -61,11 +61,17 @@ jobs:
           chmod +x PhotonCamera/gradlew
           cd PhotonCamera
           ./gradlew assembleDebug --stacktrace 2>&1 | tee "$GITHUB_WORKSPACE/AMAZE1A_GRADLE.log"
-      - name: Verify and package candidate
+      - name: Verify and package FIX1 candidate
         run: |
           python3 - <<'PY'
           from pathlib import Path
           import hashlib,json,os,shutil,zipfile
+          for name in ['HOST_TEST_RESULTS.json','HOST_SANITIZER_RESULTS.json','HOST_SCALAR_RESULTS.json','HOST_SCALAR_SANITIZER_RESULTS.json']:
+              t=json.loads((Path('validation')/name).read_text())
+              assert t['status']=='pass' and t['actualAmazeExecuted']
+              assert t['cases']==188 and t['shortTailCases']==80
+          j=json.loads(Path('validation/JNI_HOST_RESULTS.json').read_text())
+          assert j['status']=='pass' and j['jniAssertions']==73
           dest=Path('delivery');dest.mkdir()
           apks=list(Path('PhotonCamera/app/build/outputs/apk/debug').glob('*.apk'))
           assert len(apks)==1,apks
@@ -75,28 +81,31 @@ jobs:
                   assert 'lib/'+abi+'/libm10ramaze.so' in z.namelist()
               assert not any(n.endswith('/libomp.so') for n in z.namelist())
               dex=b''.join(z.read(n) for n in z.namelist() if n.endswith('.dex'))
-              for marker in [b'RENDER2N_AMAZE1A_SOURCE_ONLY',b'METERAREA1A_SHADOW',b'YA_TOPOLOGY1A',b'M10R_PORT1A']:
+              for marker in [b'RENDER2N_AMAZE1A_SOURCE_ONLY_FIX1',b'TAIL1A_PHYSICAL_BOTTOM',b'SCRATCH1A_ZERO_EACH_TILE',b'METERAREA1A_SHADOW',b'YA_TOPOLOGY1A',b'M10R_PORT1A']:
                   assert marker in dex,marker
               assert 'assets/amaze1a/LICENSE.txt' in z.namelist()
-          out=dest/'M10RCam_RENDER2N_AMAZE1A_TEST.apk';shutil.copyfile(apks[0],out)
+              assert 'assets/amaze1a/M10R_FIX1_PROVENANCE.json' in z.namelist()
+          out=dest/'M10RCam_RENDER2N_AMAZE1A_FIX1_TEST.apk';shutil.copyfile(apks[0],out)
           p=json.loads(Path('PhotonCamera/M10R_AMAZE1A_SOURCE_PROOF.json').read_text())
-          for key in ['rendererInsertionRemovalExact','nativeTargetRendererUnchanged','allExistingAssetsUnchanged','exposureCaptureDngAndPreviewSourcesUnchanged']:assert p[key],key
+          for key in ['rendererInsertionRemovalExact','nativeTargetRendererUnchanged','allExistingAssetsUnchanged','exposureCaptureDngAndPreviewSourcesUnchanged','shortTailReflectionFixed','tileScratchInitializationFixed']:assert p[key],key
+          assert p['upstreamFix']==json.loads(Path('validation/UPSTREAM_FIX1_RESULTS.json').read_text())
           p.update(source_commit=os.environ['GITHUB_SHA'],run_id=os.environ['GITHUB_RUN_ID'],apk_bytes=out.stat().st_size,apk_sha256=hashlib.sha256(out.read_bytes()).hexdigest())
           (dest/'APK_PROVENANCE.json').write_text(json.dumps(p,indent=2)+'\n')
           for f in Path('validation').glob('*.json'):shutil.copyfile(f,dest/f.name)
-          with zipfile.ZipFile(dest/'AMAZE1A_SOURCE.zip','w',zipfile.ZIP_DEFLATED) as z:
+          with zipfile.ZipFile(dest/'AMAZE1A_FIX1_SOURCE.zip','w',zipfile.ZIP_DEFLATED) as z:
               for root in [Path('patches/amaze1a'),Path('PhotonCamera/app/src/main/cpp/amaze1a')]:
                   for f in root.rglob('*'):
-                      if f.is_file():z.write(f)
-              for rel in ['app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java','app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RAmaze1A.java','app/src/main/cpp/CMakeLists.txt']:
+                      if f.is_file() and '__pycache__' not in f.parts:z.write(f)
+              for rel in ['app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java','app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RAmaze1A.java','app/src/main/cpp/CMakeLists.txt','app/build.gradle']:
                   z.write(Path('PhotonCamera')/rel)
+              z.write('.github/workflows/m10r-render2n-amaze1a.yml')
           print(json.dumps({k:v for k,v in p.items() if k not in ['before','after','upstream']},indent=2))
           PY
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose delivery/*.apk | tee delivery/signature_verification.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: M10R-AMAZE1A-TESTS-AND-BUILDLOG
+          name: M10R-AMAZE1A-FIX1-TESTS-AND-BUILDLOG
           path: |
             validation/*.json
             AMAZE1A_GRADLE.log
@@ -104,7 +113,7 @@ jobs:
           retention-days: 90
       - uses: actions/upload-artifact@v4
         with:
-          name: M10RCam-RENDER2N-AMAZE1A-TEST-APK
+          name: M10RCam-RENDER2N-AMAZE1A-FIX1-TEST-APK
           path: delivery/
           if-no-files-found: error
           retention-days: 90

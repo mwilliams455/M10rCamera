@@ -6,7 +6,7 @@ import org.json.JSONObject;
 
 /** RENDER2N: AMaZE interior with unchanged EA border, source/target separation. */
 public final class M10RAmaze1A implements AutoCloseable {
-    public static final String REVISION = "RENDER2N_AMAZE1A_SOURCE_ONLY";
+    public static final String REVISION = "RENDER2N_AMAZE1A_SOURCE_ONLY_FIX1";
     static { System.loadLibrary("m10ramaze"); }
     private long handle;
     private static native long nativeOpen(short[] raw,int w,int h,int cfa,double scale,double nr,double nb,int workers);
@@ -39,6 +39,9 @@ public final class M10RAmaze1A implements AutoCloseable {
         d.put("amazeGlobalMagentaSuppressionEnabled",false);
         d.put("amazeNativeInputPlaneBytes",4L*width*height);
         d.put("amazeBorderPixels",16);
+        d.put("amazeShortTailReflectionRevision","TAIL1A_PHYSICAL_BOTTOM");
+        d.put("amazeExtraScratchRows",16);
+        d.put("amazeTileScratchRevision","SCRATCH1A_ZERO_EACH_TILE");
         d.put("openCvPurpose","unchanged_EA_border_reference_AMaZE_replaces_interior");
         long pointer=nativeOpen(raw,width,height,cfa,scale,nr,nb,workers);
         if(pointer==0) throw new IllegalStateException("AMAZE1A native open returned null");

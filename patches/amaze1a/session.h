@@ -34,7 +34,9 @@ public:
         const size_t count=size_t(w)*size_t(h);
         input.resize(count);
         inRows.resize(h); rRows.resize(h,nullptr); gRows.resize(h,nullptr); bRows.resize(h,nullptr);
-        const size_t band=size_t(w)*std::min(h,capacity);
+        // Up to 15 extra scratch rows carry a penultimate band to the physical
+        // image bottom. Only the originally requested rows are emitted.
+        const size_t band=size_t(w)*std::min(h,capacity+Border);
         red.resize(band); green.resize(band); blue.resize(band);
         for(int y=0;y<h;++y) inRows[y]=input.data()+size_t(y)*w;
     }
@@ -60,7 +62,12 @@ public:
         std::fill(red.begin(),red.end(),0.0f);
         std::fill(green.begin(),green.end(),0.0f);
         std::fill(blue.begin(),blue.end(),0.0f);
-        for(int y=top;y<top+rows;++y) {
+        // TAIL1A: when fewer than Border rows remain, upstream's window-end
+        // reflection must use the physical bottom, not this band's early end.
+        // Keep the global 128-row tile lattice and the logical output schedule.
+        const int tail=height-top-rows;
+        const int renderRows=rows+((tail>0 && tail<Border)?tail:0);
+        for(int y=top;y<top+renderRows;++y) {
             rRows[y]=red.data()+size_t(y-top)*width;
             gRows[y]=green.data()+size_t(y-top)*width;
             bRows[y]=blue.data()+size_t(y-top)*width;
@@ -74,7 +81,7 @@ public:
         // rawStored = sourceCorrected * storageScale * 65535.
         // Neutral-balanced unit-one -> storageScale/headroom. AMaZE defines
         // clip_pt=1/initGain, so M10-R must pass headroom/storageScale.
-        const rpError rc=amaze_demosaic(width,height,0,top,width,rows,
+        const rpError rc=amaze_demosaic(width,height,0,top,width,renderRows,
                 inRows.data(),rRows.data(),gRows.data(),bRows.data(),patterns[cfa],
                 [](double){return false;},initGain,Border,65535.f,65535.f,2,false);
         if(rc!=RP_NO_ERROR) throw std::runtime_error("AMAZE1A upstream failure "+std::to_string(int(rc)));
