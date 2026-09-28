@@ -25,3 +25,9 @@ The Android workflow must pass all gates and compile the actual APK before packa
 No RAW noise correction, directional chroma filtering, global magenta suppression, HDR, exposure adjustment, sensor-specific look, or M10-R colour/tone retuning is added. Existing preview, meter, capture, DNG, native target renderer and existing assets are checked unchanged. Final photograph pixels are expected to differ because the demosaic input changes; unchanged target code is not a promise of identical final colour.
 
 This is not a speed optimization. It retains the EA border reference calculation and adds AMaZE source storage and per-tile clearing. Phone memory, latency, successive captures and same-RAW photographic quality remain pending. These adapter findings do not establish the cause of any previously supplied photograph's fringes.
+
+## Local verification receipt and build retry
+
+The five individual real-code test executions completed successfully: SSE 188 cases/1022 assertions; SSE address/undefined sanitizer 188/1021; non-SSE 188/1022; non-SSE sanitizer 188/1021; JNI host JVM 73 assertions. Both normal native runs include the 12MP smoke. These are host results, not phone tests. The combined local script was interrupted by the execution-time limit; its remaining individual commands were then executed successfully.
+
+Initial FIX1 Actions run 36383853018 reported startup_failure with no jobs. The isolated runner-only probe 36384059774 succeeded. This does not establish an account-wide outage or a compiler failure. This documentation-only commit triggers a fresh full build with the same source and all validation gates retained.
