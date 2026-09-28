@@ -1,0 +1,15 @@
+name: M10-R FIX1 runner startup probe
+on:
+  push:
+    branches: [m10r-render2n-amaze1a-fix1]
+    paths: ['.github/workflows/m10r-fix1-startup-probe.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Confirm runner execution without checkout or dependencies
+        run: printf 'M10R_FIX1_RUNNER_STARTED\n'
