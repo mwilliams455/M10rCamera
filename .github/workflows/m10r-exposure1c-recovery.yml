@@ -1,0 +1,83 @@
+name: M10-R EXPOSURE1C offline integration prerequisites
+on:
+  push:
+    branches: [m10r-exposure1c-integration]
+    paths: ['.github/workflows/m10r-exposure1c-recovery.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/checkout@v4
+        with:
+          repository: mwilliams455/M9Camera_refresh
+          ref: a00e722bf25b4c609ae9addcc4b612e6d8e434d6
+          path: m9-reference
+          sparse-checkout: patches/colourtrial1c/upstream
+          persist-credentials: false
+      - name: Reconstruct the published FIX1 source only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install PyYAML==6.0.2
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess,yaml
+          w=yaml.safe_load(Path('.github/workflows/m10r-render2m-meterarea1a.yml').read_text())
+          for name in ['Reconstruct verified RENDER2L baseline','Insert shadow probe and prove frozen photometric code']:
+              s=[s for s in w['jobs']['build']['steps'] if s.get('name')==name]
+              assert len(s)==1,name
+              subprocess.run(['bash','-euo','pipefail','-c',s[0]['run']],check=True)
+          PY
+          python3 patches/amaze1a/apply.py PhotonCamera m9-reference/patches/colourtrial1c/upstream
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install pinned SDK components
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-36' 'build-tools;35.0.0' 'cmake;3.22.1' 'ndk;27.0.12077973'
+      - name: Resolve and build published parent dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x PhotonCamera/gradlew
+          cd PhotonCamera
+          ./gradlew assembleDebug --stacktrace > "$GITHUB_WORKSPACE/PARENT_BUILD.log" 2>&1
+          ./gradlew --stop
+      - name: Export public source and offline compiler prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p delivery
+          git clone --no-checkout --depth 1 --branch dev https://github.com/eszdman/PhotonCamera.git upstream-export
+          git -C upstream-export fetch --depth 1 origin 4ee108e169496f429c0afa0cc33e57bb6b2ec724
+          git -C upstream-export archive --format=tar 4ee108e169496f429c0afa0cc33e57bb6b2ec724 | gzip -1 > delivery/PHOTON_4ee108e_PUBLIC_SOURCE.tar.gz
+          tar --exclude='.git' --exclude='build' --exclude='.gradle' --exclude='.cxx' --exclude='local.properties' -C PhotonCamera -czf delivery/PUBLISHED_FIX1_ASSEMBLED_SOURCE.tar.gz .
+          tar -C "$ANDROID_HOME" -czf delivery/ANDROID_PINNED_TOOLCHAIN.tar.gz platforms/android-36 build-tools/35.0.0 cmake/3.22.1 ndk/27.0.12077973 licenses
+          tar --exclude='*.lock' --exclude='gc.properties' -C "$HOME/.gradle" -czf delivery/GRADLE_PUBLIC_DEPENDENCIES.tar.gz caches wrapper
+          cp PARENT_BUILD.log delivery/
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          p=Path('delivery')
+          (p/'SHA256.json').write_text(json.dumps({x.name:hashlib.sha256(x.read_bytes()).hexdigest() for x in p.iterdir() if x.is_file()},indent=2))
+          PY
+          du -h delivery/*
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-EXPOSURE1C-PREREQUISITES
+          path: delivery/
+          compression-level: 0
+          retention-days: 14
+          if-no-files-found: error
