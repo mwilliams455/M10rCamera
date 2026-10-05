@@ -1,0 +1,74 @@
+name: M10-R EXPOSURE1C prerequisite transport
+on:
+  push:
+    branches: [m10r-exposure1c-integration]
+    paths: ['.github/workflows/m10r-exposure1c-split.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: M10R-EXPOSURE1C-PREREQUISITES
+          run-id: 37321071317
+          github-token: ${{ github.token }}
+          path: input
+      - name: Verify and partition transport only
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          p=Path('input')
+          for name,sha in json.loads((p/'SHA256.json').read_text()).items():
+              h=hashlib.sha256()
+              with (p/name).open('rb') as f:
+                  for b in iter(lambda:f.read(1024*1024),b''):h.update(b)
+              assert h.hexdigest()==sha,name
+          PY
+          mkdir -p sources parts
+          cp input/PHOTON_4ee108e_PUBLIC_SOURCE.tar.gz input/PUBLISHED_FIX1_ASSEMBLED_SOURCE.tar.gz input/SHA256.json input/PARENT_BUILD.log sources/
+          split -b 400M -d -a 2 input/ANDROID_PINNED_TOOLCHAIN.tar.gz parts/android.part
+          split -b 400M -d -a 2 input/GRADLE_PUBLIC_DEPENDENCIES.tar.gz parts/gradle.part
+          sha256sum parts/* > sources/PART_SHA256.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1C-SOURCES
+          path: sources/
+          compression-level: 0
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1C-ANDROID-00
+          path: parts/android.part00
+          compression-level: 0
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1C-ANDROID-01
+          path: parts/android.part01
+          compression-level: 0
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1C-GRADLE-00
+          path: parts/gradle.part00
+          compression-level: 0
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1C-GRADLE-01
+          path: parts/gradle.part01
+          compression-level: 0
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1C-GRADLE-02
+          path: parts/gradle.part02
+          compression-level: 0
+          retention-days: 14
