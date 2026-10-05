@@ -40,29 +40,23 @@ jobs:
               if p.is_file() and not p.name.endswith('.lock'):out[str(p.relative_to(r))]=hashlib.sha256(p.read_bytes()).hexdigest()
           Path('before.json').write_text(json.dumps(out))
           PY
-      - name: Resolve public modern app dependencies
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install matching public toolchain components
+        run: sdkmanager 'platforms;android-33' 'platforms;android-36' 'build-tools;35.0.0' 'ndk;27.0.12077973'
+      - name: Populate modern dependencies using actual public app compilation
         run: |
-          cat > deps.init.gradle <<'GR'
-          allprojects { afterEvaluate { p ->
-            if (p.hasProperty('android')) p.android.compileSdkVersion 36
-            p.tasks.register('resolveOfflineIntegration') { doLast {
-              ['debugCompileClasspath','debugRuntimeClasspath','debugAnnotationProcessor','debugUnitTestCompileClasspath','debugUnitTestRuntimeClasspath'].each { n ->
-                def c=p.configurations.findByName(n)
-                if(c!=null && c.canBeResolved) { println("RESOLVE "+p.path+":"+n); c.resolve() }
-              }
-            } }
-          } }
-          GR
           cd public-photon
           chmod +x gradlew
-          ./gradlew --no-daemon --init-script ../deps.init.gradle :app:resolveOfflineIntegration :circularbarlib:resolveOfflineIntegration --stacktrace
-      - name: Export changed dependency files only
+          ./gradlew --no-daemon :app:compileDebugJavaWithJavac :app:compileDebugUnitTestJavaWithJavac --stacktrace
+      - name: Export changed dependency files only and public platform prerequisites
         if: always()
         run: |
           mkdir -p delivery
           python3 - <<'PY'
           from pathlib import Path
-          import hashlib,json,tarfile
+          import hashlib,json,tarfile,os
           r=Path.home()/'.gradle';before=json.loads(Path('before.json').read_text());changed={}
           with tarfile.open('delivery/PUBLIC_MODERN_GRADLE_DELTA.tar.gz','w:gz') as t:
               for p in (r/'caches/modules-2').rglob('*'):
@@ -70,6 +64,10 @@ jobs:
                   n=str(p.relative_to(r));h=hashlib.sha256(p.read_bytes()).hexdigest()
                   if before.get(n)!=h:t.add(p,arcname=n);changed[n]=h
           Path('delivery/SHA256.json').write_text(json.dumps(changed,indent=2))
+          sdk=Path(os.environ['ANDROID_HOME'])
+          with tarfile.open('delivery/ANDROID_PLATFORM33.tar.gz','w:gz') as t:t.add(sdk/'platforms/android-33',arcname='platforms/android-33')
+          with tarfile.open('delivery/JAVA17_PUBLIC.tar.gz','w:gz') as t:t.add(Path(os.environ['JAVA_HOME']),arcname='jdk17')
+          Path('delivery/ARCHIVES_SHA256.json').write_text(json.dumps({p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in Path('delivery').glob('*.tar.gz')},indent=2))
           print('Changed cache files:',len(changed))
           PY
       - uses: actions/upload-artifact@v4
