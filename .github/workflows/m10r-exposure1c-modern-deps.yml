@@ -1,0 +1,80 @@
+name: M10R exposure integration public dependency recovery
+on:
+  push:
+    branches: [m10r-exposure1c-integration]
+    paths: ['.github/workflows/m10r-exposure1c-modern-deps.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  dependencies:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: eszdman/PhotonCamera
+          ref: 4ee108e169496f429c0afa0cc33e57bb6b2ec724
+          path: public-photon
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37322776900
+          pattern: M10R-E1C-GRADLE-*
+          merge-multiple: true
+          path: cache-parts
+      - name: Restore public dependency cache and record baseline
+        run: |
+          mkdir -p "$HOME/.gradle"
+          cat cache-parts/gradle.part* | tar -xz -C "$HOME/.gradle"
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          r=Path.home()/'.gradle';out={}
+          for p in (r/'caches/modules-2').rglob('*'):
+              if p.is_file() and not p.name.endswith('.lock'):out[str(p.relative_to(r))]=hashlib.sha256(p.read_bytes()).hexdigest()
+          Path('before.json').write_text(json.dumps(out))
+          PY
+      - name: Resolve public modern app dependencies
+        run: |
+          cat > deps.init.gradle <<'GR'
+          allprojects { afterEvaluate { p ->
+            if (p.hasProperty('android')) p.android.compileSdkVersion 36
+            p.tasks.register('resolveOfflineIntegration') { doLast {
+              ['debugCompileClasspath','debugRuntimeClasspath','debugAnnotationProcessor','debugUnitTestCompileClasspath','debugUnitTestRuntimeClasspath'].each { n ->
+                def c=p.configurations.findByName(n)
+                if(c!=null && c.canBeResolved) { println("RESOLVE "+p.path+":"+n); c.resolve() }
+              }
+            } }
+          } }
+          GR
+          cd public-photon
+          chmod +x gradlew
+          ./gradlew --no-daemon --init-script ../deps.init.gradle :app:resolveOfflineIntegration :circularbarlib:resolveOfflineIntegration --stacktrace
+      - name: Export changed dependency files only
+        if: always()
+        run: |
+          mkdir -p delivery
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,tarfile
+          r=Path.home()/'.gradle';before=json.loads(Path('before.json').read_text());changed={}
+          with tarfile.open('delivery/PUBLIC_MODERN_GRADLE_DELTA.tar.gz','w:gz') as t:
+              for p in (r/'caches/modules-2').rglob('*'):
+                  if not p.is_file() or p.name.endswith('.lock'):continue
+                  n=str(p.relative_to(r));h=hashlib.sha256(p.read_bytes()).hexdigest()
+                  if before.get(n)!=h:t.add(p,arcname=n);changed[n]=h
+          Path('delivery/SHA256.json').write_text(json.dumps(changed,indent=2))
+          print('Changed cache files:',len(changed))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: M10R-E1C-PUBLIC-MODERN-DEPS
+          path: delivery/
+          retention-days: 14
