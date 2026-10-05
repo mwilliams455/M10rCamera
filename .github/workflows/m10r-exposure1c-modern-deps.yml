@@ -45,11 +45,11 @@ jobs:
           packages: platform-tools
       - name: Install matching public toolchain components
         run: sdkmanager 'platforms;android-33' 'platforms;android-36' 'build-tools;35.0.0' 'ndk;27.0.12077973'
-      - name: Populate modern dependencies using actual public app compilation
+      - name: Populate modern dependencies using actual public app tests
         run: |
           cd public-photon
           chmod +x gradlew
-          ./gradlew --no-daemon :app:compileDebugJavaWithJavac :app:compileDebugUnitTestJavaWithJavac --stacktrace
+          ./gradlew --no-daemon :app:testDebugUnitTest --tests '*LensSwitchSchedulerTest' --stacktrace
       - name: Export changed dependency files only and public platform prerequisites
         if: always()
         run: |
@@ -66,7 +66,7 @@ jobs:
           Path('delivery/SHA256.json').write_text(json.dumps(changed,indent=2))
           sdk=Path(os.environ['ANDROID_HOME'])
           with tarfile.open('delivery/ANDROID_PLATFORM33.tar.gz','w:gz') as t:t.add(sdk/'platforms/android-33',arcname='platforms/android-33')
-          with tarfile.open('delivery/JAVA17_PUBLIC.tar.gz','w:gz') as t:t.add(Path(os.environ['JAVA_HOME']),arcname='jdk17')
+          with tarfile.open('delivery/JAVA17_PUBLIC.tar.gz','w:gz',dereference=True) as t:t.add(Path(os.environ['JAVA_HOME']).resolve(),arcname='jdk17')
           Path('delivery/ARCHIVES_SHA256.json').write_text(json.dumps({p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in Path('delivery').glob('*.tar.gz')},indent=2))
           print('Changed cache files:',len(changed))
           PY
