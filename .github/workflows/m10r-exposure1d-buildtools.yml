@@ -1,0 +1,165 @@
+name: M10R public build tool transfer
+on:
+  push:
+    branches: [m10r-exposure1d-buildtools]
+    paths: ['.github/workflows/m10r-exposure1d-buildtools.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  split-public-prerequisites:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: ANDROID-00
+            artifact: 11351166198
+            digest: 4066f48f8d97ae79a906ff5fd11f392bd8a27d0fc499efb82282a23cdbe28b5b
+          - label: GRADLE-00
+            artifact: 11350153715
+            digest: 6c168065ca1ca656bb971607b38674ff548bee1415f9ffcf9559bf255d57f98c
+          - label: GRADLE-01
+            artifact: 11350348565
+            digest: 78acef3cc83853cc8ff6f388092edab4bd22431e6f95df77fbb0371dd72524f0
+          - label: MODERN-DEPS
+            artifact: 11354261672
+            digest: c73c3941e9ec559ed066f44db4df001fa7d7f58df99e274fc450b3edeae90c0c
+    steps:
+      - name: Split existing public prerequisites only
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT: ${{ matrix.artifact }}
+          EXPECTED: ${{ matrix.digest }}
+        run: |
+          gh api "repos/mwilliams455/M10rCamera/actions/artifacts/$ARTIFACT/zip" > dependency.zip
+          python3 - <<'PY'
+          import hashlib,os,pathlib
+          p=pathlib.Path('dependency.zip')
+          assert hashlib.sha256(p.read_bytes()).hexdigest()==os.environ['EXPECTED']
+          with p.open('rb') as f:
+              i=0
+              while data:=f.read(24*1024*1024):
+                  pathlib.Path(f'part{i:02d}').write_bytes(data)
+                  i+=1
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-00
+          path: part00
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-01
+          path: part01
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-02
+          path: part02
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-03
+          path: part03
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-04
+          path: part04
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-05
+          path: part05
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-06
+          path: part06
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-07
+          path: part07
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-08
+          path: part08
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-09
+          path: part09
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-10
+          path: part10
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-11
+          path: part11
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-12
+          path: part12
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-13
+          path: part13
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-14
+          path: part14
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-15
+          path: part15
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: M10R-E1D-${{ matrix.label }}-16
+          path: part16
+          if-no-files-found: ignore
+          compression-level: 0
+          retention-days: 7
