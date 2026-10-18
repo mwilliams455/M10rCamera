@@ -1,0 +1,15 @@
+allprojects {
+    tasks.withType(Test).configureEach {
+        // Android's local stubs leave Camera2 final keys null. These tests install
+        // distinct keys with Unsafe. Isolate classes so JIT-folded final references
+        // from a previous fixture cannot survive restoration/reinstallation.
+        forkEvery = 1
+        doFirst {
+            def agents = fileTree(new File(gradle.gradleUserHomeDir, 'caches/modules-2/files-2.1/net.bytebuddy/byte-buddy-agent/1.17.7')).matching {
+                include '**/byte-buddy-agent-1.17.7.jar'
+            }.files
+            if (agents.size() != 1) throw new GradleException('Expected one Byte Buddy 1.17.7 test agent')
+            jvmArgs "-javaagent:${agents.first().absolutePath}"
+        }
+    }
+}

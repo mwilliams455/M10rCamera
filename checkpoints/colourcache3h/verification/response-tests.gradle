@@ -1,0 +1,5 @@
+allprojects {
+    tasks.withType(Test).configureEach {
+        systemProperty 'm10r.response.fixture', "${rootProject.projectDir.parentFile}/verification/SYNTHETIC_RESPONSE2S.json"
+    }
+}

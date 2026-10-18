@@ -1,0 +1,27 @@
+name: M10-R checkpoint validation
+on:
+  pull_request:
+    paths:
+      - 'checkpoints/**'
+      - '.github/workflows/m10r-checkpoint.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'checkpoints/**'
+      - '.github/workflows/m10r-checkpoint.yml'
+permissions:
+  contents: read
+jobs:
+  exact-tone-cache:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify pinned source overlay
+        run: python3 checkpoints/colourcache3h/prepare_project.py --verify-only
+      - name: Exhaustive RGB, alpha and concurrent cache checks
+        run: |
+          g++ -std=c++17 -O3 -fno-fast-math -ffp-contract=off -pthread \
+            -I checkpoints/colourcache3h/overlay/app/src/main/cpp \
+            checkpoints/colourcache3h/host/cache_test.cpp -o /tmp/m10r-cache-test
+          /tmp/m10r-cache-test

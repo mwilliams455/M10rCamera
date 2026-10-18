@@ -1,0 +1,6 @@
+allprojects {
+    tasks.withType(Test).configureEach {
+        jvmArgs "-Djava.library.path=${rootProject.projectDir.parentFile}/verification/shadow-build"
+        systemProperty 'm10r.shadow.fixture', "${rootProject.projectDir.parentFile}/verification/SYNTHETIC_HOST_SIDECAR.json"
+    }
+}

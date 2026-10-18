@@ -1,0 +1,115 @@
+M10R COLOURCACHE3H — exact tone-calibration cache
+18 October 2026
+
+DELIVERABLE
+M10RCam_COLOURCACHE3H_TEST.apk
+Version 1.39-m10r-colourcache3h-test, version code 28901.
+SHA-256: 42c6a09052f42a973746b99e0282a6894614f105cffd2878a0dd5c702bde8826
+Bytes: 115552549
+Same application ID and signing certificate as NATIVENORM3G; installs over it.
+This build has not yet been run on the phone. No GitHub merge is claimed.
+
+WHY THIS CHANGE
+The 15:57:11 NATIVENORM3G PHOTO capture used native normalization successfully:
+  normalization 262.135 ms (previous 3F observation 1303.349 ms)
+  renderer 2302.470 ms; save branch through pre-sidecar 3223.511 ms
+  native colour/tone 1026.828 ms; AMaZE initialization + bands 741.837 ms
+  JPEG and DNG saved, exactly one photographic RAW, no fusion/HDR.
+Exposure was delivered exactly as requested: ISO 250, 38.88 ms. No original RAW
+sites reached white. Different captures/device states make these observations,
+not controlled benchmarks. MOTION still needs a phone capture.
+
+The native colour loop's final TONECAL1A function accepts an already quantized
+RGB24 value and calculates fixed Lab lightness calibration, including cube roots
+and powers. Repeated RGB values produce identical results. This checkpoint adds
+exact-key memoization of that function, preserving its original arithmetic on
+all misses. No colour, exposure, white-balance, tone or sharpening parameter is
+changed. There is no interpolation or approximate lookup table.
+
+IMPLEMENTATION
+Each of the existing four band workers owns 16,384 direct-mapped cache entries:
+  131,072 bytes of entries per worker; at most 524,288 bytes across four workers.
+The cache lives on that worker's stack and resets for each band. It stores the
+complete RGB key plus a validity tag and calibrated RGB output. Hash collisions
+are misses and call the original function. Alpha is preserved independently.
+No cache data survives a render or is shared between workers.
+
+The original native pixel-loop text is identical except for the final calibration
+call. All original native helper functions are unchanged. Native diagnostics
+retain their full-frame counters. The new isolated m10rcolour3h library contains
+the colour loop and cache; original dngCreator and all 25 parent native libraries
+remain byte-identical. All assets also remain byte-identical. The cache uses
+private statically linked C++ runtime symbols so the packaged shared runtime is
+not replaced. Both existing ABIs are built: arm64-v8a and armeabi-v7a. ELF and ZIP
+16 KiB alignment were checked. No device-model or lens-specific dispatch.
+
+M10R_TONE_CACHE3H defaults true. -Pm10rToneCache3H=false selects the existing 3G
+native colour path. Missing-library/missing-symbol or rejected-input cases use
+that same parent path. Out-of-memory errors and native crashes are not disguised
+as a successful fallback. Existing native normalization3G, exposure policy,
+AMaZE, DETAIL3D and PHOTO/MOTION routing are preserved. DETAIL3D remains enabled
+in this test APK and false by default in source builds.
+
+VALIDATION
+- 337 existing JVM tests in 54 suites: zero failures/errors/skips.
+- Exhaustive cache comparison for all 16,777,216 RGB inputs, with two different
+  alpha values per input: 33,554,432 comparisons. Every result matches exactly.
+- Another 1,000,000 random comparisons across four independent worker caches.
+- Actual old and new JNI functions compiled and called for all 37,748,736 RGB
+  pixels from three full saved phone RAW replays. All output pixels and all 32
+  counter slots match exactly; input RGB arrays remain unchanged.
+- 20 synthetic JNI cases cover both CC1 placements, cache-on/off, small and
+  worker-threshold lengths, repeated colours, random colours and headroom.
+- Production Java dispatcher verified with actual JNI: exact output/counters,
+  aggregation over two bands, cache/timing partitions, disabled control,
+  rejected input, and missing-library fallback in a separate process.
+- Source audit and packaging verify the bounded changes and retained payloads.
+
+HOST PERFORMANCE OBSERVATIONS
+Full colour/tone JNI calls (old -> cached), same replay input:
+  113938: 832.481 -> 707.588 ms; 22.89% cache hits
+  130701: 727.502 -> 607.997 ms; 33.63% cache hits
+  130948: 762.139 -> 603.761 ms; 43.01% cache hits
+These single host runs suggest roughly 15–21% lower colour-stage time, but are
+not predictions of Android speedup or total capture time. CPU scheduling, cache
+behaviour, JNI copying, compiler/libm and scene colour diversity differ. Scenes
+with few repeated colours may benefit less or pay cache overhead. Host equality
+is not proof of ARM output bit parity against the already-shipped binary.
+
+PHONE CHECK
+Install over NATIVENORM3G; take a PHOTO and a MOTION capture and supply JPEG+JSON.
+The nativeColour3H object should report:
+  nativeApplied true, status exact_tone_cache_applied
+  appliedBands 12 and pixels 12582912 at 4096x3072
+  fallbackBands 0; cacheHits + cacheMisses == pixels
+  cacheCountPartitionValid true; nativeTimingPartitionValid true.
+Compare rendererTiming3E.nativeColourAndTone with prior observations. The object
+also records jniSetupMs, workerWallMs, jniReleaseAndCountsMs and nativeSubtotalMs.
+These are nested inside the existing colour-stage timer: do not add them again
+to rendering time. Worker wall time includes launching/joining the threads,
+cache setup, the complete pixel loop and scheduling; it is not pure CPU time.
+The new timers exclude Java dispatch/JNI entry-return/performance publication.
+
+REPRODUCTION
+Complete project, native binaries, source diff, tests, three replay RGB fixtures,
+colour contexts/tables, original source snapshot, 3G phone review and logs are
+included in the source archive. The original RAWs are not needed for colour-loop
+replay. Saved RGB fixtures are intermediate AMaZE outputs from previous replays;
+this verification does not revalidate demosaic or photographic scene accuracy.
+
+Host (JDK17 + g++):
+  M10R_JDK=/path/to/jdk17 python3 host/verify_native.py
+  M10R_JDK=/path/to/jdk17 python3 verification/verify_wrapper.py
+  g++ -std=c++17 -O3 -fno-fast-math -ffp-contract=off -pthread \
+    -I PhotonCamera/app/src/main/cpp host/cache_test.cpp -o /tmp/cache_test
+  /tmp/cache_test
+Native Android (official NDK r27c; checksum recorded in verification):
+  M10R_NDK=/path/to/android-ndk-r27c python3 verification/build_native.py
+Android build with the existing offline build dependency bundle:
+  M10R_BUILD_DEPS=/path/to/deps python3 verification/build.py --offline \
+    -Pm10rDetail3D=true -I "$PWD/verification/test-agent.gradle" \
+    -I "$PWD/verification/shadow-tests.gradle" \
+    -I "$PWD/verification/response-tests.gradle" \
+    :app:assembleDebug :app:testDebugUnitTest --tests '*m10r.*'
+Packaging uses M10R_PARENT_APK and M10R_BUILD_DEPS. Source archiving uses
+M10R_PARENT_SOURCE_ZIP. Parent hashes are guarded by the scripts.
