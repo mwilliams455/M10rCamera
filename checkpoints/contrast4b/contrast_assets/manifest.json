@@ -1,0 +1,61 @@
+{
+  "default_still_contrast": {
+    "enum": 2,
+    "firmware_status": "frozen",
+    "name": "MEDIUM",
+    "suffix": "_CONTRAST:MEDIUM"
+  },
+  "differential_gamma": {
+    "coordinate_formula": "coarse=x>>4; fine=x&15; y=FL[coarse]+sum(DG[coarse][1..fine])",
+    "encoding": "2048 uint16 anchors + 2048x16 uint8 differential groups",
+    "expanded_entries": 32768,
+    "expanded_file": "dg_expanded_u16le.bin",
+    "expanded_max": 16383,
+    "expanded_min": 0,
+    "expanded_monotonic": true,
+    "expanded_sha256": "9e65de24d52271be0783f4e2728f20f482c0ba43b63159b75033b4a4fc75457d",
+    "fl_file": "dg_fl_u16le.bin",
+    "fl_sha256": "e1a997633d1be1d82c89feac40f4feccfa058fad4b3d87cadf08d385f83953e6",
+    "main_file": "dg_main_u8.bin",
+    "main_sha256": "1678c7f99ab1fac958ffb068d20a0c24ab1677adf20a916335d0b2947fc8a1a1"
+  },
+  "format": "m10r-b2y-assets-v1",
+  "frozen_references": [
+    "research/M10R_v189_DIFFERENTIAL_GAMMA_ENCODING_FROZEN.md",
+    "research/M10R_v192_TONE_Q15_GAIN_MODEL_FROZEN.md",
+    "research/M10R_v198_CONTRAST_ENUM_TONE_SELECTION_FROZEN.md",
+    "research/M10R_v206_DEFAULT_STILL_CONTRAST_MEDIUM_FROZEN.md"
+  ],
+  "record_count": 168,
+  "source_sha256": "ea935a8006ea3b0a765660bd1d89f6a52c9f60508ee5ba76650005d80372335b",
+  "tone": {
+    "active_entries": 10240,
+    "encoding": "uint32 little-endian Q15 gain",
+    "exact_live_rounding": "open",
+    "first_parity_index": "x >> 1",
+    "tables": {
+      "high": {
+        "file": "tone_high_q15.u32le",
+        "max": 37812,
+        "min": 16190,
+        "sha256": "0a764cf29d35cd4a4eb7f816e5d128bccaef81b4d5eca991d9b80ab207bd0101",
+        "unique": 4063
+      },
+      "low": {
+        "file": "tone_low_q15.u32le",
+        "max": 32768,
+        "min": 32768,
+        "sha256": "136b69127e73cc43c28c0aa7b511f1f3e9b29be139f4d491422f2eb574a49fb0",
+        "unique": 1
+      },
+      "medium": {
+        "file": "tone_medium_q15.u32le",
+        "max": 35130,
+        "min": 19431,
+        "sha256": "2fd6ca209f290c75aa96976b3d7692e55c41a55c0017a063aba9808da3b41a00",
+        "unique": 2664
+      }
+    },
+    "unity": 32768
+  }
+}

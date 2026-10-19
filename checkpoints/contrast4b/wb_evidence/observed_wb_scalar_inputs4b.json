@@ -1,0 +1,203 @@
+{
+  "revision": "M10R_OBSERVED_WB_SCALAR_INPUTS4B",
+  "script_sha256": "ec4a9e9748311b867f5b7429f208542411a618b8d21d415f32e3f0cb61ea7a97",
+  "analyzed_IMG_sha256": "f5f16cab7ad18893b5a8348f49c8a3630efbeb7b623a5dc681a17f6dcd829d4a",
+  "sources": {
+    "tag_constructor": {
+      "path": "<retained-workspace>/m10r_sources/wb3y/wb_accumulation3v/calibration/maker_note_awb_tag.txt",
+      "sha256": "96a1f5cf4a2a989ee67c9a15716d0e5283f1cdb8d72e20b60ea6b06d1e5cd451"
+    },
+    "packet_builder": {
+      "path": "<retained-workspace>/m10r_sources/wb3y/wb_inputs3s/statistics/img_wb_packet_builder_835c_8680.txt",
+      "sha256": "812453d399422c74ad860e1fd0845d3fb6c95629bd63868f714e2607498bd8b3"
+    },
+    "packet_converter": {
+      "path": "<retained-workspace>/m10r_sources/wb3y/wb_producer3t/controls/img_packet_converters_8170_835c.txt",
+      "sha256": "b745e3d24fdc0221b8855162be4f804b7614e1bfbe105f228ab8e4ca4a51c1a2"
+    },
+    "metadata_manifest": {
+      "path": "<retained-workspace>/m10r_sources/wb3y/wb_accumulation3v/samples/metadata/PUBLIC_CALIBRATION_METADATA3V.json",
+      "sha256": "e9fa0f2f3b6925b39d244d854f6b8915a8835c5afa9e6b430b7565e67891aa42"
+    }
+  },
+  "source_mapping": {
+    "F": "J + 0x280",
+    "tag_6": {
+      "type": "SSHORT",
+      "count": 1,
+      "source": "F + 0x96",
+      "source_label": "IR",
+      "constructor": "0x421AA4EE..0x421AA532",
+      "packet_destination": "P + 0x34 via 0x420A8180",
+      "packet_instructions": "0x420A84FE..0x420A8508"
+    },
+    "tag_17": {
+      "type": "SSHORT",
+      "count": 1,
+      "source": "F + 0x98",
+      "source_label": "ExtBv",
+      "constructor": "0x421AA534..0x421AA578",
+      "packet_destination": "P + 0x36 copied halfword",
+      "packet_instructions": "0x420A850A..0x420A850E"
+    },
+    "diagnostic_label_instructions": "0x420A8578..0x420A8592"
+  },
+  "cases": [
+    {
+      "sample_id": "01",
+      "source_url": "https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_01.jpg",
+      "jpeg_sha256": "b6e6fb0975c4da3201be8c3092d9f32107c1ad4e5aaafe905a27f17aefc8401b",
+      "exif_identity": {
+        "make": "Leica Camera AG",
+        "model": "LEICA M10-R",
+        "software": "10.20.27.20",
+        "datetime_original": "2020:08:01 10:20:52",
+        "iso": 320,
+        "exposure_time": {
+          "numerator": 1,
+          "denominator": 30
+        },
+        "white_balance_mode": 0,
+        "body_serial": "5502701",
+        "image_unique_id": "000000000053F6ED0121ECBD1B8E0FD4"
+      },
+      "private_plain_path": "<retained-workspace>/m10r_sources/wb3y/wb_accumulation3v/samples/metadata/sample_01_private_plain.bin",
+      "private_plain_sha256": "0893816f449a82e545c9a366ddab13c21920ea14a715b65946baea5571e4581b",
+      "observed_source_fields": {
+        "F_plus_0x96_IR": {
+          "tag": 6,
+          "type": 8,
+          "count": 1,
+          "descriptor_offset": "0x3e",
+          "value_offset": "0x46",
+          "descriptor_hex": "0600080001000000c603dfef",
+          "value": 966,
+          "ignored_padding_hex": "dfef"
+        },
+        "F_plus_0x98_ExtBv": {
+          "tag": 17,
+          "type": 8,
+          "count": 1,
+          "descriptor_offset": "0x4a",
+          "value_offset": "0x52",
+          "descriptor_hex": "11000800010000001605ffff",
+          "value": 1302,
+          "ignored_padding_hex": "ffff"
+        }
+      },
+      "derived_using_IMG_30_22_23_34_packet_contract": {
+        "P_plus_0x34": 2898,
+        "P_plus_0x36": 1302,
+        "s16_P36_minus_P34": -1596,
+        "is_observed_runtime_packet": false
+      },
+      "observed_endpoint_banks": {
+        "channels": [
+          "B",
+          "G0",
+          "G1",
+          "R"
+        ],
+        "bank_A_offsets_08_0E": [
+          9328,
+          11141,
+          11051,
+          3675
+        ],
+        "bank_B_offsets_10_16": [
+          5180,
+          10620,
+          10586,
+          5328
+        ]
+      },
+      "observed_selected_gains_RGB": [
+        897,
+        256,
+        390
+      ]
+    },
+    {
+      "sample_id": "03",
+      "source_url": "https://img.photographyblog.com/reviews/leica_m10_r/sample_images/leica_m10_r_03.jpg",
+      "jpeg_sha256": "08d8c31c9e747102d5e63f89ee97cc010b3c8edd462b374dedcd82cd8f263d51",
+      "exif_identity": {
+        "make": "Leica Camera AG",
+        "model": "LEICA M10-R",
+        "software": "10.20.27.20",
+        "datetime_original": "2020:08:01 10:31:18",
+        "iso": 100,
+        "exposure_time": {
+          "numerator": 1,
+          "denominator": 750
+        },
+        "white_balance_mode": 0,
+        "body_serial": "5502701",
+        "image_unique_id": "000000000053F6ED000F941007194F5C"
+      },
+      "private_plain_path": "<retained-workspace>/m10r_sources/wb3y/wb_accumulation3v/samples/metadata/sample_03_private_plain.bin",
+      "private_plain_sha256": "7b9a45f51a3ed2b7db366f33731c47024d0dff2fd479fea5b0cbb851e866abd4",
+      "observed_source_fields": {
+        "F_plus_0x96_IR": {
+          "tag": 6,
+          "type": 8,
+          "count": 1,
+          "descriptor_offset": "0x3e",
+          "value_offset": "0x46",
+          "descriptor_hex": "0600080001000000d903ffff",
+          "value": 985,
+          "ignored_padding_hex": "ffff"
+        },
+        "F_plus_0x98_ExtBv": {
+          "tag": 17,
+          "type": 8,
+          "count": 1,
+          "descriptor_offset": "0x4a",
+          "value_offset": "0x52",
+          "descriptor_hex": "1100080001000000c505ffff",
+          "value": 1477,
+          "ignored_padding_hex": "ffff"
+        }
+      },
+      "derived_using_IMG_30_22_23_34_packet_contract": {
+        "P_plus_0x34": 2955,
+        "P_plus_0x36": 1477,
+        "s16_P36_minus_P34": -1478,
+        "is_observed_runtime_packet": false
+      },
+      "observed_endpoint_banks": {
+        "channels": [
+          "B",
+          "G0",
+          "G1",
+          "R"
+        ],
+        "bank_A_offsets_08_0E": [
+          9328,
+          11141,
+          11051,
+          3675
+        ],
+        "bank_B_offsets_10_16": [
+          5180,
+          10620,
+          10586,
+          5328
+        ]
+      },
+      "observed_selected_gains_RGB": [
+        897,
+        256,
+        392
+      ]
+    }
+  ],
+  "qualifications": [
+    "Scalar source mapping is recovered from original IMG code; physical derivation and units are not established.",
+    "Retained JPEG firmware is 10.20.27.20; analyzed IMG firmware is 30.22.23.34.",
+    "Observed values are source fields exported by JPEG metadata, not captured live WB packets.",
+    "Derived packet values apply the analyzed converter to observed fields; no original firmware or selector rerun was performed here.",
+    "The two camera endpoint banks have no proven named-illuminant assignment or relationship to current renderer ColorMatrix literals.",
+    "These are offline fixtures for a specific camera and captures, not authorized Android scene controls or photographic white-balance authority."
+  ]
+}

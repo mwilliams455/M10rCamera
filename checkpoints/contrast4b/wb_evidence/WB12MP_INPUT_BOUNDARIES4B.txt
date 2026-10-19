@@ -1,0 +1,223 @@
+M10-R 12 MP WB input review 4B — source-linked scalars and target calibration payload
+2026-10-19
+
+Result
+
+The existing recovered IMG code exposes a useful additional observation in the
+two retained original-camera JPEGs: private tag 17 is the same F+0x98 halfword
+that the WB packet builder copies to P+0x36. The firmware diagnostic names that
+source ExtBv. Tag 6 similarly exposes F+0x96, named IR, which the packet builder
+passes through 0x420A8180 before storing P+0x34.
+
+The current target ColorMatrix coefficients also have a concrete local firmware
+source: both nine-word Q12 matrices in corrected firmware section 73,
+/data/calib/B2Y_CC0_CA9_CM.bin. Every current decimal literal reproduces the
+corresponding firmware coefficient rounded to eight decimal places. This is
+stronger provenance than the renderer's RENDER_PARITY1A comment alone.
+
+These results do not establish Android conversions for IR/ExtBv, physical
+statistics scale, per-camera live profile state, or an illuminant assignment for
+the separately recovered AWB calibration banks. They do not promote the shadow
+selector to photographic WB authority.
+
+1. New source linkage
+
+In the original constructor at 0x421AA220, r6 is J and the established frame
+structure is F = J+0x280. Descriptors at u32(M+0x23F6C) have 12-byte stride and
+fields tag:u16, type:u16, count:u32, value-pointer:u32.
+
+Tag 6:
+  0x421AA4EE..0x421AA532 builds tag=6, type=8 (SSHORT), count=1,
+  source=F+0x96. The descriptor index r4 is 5 after constructing tags 1..5;
+  its left shift by 7 at 0x421AA51E therefore supplies J+0x280.
+
+Tag 17:
+  0x421AA534..0x421AA578 builds tag=17, type=8 (SSHORT), count=1,
+  source=J+(5<<7)+0x98 = F+0x98.
+
+Packet builder:
+  0x420A84FE..0x420A8508 reads signed16 F+0x96, calls 0x420A8180,
+  stores the result's halfword at P+0x34.
+  0x420A850A..0x420A850E copies F+0x98 directly to P+0x36.
+  0x420A8578..0x420A8592 supplies the same F+0x98 and F+0x96 fields
+  to the ExtBv and IR diagnostic format slots, respectively.
+
+The complete converter 0x420A8180..0x420A8208 returns x unchanged if x<0.
+Otherwise it returns signed16 of truncation-toward-zero division by 10:
+  0 <= x < 260:  (x-160)*46 / 10
+  260 <= x < 360: x*42 / 10
+  360 <= x < 600: x*34 / 10
+  600 <= x < 1000: x*30 / 10
+  1000 <= x:      x*21 / 10
+No physical interpretation of these piecewise regions is assigned here.
+
+2. Observations and derived offline fixture
+
+                    sample_01       sample_03
+Private tag 6 / IR       966             985
+Private tag 17 / ExtBv  1302            1477
+Derived P+0x34          2898            2955
+Copied P+0x36           1302            1477
+s16(P36-P34)           -1596           -1478
+JPEG selected RGB    897,256,390     897,256,392
+
+Both images also export the same previously recovered resident endpoint banks:
+  Bank A, B/G0/G1/R = 9328,11141,11051,3675
+  Bank B, B/G0/G1/R = 5180,10620,10586,5328
+
+The words in the private plaintext are directly observed. The P+0x34 conversion
+is a new offline derivation using the analyzed firmware contract. The JPEGs are
+from firmware 10.20.27.20; the analyzed IMG is from 30.22.23.34. They are not
+captured live WB packets, and equivalence of all control-production semantics
+across those versions is not established. The two-byte padding after an inline
+SSHORT is ignored, rather than interpreting all four bytes as its value.
+
+The existing 3R consumers already establish why these fields matter: signed
+P+0x36 supplies the eight 0x40009E28 prior curves and signed16(P36-P34) supplies
+0x400093A8's controls. The current 3Y choice P34=P36=256 deliberately leaves
+the latter difference zero. The two observed source-field fixtures are therefore
+useful for a later controlled offline comparison, not replacement phone values.
+
+3. Target ColorMatrix coefficients are identified; runtime pairing remains open
+
+Corrected firmware section 73 has these identities:
+  Firmware pathname: /data/calib/B2Y_CC0_CA9_CM.bin
+  Decoded firmware offset: 0x5291F2
+  Payload length: 132 bytes
+  SHA256: 0411bd3396346d04b3cfd8227cda353df46a0b4cf55a779a7828739b9e93aec7
+  TOC MD5: b462c9cb097df73edf56201d42af4dde
+
+The payload was extracted locally from retained decoded firmware. Its MD5
+matches the actual TOC entry and the corrected 3T ledger; its SHA256 matches
+the ledger as well. The original legacy extraction's [4:] is identical to the
+corrected payload without its final four bytes.
+
+At corrected record offsets 0x00 and 0x2C are nine signed32 coefficient words:
+  Current M10_CM_A:
+    2918,-1024,-178,-2350,6358,1473,-449,1197,3172
+  Current M10_CM_D65:
+    1998,-527,-199,-2392,5612,904,-739,1380,2151
+
+Both records have scale-exponent word 12 at record+0x24, meaning denominator
+4096 under the retained original v1.45 builder contract. Rounding each exact
+Q12 ratio to eight decimal places, halfway away from zero, reproduces all 18
+current renderer literals and all 18 golden profile literals. The maximum
+absolute decimal-literal differences are 3.75e-9 and 5e-9, respectively. They
+are not bit-exact double representations of the exact Q12 fractions.
+
+The following word at record+0x28 is 2850 for the first record and 6807 for
+the second. The current renderer uses reference temperatures 2856 and 6504,
+and the golden fixture calls its temperature choice an accepted 17/21 reference
+fixture bridge. This pass records the raw file words without newly proving
+their consumer semantics or changing the current reference-temperature policy.
+
+The retained original v1.45 contract identifies loader 0x420A4628, builder
+0x420A4AAC, exact file length0x84 and config destination0x43705830. That
+baseline config path is distinct from per-frame selected-gain/ASN submission.
+Only the retained disassembly and contracts were used; no additional disassembler
+dependency was installed and no producer or ColorSpec emulation was performed.
+
+The independently recovered AWB banks remain B/G0/G1/R endpoint records.
+The reviewed 3X basis report and 3Y adapter policy do not identify their bank
+labels with the two CM endpoints. A/B storage names do not assign A/D65
+illuminants. A packaged default CM source also does not prove the resident
+calibration state for every camera body.
+
+The next smallest source task is to trace record+0x28 through the original CM
+initializer into its dual-matrix interpolation state, and identify the actual
+resident profile and AWB-bank selection paths. Keep the existing 17/21 reference
+bridge separate while answering that question. The broader numeric seam is
+which verified transformation relates the target CM camera basis to the
+sensor/statistics basis of the resident AWB banks, with any camera calibration
+or analog-balance factors explicitly represented.
+
+3A. Retained DNG provenance lookup and its limits
+
+The original GitHub RENDER_PARITY1A report identifies these genuine DNG files:
+  7233386414.dng
+    SHA256 b03ab4fdc8a5ce2ab6341721712950e546e97cb7e68776d7e4315ba1de6d5126
+  2534813740.dng
+    SHA256 2b0aee07897923ae161eb04cf4b38f3c385916f86ba42ede7b57e65da806fadd
+Report commit: 8045b7db1b132545b389cceb7d847a76a793ec57
+Report path: research/RENDER_PARITY1A_REAL_M10R_DNG_FACTORIAL_2026-09-06.md
+
+Neither file is present by name in the retained <retained-workspace>
+file listing. The central directories of 17 retained project evidence ZIPs
+there, and two ZIPs in current m10r_sources, contain no original Leica DNG
+members; the DNG members found are explicitly synthetic phone test fixtures.
+This is a bounded lookup, not a claim that no copy exists anywhere. The old
+3M provenance directory <retained-workspace> no longer exists.
+Therefore no original metadata, embedded JPEG or private block from either
+named DPReview DNG was read or linked in this pass.
+
+The retained m10r_rendered_color1a.json has 12 gain/matrix fixtures with IDs
+01..10 and 063633/063649. Its first and third selected-gain triplets numerically
+match the retained original JPEG sample01/03 values. These records do not carry
+original-file hashes, so that numeric agreement is not asserted as a same-file
+identity proof. The test source describes both recovered references and phone
+neutrals. An earlier interim message identifying all these as phone fixtures
+was corrected after inspecting their contents.
+
+Existing handoffs establish that matched DPReview rendered references were
+supplied previously. They also require checking whether each reference is an
+original camera JPEG or editorial RAW conversion. No new image was downloaded
+and no new user photograph was requested here. If retained same-camera metadata
+becomes available, compare ColorMatrix/CameraCalibration/AnalogBalance and
+AsShotNeutral with the same-file private banks, selected gains, IR and ExtBv;
+that comparison still does not alone prove hardware cell acceptance or scale.
+
+4. Negative D65 case and practical 12 MP action
+
+The 4A RAW input verification remains valid. DNG replay exactly reproduced the
+sidecar's 352 cells, four-phase counts/sums and grid hash. The fixed D65 transform
+has three finite negative-blue cells: indices 119, 141 and 273, with blue values
+-4.365410128164944, -3.2801891599251842 and -0.45283151275686606. Multiplying by
+positive scale 1, 4 or 16 cannot remove their negative sign. The A transform has
+no negative cells, but all three recorded runs choose the configured fallback.
+
+The recovered format-0x11 reader floor max(1, s16(u32(numerator)/u32(D))-offset)
+acts after unsigned tuple input, division and narrowing. It does not specify
+clipping a negative continuous cross-camera transform before tuple construction.
+No reviewed producer contract proves such a conversion. Do not transplant that
+floor into the phone transform to make the trial pass.
+
+A concrete implementation can retain 12 MP photographic WB behavior while
+advancing independently evidenced rendering controls, such as the recovered
+Low/Medium/High contrast path being handled by root. For WB, bind future fixtures
+to actual source identities and retain explicit rejection/fallback provenance.
+The new scalar fixture is suitable for a bounded offline experiment once its
+specific input-basis question is selected; it is not a new live scene heuristic.
+
+5. Verification and files
+
+This pass reread original disassembly, parsed both retained private plaintext
+blocks, and verified the small corrected CM payload against its original TOC.
+The private blocks' hashes, sizes, tag counts and descriptor bytes match the
+saved 3V manifest. No original reader/selector arithmetic was rerun, no APK was
+built, and no current app source was modified.
+
+Local reproducibility files (temporary analytical outputs):
+  analysis_wb12mp_inputs4b/extract_observed_wb_controls.py
+  analysis_wb12mp_inputs4b/observed_wb_scalar_inputs4b.json
+  analysis_wb12mp_inputs4b/verify_target_cm_source.py
+  analysis_wb12mp_inputs4b/target_cm_source_identity4b.json
+  analysis_wb12mp_inputs4b/B2Y_CC0_CA9_CM_corrected4b.bin
+  analysis_wb12mp_inputs4b/retained_archive_lookup.json
+
+All paths below are relative to <retained-workspace>/m10r_sources/wb3y/:
+  wb_accumulation3v/calibration/maker_note_awb_tag.txt
+  wb_inputs3s/statistics/img_wb_packet_builder_835c_8680.txt
+  wb_producer3t/controls/img_packet_converters_8170_835c.txt
+  wb_accumulation3v/samples/metadata/PUBLIC_CALIBRATION_METADATA3V.json
+  wb_accumulation3v/samples/metadata/sample_01_private_plain.bin
+  wb_accumulation3v/samples/metadata/sample_03_private_plain.bin
+  wb_selector3r/coordinates/PRIOR_WEIGHT_CONTRACT3R.md
+  wb_selector3r/aggregation/HELPER93A8_CONTRACT3R.md
+  wb_replay3x/basis/BASIS_TRIAL3X_REPORT.txt
+  wb_replay3x/basis/basis_trial3x.py
+  wb_port3y/adapter/ADAPTER_POLICY3Y.txt
+  wb_port3y/PhotonCamera/app/src/main/java/com/particlesdevs/photoncamera/m10r/M10RNativeRenderer.java
+
+The fixture JSON records absolute paths and file hashes for the primary scalar
+sources. Corrected analyzed IMG SHA256:
+  f5f16cab7ad18893b5a8348f49c8a3630efbeb7b623a5dc681a17f6dcd829d4a

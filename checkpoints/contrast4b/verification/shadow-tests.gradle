@@ -1,0 +1,7 @@
+allprojects {
+    tasks.withType(Test).configureEach {
+        jvmArgs "-Djava.library.path=${rootProject.projectDir.parentFile}/verification/shadow-build"
+        // Kept for inherited tests that explicitly opt into the synthetic fixture.
+        systemProperty 'm10r.shadow.fixture', "${rootProject.projectDir.parentFile}/verification/SYNTHETIC_HOST_SIDECAR.json"
+    }
+}

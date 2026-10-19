@@ -1,0 +1,19 @@
+allprojects {
+    tasks.withType(Test).configureEach {
+        // Camera2 local stubs have final null keys. Fixture keys use Unsafe;
+        // isolate suites so restored keys cannot survive via JIT constant folding.
+        forkEvery = 1
+        doFirst {
+            def roots = [new File(gradle.gradleUserHomeDir, 'caches/modules-2')]
+            def ro = System.getenv('GRADLE_RO_DEP_CACHE')
+            if (ro != null) roots.add(new File(ro, 'modules-2'))
+            def agents = roots.collectMany { root ->
+                fileTree(new File(root, 'files-2.1/net.bytebuddy/byte-buddy-agent/1.17.7')).matching {
+                    include '**/byte-buddy-agent-1.17.7.jar'
+                }.files.toList()
+            }.collect { it.canonicalFile }.unique()
+            if (agents.size() != 1) throw new GradleException('Expected one Byte Buddy 1.17.7 test agent')
+            jvmArgs "-javaagent:${agents.first().absolutePath}"
+        }
+    }
+}
